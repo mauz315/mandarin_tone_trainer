@@ -6,7 +6,7 @@ let audioInstance = null;
 async function init() {
   try {
     // 1. Fetch the data - ensure this filename matches yours exactly
-    const response = await fetch('/single_words.json');
+    const response = await fetch('./single_words.json');
     if (!response.ok) throw new Error("JSON not found in public folder");
 
     words = await response.json();
@@ -55,7 +55,7 @@ function playAudio() {
   }
 
   // Vite serves /public at the root, so /audio/ma1.mp3 works
-  audioInstance = new Audio(`/${currentItem.audio}`);
+  audioInstance = new Audio(`./${currentItem.audio}`);
   audioInstance.play().catch(e => console.error("Audio failed:", e));
 }
 
