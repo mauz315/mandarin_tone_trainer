@@ -9295,19 +9295,6 @@
         ]
     },
     {
-        "pinyin_base": "le",
-        "pinyin_correct": "le",
-        "tone": 5,
-        "hanzi": "了",
-        "audio": "audio/le5.mp3",
-        "options": [
-            "lē",
-            "lé",
-            "lě",
-            "lè"
-        ]
-    },
-    {
         "pinyin_base": "pin",
         "pinyin_correct": "pǐn",
         "tone": 3,
@@ -9435,19 +9422,6 @@
             "shún",
             "shǔn",
             "shùn"
-        ]
-    },
-    {
-        "pinyin_base": "ne",
-        "pinyin_correct": "ne",
-        "tone": 5,
-        "hanzi": "呢",
-        "audio": "audio/ne5.mp3",
-        "options": [
-            "nē",
-            "né",
-            "ně",
-            "nè"
         ]
     },
     {
@@ -17690,19 +17664,6 @@
             "tíng",
             "tǐng",
             "tìng"
-        ]
-    },
-    {
-        "pinyin_base": "dei",
-        "pinyin_correct": "dei",
-        "tone": 5,
-        "hanzi": "得",
-        "audio": "audio/dei5.mp3",
-        "options": [
-            "dēi",
-            "déi",
-            "děi",
-            "dèi"
         ]
     },
     {
