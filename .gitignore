@@ -140,4 +140,3 @@ vite.config.ts.timestamp-*
 
 node_modules/
 .DS_Store
-docs/
