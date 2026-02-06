@@ -1,17 +1,124 @@
-body { font-family: sans-serif; display: flex; justify-content: center; background: #f7f7f7; }
-.card { background: white; padding: 40px; border-radius: 20px; text-align: center; border: 2px solid #e5e5e5; margin-top: 50px; }
-#pinyin-display { font-size: 3rem; color: #3c3c3c; margin-bottom: 10px; }
+:root {
+  /* Bauhaus Palette */
+  --bg-color: #ffffff;
+  --tone-1-red: #da291c;    /* Vibrant Red */
+  --tone-2-yellow: #f4c300; /* Bauhaus Gold */
+  --tone-3-blue: #005696;   /* Strong Blue */
+  --tone-4-green: #008f39;  /* Vivid Green */
+  --black-accent: #000000;
+}
+
+body {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Clean Sans-Serif */
+  background-color: var(--bg-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+}
+
+#app {
+  width: 100%;
+  max-width: 600px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 1. THE DISPLAY CARD */
+.card {
+  background: transparent; /* No border, just floating text */
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+/* Hanzi Character */
+#pinyin-display div:first-child {
+  font-size: 6rem !important; /* Huge & Bold */
+  font-weight: 400;
+  color: #000;
+  line-height: 1.2;
+}
+
+/* Pinyin Base (below Hanzi) */
+#pinyin-display div:last-child {
+  font-size: 2rem !important;
+  color: #555; /* Dark Grey */
+  font-weight: 300;
+  margin-top: 10px;
+}
+
+/* 2. THE GEOMETRIC BUTTONS */
+.options {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  width: 100%;
+}
 
 .tone-btn {
-  background: #58cc02; color: white; border: none; padding: 20px; margin: 5px;
-  border-radius: 12px; font-weight: bold; cursor: pointer;
-  box-shadow: 0 5px #46a302; /* The 3D Shadow */
-  transition: all 0.1s;
+  border: none;
+  border-radius: 50%; /* Perfect Circles */
+  width: 75px;        /* Large enough for text */
+  height: 75px;
+
+  color: white;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+
+  /* Flexbox to center the text perfectly */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* No shadows, flat design */
+  box-shadow: none;
 }
 
+/* Assign specific colors to specific tones */
+.tone-btn[data-tone="1"] { background-color: var(--tone-1-red); }
+.tone-btn[data-tone="2"] { background-color: var(--tone-2-yellow); }
+.tone-btn[data-tone="3"] { background-color: var(--tone-3-blue); }
+.tone-btn[data-tone="4"] { background-color: var(--tone-4-green); }
+
+.tone-btn:hover {
+  transform: scale(1.1); /* Slight grow on hover */
+}
 .tone-btn:active {
-  box-shadow: 0 0px #46a302;
-  transform: translateY(5px); /* Bouncy press effect */
+  transform: scale(0.95);
 }
 
-.secondary-btn { background: #1cb0f6; box-shadow: 0 5px #1899d6; color: white; border: none; padding: 10px 20px; border-radius: 12px; cursor: pointer; }
+/* 3. THE LISTEN BUTTON */
+#play-btn {
+  background-color: var(--black-accent);
+  color: white;
+  border: none;
+  border-radius: 4px; /* Slightly rounded rectangle */
+  padding: 12px 30px;
+  font-size: 1rem;
+  font-weight: bold;
+  text-transform: uppercase; /* "LISTEN" */
+  letter-spacing: 1px;
+  cursor: pointer;
+  margin-top: 40px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#play-btn:hover {
+  opacity: 0.8;
+}
+
+/* Feedback Text */
+#feedback {
+  margin-top: 20px;
+  font-weight: bold;
+  height: 20px;
+}

@@ -40,7 +40,6 @@ function nextQuestion() {
     // We assume currentItem.options is ["mā", "má", "mǎ", "mà"]
     btn.innerText = currentItem.options[index];
   });
-  // --- MODIFIED SECTION END ---
 
   document.getElementById('feedback').innerText = "";
   playAudio();
