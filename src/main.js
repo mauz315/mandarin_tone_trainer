@@ -65,7 +65,7 @@ function setupButtons() {
       const userGuess = parseInt(e.target.dataset.tone);
 
       if (userGuess === currentItem.tone) {
-        document.getElementById('feedback').innerText = "Correct! 🎉";
+        document.getElementById('feedback').innerText = "CORRECT";
         document.getElementById('feedback').style.color = "green";
 
         // --- MODIFIED SECTION START ---
@@ -86,7 +86,7 @@ function setupButtons() {
 
         setTimeout(nextQuestion, 1500); // Increased time slightly to admire the result
       } else {
-        document.getElementById('feedback').innerText = "Try again! ❌";
+        document.getElementById('feedback').innerText = "TRY AGAIN";
         document.getElementById('feedback').style.color = "red";
         playAudio();
       }

@@ -16,7 +16,7 @@
         "pinyin_base": "er",
         "pinyin_correct": "ēr",
         "tone": 1,
-        "hanzi": "而",
+        "hanzi": "?",
         "audio": "audio/er1.mp3",
         "options": [
             "ēr",
@@ -29,7 +29,7 @@
         "pinyin_base": "rang",
         "pinyin_correct": "rāng",
         "tone": 1,
-        "hanzi": "让",
+        "hanzi": "?",
         "audio": "audio/rang1.mp3",
         "options": [
             "rāng",
@@ -55,7 +55,7 @@
         "pinyin_base": "wo",
         "pinyin_correct": "wó",
         "tone": 2,
-        "hanzi": "我",
+        "hanzi": "薶",
         "audio": "audio/wo2.mp3",
         "options": [
             "wō",
@@ -81,7 +81,7 @@
         "pinyin_base": "rong",
         "pinyin_correct": "ròng",
         "tone": 4,
-        "hanzi": "容",
+        "hanzi": "?",
         "audio": "audio/rong4.mp3",
         "options": [
             "rōng",
@@ -224,7 +224,7 @@
         "pinyin_base": "gan",
         "pinyin_correct": "gán",
         "tone": 2,
-        "hanzi": "感",
+        "hanzi": "玵",
         "audio": "audio/gan2.mp3",
         "options": [
             "gān",
@@ -276,7 +276,7 @@
         "pinyin_base": "lo",
         "pinyin_correct": "ló",
         "tone": 2,
-        "hanzi": "咯",
+        "hanzi": "?",
         "audio": "audio/lo2.mp3",
         "options": [
             "lō",
@@ -367,7 +367,7 @@
         "pinyin_base": "te",
         "pinyin_correct": "tě",
         "tone": 3,
-        "hanzi": "特",
+        "hanzi": "?",
         "audio": "audio/te3.mp3",
         "options": [
             "tē",
@@ -497,7 +497,7 @@
         "pinyin_base": "kan",
         "pinyin_correct": "kán",
         "tone": 2,
-        "hanzi": "看",
+        "hanzi": "?",
         "audio": "audio/kan2.mp3",
         "options": [
             "kān",
@@ -536,7 +536,7 @@
         "pinyin_base": "zong",
         "pinyin_correct": "zóng",
         "tone": 2,
-        "hanzi": "总",
+        "hanzi": "從",
         "audio": "audio/zong2.mp3",
         "options": [
             "zōng",
@@ -692,7 +692,7 @@
         "pinyin_base": "san",
         "pinyin_correct": "sán",
         "tone": 2,
-        "hanzi": "三",
+        "hanzi": "?",
         "audio": "audio/san2.mp3",
         "options": [
             "sān",
@@ -757,7 +757,7 @@
         "pinyin_base": "ruo",
         "pinyin_correct": "ruō",
         "tone": 1,
-        "hanzi": "若",
+        "hanzi": "?",
         "audio": "audio/ruo1.mp3",
         "options": [
             "ruō",
@@ -952,7 +952,7 @@
         "pinyin_base": "shuai",
         "pinyin_correct": "shuái",
         "tone": 2,
-        "hanzi": "帅",
+        "hanzi": "?",
         "audio": "audio/shuai2.mp3",
         "options": [
             "shuāi",
@@ -1082,7 +1082,7 @@
         "pinyin_base": "qiu",
         "pinyin_correct": "qiù",
         "tone": 4,
-        "hanzi": "求",
+        "hanzi": "?",
         "audio": "audio/qiu4.mp3",
         "options": [
             "qiū",
@@ -1147,7 +1147,7 @@
         "pinyin_base": "lo",
         "pinyin_correct": "lǒ",
         "tone": 3,
-        "hanzi": "咯",
+        "hanzi": "?",
         "audio": "audio/lo3.mp3",
         "options": [
             "lō",
@@ -1238,7 +1238,7 @@
         "pinyin_base": "ruan",
         "pinyin_correct": "ruān",
         "tone": 1,
-        "hanzi": "软",
+        "hanzi": "?",
         "audio": "audio/ruan1.mp3",
         "options": [
             "ruān",
@@ -1550,7 +1550,7 @@
         "pinyin_base": "jiong",
         "pinyin_correct": "jiòng",
         "tone": 4,
-        "hanzi": "窘",
+        "hanzi": "臦",
         "audio": "audio/jiong4.mp3",
         "options": [
             "jiōng",
@@ -1615,7 +1615,7 @@
         "pinyin_base": "ping",
         "pinyin_correct": "pǐng",
         "tone": 3,
-        "hanzi": "平",
+        "hanzi": "?",
         "audio": "audio/ping3.mp3",
         "options": [
             "pīng",
@@ -1680,7 +1680,7 @@
         "pinyin_base": "hun",
         "pinyin_correct": "hǔn",
         "tone": 3,
-        "hanzi": "婚",
+        "hanzi": "湣",
         "audio": "audio/hun3.mp3",
         "options": [
             "hūn",
@@ -1745,7 +1745,7 @@
         "pinyin_base": "sen",
         "pinyin_correct": "sèn",
         "tone": 4,
-        "hanzi": "森",
+        "hanzi": "?",
         "audio": "audio/sen4.mp3",
         "options": [
             "sēn",
@@ -2096,7 +2096,7 @@
         "pinyin_base": "ruo",
         "pinyin_correct": "ruǒ",
         "tone": 3,
-        "hanzi": "若",
+        "hanzi": "?",
         "audio": "audio/ruo3.mp3",
         "options": [
             "ruō",
@@ -2174,7 +2174,7 @@
         "pinyin_base": "guan",
         "pinyin_correct": "guán",
         "tone": 2,
-        "hanzi": "关",
+        "hanzi": "綸",
         "audio": "audio/guan2.mp3",
         "options": [
             "guān",
@@ -2252,7 +2252,7 @@
         "pinyin_base": "die",
         "pinyin_correct": "diě",
         "tone": 3,
-        "hanzi": "跌",
+        "hanzi": "鴩",
         "audio": "audio/die3.mp3",
         "options": [
             "diē",
@@ -2304,7 +2304,7 @@
         "pinyin_base": "leng",
         "pinyin_correct": "lēng",
         "tone": 1,
-        "hanzi": "冷",
+        "hanzi": "?",
         "audio": "audio/leng1.mp3",
         "options": [
             "lēng",
@@ -2317,7 +2317,7 @@
         "pinyin_base": "lian",
         "pinyin_correct": "liān",
         "tone": 1,
-        "hanzi": "联",
+        "hanzi": "?",
         "audio": "audio/lian1.mp3",
         "options": [
             "liān",
@@ -2395,7 +2395,7 @@
         "pinyin_base": "mei",
         "pinyin_correct": "mēi",
         "tone": 1,
-        "hanzi": "没",
+        "hanzi": "殙",
         "audio": "audio/mei1.mp3",
         "options": [
             "mēi",
@@ -2408,7 +2408,7 @@
         "pinyin_base": "dun",
         "pinyin_correct": "dún",
         "tone": 2,
-        "hanzi": "顿",
+        "hanzi": "坉",
         "audio": "audio/dun2.mp3",
         "options": [
             "dūn",
@@ -2434,7 +2434,7 @@
         "pinyin_base": "te",
         "pinyin_correct": "tē",
         "tone": 1,
-        "hanzi": "特",
+        "hanzi": "?",
         "audio": "audio/te1.mp3",
         "options": [
             "tē",
@@ -2512,7 +2512,7 @@
         "pinyin_base": "me",
         "pinyin_correct": "mě",
         "tone": 3,
-        "hanzi": "么",
+        "hanzi": "?",
         "audio": "audio/me3.mp3",
         "options": [
             "mē",
@@ -2577,7 +2577,7 @@
         "pinyin_base": "nuan",
         "pinyin_correct": "nuān",
         "tone": 1,
-        "hanzi": "暖",
+        "hanzi": "?",
         "audio": "audio/nuan1.mp3",
         "options": [
             "nuān",
@@ -2590,7 +2590,7 @@
         "pinyin_base": "pie",
         "pinyin_correct": "pié",
         "tone": 2,
-        "hanzi": "瞥",
+        "hanzi": "?",
         "audio": "audio/pie2.mp3",
         "options": [
             "piē",
@@ -2603,7 +2603,7 @@
         "pinyin_base": "yu",
         "pinyin_correct": "yū",
         "tone": 1,
-        "hanzi": "于",
+        "hanzi": "吁",
         "audio": "audio/yu1.mp3",
         "options": [
             "yū",
@@ -2785,7 +2785,7 @@
         "pinyin_base": "kuang",
         "pinyin_correct": "kuǎng",
         "tone": 3,
-        "hanzi": "况",
+        "hanzi": "儣",
         "audio": "audio/kuang3.mp3",
         "options": [
             "kuāng",
@@ -2863,7 +2863,7 @@
         "pinyin_base": "ling",
         "pinyin_correct": "līng",
         "tone": 1,
-        "hanzi": "领",
+        "hanzi": "?",
         "audio": "audio/ling1.mp3",
         "options": [
             "līng",
@@ -2993,7 +2993,7 @@
         "pinyin_base": "jiong",
         "pinyin_correct": "jiōng",
         "tone": 1,
-        "hanzi": "扃",
+        "hanzi": "絅",
         "audio": "audio/jiong1.mp3",
         "options": [
             "jiōng",
@@ -3006,7 +3006,7 @@
         "pinyin_base": "mai",
         "pinyin_correct": "māi",
         "tone": 1,
-        "hanzi": "买",
+        "hanzi": "?",
         "audio": "audio/mai1.mp3",
         "options": [
             "māi",
@@ -3045,7 +3045,7 @@
         "pinyin_base": "nong",
         "pinyin_correct": "nōng",
         "tone": 1,
-        "hanzi": "农",
+        "hanzi": "?",
         "audio": "audio/nong1.mp3",
         "options": [
             "nōng",
@@ -3149,7 +3149,7 @@
         "pinyin_base": "sang",
         "pinyin_correct": "sáng",
         "tone": 2,
-        "hanzi": "丧",
+        "hanzi": "?",
         "audio": "audio/sang2.mp3",
         "options": [
             "sāng",
@@ -3201,7 +3201,7 @@
         "pinyin_base": "lo",
         "pinyin_correct": "lò",
         "tone": 4,
-        "hanzi": "咯",
+        "hanzi": "?",
         "audio": "audio/lo4.mp3",
         "options": [
             "lō",
@@ -3253,7 +3253,7 @@
         "pinyin_base": "nin",
         "pinyin_correct": "nīn",
         "tone": 1,
-        "hanzi": "您",
+        "hanzi": "?",
         "audio": "audio/nin1.mp3",
         "options": [
             "nīn",
@@ -3396,7 +3396,7 @@
         "pinyin_base": "jun",
         "pinyin_correct": "jǔn",
         "tone": 3,
-        "hanzi": "军",
+        "hanzi": "?",
         "audio": "audio/jun3.mp3",
         "options": [
             "jūn",
@@ -3617,7 +3617,7 @@
         "pinyin_base": "run",
         "pinyin_correct": "rǔn",
         "tone": 3,
-        "hanzi": "润",
+        "hanzi": "?",
         "audio": "audio/run3.mp3",
         "options": [
             "rūn",
@@ -3695,7 +3695,7 @@
         "pinyin_base": "ding",
         "pinyin_correct": "díng",
         "tone": 2,
-        "hanzi": "定",
+        "hanzi": "?",
         "audio": "audio/ding2.mp3",
         "options": [
             "dīng",
@@ -3708,7 +3708,7 @@
         "pinyin_base": "nüe",
         "pinyin_correct": "nüē",
         "tone": 1,
-        "hanzi": "虐",
+        "hanzi": "?",
         "audio": "audio/nue1.mp3",
         "options": [
             "nüē",
@@ -3773,7 +3773,7 @@
         "pinyin_base": "jun",
         "pinyin_correct": "jún",
         "tone": 2,
-        "hanzi": "军",
+        "hanzi": "?",
         "audio": "audio/jun2.mp3",
         "options": [
             "jūn",
@@ -3942,7 +3942,7 @@
         "pinyin_base": "mian",
         "pinyin_correct": "miān",
         "tone": 1,
-        "hanzi": "面",
+        "hanzi": "牑",
         "audio": "audio/mian1.mp3",
         "options": [
             "miān",
@@ -3955,7 +3955,7 @@
         "pinyin_base": "meng",
         "pinyin_correct": "mēng",
         "tone": 1,
-        "hanzi": "梦",
+        "hanzi": "?",
         "audio": "audio/meng1.mp3",
         "options": [
             "mēng",
@@ -4072,7 +4072,7 @@
         "pinyin_base": "ming",
         "pinyin_correct": "mīng",
         "tone": 1,
-        "hanzi": "名",
+        "hanzi": "?",
         "audio": "audio/ming1.mp3",
         "options": [
             "mīng",
@@ -4085,7 +4085,7 @@
         "pinyin_base": "ri",
         "pinyin_correct": "rī",
         "tone": 1,
-        "hanzi": "日",
+        "hanzi": "?",
         "audio": "audio/ri1.mp3",
         "options": [
             "rī",
@@ -4137,7 +4137,7 @@
         "pinyin_base": "suan",
         "pinyin_correct": "suán",
         "tone": 2,
-        "hanzi": "算",
+        "hanzi": "?",
         "audio": "audio/suan2.mp3",
         "options": [
             "suān",
@@ -4202,7 +4202,7 @@
         "pinyin_base": "dian",
         "pinyin_correct": "dián",
         "tone": 2,
-        "hanzi": "电",
+        "hanzi": "窴",
         "audio": "audio/dian2.mp3",
         "options": [
             "diān",
@@ -4306,7 +4306,7 @@
         "pinyin_base": "gou",
         "pinyin_correct": "góu",
         "tone": 2,
-        "hanzi": "购",
+        "hanzi": "?",
         "audio": "audio/gou2.mp3",
         "options": [
             "gōu",
@@ -4423,7 +4423,7 @@
         "pinyin_base": "jiong",
         "pinyin_correct": "jióng",
         "tone": 2,
-        "hanzi": "窘",
+        "hanzi": "?",
         "audio": "audio/jiong2.mp3",
         "options": [
             "jiōng",
@@ -4501,7 +4501,7 @@
         "pinyin_base": "bin",
         "pinyin_correct": "bín",
         "tone": 2,
-        "hanzi": "宾",
+        "hanzi": "頻",
         "audio": "audio/bin2.mp3",
         "options": [
             "bīn",
@@ -4527,7 +4527,7 @@
         "pinyin_base": "ri",
         "pinyin_correct": "rǐ",
         "tone": 3,
-        "hanzi": "日",
+        "hanzi": "?",
         "audio": "audio/ri3.mp3",
         "options": [
             "rī",
@@ -4540,7 +4540,7 @@
         "pinyin_base": "sen",
         "pinyin_correct": "sén",
         "tone": 2,
-        "hanzi": "森",
+        "hanzi": "?",
         "audio": "audio/sen2.mp3",
         "options": [
             "sēn",
@@ -4813,7 +4813,7 @@
         "pinyin_base": "kou",
         "pinyin_correct": "kóu",
         "tone": 2,
-        "hanzi": "口",
+        "hanzi": "?",
         "audio": "audio/kou2.mp3",
         "options": [
             "kōu",
@@ -4865,7 +4865,7 @@
         "pinyin_base": "sao",
         "pinyin_correct": "sáo",
         "tone": 2,
-        "hanzi": "扫",
+        "hanzi": "?",
         "audio": "audio/sao2.mp3",
         "options": [
             "sāo",
@@ -4891,7 +4891,7 @@
         "pinyin_base": "die",
         "pinyin_correct": "diè",
         "tone": 4,
-        "hanzi": "鞢",
+        "hanzi": "咥",
         "audio": "audio/die4.mp3",
         "options": [
             "diē",
@@ -4917,7 +4917,7 @@
         "pinyin_base": "run",
         "pinyin_correct": "rūn",
         "tone": 1,
-        "hanzi": "润",
+        "hanzi": "?",
         "audio": "audio/run1.mp3",
         "options": [
             "rūn",
@@ -5190,7 +5190,7 @@
         "pinyin_base": "kao",
         "pinyin_correct": "káo",
         "tone": 2,
-        "hanzi": "考",
+        "hanzi": "?",
         "audio": "audio/kao2.mp3",
         "options": [
             "kāo",
@@ -5203,7 +5203,7 @@
         "pinyin_base": "sou",
         "pinyin_correct": "sóu",
         "tone": 2,
-        "hanzi": "搜",
+        "hanzi": "?",
         "audio": "audio/sou2.mp3",
         "options": [
             "sōu",
@@ -5333,7 +5333,7 @@
         "pinyin_base": "re",
         "pinyin_correct": "rē",
         "tone": 1,
-        "hanzi": "热",
+        "hanzi": "?",
         "audio": "audio/re1.mp3",
         "options": [
             "rē",
@@ -5346,7 +5346,7 @@
         "pinyin_base": "gao",
         "pinyin_correct": "gáo",
         "tone": 2,
-        "hanzi": "高",
+        "hanzi": "獋",
         "audio": "audio/gao2.mp3",
         "options": [
             "gāo",
@@ -5411,7 +5411,7 @@
         "pinyin_base": "sen",
         "pinyin_correct": "sěn",
         "tone": 3,
-        "hanzi": "森",
+        "hanzi": "?",
         "audio": "audio/sen3.mp3",
         "options": [
             "sēn",
@@ -5463,7 +5463,7 @@
         "pinyin_base": "bin",
         "pinyin_correct": "bǐn",
         "tone": 3,
-        "hanzi": "宾",
+        "hanzi": "?",
         "audio": "audio/bin3.mp3",
         "options": [
             "bīn",
@@ -5515,7 +5515,7 @@
         "pinyin_base": "nong",
         "pinyin_correct": "nǒng",
         "tone": 3,
-        "hanzi": "农",
+        "hanzi": "繷",
         "audio": "audio/nong3.mp3",
         "options": [
             "nōng",
@@ -5554,7 +5554,7 @@
         "pinyin_base": "ping",
         "pinyin_correct": "pìng",
         "tone": 4,
-        "hanzi": "平",
+        "hanzi": "庰",
         "audio": "audio/ping4.mp3",
         "options": [
             "pīng",
@@ -5684,7 +5684,7 @@
         "pinyin_base": "seng",
         "pinyin_correct": "sěng",
         "tone": 3,
-        "hanzi": "僧",
+        "hanzi": "?",
         "audio": "audio/seng3.mp3",
         "options": [
             "sēng",
@@ -5853,7 +5853,7 @@
         "pinyin_base": "le",
         "pinyin_correct": "lé",
         "tone": 2,
-        "hanzi": "了",
+        "hanzi": "?",
         "audio": "audio/le2.mp3",
         "options": [
             "lē",
@@ -5879,7 +5879,7 @@
         "pinyin_base": "dang",
         "pinyin_correct": "dáng",
         "tone": 2,
-        "hanzi": "当",
+        "hanzi": "崵",
         "audio": "audio/dang2.mp3",
         "options": [
             "dāng",
@@ -5918,7 +5918,7 @@
         "pinyin_base": "li",
         "pinyin_correct": "lī",
         "tone": 1,
-        "hanzi": "理",
+        "hanzi": "哩",
         "audio": "audio/li1.mp3",
         "options": [
             "lī",
@@ -5931,7 +5931,7 @@
         "pinyin_base": "niao",
         "pinyin_correct": "niāo",
         "tone": 1,
-        "hanzi": "尿",
+        "hanzi": "?",
         "audio": "audio/niao1.mp3",
         "options": [
             "niāo",
@@ -5970,7 +5970,7 @@
         "pinyin_base": "miu",
         "pinyin_correct": "miǔ",
         "tone": 3,
-        "hanzi": "谬",
+        "hanzi": "?",
         "audio": "audio/miu3.mp3",
         "options": [
             "miū",
@@ -5983,7 +5983,7 @@
         "pinyin_base": "long",
         "pinyin_correct": "lōng",
         "tone": 1,
-        "hanzi": "龙",
+        "hanzi": "?",
         "audio": "audio/long1.mp3",
         "options": [
             "lōng",
@@ -6035,7 +6035,7 @@
         "pinyin_base": "zhuo",
         "pinyin_correct": "zhuǒ",
         "tone": 3,
-        "hanzi": "着",
+        "hanzi": "缴",
         "audio": "audio/zhuo3.mp3",
         "options": [
             "zhuō",
@@ -6100,7 +6100,7 @@
         "pinyin_base": "nie",
         "pinyin_correct": "niě",
         "tone": 3,
-        "hanzi": "捏",
+        "hanzi": "?",
         "audio": "audio/nie3.mp3",
         "options": [
             "niē",
@@ -6230,7 +6230,7 @@
         "pinyin_base": "gei",
         "pinyin_correct": "gēi",
         "tone": 1,
-        "hanzi": "给",
+        "hanzi": "?",
         "audio": "audio/gei1.mp3",
         "options": [
             "gēi",
@@ -6347,7 +6347,7 @@
         "pinyin_base": "nun",
         "pinyin_correct": "nǔn",
         "tone": 3,
-        "hanzi": "黁",
+        "hanzi": "?",
         "audio": "audio/nun3.mp3",
         "options": [
             "nūn",
@@ -6711,7 +6711,7 @@
         "pinyin_base": "cou",
         "pinyin_correct": "cōu",
         "tone": 1,
-        "hanzi": "凑",
+        "hanzi": "?",
         "audio": "audio/cou1.mp3",
         "options": [
             "cōu",
@@ -6724,7 +6724,7 @@
         "pinyin_base": "le",
         "pinyin_correct": "lě",
         "tone": 3,
-        "hanzi": "了",
+        "hanzi": "?",
         "audio": "audio/le3.mp3",
         "options": [
             "lē",
@@ -6763,7 +6763,7 @@
         "pinyin_base": "man",
         "pinyin_correct": "mān",
         "tone": 1,
-        "hanzi": "满",
+        "hanzi": "颟",
         "audio": "audio/man1.mp3",
         "options": [
             "mān",
@@ -6854,7 +6854,7 @@
         "pinyin_base": "duan",
         "pinyin_correct": "duán",
         "tone": 2,
-        "hanzi": "段",
+        "hanzi": "?",
         "audio": "audio/duan2.mp3",
         "options": [
             "duān",
@@ -6867,7 +6867,7 @@
         "pinyin_base": "ne",
         "pinyin_correct": "nē",
         "tone": 1,
-        "hanzi": "呢",
+        "hanzi": "?",
         "audio": "audio/ne1.mp3",
         "options": [
             "nē",
@@ -6880,7 +6880,7 @@
         "pinyin_base": "seng",
         "pinyin_correct": "séng",
         "tone": 2,
-        "hanzi": "僧",
+        "hanzi": "?",
         "audio": "audio/seng2.mp3",
         "options": [
             "sēng",
@@ -6906,7 +6906,7 @@
         "pinyin_base": "shuo",
         "pinyin_correct": "shuǒ",
         "tone": 3,
-        "hanzi": "说",
+        "hanzi": "?",
         "audio": "audio/shuo3.mp3",
         "options": [
             "shuō",
@@ -6932,7 +6932,7 @@
         "pinyin_base": "kua",
         "pinyin_correct": "kuá",
         "tone": 2,
-        "hanzi": "跨",
+        "hanzi": "?",
         "audio": "audio/kua2.mp3",
         "options": [
             "kuā",
@@ -7075,7 +7075,7 @@
         "pinyin_base": "cou",
         "pinyin_correct": "cǒu",
         "tone": 3,
-        "hanzi": "凑",
+        "hanzi": "?",
         "audio": "audio/cou3.mp3",
         "options": [
             "cōu",
@@ -7179,7 +7179,7 @@
         "pinyin_base": "niao",
         "pinyin_correct": "niáo",
         "tone": 2,
-        "hanzi": "尿",
+        "hanzi": "?",
         "audio": "audio/niao2.mp3",
         "options": [
             "niāo",
@@ -7218,7 +7218,7 @@
         "pinyin_base": "zeng",
         "pinyin_correct": "zěng",
         "tone": 3,
-        "hanzi": "增",
+        "hanzi": "?",
         "audio": "audio/zeng3.mp3",
         "options": [
             "zēng",
@@ -7348,7 +7348,7 @@
         "pinyin_base": "cu",
         "pinyin_correct": "cǔ",
         "tone": 3,
-        "hanzi": "促",
+        "hanzi": "?",
         "audio": "audio/cu3.mp3",
         "options": [
             "cū",
@@ -7361,7 +7361,7 @@
         "pinyin_base": "gua",
         "pinyin_correct": "guá",
         "tone": 2,
-        "hanzi": "挂",
+        "hanzi": "?",
         "audio": "audio/gua2.mp3",
         "options": [
             "guā",
@@ -7452,7 +7452,7 @@
         "pinyin_base": "gei",
         "pinyin_correct": "géi",
         "tone": 2,
-        "hanzi": "给",
+        "hanzi": "?",
         "audio": "audio/gei2.mp3",
         "options": [
             "gēi",
@@ -7465,7 +7465,7 @@
         "pinyin_base": "nun",
         "pinyin_correct": "nūn",
         "tone": 1,
-        "hanzi": "黁",
+        "hanzi": "?",
         "audio": "audio/nun1.mp3",
         "options": [
             "nūn",
@@ -7582,7 +7582,7 @@
         "pinyin_base": "e",
         "pinyin_correct": "ě",
         "tone": 3,
-        "hanzi": "额",
+        "hanzi": "枙",
         "audio": "audio/e3.mp3",
         "options": [
             "ē",
@@ -7621,7 +7621,7 @@
         "pinyin_base": "jin",
         "pinyin_correct": "jín",
         "tone": 2,
-        "hanzi": "进",
+        "hanzi": "慬",
         "audio": "audio/jin2.mp3",
         "options": [
             "jīn",
@@ -7842,7 +7842,7 @@
         "pinyin_base": "miu",
         "pinyin_correct": "miū",
         "tone": 1,
-        "hanzi": "谬",
+        "hanzi": "?",
         "audio": "audio/miu1.mp3",
         "options": [
             "miū",
@@ -7972,7 +7972,7 @@
         "pinyin_base": "chua",
         "pinyin_correct": "chuà",
         "tone": 4,
-        "hanzi": "欻",
+        "hanzi": "?",
         "audio": "audio/chua4.mp3",
         "options": [
             "chuā",
@@ -8128,7 +8128,7 @@
         "pinyin_base": "ne",
         "pinyin_correct": "né",
         "tone": 2,
-        "hanzi": "呢",
+        "hanzi": "?",
         "audio": "audio/ne2.mp3",
         "options": [
             "nē",
@@ -8154,7 +8154,7 @@
         "pinyin_base": "shuo",
         "pinyin_correct": "shuó",
         "tone": 2,
-        "hanzi": "说",
+        "hanzi": "?",
         "audio": "audio/shuo2.mp3",
         "options": [
             "shuō",
@@ -8323,7 +8323,7 @@
         "pinyin_base": "gu",
         "pinyin_correct": "gú",
         "tone": 2,
-        "hanzi": "股",
+        "hanzi": "抇",
         "audio": "audio/gu2.mp3",
         "options": [
             "gū",
@@ -8349,7 +8349,7 @@
         "pinyin_base": "zuo",
         "pinyin_correct": "zuō",
         "tone": 1,
-        "hanzi": "作",
+        "hanzi": "撮",
         "audio": "audio/zuo1.mp3",
         "options": [
             "zuō",
@@ -8375,7 +8375,7 @@
         "pinyin_base": "neng",
         "pinyin_correct": "něng",
         "tone": 3,
-        "hanzi": "能",
+        "hanzi": "?",
         "audio": "audio/neng3.mp3",
         "options": [
             "nēng",
@@ -8583,7 +8583,7 @@
         "pinyin_base": "guang",
         "pinyin_correct": "guáng",
         "tone": 2,
-        "hanzi": "广",
+        "hanzi": "潢",
         "audio": "audio/guang2.mp3",
         "options": [
             "guāng",
@@ -8609,7 +8609,7 @@
         "pinyin_base": "ning",
         "pinyin_correct": "nǐng",
         "tone": 3,
-        "hanzi": "宁",
+        "hanzi": "矃",
         "audio": "audio/ning3.mp3",
         "options": [
             "nīng",
@@ -8700,7 +8700,7 @@
         "pinyin_base": "sai",
         "pinyin_correct": "sái",
         "tone": 2,
-        "hanzi": "赛",
+        "hanzi": "?",
         "audio": "audio/sai2.mp3",
         "options": [
             "sāi",
@@ -8726,7 +8726,7 @@
         "pinyin_base": "nun",
         "pinyin_correct": "nùn",
         "tone": 4,
-        "hanzi": "黁",
+        "hanzi": "?",
         "audio": "audio/nun4.mp3",
         "options": [
             "nūn",
@@ -8804,7 +8804,7 @@
         "pinyin_base": "sai",
         "pinyin_correct": "sǎi",
         "tone": 3,
-        "hanzi": "赛",
+        "hanzi": "?",
         "audio": "audio/sai3.mp3",
         "options": [
             "sāi",
@@ -8817,7 +8817,7 @@
         "pinyin_base": "shang",
         "pinyin_correct": "sháng",
         "tone": 2,
-        "hanzi": "上",
+        "hanzi": "鏛",
         "audio": "audio/shang2.mp3",
         "options": [
             "shāng",
@@ -8934,7 +8934,7 @@
         "pinyin_base": "ca",
         "pinyin_correct": "cá",
         "tone": 2,
-        "hanzi": "擦",
+        "hanzi": "?",
         "audio": "audio/ca2.mp3",
         "options": [
             "cā",
@@ -8960,7 +8960,7 @@
         "pinyin_base": "kai",
         "pinyin_correct": "kái",
         "tone": 2,
-        "hanzi": "开",
+        "hanzi": "?",
         "audio": "audio/kai2.mp3",
         "options": [
             "kāi",
@@ -8986,7 +8986,7 @@
         "pinyin_base": "men",
         "pinyin_correct": "měn",
         "tone": 3,
-        "hanzi": "们",
+        "hanzi": "斖",
         "audio": "audio/men3.mp3",
         "options": [
             "mēn",
@@ -9025,7 +9025,7 @@
         "pinyin_base": "shuan",
         "pinyin_correct": "shuǎn",
         "tone": 3,
-        "hanzi": "栓",
+        "hanzi": "?",
         "audio": "audio/shuan3.mp3",
         "options": [
             "shuān",
@@ -9038,7 +9038,7 @@
         "pinyin_base": "si",
         "pinyin_correct": "sí",
         "tone": 2,
-        "hanzi": "司",
+        "hanzi": "枱",
         "audio": "audio/si2.mp3",
         "options": [
             "sī",
@@ -9142,7 +9142,7 @@
         "pinyin_base": "gai",
         "pinyin_correct": "gái",
         "tone": 2,
-        "hanzi": "改",
+        "hanzi": "?",
         "audio": "audio/gai2.mp3",
         "options": [
             "gāi",
@@ -9194,7 +9194,7 @@
         "pinyin_base": "lie",
         "pinyin_correct": "liē",
         "tone": 1,
-        "hanzi": "列",
+        "hanzi": "忚",
         "audio": "audio/lie1.mp3",
         "options": [
             "liē",
@@ -9376,7 +9376,7 @@
         "pinyin_base": "seng",
         "pinyin_correct": "sèng",
         "tone": 4,
-        "hanzi": "僧",
+        "hanzi": "?",
         "audio": "audio/seng4.mp3",
         "options": [
             "sēng",
@@ -9415,7 +9415,7 @@
         "pinyin_base": "shun",
         "pinyin_correct": "shūn",
         "tone": 1,
-        "hanzi": "顺",
+        "hanzi": "?",
         "audio": "audio/shun1.mp3",
         "options": [
             "shūn",
@@ -9558,7 +9558,7 @@
         "pinyin_base": "chua",
         "pinyin_correct": "chuǎ",
         "tone": 3,
-        "hanzi": "欻",
+        "hanzi": "?",
         "audio": "audio/chua3.mp3",
         "options": [
             "chuā",
@@ -9571,7 +9571,7 @@
         "pinyin_base": "dong",
         "pinyin_correct": "dóng",
         "tone": 2,
-        "hanzi": "动",
+        "hanzi": "燑",
         "audio": "audio/dong2.mp3",
         "options": [
             "dōng",
@@ -9610,7 +9610,7 @@
         "pinyin_base": "reng",
         "pinyin_correct": "rěng",
         "tone": 3,
-        "hanzi": "仍",
+        "hanzi": "?",
         "audio": "audio/reng3.mp3",
         "options": [
             "rēng",
@@ -9662,7 +9662,7 @@
         "pinyin_base": "liang",
         "pinyin_correct": "liāng",
         "tone": 1,
-        "hanzi": "量",
+        "hanzi": "?",
         "audio": "audio/liang1.mp3",
         "options": [
             "liāng",
@@ -9792,7 +9792,7 @@
         "pinyin_base": "dui",
         "pinyin_correct": "duí",
         "tone": 2,
-        "hanzi": "对",
+        "hanzi": "敓",
         "audio": "audio/dui2.mp3",
         "options": [
             "duī",
@@ -9818,7 +9818,7 @@
         "pinyin_base": "xun",
         "pinyin_correct": "xǔn",
         "tone": 3,
-        "hanzi": "询",
+        "hanzi": "鶽",
         "audio": "audio/xun3.mp3",
         "options": [
             "xūn",
@@ -9948,7 +9948,7 @@
         "pinyin_base": "he",
         "pinyin_correct": "hě",
         "tone": 3,
-        "hanzi": "合",
+        "hanzi": "?",
         "audio": "audio/he3.mp3",
         "options": [
             "hē",
@@ -9961,7 +9961,7 @@
         "pinyin_base": "mang",
         "pinyin_correct": "màng",
         "tone": 4,
-        "hanzi": "忙",
+        "hanzi": "盳",
         "audio": "audio/mang4.mp3",
         "options": [
             "māng",
@@ -10026,7 +10026,7 @@
         "pinyin_base": "guai",
         "pinyin_correct": "guái",
         "tone": 2,
-        "hanzi": "怪",
+        "hanzi": "?",
         "audio": "audio/guai2.mp3",
         "options": [
             "guāi",
@@ -10052,7 +10052,7 @@
         "pinyin_base": "gei",
         "pinyin_correct": "gèi",
         "tone": 4,
-        "hanzi": "给",
+        "hanzi": "?",
         "audio": "audio/gei4.mp3",
         "options": [
             "gēi",
@@ -10182,7 +10182,7 @@
         "pinyin_base": "geng",
         "pinyin_correct": "géng",
         "tone": 2,
-        "hanzi": "更",
+        "hanzi": "絙",
         "audio": "audio/geng2.mp3",
         "options": [
             "gēng",
@@ -10247,7 +10247,7 @@
         "pinyin_base": "luan",
         "pinyin_correct": "luān",
         "tone": 1,
-        "hanzi": "乱",
+        "hanzi": "?",
         "audio": "audio/luan1.mp3",
         "options": [
             "luān",
@@ -10260,7 +10260,7 @@
         "pinyin_base": "ning",
         "pinyin_correct": "nīng",
         "tone": 1,
-        "hanzi": "宁",
+        "hanzi": "?",
         "audio": "audio/ning1.mp3",
         "options": [
             "nīng",
@@ -10520,7 +10520,7 @@
         "pinyin_base": "neng",
         "pinyin_correct": "nēng",
         "tone": 1,
-        "hanzi": "能",
+        "hanzi": "?",
         "audio": "audio/neng1.mp3",
         "options": [
             "nēng",
@@ -10533,7 +10533,7 @@
         "pinyin_base": "lie",
         "pinyin_correct": "lié",
         "tone": 2,
-        "hanzi": "列",
+        "hanzi": "獦",
         "audio": "audio/lie2.mp3",
         "options": [
             "liē",
@@ -10598,7 +10598,7 @@
         "pinyin_base": "chua",
         "pinyin_correct": "chuá",
         "tone": 2,
-        "hanzi": "欻",
+        "hanzi": "?",
         "audio": "audio/chua2.mp3",
         "options": [
             "chuā",
@@ -10858,7 +10858,7 @@
         "pinyin_base": "huang",
         "pinyin_correct": "huàng",
         "tone": 4,
-        "hanzi": "黄",
+        "hanzi": "鎤",
         "audio": "audio/huang4.mp3",
         "options": [
             "huāng",
@@ -10923,7 +10923,7 @@
         "pinyin_base": "shua",
         "pinyin_correct": "shuá",
         "tone": 2,
-        "hanzi": "刷",
+        "hanzi": "?",
         "audio": "audio/shua2.mp3",
         "options": [
             "shuā",
@@ -10936,7 +10936,7 @@
         "pinyin_base": "che",
         "pinyin_correct": "ché",
         "tone": 2,
-        "hanzi": "车",
+        "hanzi": "?",
         "audio": "audio/che2.mp3",
         "options": [
             "chē",
@@ -10962,7 +10962,7 @@
         "pinyin_base": "bian",
         "pinyin_correct": "bián",
         "tone": 2,
-        "hanzi": "变",
+        "hanzi": "臱",
         "audio": "audio/bian2.mp3",
         "options": [
             "biān",
@@ -11001,7 +11001,7 @@
         "pinyin_base": "zhuang",
         "pinyin_correct": "zhuǎng",
         "tone": 3,
-        "hanzi": "装",
+        "hanzi": "?",
         "audio": "audio/zhuang3.mp3",
         "options": [
             "zhuāng",
@@ -11040,7 +11040,7 @@
         "pinyin_base": "ran",
         "pinyin_correct": "rān",
         "tone": 1,
-        "hanzi": "然",
+        "hanzi": "?",
         "audio": "audio/ran1.mp3",
         "options": [
             "rān",
@@ -11053,7 +11053,7 @@
         "pinyin_base": "hen",
         "pinyin_correct": "hēn",
         "tone": 1,
-        "hanzi": "很",
+        "hanzi": "?",
         "audio": "audio/hen1.mp3",
         "options": [
             "hēn",
@@ -11092,7 +11092,7 @@
         "pinyin_base": "suo",
         "pinyin_correct": "suó",
         "tone": 2,
-        "hanzi": "所",
+        "hanzi": "?",
         "audio": "audio/suo2.mp3",
         "options": [
             "suō",
@@ -11131,7 +11131,7 @@
         "pinyin_base": "weng",
         "pinyin_correct": "wéng",
         "tone": 2,
-        "hanzi": "翁",
+        "hanzi": "?",
         "audio": "audio/weng2.mp3",
         "options": [
             "wēng",
@@ -11157,7 +11157,7 @@
         "pinyin_base": "zhei",
         "pinyin_correct": "zhēi",
         "tone": 1,
-        "hanzi": "这",
+        "hanzi": "?",
         "audio": "audio/zhei1.mp3",
         "options": [
             "zhēi",
@@ -11196,7 +11196,7 @@
         "pinyin_base": "nü",
         "pinyin_correct": "nǖ",
         "tone": 1,
-        "hanzi": "女",
+        "hanzi": "?",
         "audio": "audio/nuu1.mp3",
         "options": [
             "nǖ",
@@ -11248,7 +11248,7 @@
         "pinyin_base": "den",
         "pinyin_correct": "dēn",
         "tone": 1,
-        "hanzi": "扽",
+        "hanzi": "?",
         "audio": "audio/den1.mp3",
         "options": [
             "dēn",
@@ -11274,7 +11274,7 @@
         "pinyin_base": "qun",
         "pinyin_correct": "qǔn",
         "tone": 3,
-        "hanzi": "群",
+        "hanzi": "?",
         "audio": "audio/qun3.mp3",
         "options": [
             "qūn",
@@ -11612,7 +11612,7 @@
         "pinyin_base": "min",
         "pinyin_correct": "mīn",
         "tone": 1,
-        "hanzi": "民",
+        "hanzi": "?",
         "audio": "audio/min1.mp3",
         "options": [
             "mīn",
@@ -11625,7 +11625,7 @@
         "pinyin_base": "kuai",
         "pinyin_correct": "kuāi",
         "tone": 1,
-        "hanzi": "快",
+        "hanzi": "?",
         "audio": "audio/kuai1.mp3",
         "options": [
             "kuāi",
@@ -11716,7 +11716,7 @@
         "pinyin_base": "hou",
         "pinyin_correct": "hōu",
         "tone": 1,
-        "hanzi": "后",
+        "hanzi": "吽",
         "audio": "audio/hou1.mp3",
         "options": [
             "hōu",
@@ -11729,7 +11729,7 @@
         "pinyin_base": "jiu",
         "pinyin_correct": "jiú",
         "tone": 2,
-        "hanzi": "就",
+        "hanzi": "?",
         "audio": "audio/jiu2.mp3",
         "options": [
             "jiū",
@@ -11781,7 +11781,7 @@
         "pinyin_base": "zei",
         "pinyin_correct": "zèi",
         "tone": 4,
-        "hanzi": "贼",
+        "hanzi": "?",
         "audio": "audio/zei4.mp3",
         "options": [
             "zēi",
@@ -11807,7 +11807,7 @@
         "pinyin_base": "nai",
         "pinyin_correct": "nāi",
         "tone": 1,
-        "hanzi": "奶",
+        "hanzi": "?",
         "audio": "audio/nai1.mp3",
         "options": [
             "nāi",
@@ -11820,7 +11820,7 @@
         "pinyin_base": "zhuai",
         "pinyin_correct": "zhuài",
         "tone": 4,
-        "hanzi": "拽",
+        "hanzi": "?",
         "audio": "audio/zhuai4.mp3",
         "options": [
             "zhuāi",
@@ -11859,7 +11859,7 @@
         "pinyin_base": "ka",
         "pinyin_correct": "kà",
         "tone": 4,
-        "hanzi": "卡",
+        "hanzi": "?",
         "audio": "audio/ka4.mp3",
         "options": [
             "kā",
@@ -11989,7 +11989,7 @@
         "pinyin_base": "kuo",
         "pinyin_correct": "kuó",
         "tone": 2,
-        "hanzi": "括",
+        "hanzi": "秳",
         "audio": "audio/kuo2.mp3",
         "options": [
             "kuō",
@@ -12067,7 +12067,7 @@
         "pinyin_base": "shei",
         "pinyin_correct": "shěi",
         "tone": 3,
-        "hanzi": "谁",
+        "hanzi": "?",
         "audio": "audio/shei3.mp3",
         "options": [
             "shēi",
@@ -12119,7 +12119,7 @@
         "pinyin_base": "ru",
         "pinyin_correct": "rū",
         "tone": 1,
-        "hanzi": "如",
+        "hanzi": "吺",
         "audio": "audio/ru1.mp3",
         "options": [
             "rū",
@@ -12171,7 +12171,7 @@
         "pinyin_base": "shei",
         "pinyin_correct": "shēi",
         "tone": 1,
-        "hanzi": "谁",
+        "hanzi": "?",
         "audio": "audio/shei1.mp3",
         "options": [
             "shēi",
@@ -12301,7 +12301,7 @@
         "pinyin_base": "dao",
         "pinyin_correct": "dáo",
         "tone": 2,
-        "hanzi": "裯",
+        "hanzi": "帱",
         "audio": "audio/dao2.mp3",
         "options": [
             "dāo",
@@ -12496,7 +12496,7 @@
         "pinyin_base": "zhei",
         "pinyin_correct": "zhéi",
         "tone": 2,
-        "hanzi": "这",
+        "hanzi": "?",
         "audio": "audio/zhei2.mp3",
         "options": [
             "zhēi",
@@ -12574,7 +12574,7 @@
         "pinyin_base": "zhua",
         "pinyin_correct": "zhuá",
         "tone": 2,
-        "hanzi": "抓",
+        "hanzi": "?",
         "audio": "audio/zhua2.mp3",
         "options": [
             "zhuā",
@@ -12613,7 +12613,7 @@
         "pinyin_base": "den",
         "pinyin_correct": "dén",
         "tone": 2,
-        "hanzi": "扽",
+        "hanzi": "?",
         "audio": "audio/den2.mp3",
         "options": [
             "dēn",
@@ -12626,7 +12626,7 @@
         "pinyin_base": "keng",
         "pinyin_correct": "kéng",
         "tone": 2,
-        "hanzi": "坑",
+        "hanzi": "?",
         "audio": "audio/keng2.mp3",
         "options": [
             "kēng",
@@ -12990,7 +12990,7 @@
         "pinyin_base": "den",
         "pinyin_correct": "děn",
         "tone": 3,
-        "hanzi": "扽",
+        "hanzi": "?",
         "audio": "audio/den3.mp3",
         "options": [
             "dēn",
@@ -13068,7 +13068,7 @@
         "pinyin_base": "zhei",
         "pinyin_correct": "zhěi",
         "tone": 3,
-        "hanzi": "这",
+        "hanzi": "?",
         "audio": "audio/zhei3.mp3",
         "options": [
             "zhēi",
@@ -13133,7 +13133,7 @@
         "pinyin_base": "diu",
         "pinyin_correct": "diù",
         "tone": 4,
-        "hanzi": "丢",
+        "hanzi": "?",
         "audio": "audio/diu4.mp3",
         "options": [
             "diū",
@@ -13172,7 +13172,7 @@
         "pinyin_base": "sun",
         "pinyin_correct": "sùn",
         "tone": 4,
-        "hanzi": "损",
+        "hanzi": "扻",
         "audio": "audio/sun4.mp3",
         "options": [
             "sūn",
@@ -13445,7 +13445,7 @@
         "pinyin_base": "hang",
         "pinyin_correct": "hǎng",
         "tone": 3,
-        "hanzi": "行",
+        "hanzi": "?",
         "audio": "audio/hang3.mp3",
         "options": [
             "hāng",
@@ -13484,7 +13484,7 @@
         "pinyin_base": "shei",
         "pinyin_correct": "shèi",
         "tone": 4,
-        "hanzi": "谁",
+        "hanzi": "?",
         "audio": "audio/shei4.mp3",
         "options": [
             "shēi",
@@ -13536,7 +13536,7 @@
         "pinyin_base": "bei",
         "pinyin_correct": "béi",
         "tone": 2,
-        "hanzi": "北",
+        "hanzi": "勃",
         "audio": "audio/bei2.mp3",
         "options": [
             "bēi",
@@ -13692,7 +13692,7 @@
         "pinyin_base": "suo",
         "pinyin_correct": "suò",
         "tone": 4,
-        "hanzi": "所",
+        "hanzi": "蜶",
         "audio": "audio/suo4.mp3",
         "options": [
             "suō",
@@ -13705,7 +13705,7 @@
         "pinyin_base": "lüe",
         "pinyin_correct": "lüé",
         "tone": 2,
-        "hanzi": "略",
+        "hanzi": "?",
         "audio": "audio/luue2.mp3",
         "options": [
             "lüē",
@@ -13731,7 +13731,7 @@
         "pinyin_base": "zei",
         "pinyin_correct": "zěi",
         "tone": 3,
-        "hanzi": "贼",
+        "hanzi": "?",
         "audio": "audio/zei3.mp3",
         "options": [
             "zēi",
@@ -13783,7 +13783,7 @@
         "pinyin_base": "zheng",
         "pinyin_correct": "zhéng",
         "tone": 2,
-        "hanzi": "正",
+        "hanzi": "憕",
         "audio": "audio/zheng2.mp3",
         "options": [
             "zhēng",
@@ -13796,7 +13796,7 @@
         "pinyin_base": "chuo",
         "pinyin_correct": "chuó",
         "tone": 2,
-        "hanzi": "鋜",
+        "hanzi": "孎",
         "audio": "audio/chuo2.mp3",
         "options": [
             "chuō",
@@ -13926,7 +13926,7 @@
         "pinyin_base": "lai",
         "pinyin_correct": "lǎi",
         "tone": 3,
-        "hanzi": "来",
+        "hanzi": "?",
         "audio": "audio/lai3.mp3",
         "options": [
             "lāi",
@@ -13965,7 +13965,7 @@
         "pinyin_base": "jian",
         "pinyin_correct": "jián",
         "tone": 2,
-        "hanzi": "间",
+        "hanzi": "?",
         "audio": "audio/jian2.mp3",
         "options": [
             "jiān",
@@ -14017,7 +14017,7 @@
         "pinyin_base": "nei",
         "pinyin_correct": "néi",
         "tone": 2,
-        "hanzi": "内",
+        "hanzi": "?",
         "audio": "audio/nei2.mp3",
         "options": [
             "nēi",
@@ -14043,7 +14043,7 @@
         "pinyin_base": "gun",
         "pinyin_correct": "gūn",
         "tone": 1,
-        "hanzi": "滚",
+        "hanzi": "裷",
         "audio": "audio/gun1.mp3",
         "options": [
             "gūn",
@@ -14082,7 +14082,7 @@
         "pinyin_base": "tai",
         "pinyin_correct": "tǎi",
         "tone": 3,
-        "hanzi": "台",
+        "hanzi": "奤",
         "audio": "audio/tai3.mp3",
         "options": [
             "tāi",
@@ -14173,7 +14173,7 @@
         "pinyin_base": "mu",
         "pinyin_correct": "mū",
         "tone": 1,
-        "hanzi": "目",
+        "hanzi": "朷",
         "audio": "audio/mu1.mp3",
         "options": [
             "mū",
@@ -14238,7 +14238,7 @@
         "pinyin_base": "pan",
         "pinyin_correct": "pǎn",
         "tone": 3,
-        "hanzi": "盘",
+        "hanzi": "眫",
         "audio": "audio/pan3.mp3",
         "options": [
             "pān",
@@ -14381,7 +14381,7 @@
         "pinyin_base": "chuo",
         "pinyin_correct": "chuǒ",
         "tone": 3,
-        "hanzi": "绰",
+        "hanzi": "?",
         "audio": "audio/chuo3.mp3",
         "options": [
             "chuō",
@@ -14459,7 +14459,7 @@
         "pinyin_base": "lüe",
         "pinyin_correct": "lüě",
         "tone": 3,
-        "hanzi": "略",
+        "hanzi": "?",
         "audio": "audio/luue3.mp3",
         "options": [
             "lüē",
@@ -14485,7 +14485,7 @@
         "pinyin_base": "ka",
         "pinyin_correct": "ká",
         "tone": 2,
-        "hanzi": "卡",
+        "hanzi": "?",
         "audio": "audio/ka2.mp3",
         "options": [
             "kā",
@@ -14680,7 +14680,7 @@
         "pinyin_base": "rou",
         "pinyin_correct": "rōu",
         "tone": 1,
-        "hanzi": "肉",
+        "hanzi": "?",
         "audio": "audio/rou1.mp3",
         "options": [
             "rōu",
@@ -14758,7 +14758,7 @@
         "pinyin_base": "kun",
         "pinyin_correct": "kún",
         "tone": 2,
-        "hanzi": "困",
+        "hanzi": "?",
         "audio": "audio/kun2.mp3",
         "options": [
             "kūn",
@@ -14901,7 +14901,7 @@
         "pinyin_base": "lüe",
         "pinyin_correct": "lüē",
         "tone": 1,
-        "hanzi": "略",
+        "hanzi": "?",
         "audio": "audio/luue1.mp3",
         "options": [
             "lüē",
@@ -14966,7 +14966,7 @@
         "pinyin_base": "lü",
         "pinyin_correct": "lǖ",
         "tone": 1,
-        "hanzi": "律",
+        "hanzi": "瞜",
         "audio": "audio/luu1.mp3",
         "options": [
             "lǖ",
@@ -15031,7 +15031,7 @@
         "pinyin_base": "diu",
         "pinyin_correct": "diǔ",
         "tone": 3,
-        "hanzi": "丢",
+        "hanzi": "?",
         "audio": "audio/diu3.mp3",
         "options": [
             "diū",
@@ -15122,7 +15122,7 @@
         "pinyin_base": "zhua",
         "pinyin_correct": "zhuà",
         "tone": 4,
-        "hanzi": "抓",
+        "hanzi": "?",
         "audio": "audio/zhua4.mp3",
         "options": [
             "zhuā",
@@ -15304,7 +15304,7 @@
         "pinyin_base": "gun",
         "pinyin_correct": "gún",
         "tone": 2,
-        "hanzi": "滚",
+        "hanzi": "?",
         "audio": "audio/gun2.mp3",
         "options": [
             "gūn",
@@ -15343,7 +15343,7 @@
         "pinyin_base": "ren",
         "pinyin_correct": "rēn",
         "tone": 1,
-        "hanzi": "人",
+        "hanzi": "?",
         "audio": "audio/ren1.mp3",
         "options": [
             "rēn",
@@ -15473,7 +15473,7 @@
         "pinyin_base": "lai",
         "pinyin_correct": "lāi",
         "tone": 1,
-        "hanzi": "来",
+        "hanzi": "?",
         "audio": "audio/lai1.mp3",
         "options": [
             "lāi",
@@ -15538,7 +15538,7 @@
         "pinyin_base": "diu",
         "pinyin_correct": "diú",
         "tone": 2,
-        "hanzi": "丢",
+        "hanzi": "?",
         "audio": "audio/diu2.mp3",
         "options": [
             "diū",
@@ -15564,7 +15564,7 @@
         "pinyin_base": "fou",
         "pinyin_correct": "fōu",
         "tone": 1,
-        "hanzi": "否",
+        "hanzi": "?",
         "audio": "audio/fou1.mp3",
         "options": [
             "fōu",
@@ -15590,7 +15590,7 @@
         "pinyin_base": "shai",
         "pinyin_correct": "shái",
         "tone": 2,
-        "hanzi": "晒",
+        "hanzi": "?",
         "audio": "audio/shai2.mp3",
         "options": [
             "shāi",
@@ -15603,7 +15603,7 @@
         "pinyin_base": "chun",
         "pinyin_correct": "chùn",
         "tone": 4,
-        "hanzi": "春",
+        "hanzi": "?",
         "audio": "audio/chun4.mp3",
         "options": [
             "chūn",
@@ -15668,7 +15668,7 @@
         "pinyin_base": "ceng",
         "pinyin_correct": "cěng",
         "tone": 3,
-        "hanzi": "层",
+        "hanzi": "?",
         "audio": "audio/ceng3.mp3",
         "options": [
             "cēng",
@@ -15681,7 +15681,7 @@
         "pinyin_base": "sun",
         "pinyin_correct": "sún",
         "tone": 2,
-        "hanzi": "损",
+        "hanzi": "?",
         "audio": "audio/sun2.mp3",
         "options": [
             "sūn",
@@ -15694,7 +15694,7 @@
         "pinyin_base": "zei",
         "pinyin_correct": "zēi",
         "tone": 1,
-        "hanzi": "贼",
+        "hanzi": "?",
         "audio": "audio/zei1.mp3",
         "options": [
             "zēi",
@@ -15928,7 +15928,7 @@
         "pinyin_base": "zhan",
         "pinyin_correct": "zhán",
         "tone": 2,
-        "hanzi": "展",
+        "hanzi": "讝",
         "audio": "audio/zhan2.mp3",
         "options": [
             "zhān",
@@ -15993,7 +15993,7 @@
         "pinyin_base": "ge",
         "pinyin_correct": "gě",
         "tone": 3,
-        "hanzi": "个",
+        "hanzi": "舸",
         "audio": "audio/ge3.mp3",
         "options": [
             "gē",
@@ -16032,7 +16032,7 @@
         "pinyin_base": "dai",
         "pinyin_correct": "dái",
         "tone": 2,
-        "hanzi": "代",
+        "hanzi": "诒",
         "audio": "audio/dai2.mp3",
         "options": [
             "dāi",
@@ -16058,7 +16058,7 @@
         "pinyin_base": "bo",
         "pinyin_correct": "bò",
         "tone": 4,
-        "hanzi": "播",
+        "hanzi": "檗",
         "audio": "audio/bo4.mp3",
         "options": [
             "bō",
@@ -16071,7 +16071,7 @@
         "pinyin_base": "huai",
         "pinyin_correct": "huǎi",
         "tone": 3,
-        "hanzi": "怀",
+        "hanzi": "?",
         "audio": "audio/huai3.mp3",
         "options": [
             "huāi",
@@ -16162,7 +16162,7 @@
         "pinyin_base": "lia",
         "pinyin_correct": "lià",
         "tone": 4,
-        "hanzi": "俩",
+        "hanzi": "?",
         "audio": "audio/lia4.mp3",
         "options": [
             "liā",
@@ -16175,7 +16175,7 @@
         "pinyin_base": "zen",
         "pinyin_correct": "zén",
         "tone": 2,
-        "hanzi": "怎",
+        "hanzi": "?",
         "audio": "audio/zen2.mp3",
         "options": [
             "zēn",
@@ -16422,7 +16422,7 @@
         "pinyin_base": "ha",
         "pinyin_correct": "hà",
         "tone": 4,
-        "hanzi": "哈",
+        "hanzi": "?",
         "audio": "audio/ha4.mp3",
         "options": [
             "hā",
@@ -16435,7 +16435,7 @@
         "pinyin_base": "nüe",
         "pinyin_correct": "nüé",
         "tone": 2,
-        "hanzi": "虐",
+        "hanzi": "?",
         "audio": "audio/nuue2.mp3",
         "options": [
             "nüē",
@@ -16526,7 +16526,7 @@
         "pinyin_base": "a",
         "pinyin_correct": "ǎ",
         "tone": 3,
-        "hanzi": "阿",
+        "hanzi": "?",
         "audio": "audio/a3.mp3",
         "options": [
             "ā",
@@ -16565,7 +16565,7 @@
         "pinyin_base": "juan",
         "pinyin_correct": "juán",
         "tone": 2,
-        "hanzi": "卷",
+        "hanzi": "?",
         "audio": "audio/juan2.mp3",
         "options": [
             "juān",
@@ -16682,7 +16682,7 @@
         "pinyin_base": "kong",
         "pinyin_correct": "kóng",
         "tone": 2,
-        "hanzi": "空",
+        "hanzi": "?",
         "audio": "audio/kong2.mp3",
         "options": [
             "kōng",
@@ -16695,7 +16695,7 @@
         "pinyin_base": "nen",
         "pinyin_correct": "nén",
         "tone": 2,
-        "hanzi": "嫩",
+        "hanzi": "?",
         "audio": "audio/nen2.mp3",
         "options": [
             "nēn",
@@ -16734,7 +16734,7 @@
         "pinyin_base": "nüe",
         "pinyin_correct": "nüě",
         "tone": 3,
-        "hanzi": "虐",
+        "hanzi": "?",
         "audio": "audio/nuue3.mp3",
         "options": [
             "nüē",
@@ -16747,7 +16747,7 @@
         "pinyin_base": "fo",
         "pinyin_correct": "fō",
         "tone": 1,
-        "hanzi": "佛",
+        "hanzi": "?",
         "audio": "audio/fo1.mp3",
         "options": [
             "fō",
@@ -16851,7 +16851,7 @@
         "pinyin_base": "qiong",
         "pinyin_correct": "qiōng",
         "tone": 1,
-        "hanzi": "穷",
+        "hanzi": "?",
         "audio": "audio/qiong1.mp3",
         "options": [
             "qiōng",
@@ -16890,7 +16890,7 @@
         "pinyin_base": "qiang",
         "pinyin_correct": "qiàng",
         "tone": 4,
-        "hanzi": "强",
+        "hanzi": "彊",
         "audio": "audio/qiang4.mp3",
         "options": [
             "qiāng",
@@ -16994,7 +16994,7 @@
         "pinyin_base": "heng",
         "pinyin_correct": "hěng",
         "tone": 3,
-        "hanzi": "衡",
+        "hanzi": "?",
         "audio": "audio/heng3.mp3",
         "options": [
             "hēng",
@@ -17059,7 +17059,7 @@
         "pinyin_base": "ei",
         "pinyin_correct": "ěi",
         "tone": 3,
-        "hanzi": "诶",
+        "hanzi": "?",
         "audio": "audio/ei3.mp3",
         "options": [
             "ēi",
@@ -17150,7 +17150,7 @@
         "pinyin_base": "zhang",
         "pinyin_correct": "zháng",
         "tone": 2,
-        "hanzi": "章",
+        "hanzi": "弡",
         "audio": "audio/zhang2.mp3",
         "options": [
             "zhāng",
@@ -17202,7 +17202,7 @@
         "pinyin_base": "nou",
         "pinyin_correct": "nǒu",
         "tone": 3,
-        "hanzi": "耨",
+        "hanzi": "?",
         "audio": "audio/nou3.mp3",
         "options": [
             "nōu",
@@ -17241,7 +17241,7 @@
         "pinyin_base": "nou",
         "pinyin_correct": "nōu",
         "tone": 1,
-        "hanzi": "耨",
+        "hanzi": "?",
         "audio": "audio/nou1.mp3",
         "options": [
             "nōu",
@@ -17306,7 +17306,7 @@
         "pinyin_base": "cang",
         "pinyin_correct": "cǎng",
         "tone": 3,
-        "hanzi": "藏",
+        "hanzi": "?",
         "audio": "audio/cang3.mp3",
         "options": [
             "cāng",
@@ -17332,7 +17332,7 @@
         "pinyin_base": "kui",
         "pinyin_correct": "kuǐ",
         "tone": 3,
-        "hanzi": "馈",
+        "hanzi": "頍",
         "audio": "audio/kui3.mp3",
         "options": [
             "kuī",
@@ -17501,7 +17501,7 @@
         "pinyin_base": "zen",
         "pinyin_correct": "zēn",
         "tone": 1,
-        "hanzi": "怎",
+        "hanzi": "?",
         "audio": "audio/zen1.mp3",
         "options": [
             "zēn",
@@ -17579,7 +17579,7 @@
         "pinyin_base": "shan",
         "pinyin_correct": "shán",
         "tone": 2,
-        "hanzi": "山",
+        "hanzi": "禅",
         "audio": "audio/shan2.mp3",
         "options": [
             "shān",
@@ -17592,7 +17592,7 @@
         "pinyin_base": "qiong",
         "pinyin_correct": "qiǒng",
         "tone": 3,
-        "hanzi": "穷",
+        "hanzi": "?",
         "audio": "audio/qiong3.mp3",
         "options": [
             "qiōng",
@@ -17631,7 +17631,7 @@
         "pinyin_base": "lan",
         "pinyin_correct": "lān",
         "tone": 1,
-        "hanzi": "览",
+        "hanzi": "?",
         "audio": "audio/lan1.mp3",
         "options": [
             "lān",
@@ -17696,7 +17696,7 @@
         "pinyin_base": "kuan",
         "pinyin_correct": "kuàn",
         "tone": 4,
-        "hanzi": "款",
+        "hanzi": "?",
         "audio": "audio/kuan4.mp3",
         "options": [
             "kuān",
@@ -17930,7 +17930,7 @@
         "pinyin_base": "gui",
         "pinyin_correct": "guí",
         "tone": 2,
-        "hanzi": "规",
+        "hanzi": "趹",
         "audio": "audio/gui2.mp3",
         "options": [
             "guī",
@@ -17956,7 +17956,7 @@
         "pinyin_base": "nen",
         "pinyin_correct": "nēn",
         "tone": 1,
-        "hanzi": "嫩",
+        "hanzi": "?",
         "audio": "audio/nen1.mp3",
         "options": [
             "nēn",
@@ -17969,7 +17969,7 @@
         "pinyin_base": "su",
         "pinyin_correct": "sǔ",
         "tone": 3,
-        "hanzi": "速",
+        "hanzi": "?",
         "audio": "audio/su3.mp3",
         "options": [
             "sū",
@@ -18099,7 +18099,7 @@
         "pinyin_base": "dei",
         "pinyin_correct": "dèi",
         "tone": 4,
-        "hanzi": "得",
+        "hanzi": "?",
         "audio": "audio/dei4.mp3",
         "options": [
             "dēi",
@@ -18203,7 +18203,7 @@
         "pinyin_base": "xiu",
         "pinyin_correct": "xiú",
         "tone": 2,
-        "hanzi": "修",
+        "hanzi": "?",
         "audio": "audio/xiu2.mp3",
         "options": [
             "xiū",
@@ -18281,7 +18281,7 @@
         "pinyin_base": "teng",
         "pinyin_correct": "těng",
         "tone": 3,
-        "hanzi": "腾",
+        "hanzi": "?",
         "audio": "audio/teng3.mp3",
         "options": [
             "tēng",
@@ -18294,7 +18294,7 @@
         "pinyin_base": "hei",
         "pinyin_correct": "hèi",
         "tone": 4,
-        "hanzi": "黑",
+        "hanzi": "?",
         "audio": "audio/hei4.mp3",
         "options": [
             "hēi",
@@ -18359,7 +18359,7 @@
         "pinyin_base": "huai",
         "pinyin_correct": "huāi",
         "tone": 1,
-        "hanzi": "怀",
+        "hanzi": "?",
         "audio": "audio/huai1.mp3",
         "options": [
             "huāi",
@@ -18398,7 +18398,7 @@
         "pinyin_base": "niang",
         "pinyin_correct": "niǎng",
         "tone": 3,
-        "hanzi": "娘",
+        "hanzi": "?",
         "audio": "audio/niang3.mp3",
         "options": [
             "niāng",
@@ -18632,7 +18632,7 @@
         "pinyin_base": "cong",
         "pinyin_correct": "cǒng",
         "tone": 3,
-        "hanzi": "从",
+        "hanzi": "愡",
         "audio": "audio/cong3.mp3",
         "options": [
             "cōng",
@@ -18671,7 +18671,7 @@
         "pinyin_base": "ei",
         "pinyin_correct": "èi",
         "tone": 4,
-        "hanzi": "诶",
+        "hanzi": "?",
         "audio": "audio/ei4.mp3",
         "options": [
             "ēi",
@@ -18710,7 +18710,7 @@
         "pinyin_base": "lia",
         "pinyin_correct": "liá",
         "tone": 2,
-        "hanzi": "俩",
+        "hanzi": "?",
         "audio": "audio/lia2.mp3",
         "options": [
             "liā",
@@ -18723,7 +18723,7 @@
         "pinyin_base": "nu",
         "pinyin_correct": "nū",
         "tone": 1,
-        "hanzi": "努",
+        "hanzi": "?",
         "audio": "audio/nu1.mp3",
         "options": [
             "nū",
@@ -18905,7 +18905,7 @@
         "pinyin_base": "ce",
         "pinyin_correct": "cē",
         "tone": 1,
-        "hanzi": "册",
+        "hanzi": "?",
         "audio": "audio/ce1.mp3",
         "options": [
             "cē",
@@ -19087,7 +19087,7 @@
         "pinyin_base": "mie",
         "pinyin_correct": "mié",
         "tone": 2,
-        "hanzi": "灭",
+        "hanzi": "?",
         "audio": "audio/mie2.mp3",
         "options": [
             "miē",
@@ -19178,7 +19178,7 @@
         "pinyin_base": "mie",
         "pinyin_correct": "miě",
         "tone": 3,
-        "hanzi": "灭",
+        "hanzi": "?",
         "audio": "audio/mie3.mp3",
         "options": [
             "miē",
@@ -19217,7 +19217,7 @@
         "pinyin_base": "a",
         "pinyin_correct": "à",
         "tone": 4,
-        "hanzi": "阿",
+        "hanzi": "?",
         "audio": "audio/a4.mp3",
         "options": [
             "ā",
@@ -19646,7 +19646,7 @@
         "pinyin_base": "bang",
         "pinyin_correct": "báng",
         "tone": 2,
-        "hanzi": "帮",
+        "hanzi": "挷",
         "audio": "audio/bang2.mp3",
         "options": [
             "bāng",
@@ -19945,7 +19945,7 @@
         "pinyin_base": "hua",
         "pinyin_correct": "huǎ",
         "tone": 3,
-        "hanzi": "话",
+        "hanzi": "?",
         "audio": "audio/hua3.mp3",
         "options": [
             "huā",
@@ -19971,7 +19971,7 @@
         "pinyin_base": "lia",
         "pinyin_correct": "liā",
         "tone": 1,
-        "hanzi": "俩",
+        "hanzi": "?",
         "audio": "audio/lia1.mp3",
         "options": [
             "liā",
@@ -20049,7 +20049,7 @@
         "pinyin_base": "hei",
         "pinyin_correct": "hěi",
         "tone": 3,
-        "hanzi": "黑",
+        "hanzi": "?",
         "audio": "audio/hei3.mp3",
         "options": [
             "hēi",
@@ -20218,7 +20218,7 @@
         "pinyin_base": "dei",
         "pinyin_correct": "děi",
         "tone": 3,
-        "hanzi": "得",
+        "hanzi": "?",
         "audio": "audio/dei3.mp3",
         "options": [
             "dēi",
@@ -20231,7 +20231,7 @@
         "pinyin_base": "ban",
         "pinyin_correct": "bán",
         "tone": 2,
-        "hanzi": "版",
+        "hanzi": "朌",
         "audio": "audio/ban2.mp3",
         "options": [
             "bān",
@@ -20270,7 +20270,7 @@
         "pinyin_base": "ce",
         "pinyin_correct": "cé",
         "tone": 2,
-        "hanzi": "册",
+        "hanzi": "?",
         "audio": "audio/ce2.mp3",
         "options": [
             "cē",
@@ -20621,7 +20621,7 @@
         "pinyin_base": "fo",
         "pinyin_correct": "fò",
         "tone": 4,
-        "hanzi": "佛",
+        "hanzi": "?",
         "audio": "audio/fo4.mp3",
         "options": [
             "fō",
@@ -20660,7 +20660,7 @@
         "pinyin_base": "ce",
         "pinyin_correct": "cě",
         "tone": 3,
-        "hanzi": "册",
+        "hanzi": "?",
         "audio": "audio/ce3.mp3",
         "options": [
             "cē",
@@ -20725,7 +20725,7 @@
         "pinyin_base": "zi",
         "pinyin_correct": "zí",
         "tone": 2,
-        "hanzi": "自",
+        "hanzi": "纃",
         "audio": "audio/zi2.mp3",
         "options": [
             "zī",
@@ -20777,7 +20777,7 @@
         "pinyin_base": "zhen",
         "pinyin_correct": "zhén",
         "tone": 2,
-        "hanzi": "真",
+        "hanzi": "溱",
         "audio": "audio/zhen2.mp3",
         "options": [
             "zhēn",
@@ -20829,7 +20829,7 @@
         "pinyin_base": "ze",
         "pinyin_correct": "zē",
         "tone": 1,
-        "hanzi": "责",
+        "hanzi": "滜",
         "audio": "audio/ze1.mp3",
         "options": [
             "zē",
@@ -20842,7 +20842,7 @@
         "pinyin_base": "qiong",
         "pinyin_correct": "qiòng",
         "tone": 4,
-        "hanzi": "穷",
+        "hanzi": "?",
         "audio": "audio/qiong4.mp3",
         "options": [
             "qiōng",
@@ -20881,7 +20881,7 @@
         "pinyin_base": "hei",
         "pinyin_correct": "héi",
         "tone": 2,
-        "hanzi": "黑",
+        "hanzi": "?",
         "audio": "audio/hei2.mp3",
         "options": [
             "hēi",
@@ -20894,7 +20894,7 @@
         "pinyin_base": "chui",
         "pinyin_correct": "chuǐ",
         "tone": 3,
-        "hanzi": "吹",
+        "hanzi": "?",
         "audio": "audio/chui3.mp3",
         "options": [
             "chuī",
@@ -21011,7 +21011,7 @@
         "pinyin_base": "pei",
         "pinyin_correct": "pěi",
         "tone": 3,
-        "hanzi": "配",
+        "hanzi": "妚",
         "audio": "audio/pei3.mp3",
         "options": [
             "pēi",
@@ -21050,7 +21050,7 @@
         "pinyin_base": "zhong",
         "pinyin_correct": "zhóng",
         "tone": 2,
-        "hanzi": "中",
+        "hanzi": "?",
         "audio": "audio/zhong2.mp3",
         "options": [
             "zhōng",
