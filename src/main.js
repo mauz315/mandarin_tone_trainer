@@ -27,7 +27,6 @@ function nextQuestion() {
 
   currentItem = words[Math.floor(Math.random() * words.length)];
 
-  // --- MODIFIED SECTION START ---
   // Show Hanzi BIG, and pinyin base (ma) small below it
   document.getElementById('pinyin-display').innerHTML = `
     <div style="font-size: 3rem; line-height: 1;">${currentItem.hanzi}</div>
