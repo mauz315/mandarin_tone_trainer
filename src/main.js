@@ -65,6 +65,17 @@ function setupButtons() {
       const userGuess = parseInt(e.target.dataset.tone);
 
       if (userGuess === currentItem.tone) {
+          const toneColors = ['#da291c', '#f4c300', '#005696', '#008f39']; // Your palette
+          document.body.style.setProperty('--active-tone-color', toneColors[userGuess - 1]);
+
+          // 2. Trigger the flash
+          document.body.classList.add('flash-correct');
+
+          // 3. Remove class after animation finishes so it can run again next time
+          setTimeout(() => {
+              document.body.classList.remove('flash-correct');
+              }, 500);
+
         document.getElementById('feedback').innerText = "CORRECT";
         document.getElementById('feedback').style.color = "green";
 

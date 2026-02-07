@@ -36,6 +36,7 @@ body {
   padding: 20px;
   text-align: center;
   margin-bottom: 40px;
+    animation: slide-in-left 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 /* Hanzi Character */
@@ -96,10 +97,12 @@ body {
 }
 
 .tone-btn {
-  border: none;
+  border: 3px solid var(--black-accent); /* Thick Outline */
   border-radius: 50%; /* Perfect Circles */
   width: 75px;        /* Large enough for text */
   height: 75px;
+  box-shadow: 4px 4px 0px var(--black-accent); /* Hard Shadow */
+  transition: transform 0.1s, box-shadow 0.1s;
 
   color: white;
   font-size: 1.2rem;
@@ -117,14 +120,45 @@ body {
 }
 
 /* Assign specific colors to specific tones */
-.tone-btn[data-tone="1"] { background-color: var(--tone-1-red); }
-.tone-btn[data-tone="2"] { background-color: var(--tone-2-yellow); }
-.tone-btn[data-tone="3"] { background-color: var(--tone-3-blue); }
-.tone-btn[data-tone="4"] { background-color: var(--tone-4-green); }
+.tone-btn[data-tone="1"] {
+    background-color: var(--tone-1-red);
+    border: 2px solid var(--black-accent); /* Thick Outline */
+  box-shadow: 3px 3px 0px var(--black-accent); /* Hard Shadow */
+  transition: transform 0.1s, box-shadow 0.1s;
+    nth-child(1) { animation: slide-in-bottom 0.3s 0.1s backwards};}
+.tone-btn[data-tone="2"] { background-color: var(--tone-2-yellow); border: 2px solid var(--black-accent); /* Thick Outline */
+  box-shadow: 3px 3px 0px var(--black-accent); /* Hard Shadow */
+  transition: transform 0.1s, box-shadow 0.1s;nth-child(1) { animation: slide-in-bottom 0.3s 0.1s backwards};}
+.tone-btn[data-tone="3"] { background-color: var(--tone-3-blue); border: 2px solid var(--black-accent); /* Thick Outline */
+  box-shadow: 3px 3px 0px var(--black-accent); /* Hard Shadow */
+  transition: transform 0.1s, box-shadow 0.1s; nth-child(1) { animation: slide-in-bottom 0.3s 0.1s backwards};}
+.tone-btn[data-tone="4"] { background-color: var(--tone-4-green); border: 2px solid var(--black-accent); /* Thick Outline */
+  box-shadow: 3px 3px 0px var(--black-accent); /* Hard Shadow */
+  transition: transform 0.1s, box-shadow 0.1s; nth-child(1) { animation: slide-in-bottom 0.3s 0.1s backwards; };}
 
 .tone-btn:hover {
   transform: scale(1.1); /* Slight grow on hover */
 }
 .tone-btn:active {
-  transform: scale(0.95);
+  transform: translate(4px, 4px); /* Move down-right */
+  box-shadow: 0px 0px 0px transparent;
+}
+
+@keyframes slide-in-bottom {
+  0% { transform: translateY(50px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slide-in-left {
+  0% { transform: translateX(-50px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+.flash-correct {
+  animation: flash-bg 0.5s ease-out;
+}
+
+@keyframes flash-bg {
+  0% { background-color: var(--active-tone-color); } /* We will set this var in JS */
+  100% { background-color: var(--bg-color); }
 }
