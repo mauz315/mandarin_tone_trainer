@@ -3705,16 +3705,16 @@
         ]
     },
     {
-        "pinyin_base": "nue",
-        "pinyin_correct": "nuē",
+        "pinyin_base": "nüe",
+        "pinyin_correct": "nüē",
         "tone": 1,
-        "hanzi": "?",
+        "hanzi": "虐",
         "audio": "audio/nue1.mp3",
         "options": [
-            "nuē",
-            "nué",
-            "nuě",
-            "nuè"
+            "nüē",
+            "nüé",
+            "nüě",
+            "nüè"
         ]
     },
     {
@@ -11103,15 +11103,15 @@
     },
     {
         "pinyin_base": "lüe",
-        "pinyin_correct": "lvè",
+        "pinyin_correct": "lüè",
         "tone": 4,
         "hanzi": "略",
         "audio": "audio/luue4.mp3",
         "options": [
-            "lvē",
-            "lvé",
-            "lvě",
-            "lvè"
+            "lüē",
+            "lüé",
+            "lüě",
+            "lüè"
         ]
     },
     {
@@ -13703,15 +13703,15 @@
     },
     {
         "pinyin_base": "lüe",
-        "pinyin_correct": "lvé",
+        "pinyin_correct": "lüé",
         "tone": 2,
         "hanzi": "略",
         "audio": "audio/luue2.mp3",
         "options": [
-            "lvē",
-            "lvé",
-            "lvě",
-            "lvè"
+            "lüē",
+            "lüé",
+            "lüě",
+            "lüè"
         ]
     },
     {
@@ -14457,15 +14457,15 @@
     },
     {
         "pinyin_base": "lüe",
-        "pinyin_correct": "lvě",
+        "pinyin_correct": "lüě",
         "tone": 3,
         "hanzi": "略",
         "audio": "audio/luue3.mp3",
         "options": [
-            "lvē",
-            "lvé",
-            "lvě",
-            "lvè"
+            "lüē",
+            "lüé",
+            "lüě",
+            "lüè"
         ]
     },
     {
@@ -14899,15 +14899,15 @@
     },
     {
         "pinyin_base": "lüe",
-        "pinyin_correct": "lvē",
+        "pinyin_correct": "lüē",
         "tone": 1,
         "hanzi": "略",
         "audio": "audio/luue1.mp3",
         "options": [
-            "lvē",
-            "lvé",
-            "lvě",
-            "lvè"
+            "lüē",
+            "lüé",
+            "lüě",
+            "lüè"
         ]
     },
     {
@@ -16433,15 +16433,15 @@
     },
     {
         "pinyin_base": "nüe",
-        "pinyin_correct": "nvé",
+        "pinyin_correct": "nüé",
         "tone": 2,
         "hanzi": "虐",
         "audio": "audio/nuue2.mp3",
         "options": [
-            "nvē",
-            "nvé",
-            "nvě",
-            "nvè"
+            "nüē",
+            "nüé",
+            "nüě",
+            "nüè"
         ]
     },
     {
@@ -16732,15 +16732,15 @@
     },
     {
         "pinyin_base": "nüe",
-        "pinyin_correct": "nvě",
+        "pinyin_correct": "nüě",
         "tone": 3,
         "hanzi": "虐",
         "audio": "audio/nuue3.mp3",
         "options": [
-            "nvē",
-            "nvé",
-            "nvě",
-            "nvè"
+            "nüē",
+            "nüé",
+            "nüě",
+            "nüè"
         ]
     },
     {
@@ -18968,15 +18968,15 @@
     },
     {
         "pinyin_base": "nüe",
-        "pinyin_correct": "nvè",
+        "pinyin_correct": "nüè",
         "tone": 4,
         "hanzi": "虐",
         "audio": "audio/nuue4.mp3",
         "options": [
-            "nvē",
-            "nvé",
-            "nvě",
-            "nvè"
+            "nüē",
+            "nüé",
+            "nüě",
+            "nüè"
         ]
     },
     {
