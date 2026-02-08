@@ -12,36 +12,15 @@ async function init() {
     words = await response.json();
     console.log("App Ready. Vocabulary loaded:", words.length);
     nextQuestion();
+    setTimeout(() => {
+      document.querySelectorAll('.tone-btn').forEach(btn => {
+        btn.classList.remove('pop-up');
+      });
+    }, 1000);
+
   } catch (err) {
     console.error("Initialization error:", err);
   }
-}
-
-function nextQuestion() {
-  if (words.length === 0) return;
-
-  // Reset UI state (in case we are coming from a "Correct" state)
-  document.querySelector('.options').style.display = 'flex'; // Show buttons again
-  const blueBtn = document.getElementById('play-btn');
-  blueBtn.style.transform = "scale(1)"; // Reset size
-
-  currentItem = words[Math.floor(Math.random() * words.length)];
-
-  // Show Hanzi BIG, and pinyin base (ma) small below it
-  document.getElementById('pinyin-display').innerHTML = `
-    <div style="font-size: 3rem; line-height: 1;">${currentItem.hanzi}</div>
-    <div style="font-size: 1.5rem; color: #888; font-weight: normal;">${currentItem.pinyin_base}</div>
-  `;
-
-  // Update the 4 option buttons to show the tone marks (mā, má, etc.)
-  const buttons = document.querySelectorAll('.tone-btn');
-  buttons.forEach((btn, index) => {
-    // We assume currentItem.options is ["mā", "má", "mǎ", "mà"]
-    btn.innerText = currentItem.options[index];
-  });
-
-  document.getElementById('feedback').innerText = "";
-  playAudio();
 }
 
 function playAudio() {
@@ -65,6 +44,7 @@ function setupButtons() {
       const userGuess = parseInt(e.target.dataset.tone);
 
       if (userGuess === currentItem.tone) {
+
           const toneColors = ['#da291c', '#f4c300', '#005696', '#008f39']; // Your palette
           document.body.style.setProperty('--active-tone-color', toneColors[userGuess - 1]);
 
@@ -105,6 +85,43 @@ function setupButtons() {
   });
   document.getElementById('play-btn').addEventListener('click', playAudio);
 }
+
+function nextQuestion() {
+  if (words.length === 0) return;
+
+  // Reset UI state (in case we are coming from a "Correct" state)
+  document.querySelector('.options').style.display = 'flex'; // Show buttons again
+  const blueBtn = document.getElementById('play-btn');
+  blueBtn.style.transform = "scale(1)"; // Reset size
+
+  currentItem = words[Math.floor(Math.random() * words.length)];
+
+  // Show Hanzi BIG, and pinyin base (ma) small below it
+  document.getElementById('pinyin-display').innerHTML = `
+    <div style="font-size: 3rem; line-height: 1;">${currentItem.hanzi}</div>
+    <div style="font-size: 1.5rem; color: #888; font-weight: normal;">${currentItem.pinyin_base}</div>
+  `;
+
+  // Update the 4 option buttons to show the tone marks (mā, má, etc.)
+  const buttons = document.querySelectorAll('.tone-btn');
+  buttons.forEach((btn, index) => {
+    // We assume currentItem.options is ["mā", "má", "mǎ", "mà"]
+    btn.innerText = currentItem.options[index];
+
+    // 2. FORCE REFLOW (The Magic Line)
+    void btn.offsetWidth;
+  });
+
+  document.getElementById('feedback').innerText = "";
+  playAudio();
+}
+
+const toneColors = {
+  1: '#da291c', // Red
+  2: '#f4c300', // Yellow
+  3: '#005696', // Blue
+  4: '#008f39'  // Green
+};
 
 // Initialize the app
 setupButtons();

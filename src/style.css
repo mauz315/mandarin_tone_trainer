@@ -6,6 +6,7 @@
   --tone-3-blue: #005696;   /* Strong Blue */
   --tone-4-green: #008f39;  /* Vivid Green */
   --black-accent: #000000;
+    --active-tone-color: #000;
 }
 
 body {
@@ -124,17 +125,16 @@ body {
     background-color: var(--tone-1-red);
     border: 2px solid var(--black-accent); /* Thick Outline */
   box-shadow: 3px 3px 0px var(--black-accent); /* Hard Shadow */
-  transition: transform 0.1s, box-shadow 0.1s;
-    nth-child(1) { animation: slide-in-bottom 0.3s 0.1s backwards};}
+  transition: transform 0.1s, box-shadow 0.1s;}
 .tone-btn[data-tone="2"] { background-color: var(--tone-2-yellow); border: 2px solid var(--black-accent); /* Thick Outline */
   box-shadow: 3px 3px 0px var(--black-accent); /* Hard Shadow */
-  transition: transform 0.1s, box-shadow 0.1s;nth-child(1) { animation: slide-in-bottom 0.3s 0.1s backwards};}
+  transition: transform 0.1s, box-shadow 0.1s;}
 .tone-btn[data-tone="3"] { background-color: var(--tone-3-blue); border: 2px solid var(--black-accent); /* Thick Outline */
   box-shadow: 3px 3px 0px var(--black-accent); /* Hard Shadow */
-  transition: transform 0.1s, box-shadow 0.1s; nth-child(1) { animation: slide-in-bottom 0.3s 0.1s backwards};}
+  transition: transform 0.1s, box-shadow 0.1s;}
 .tone-btn[data-tone="4"] { background-color: var(--tone-4-green); border: 2px solid var(--black-accent); /* Thick Outline */
   box-shadow: 3px 3px 0px var(--black-accent); /* Hard Shadow */
-  transition: transform 0.1s, box-shadow 0.1s; nth-child(1) { animation: slide-in-bottom 0.3s 0.1s backwards; };}
+  transition: transform 0.1s, box-shadow 0.1s;}
 
 .tone-btn:hover {
   transform: scale(1.1); /* Slight grow on hover */
@@ -161,4 +161,35 @@ body {
 @keyframes flash-bg {
   0% { background-color: var(--active-tone-color); } /* We will set this var in JS */
   100% { background-color: var(--bg-color); }
+}
+
+.flash-correct {
+  animation: flash-bg 0.5s ease-out;
+}
+
+/* --- ANIMATION FIXES --- */
+
+/* 1. The Class Javascript toggles */
+.pop-up {
+  /* The animation name defined below */
+  animation: slide-in-bottom 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+/* 2. Staggered Delays (Standard CSS Syntax) */
+/* This makes them appear one by one: 1st button, then 2nd, etc. */
+.tone-btn:nth-child(1) { animation-delay: 0.05s; }
+.tone-btn:nth-child(2) { animation-delay: 0.1s; }
+.tone-btn:nth-child(3) { animation-delay: 0.15s; }
+.tone-btn:nth-child(4) { animation-delay: 0.2s; }
+
+/* 3. Ensure the Keyframes exist (You already have these, but check them) */
+@keyframes slide-in-bottom {
+  0% {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
