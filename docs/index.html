@@ -7,23 +7,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mandarin Tone Trainer</title>
 
-    <script type="module" crossorigin src="/mandarin_tone_trainer/assets/index-EcUCsqqq.js"></script>
-    <link rel="stylesheet" crossorigin href="/mandarin_tone_trainer/assets/index-RlDDNyPx.css">
+    <script type="module" crossorigin src="/mandarin_tone_trainer/assets/index-Dy6_HoH_.js"></script>
+    <link rel="stylesheet" crossorigin href="/mandarin_tone_trainer/assets/index-DYoRodVn.css">
   </head>
   <body>
     <div id="app">
-      <div class="card">
-        <h1 id="pinyin-display">--</h1>
-        <button id="play-btn" class="secondary-btn">▶ Listen</button>
+
+      <div id="menu-screen">
+        <h1 class="main-title">MANDARIN<br>CONSTRUCTOR</h1>
+
+        <div class="menu-stack">
+          <button id="start-tones-btn" class="menu-block red-block">
+            <span class="icon">■</span> TONE TRAINER
+          </button>
+
+          <button class="menu-block yellow-block disabled">
+            <span class="icon">▲</span> INITIALS & ENDINGS
+          </button>
+
+          <button class="menu-block blue-block disabled">
+            <span class="icon">●</span> WORD TRAINER
+          </button>
+        </div>
+      </div>
+
+      <div id="game-screen" class="hidden">
+        <button id="back-to-menu-btn">✖ MENU</button>
+
+        <div class="card">
+          <div id="pinyin-display">
+            <div>...</div>
+            <div>...</div>
+          </div>
+        </div>
 
         <div class="options">
-          <button class="tone-btn pop-up" data-tone="1">1 ˉ</button>
-          <button class="tone-btn pop-up" data-tone="2">2 ˊ</button>
-          <button class="tone-btn pop-up" data-tone="3">3 ˇ</button>
-          <button class="tone-btn pop-up" data-tone="4">4 ˋ</button>
+          <button class="tone-btn pop-up" data-tone="1">1</button>
+          <button class="tone-btn pop-up" data-tone="2">2</button>
+          <button class="tone-btn pop-up" data-tone="3">3</button>
+          <button class="tone-btn pop-up" data-tone="4">4</button>
         </div>
-        <p id="feedback"></p>
+
+        <button id="play-btn">LISTEN</button>
+        <div id="feedback"></div>
       </div>
+
     </div>
   </body>
 </html>
