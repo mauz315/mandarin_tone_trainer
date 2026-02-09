@@ -3,6 +3,30 @@ let words = [];
 let currentItem = null;
 let audioInstance = null;
 
+function setupMenu() {
+  const menuScreen = document.getElementById('menu-screen');
+  const gameScreen = document.getElementById('game-screen');
+  const startTonesBtn = document.getElementById('start-tones-btn');
+  const backBtn = document.getElementById('back-to-menu-btn');
+
+  // 1. Go to Tone Trainer
+  startTonesBtn.addEventListener('click', () => {
+    menuScreen.classList.add('hidden');
+    gameScreen.classList.remove('hidden');
+  });
+
+  // 2. Return to Menu
+  backBtn.addEventListener('click', () => {
+    gameScreen.classList.add('hidden');
+    menuScreen.classList.remove('hidden');
+
+    // Optional: Reset the game UI (hide correct answer) if they quit mid-game
+    document.querySelector('.options').style.display = 'flex';
+    document.getElementById('play-btn').style.transform = "scale(1)";
+    document.getElementById('feedback').innerText = "";
+  });
+}
+
 async function init() {
   try {
     // 1. Fetch the data - ensure this filename matches yours exactly
@@ -125,4 +149,5 @@ const toneColors = {
 
 // Initialize the app
 setupButtons();
+setupMenu();
 init();

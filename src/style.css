@@ -193,3 +193,93 @@ body {
     opacity: 1;
   }
 }
+
+.hidden {
+  display: none !important;
+}
+
+/* 1. Main Title */
+.main-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 0.9;
+  text-align: center;
+  margin-bottom: 50px;
+  letter-spacing: -2px;
+  text-transform: uppercase;
+  color: var(--black-accent);
+}
+
+/* 2. The Menu Button Stack */
+.menu-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 320px;
+}
+
+/* 3. The Bauhaus Menu Blocks */
+.menu-block {
+  border: none;
+  padding: 25px 20px;
+  font-family: 'League Spartan', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: white;
+  text-align: left;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  gap: 15px;
+
+  /* Mechanical feel */
+  box-shadow: 5px 5px 0px var(--black-accent);
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.menu-block:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0px var(--black-accent);
+}
+
+.menu-block:active {
+  transform: translate(2px, 2px);
+  box-shadow: 3px 3px 0px var(--black-accent);
+}
+
+/* Block Colors */
+.red-block { background-color: var(--tone-1-red); }
+.yellow-block { background-color: var(--tone-2-yellow); color: black; } /* Black text for yellow */
+.blue-block { background-color: var(--tone-3-blue); }
+
+/* Disabled State */
+.menu-block.disabled {
+  background-color: #ccc;
+  color: #888;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 4. The Back Button (Top Right) */
+#back-to-menu-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: transparent;
+  border: 2px solid var(--black-accent);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 800;
+  padding: 8px 15px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+#back-to-menu-btn:hover {
+  background-color: var(--black-accent);
+  color: white;
+}
