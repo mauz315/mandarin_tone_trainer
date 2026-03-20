@@ -1,17 +1,18 @@
 :root {
-  /* Bauhaus Palette */
-  --bg-color: #ffffff;
-  --tone-1-red: #da291c;    /* Vibrant Red */
-  --tone-2-yellow: #f4c300; /* Bauhaus Gold */
-  --tone-3-blue: #005696;   /* Strong Blue */
-  --tone-4-green: #008f39;  /* Vivid Green */
-  --black-accent: #000000;
-    --active-tone-color: #000;
+  /* New Color Palette */
+  --bg-color: #f3fcf0;
+  --tone-1-red: #b7102a;    /* Primary */
+  --tone-2-yellow: #ffba27; /* Tertiary Fixed Dim */
+  --tone-3-blue: #485f84;   /* Secondary */
+  --tone-4-green: #7a5500;  /* Tertiary */
+  --black-accent: #161d16;  /* On Surface */
+  --active-tone-color: #161d16;
 }
 
 body {
-  font-family: 'League Spartan', sans-serif; /* Clean Sans-Serif */
+  font-family: 'Space Grotesk', 'League Spartan', sans-serif;
   background-color: var(--bg-color);
+  color: var(--black-accent);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -26,60 +27,55 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-
-/*    border-left: 8px solid var(--black-accent);
-  padding-left: 40px; /* Add space so content doesn't touch the line */
 }
 
 /* 1. THE DISPLAY CARD */
 .card {
-  background: transparent; /* No border, just floating text */
+  background: transparent;
   padding: 20px;
   text-align: center;
   margin-bottom: 40px;
-    animation: slide-in-left 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation: slide-in-left 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 /* Hanzi Character */
 #pinyin-display div:first-child {
-
   font-family: 'Noto Sans SC', sans-serif;
-
   font-size: 6rem !important;
-  font-weight: 800; /* Make it bolder */
-  color: #000;
+  font-weight: 800;
+  color: var(--black-accent);
   line-height: 1.2;
 }
 
 /* Pinyin Base (below Hanzi) */
 #pinyin-display div:last-child {
   font-size: 2rem !important;
-  color: #555; /* Dark Grey */
+  color: #5b403f; /* on-surface-variant */
   font-weight: 300;
   margin-top: 15px;
 }
 
 /* 3. THE LISTEN BUTTON */
 #play-btn {
-  background-color: var(--black-accent);
-  color: white;
-  border: none;
-  border-radius: 4px; /* Slightly rounded rectangle */
-  padding: 12px 30px;
-  font-size: 1rem;
+  background-color: var(--tone-1-red);
+  color: #ffffff;
+  border: 2px solid var(--black-accent);
+  border-radius: 0;
+  padding: 20px 48px;
+  font-size: 0.875rem;
   font-weight: bold;
-  text-transform: uppercase; /* "LISTEN" */
-  letter-spacing: 1px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
   cursor: pointer;
   margin: 35px auto;
-
   display: flex;
   align-items: center;
   gap: 10px;
+  transition: transform 0.1s;
 }
 
 #play-btn:hover {
-  opacity: 0.8;
+  transform: translate(8px, -8px);
 }
 
 /* Feedback Text */
@@ -98,50 +94,32 @@ body {
 }
 
 .tone-btn {
-  border: 3px solid var(--black-accent); /* Thick Outline */
-  border-radius: 50%; /* Perfect Circles */
-  width: 75px;        /* Large enough for text */
+  border: 2px solid var(--black-accent);
+  border-radius: 50%;
+  width: 75px;
   height: 75px;
-  box-shadow: 4px 4px 0px var(--black-accent); /* Hard Shadow */
-  transition: transform 0.1s, box-shadow 0.1s;
-
   color: white;
   font-size: 1.2rem;
   font-weight: bold;
   cursor: pointer;
-  transition: transform 0.1s ease;
-
-  /* Flexbox to center the text perfectly */
   display: flex;
   align-items: center;
   justify-content: center;
-
-  /* No shadows, flat design */
   box-shadow: none;
+  transition: transform 0.1s ease;
 }
 
-/* Assign specific colors to specific tones */
-.tone-btn[data-tone="1"] {
-    background-color: var(--tone-1-red);
-    border: 2px solid var(--black-accent); /* Thick Outline */
-  box-shadow: 3px 3px 0px var(--black-accent); /* Hard Shadow */
-  transition: transform 0.1s, box-shadow 0.1s;}
-.tone-btn[data-tone="2"] { background-color: var(--tone-2-yellow); border: 2px solid var(--black-accent); /* Thick Outline */
-  box-shadow: 3px 3px 0px var(--black-accent); /* Hard Shadow */
-  transition: transform 0.1s, box-shadow 0.1s;}
-.tone-btn[data-tone="3"] { background-color: var(--tone-3-blue); border: 2px solid var(--black-accent); /* Thick Outline */
-  box-shadow: 3px 3px 0px var(--black-accent); /* Hard Shadow */
-  transition: transform 0.1s, box-shadow 0.1s;}
-.tone-btn[data-tone="4"] { background-color: var(--tone-4-green); border: 2px solid var(--black-accent); /* Thick Outline */
-  box-shadow: 3px 3px 0px var(--black-accent); /* Hard Shadow */
-  transition: transform 0.1s, box-shadow 0.1s;}
+.tone-btn[data-tone="1"] { background-color: var(--tone-1-red); }
+.tone-btn[data-tone="2"] { background-color: var(--tone-2-yellow); color: var(--black-accent); }
+.tone-btn[data-tone="3"] { background-color: var(--tone-3-blue); }
+.tone-btn[data-tone="4"] { background-color: var(--tone-4-green); }
 
 .tone-btn:hover {
-  transform: scale(1.1); /* Slight grow on hover */
+  transform: translate(8px, -8px);
 }
+
 .tone-btn:active {
-  transform: translate(4px, 4px); /* Move down-right */
-  box-shadow: 0px 0px 0px transparent;
+  transform: translate(0px, 0px);
 }
 
 @keyframes slide-in-bottom {
@@ -154,12 +132,8 @@ body {
   100% { transform: translateX(0); opacity: 1; }
 }
 
-.flash-correct {
-  animation: flash-bg 0.5s ease-out;
-}
-
 @keyframes flash-bg {
-  0% { background-color: var(--active-tone-color); } /* We will set this var in JS */
+  0% { background-color: var(--active-tone-color); }
   100% { background-color: var(--bg-color); }
 }
 
@@ -168,31 +142,14 @@ body {
 }
 
 /* --- ANIMATION FIXES --- */
-
-/* 1. The Class Javascript toggles */
 .pop-up {
-  /* The animation name defined below */
   animation: slide-in-bottom 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
 }
 
-/* 2. Staggered Delays (Standard CSS Syntax) */
-/* This makes them appear one by one: 1st button, then 2nd, etc. */
 .tone-btn:nth-child(1) { animation-delay: 0.05s; }
 .tone-btn:nth-child(2) { animation-delay: 0.1s; }
 .tone-btn:nth-child(3) { animation-delay: 0.15s; }
 .tone-btn:nth-child(4) { animation-delay: 0.2s; }
-
-/* 3. Ensure the Keyframes exist (You already have these, but check them) */
-@keyframes slide-in-bottom {
-  0% {
-    transform: translateY(50px);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
 
 .hidden {
   display: none !important;
@@ -207,7 +164,7 @@ body {
   margin-bottom: 50px;
   letter-spacing: -2px;
   text-transform: uppercase;
-  color: var(--black-accent);
+  color: var(--tone-1-red);
 }
 
 /* 2. The Menu Button Stack */
@@ -221,9 +178,8 @@ body {
 
 /* 3. The Bauhaus Menu Blocks */
 .menu-block {
-  border: none;
+  border: 2px solid var(--black-accent);
   padding: 25px 20px;
-  font-family: 'League Spartan', sans-serif;
   font-size: 1.2rem;
   font-weight: 800;
   letter-spacing: 2px;
@@ -231,36 +187,29 @@ body {
   color: white;
   text-align: left;
   cursor: pointer;
-
   display: flex;
   align-items: center;
   gap: 15px;
-
-  /* Mechanical feel */
-  box-shadow: 5px 5px 0px var(--black-accent);
-  transition: transform 0.1s, box-shadow 0.1s;
+  transition: transform 0.1s;
 }
 
 .menu-block:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 7px 7px 0px var(--black-accent);
+  transform: translate(8px, -8px);
 }
 
 .menu-block:active {
-  transform: translate(2px, 2px);
-  box-shadow: 3px 3px 0px var(--black-accent);
+  transform: translate(0px, 0px);
 }
 
 /* Block Colors */
 .red-block { background-color: var(--tone-1-red); }
-.yellow-block { background-color: var(--tone-2-yellow); color: black; } /* Black text for yellow */
+.yellow-block { background-color: var(--tone-2-yellow); color: var(--black-accent); }
 .blue-block { background-color: var(--tone-3-blue); }
 
 /* Disabled State */
 .menu-block.disabled {
-  background-color: #ccc;
-  color: #888;
-  box-shadow: none;
+  background-color: #dce5d9;
+  color: #5b403f;
   cursor: not-allowed;
   transform: none;
 }
@@ -272,7 +221,6 @@ body {
   right: 20px;
   background: transparent;
   border: 2px solid var(--black-accent);
-  font-family: 'League Spartan', sans-serif;
   font-weight: 800;
   padding: 8px 15px;
   cursor: pointer;
