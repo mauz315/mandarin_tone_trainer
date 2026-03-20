@@ -69,7 +69,7 @@ function setupButtons() {
 
       if (userGuess === currentItem.tone) {
 
-          const toneColors = ['#da291c', '#f4c300', '#005696', '#008f39']; // Your palette
+          const toneColors = ['#b7102a', '#ffba27', '#485f84', '#7a5500']; // New palette colors
           document.body.style.setProperty('--active-tone-color', toneColors[userGuess - 1]);
 
           // 2. Trigger the flash
@@ -81,7 +81,7 @@ function setupButtons() {
               }, 500);
 
         document.getElementById('feedback').innerText = "CORRECT";
-        document.getElementById('feedback').style.color = "green";
+        document.getElementById('feedback').style.color = "green"; // consider changing this to var(--tone-4-green) if green doesn't fit
 
         // --- MODIFIED SECTION START ---
         // 1. Hide the options
@@ -95,14 +95,14 @@ function setupButtons() {
         // 3. Show Correct Hanzi + Full Pinyin (mā)
         document.getElementById('pinyin-display').innerHTML = `
             <div style="font-size: 4rem;">${currentItem.hanzi}</div>
-            <div style="font-size: 2rem; color: #333;">${currentItem.pinyin_correct}</div>
+            <div style="font-size: 2rem; color: #161d16;">${currentItem.pinyin_correct}</div>
         `;
         // --- MODIFIED SECTION END ---
 
         setTimeout(nextQuestion, 1500); // Increased time slightly to admire the result
       } else {
         document.getElementById('feedback').innerText = "TRY AGAIN";
-        document.getElementById('feedback').style.color = "red";
+        document.getElementById('feedback').style.color = "#b7102a"; // updated to primary red
         playAudio();
       }
     });
@@ -122,8 +122,8 @@ function nextQuestion() {
 
   // Show Hanzi BIG, and pinyin base (ma) small below it
   document.getElementById('pinyin-display').innerHTML = `
-    <div style="font-size: 3rem; line-height: 1;">${currentItem.hanzi}</div>
-    <div style="font-size: 1.5rem; color: #888; font-weight: normal;">${currentItem.pinyin_base}</div>
+    <div style="font-size: 3rem; line-height: 1; color: var(--black-accent);">${currentItem.hanzi}</div>
+    <div style="font-size: 1.5rem; color: #5b403f; font-weight: normal;">${currentItem.pinyin_base}</div>
   `;
 
   // Update the 4 option buttons to show the tone marks (mā, má, etc.)
@@ -141,10 +141,10 @@ function nextQuestion() {
 }
 
 const toneColors = {
-  1: '#da291c', // Red
-  2: '#f4c300', // Yellow
-  3: '#005696', // Blue
-  4: '#008f39'  // Green
+  1: '#b7102a', // Primary
+  2: '#ffba27', // Tertiary Fixed Dim
+  3: '#485f84', // Secondary
+  4: '#7a5500'  // Tertiary
 };
 
 // Initialize the app
