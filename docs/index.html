@@ -8,8 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mandarin Tone Trainer</title>
 
-    <script type="module" crossorigin src="/mandarin_tone_trainer/assets/index-Ctdb5cLr.js"></script>
-    <link rel="stylesheet" crossorigin href="/mandarin_tone_trainer/assets/index-C3XYPGVj.css">
+    <script type="module" crossorigin src="/mandarin_tone_trainer/assets/index-CIAEOiOk.js"></script>
+    <link rel="stylesheet" crossorigin href="/mandarin_tone_trainer/assets/index-VBP1LlID.css">
   </head>
   <body>
     <div id="app">
@@ -22,12 +22,12 @@
             <span class="icon">■</span> TONE TRAINER
           </button>
 
-          <button class="menu-block yellow-block disabled">
-            <span class="icon">▲</span> INITIALS & ENDINGS
+          <button id="start-initials-btn" class="menu-block yellow-block">
+            <span class="icon">▲</span> INITIALS TRAINER
           </button>
 
-          <button class="menu-block blue-block disabled">
-            <span class="icon">●</span> WORD TRAINER
+          <button id="start-endings-btn" class="menu-block blue-block">
+            <span class="icon">●</span> ENDINGS TRAINER
           </button>
         </div>
       </div>
@@ -43,10 +43,10 @@
         </div>
 
         <div class="options">
-          <button class="tone-btn pop-up" data-tone="1">1</button>
-          <button class="tone-btn pop-up" data-tone="2">2</button>
-          <button class="tone-btn pop-up" data-tone="3">3</button>
-          <button class="tone-btn pop-up" data-tone="4">4</button>
+          <button class="tone-btn pop-up" data-index="0">1</button>
+          <button class="tone-btn pop-up" data-index="1">2</button>
+          <button class="tone-btn pop-up" data-index="2">3</button>
+          <button class="tone-btn pop-up" data-index="3">4</button>
         </div>
 
         <button id="play-btn">LISTEN</button>

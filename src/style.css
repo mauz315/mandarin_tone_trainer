@@ -115,10 +115,11 @@ body {
   transition: transform 0.1s ease;
 }
 
-.tone-btn[data-tone="1"] { background-color: var(--tone-1-red); }
-.tone-btn[data-tone="2"] { background-color: var(--tone-2-yellow); color: var(--black-accent); }
-.tone-btn[data-tone="3"] { background-color: var(--tone-3-blue); }
-.tone-btn[data-tone="4"] { background-color: var(--tone-4-green); }
+/* Instead of data-tone="1" styling, we use data-index to assign colors generically */
+.tone-btn[data-index="0"] { background-color: var(--tone-1-red); }
+.tone-btn[data-index="1"] { background-color: var(--tone-2-yellow); color: var(--black-accent); }
+.tone-btn[data-index="2"] { background-color: var(--tone-3-blue); }
+.tone-btn[data-index="3"] { background-color: var(--tone-4-green); }
 
 .tone-btn:hover {
   transform: translate(8px, -8px);
