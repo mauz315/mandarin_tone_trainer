@@ -1,75 +1,277 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-      <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-      <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
-      <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700&display=swap" rel="stylesheet">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mandarin Tone Trainer</title>
 
-  </head>
-  <body>
-    <div id="app">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary": "#ffffff",
+              "secondary-container": "#6c98ff",
+              "on-secondary-container": "#002f76",
+              "inverse-surface": "#2a322b",
+              "tertiary-fixed-dim": "#f5bf22",
+              "error": "#ba1a1a",
+              "surface-container": "#e7f0e5",
+              "surface-container-high": "#e2ebdf",
+              "surface-container-highest": "#dce5d9",
+              "error-container": "#ffdad6",
+              "on-primary-fixed-variant": "#92001d",
+              "on-tertiary-fixed-variant": "#5a4300",
+              "outline-variant": "#e4bebc",
+              "surface-tint": "#bb142c",
+              "on-secondary-fixed": "#001946",
+              "on-surface-variant": "#5b403f",
+              "tertiary-container": "#745800",
+              "on-tertiary-fixed": "#251a00",
+              "on-error-container": "#93000a",
+              "on-error": "#ffffff",
+              "on-tertiary-container": "#ffcf55",
+              "tertiary": "#574100",
+              "inverse-primary": "#ffb3b1",
+              "surface": "#f3fcf0",
+              "secondary-fixed": "#dae2ff",
+              "secondary-fixed-dim": "#b1c5ff",
+              "on-secondary-fixed-variant": "#00419e",
+              "primary": "#8e001b",
+              "tertiary-fixed": "#ffdf98",
+              "on-secondary": "#ffffff",
+              "primary-container": "#b7102a",
+              "background": "#f3fcf0",
+              "inverse-on-surface": "#eaf3e7",
+              "surface-container-lowest": "#ffffff",
+              "surface-dim": "#d4ddd1",
+              "on-primary-container": "#ffc7c5",
+              "outline": "#8f6f6e",
+              "on-primary-fixed": "#410007",
+              "on-background": "#161d16",
+              "on-primary": "#ffffff",
+              "surface-variant": "#dce5d9",
+              "surface-container-low": "#edf6ea",
+              "surface-bright": "#f3fcf0",
+              "primary-fixed-dim": "#ffb3b1",
+              "on-surface": "#161d16",
+              "primary-fixed": "#ffdad8",
+              "secondary": "#2559bd"
+            },
+            fontFamily: {
+              "headline": ["Space Grotesk"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Space Grotesk"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            keyframes: {
+              'pop-up': {
+                '0%': { transform: 'scale(0.8) translateY(20px)', opacity: '0' },
+                '100%': { transform: 'scale(1) translateY(0)', opacity: '1' },
+              }
+            },
+            animation: {
+              'pop-up': 'pop-up 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .kinetic-blur {
+        filter: blur(40px);
+      }
+    </style>
+  </head>
+  <body class="bg-surface font-body text-on-surface h-screen selection:bg-secondary-container selection:text-on-secondary-container overflow-hidden">
+
+    <!-- Kinetic Background Shapes -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+      <div class="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-secondary/5 kinetic-blur"></div>
+      <div class="absolute top-1/2 -left-32 w-80 h-80 rounded-full bg-primary/5 kinetic-blur"></div>
+      <div class="absolute bottom-24 right-1/4 w-64 h-64 rounded-xl bg-tertiary/10 rotate-12 kinetic-blur"></div>
+    </div>
+
+    <!-- Top Navigation Anchor (Centered Title Only) -->
+    <header class="bg-[#f3fcf0] dark:bg-[#161d16] flex justify-center items-center w-full px-6 py-4 fixed top-0 z-50">
+      <h1 class="font-headline font-bold tracking-tighter text-xl font-black text-primary uppercase">MANDARIN CONSTRUCTOR</h1>
+    </header>
+
+    <div id="app" class="relative z-10 px-6 flex flex-col justify-center h-screen max-w-4xl mx-auto w-full pt-8 pb-6">
+
+      <!-- MENU SCREEN -->
       <div id="menu-screen">
-        <h1 class="main-title">MANDARIN<br>CONSTRUCTOR</h1>
+        <section class="mb-4">
+          <h2 class="font-headline text-3xl md:text-4xl font-bold tracking-tight text-on-surface leading-none text-center">
+            Choose your <br/><span class="text-secondary">practice mode.</span>
+          </h2>
+        </section>
 
         <!-- Main Menu -->
-        <div id="main-menu" class="menu-stack">
-          <button id="start-tones-btn" class="menu-block red-block">
-            <span class="icon">■</span> TONE TRAINER
+        <div id="main-menu" class="grid grid-cols-1 md:grid-cols-12 gap-3">
+
+          <!-- Tone Trainer Card -->
+          <button id="start-tones-btn" class="md:col-span-12 lg:col-span-8 bg-surface-container-low rounded-xl p-5 flex flex-col justify-between min-h-[140px] relative overflow-hidden group hover:bg-surface-container transition-colors duration-300 text-left w-full">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[100px] z-0"></div>
+            <div class="relative z-10 flex gap-4 items-center">
+              <div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center shadow-lg shrink-0">
+                <span class="material-symbols-outlined text-on-primary text-xl">graphic_eq</span>
+              </div>
+              <div>
+                <h3 class="font-headline text-xl font-bold text-on-surface mb-1">Tone Trainer</h3>
+                <p class="text-on-surface-variant text-xs max-w-sm">Master the four tones of Mandarin through isolated audio drills.</p>
+              </div>
+            </div>
           </button>
 
-          <!-- Opens the submenu -->
-          <button id="open-submenu-btn" class="menu-block yellow-block">
-            <span class="icon">▲</span> INITIALS & ENDINGS
+          <!-- Initials & Endings (Opens Submenu) -->
+          <button id="open-submenu-btn" class="md:col-span-6 lg:col-span-4 bg-surface-container-low rounded-xl p-5 flex flex-col justify-between min-h-[140px] relative overflow-hidden group hover:bg-surface-container transition-colors duration-300 text-left w-full">
+            <div class="absolute -bottom-8 -right-8 w-24 h-24 bg-secondary/10 rounded-full z-0"></div>
+            <div class="relative z-10 flex gap-4 items-center">
+              <div class="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center shadow-lg shrink-0">
+                <span class="material-symbols-outlined text-white text-xl">translate</span>
+              </div>
+              <div>
+                <h3 class="font-headline text-lg font-bold text-on-surface mb-1 leading-tight">Initials &amp; Endings</h3>
+                <p class="text-xs text-on-surface-variant">Focus on Pinyin phonetic components.</p>
+              </div>
+            </div>
           </button>
 
-          <!-- Future game -->
-          <button id="start-words-btn" class="menu-block blue-block disabled">
-            <span class="icon">●</span> WORD TRAINER
+          <!-- Word Trainer (Disabled) -->
+          <button id="start-words-btn" class="md:col-span-6 lg:col-span-12 bg-surface-container-low rounded-xl p-5 flex flex-col md:flex-row justify-between items-start md:items-center relative overflow-hidden group opacity-50 cursor-not-allowed grayscale text-left w-full min-h-[80px]">
+            <div class="absolute left-1/2 top-0 -translate-x-1/2 w-48 h-4 bg-tertiary-fixed-dim/20 rounded-b-full z-0"></div>
+            <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-4">
+              <div class="w-10 h-10 bg-tertiary-fixed-dim rounded-full flex items-center justify-center shadow-lg shrink-0">
+                <span class="material-symbols-outlined text-tertiary text-xl">auto_stories</span>
+              </div>
+              <div>
+                <h3 class="font-headline text-lg font-bold text-on-surface mb-1 leading-tight">Word Trainer</h3>
+                <p class="text-xs text-on-surface-variant max-w-md">Apply your listening skills to real vocabulary. (Coming Soon)</p>
+              </div>
+            </div>
           </button>
         </div>
 
         <!-- Submenu (Hidden by default) -->
-        <div id="submenu" class="menu-stack hidden">
-          <button id="close-submenu-btn" class="menu-block" style="background-color: #dce5d9; color: var(--black-accent);">
-            ✖ BACK
+        <div id="submenu" class="grid grid-cols-1 md:grid-cols-2 gap-3 hidden">
+
+          <!-- Back Button -->
+          <button id="close-submenu-btn" class="col-span-full font-label text-xs font-bold tracking-widest text-on-surface/40 hover:text-primary uppercase flex items-center gap-2">
+             <span class="material-symbols-outlined text-sm">arrow_back</span> BACK TO MENU
           </button>
 
-          <button id="start-initials-btn" class="menu-block yellow-block">
-            INITIALS
+          <!-- Initials Card -->
+          <button id="start-initials-btn" class="bg-surface-container-low rounded-xl p-5 flex flex-col justify-between min-h-[140px] relative overflow-hidden group hover:bg-surface-container transition-colors duration-300 text-left w-full">
+            <div class="absolute -bottom-8 -right-8 w-24 h-24 bg-tertiary-fixed-dim/20 rounded-full z-0"></div>
+            <div class="relative z-10 flex gap-4 items-center">
+              <div class="w-10 h-10 bg-tertiary-fixed-dim rounded-lg flex items-center justify-center shadow-lg shrink-0">
+                <span class="font-headline font-bold text-tertiary text-lg">zh</span>
+              </div>
+              <div>
+                <h3 class="font-headline text-xl font-bold text-on-surface mb-1">Initials</h3>
+                <p class="text-xs text-on-surface-variant">Train your ear to recognize the starting consonants.</p>
+              </div>
+            </div>
           </button>
 
-          <button id="start-endings-btn" class="menu-block yellow-block">
-            ENDINGS
+          <!-- Endings Card -->
+          <button id="start-endings-btn" class="bg-surface-container-low rounded-xl p-5 flex flex-col justify-between min-h-[140px] relative overflow-hidden group hover:bg-surface-container transition-colors duration-300 text-left w-full">
+             <div class="absolute top-0 right-0 w-32 h-32 bg-secondary/10 rounded-bl-[100px] z-0"></div>
+            <div class="relative z-10 flex gap-4 items-center">
+              <div class="w-10 h-10 bg-secondary-container rounded-lg flex items-center justify-center shadow-lg shrink-0">
+                <span class="font-headline font-bold text-on-secondary-container text-lg">ang</span>
+              </div>
+              <div>
+                <h3 class="font-headline text-xl font-bold text-on-surface mb-1">Endings</h3>
+                <p class="text-xs text-on-surface-variant">Master the vowels and nasal endings.</p>
+              </div>
+            </div>
           </button>
         </div>
       </div>
 
-      <div id="game-screen" class="hidden">
-        <button id="back-to-menu-btn">✖ MENU</button>
+      <!-- GAME SCREEN -->
+      <div id="game-screen" class="hidden flex flex-col items-center w-full max-w-2xl mx-auto">
 
-        <div class="card">
-          <div id="pinyin-display">
+        <div class="w-full flex justify-start mb-0">
+            <button id="back-to-menu-btn" class="font-label text-xs font-bold tracking-widest text-on-surface/40 hover:text-primary uppercase flex items-center gap-2 transition-colors">
+                <span class="material-symbols-outlined text-sm">close</span> MENU
+            </button>
+        </div>
+
+        <!-- Listening Core Area -->
+        <div class="relative w-full flex flex-col items-center mb-2 mt-4">
+          <!-- Fluid Play Button -->
+          <div class="relative group cursor-pointer active:scale-95 transition-all duration-300">
+            <div class="absolute inset-0 bg-primary opacity-5 blur-2xl rounded-full scale-150 group-hover:opacity-10 transition-opacity"></div>
+            <!-- Main Button Body -->
+            <button id="play-btn" class="relative w-24 h-24 rounded-3xl bg-primary-container text-on-primary shadow-xl flex items-center justify-center overflow-hidden">
+              <!-- Bauhaus Geometric Detail -->
+              <div class="absolute -top-1 -right-1 w-4 h-4 bg-tertiary rounded-full group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></div>
+              <span class="material-symbols-outlined text-5xl" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+            </button>
+          </div>
+
+          <!-- Pinyin Display -->
+          <div id="pinyin-display" class="mt-2 text-center card min-h-[100px] flex flex-col justify-center">
             <div>...</div>
             <div>...</div>
           </div>
         </div>
 
-        <div class="options">
-          <button class="tone-btn pop-up" data-index="0">1</button>
-          <button class="tone-btn pop-up" data-index="1">2</button>
-          <button class="tone-btn pop-up" data-index="2">3</button>
-          <button class="tone-btn pop-up" data-index="3">4</button>
+        <div id="feedback" class="mb-0 font-label tracking-widest font-bold uppercase text-sm h-6"></div>
+
+        <!-- Geometric Answer Options (Bento Grid Style) -->
+        <div class="options w-full grid grid-cols-1 md:grid-cols-2 gap-2 relative mt-2">
+
+          <!-- Option 1 -->
+          <button class="tone-btn pop-up bg-surface-container-lowest h-16 rounded-2xl flex flex-col items-center justify-center hover:bg-secondary-container/10 transition-colors border-2 border-transparent hover:border-secondary group relative overflow-hidden active:translate-y-1 shadow-sm" data-index="0">
+            <div class="absolute top-2 right-2 w-2 h-2 bg-secondary/20 rounded-full group-hover:bg-secondary transition-colors"></div>
+            <span class="font-headline text-2xl font-bold text-on-surface option-text">1</span>
+          </button>
+
+          <!-- Option 2 -->
+          <button class="tone-btn pop-up bg-surface-container-lowest h-16 rounded-2xl flex flex-col items-center justify-center hover:bg-primary-container/10 transition-colors border-2 border-transparent hover:border-primary group relative overflow-hidden active:translate-y-1 shadow-sm" data-index="1">
+            <div class="absolute top-2 right-2 w-2 h-2 bg-primary/20 rounded-full group-hover:bg-primary transition-colors"></div>
+            <span class="font-headline text-2xl font-bold text-on-surface option-text">2</span>
+          </button>
+
+          <!-- Option 3 -->
+          <button class="tone-btn pop-up bg-surface-container-lowest h-16 rounded-2xl flex flex-col items-center justify-center hover:bg-tertiary-fixed-dim/10 transition-colors border-2 border-transparent hover:border-tertiary-fixed-dim group relative overflow-hidden active:translate-y-1 shadow-sm" data-index="2">
+            <div class="absolute top-2 right-2 w-2 h-2 bg-tertiary-fixed-dim/20 rounded-full group-hover:bg-tertiary-fixed-dim transition-colors"></div>
+            <span class="font-headline text-2xl font-bold text-on-surface option-text">3</span>
+          </button>
+
+          <!-- Option 4 -->
+          <button class="tone-btn pop-up bg-surface-container-lowest h-16 rounded-2xl flex flex-col items-center justify-center hover:bg-tertiary/10 transition-colors border-2 border-transparent hover:border-tertiary group relative overflow-hidden active:translate-y-1 shadow-sm" data-index="3">
+            <div class="absolute top-2 right-2 w-2 h-2 bg-tertiary/20 rounded-full group-hover:bg-tertiary transition-colors"></div>
+            <span class="font-headline text-2xl font-bold text-on-surface option-text">4</span>
+          </button>
+
         </div>
 
-        <button id="play-btn">LISTEN</button>
-        <div id="feedback"></div>
+        <!-- FAB Container for Correct/Incorrect Icons -->
+        <div id="fab-container" class="fixed bottom-12 right-6 z-40 hidden"></div>
+
       </div>
 
     </div>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

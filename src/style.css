@@ -1,133 +1,7 @@
-:root {
-  /* New Color Palette */
-  --bg-color: #f3fcf0;
-  --tone-1-red: #b7102a;    /* Primary */
-  --tone-2-yellow: #ffba27; /* Tertiary Fixed Dim */
-  --tone-3-blue: #485f84;   /* Secondary */
-  --tone-4-green: #7a5500;  /* Tertiary */
-  --black-accent: #161d16;  /* On Surface */
-  --active-tone-color: #161d16;
-}
-
-body {
-  font-family: 'Space Grotesk', 'League Spartan', sans-serif;
-  background-color: var(--bg-color);
-  color: var(--black-accent);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  margin: 0;
-}
-
-#app {
-  width: 100%;
-  max-width: 600px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* 1. THE DISPLAY CARD */
-.card {
-  background: transparent;
-  padding: 20px;
-  text-align: center;
-  margin-bottom: 40px;
-  animation: slide-in-left 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-  min-height: 160px; /* Fixed height to prevent jumping */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-/* Hanzi Character */
-#pinyin-display div:first-child {
-  font-family: 'Noto Sans SC', sans-serif;
-  font-size: 6rem !important;
-  font-weight: 800;
-  color: var(--black-accent);
-  line-height: 1.2;
-}
-
-/* Pinyin Base (below Hanzi) */
-#pinyin-display div:last-child {
-  font-size: 2rem !important;
-  color: #5b403f; /* on-surface-variant */
-  font-weight: 300;
-  margin-top: 15px;
-}
-
-/* 3. THE LISTEN BUTTON */
-#play-btn {
-  background-color: var(--tone-1-red);
-  color: #ffffff;
-  border: 2px solid var(--black-accent);
-  border-radius: 0;
-  padding: 20px 48px;
-  font-size: 0.875rem;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-  margin: 35px auto;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: transform 0.1s;
-}
-
-#play-btn:hover {
-  transform: translate(8px, -8px);
-}
-
-/* Feedback Text */
-#feedback {
-  margin-top: 20px;
-  font-weight: bold;
-  height: 20px;
-  text-align: center;
-  width: 100%;
-}
-
-/* 2. THE GEOMETRIC BUTTONS */
-.options {
-  display: flex;
-  gap: 15px;
-  justify-content: center;
-  width: 100%;
-}
-
-.tone-btn {
-  border: 2px solid var(--black-accent);
-  border-radius: 50%;
-  width: 75px;
-  height: 75px;
-  color: white;
-  font-size: 1.2rem;
-  font-weight: bold;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: none;
-  transition: transform 0.1s ease;
-}
-
-/* Instead of data-tone="1" styling, we use data-index to assign colors generically */
-.tone-btn[data-index="0"] { background-color: var(--tone-1-red); }
-.tone-btn[data-index="1"] { background-color: var(--tone-2-yellow); color: var(--black-accent); }
-.tone-btn[data-index="2"] { background-color: var(--tone-3-blue); }
-.tone-btn[data-index="3"] { background-color: var(--tone-4-green); }
-
-.tone-btn:hover {
-  transform: translate(8px, -8px);
-}
-
-.tone-btn:active {
-  transform: translate(0px, 0px);
-}
+/*
+  Since we migrated to Tailwind CSS, almost all custom CSS has been removed.
+  We only keep standard CSS properties for custom animations that Tailwind doesn't have by default.
+*/
 
 @keyframes slide-in-bottom {
   0% { transform: translateY(50px); opacity: 0; }
@@ -139,102 +13,18 @@ body {
   100% { transform: translateX(0); opacity: 1; }
 }
 
-@keyframes flash-bg {
-  0% { background-color: var(--active-tone-color); }
-  100% { background-color: var(--bg-color); }
-}
-
-.flash-correct {
-  animation: flash-bg 0.5s ease-out;
-}
-
-/* --- ANIMATION FIXES --- */
+/* Base Pop-up animations for buttons */
 .pop-up {
   animation: slide-in-bottom 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
 }
 
+/* Staggered delays for the options grid */
 .tone-btn:nth-child(1) { animation-delay: 0.05s; }
 .tone-btn:nth-child(2) { animation-delay: 0.1s; }
 .tone-btn:nth-child(3) { animation-delay: 0.15s; }
 .tone-btn:nth-child(4) { animation-delay: 0.2s; }
 
-.hidden {
-  display: none !important;
-}
-
-/* 1. Main Title */
-.main-title {
-  font-size: 3.5rem;
-  font-weight: 800;
-  line-height: 0.9;
-  text-align: center;
-  margin-bottom: 50px;
-  letter-spacing: -2px;
-  text-transform: uppercase;
-  color: var(--tone-1-red);
-}
-
-/* 2. The Menu Button Stack */
-.menu-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  width: 100%;
-  max-width: 320px;
-}
-
-/* 3. The Bauhaus Menu Blocks */
-.menu-block {
-  border: 2px solid var(--black-accent);
-  padding: 25px 20px;
-  font-size: 1.2rem;
-  font-weight: 800;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: white;
-  text-align: left;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  transition: transform 0.1s;
-}
-
-.menu-block:hover {
-  transform: translate(8px, -8px);
-}
-
-.menu-block:active {
-  transform: translate(0px, 0px);
-}
-
-/* Block Colors */
-.red-block { background-color: var(--tone-1-red); }
-.yellow-block { background-color: var(--tone-2-yellow); color: var(--black-accent); }
-.blue-block { background-color: var(--tone-3-blue); }
-
-/* Disabled State */
-.menu-block.disabled {
-  background-color: #dce5d9;
-  color: #5b403f;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* 4. The Back Button (Top Right) */
-#back-to-menu-btn {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: transparent;
-  border: 2px solid var(--black-accent);
-  font-weight: 800;
-  padding: 8px 15px;
-  cursor: pointer;
-  text-transform: uppercase;
-}
-
-#back-to-menu-btn:hover {
-  background-color: var(--black-accent);
-  color: white;
+/* Fixed height constraint for the Hanzi display card to stop layout shifts */
+.card {
+  animation: slide-in-left 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }

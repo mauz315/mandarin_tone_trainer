@@ -61,7 +61,7 @@ function setupMenu() {
     mainMenu.classList.remove('hidden');
 
     // Reset the game UI
-    document.querySelector('.options').style.display = 'flex';
+    document.querySelector('.options').style.display = 'grid';
     document.getElementById('play-btn').style.transform = "scale(1)";
     document.getElementById('feedback').innerText = "";
   });
@@ -112,7 +112,8 @@ function playAudio() {
 function setupButtons() {
   document.querySelectorAll('.tone-btn').forEach((btn, index) => {
     btn.addEventListener('click', (e) => {
-      const userGuess = e.target.innerText;
+      // Get text from the nested span, not the whole button text which might include empty space
+      const userGuess = btn.querySelector('.option-text').innerText;
       let isCorrect = false;
 
       // Check correctness based on mode
@@ -125,35 +126,56 @@ function setupButtons() {
       }
 
       if (isCorrect) {
-          const toneColors = ['#b7102a', '#ffba27', '#485f84', '#7a5500']; 
-          // Use index to pick a color so it flashes different colors for the 4 buttons
-          document.body.style.setProperty('--active-tone-color', toneColors[index]);
-
-          document.body.classList.add('flash-correct');
+          // Tailwind Color Classes to add dynamically instead of CSS custom properties
+          const flashColors = ['bg-secondary', 'bg-primary', 'bg-tertiary-fixed-dim', 'bg-tertiary'];
+          
+          const dot = btn.querySelector('div');
+          dot.classList.add(flashColors[index]);
 
           setTimeout(() => {
-              document.body.classList.remove('flash-correct');
+              dot.classList.remove(flashColors[index]);
           }, 500);
 
         document.getElementById('feedback').innerText = "CORRECT";
-        document.getElementById('feedback').style.color = "green"; 
+        document.getElementById('feedback').className = "mb-2 font-label tracking-widest font-bold uppercase text-sm h-6 text-tertiary text-center";
 
-        // Hide options & Transform listen button
+        // Hide options 
         document.querySelector('.options').style.display = 'none';
-        const blueBtn = document.getElementById('play-btn');
-        blueBtn.style.transition = "all 0.5s ease";
-        blueBtn.style.transform = "scale(1.2)";
+        
+        // --- NEW: Inject the Blue Checkmark FAB ---
+        const fabContainer = document.getElementById('fab-container');
+        fabContainer.innerHTML = `
+          <button class="w-14 h-14 rounded-full bg-secondary text-on-secondary shadow-xl flex items-center justify-center animate-[pop-up_0.3s_ease-out]">
+            <span class="material-symbols-outlined text-2xl">check</span>
+          </button>
+        `;
+        fabContainer.classList.remove('hidden');
 
-        // Show Correct Hanzi + Full Pinyin
+        // Show Correct Hanzi + Full Pinyin (Tailwind Classes)
         document.getElementById('pinyin-display').innerHTML = `
-            <div style="font-size: 4rem;">${currentItem.hanzi}</div>
-            <div style="font-size: 2rem; color: #161d16;">${currentItem.pinyin_correct}</div>
+            <div class="font-headline text-8xl font-black text-on-surface tracking-tighter mb-4">${currentItem.hanzi}</div>
+            <div class="font-body text-on-surface-variant text-3xl font-medium">${currentItem.pinyin_correct}</div>
         `;
 
         setTimeout(nextQuestion, 1500); 
       } else {
         document.getElementById('feedback').innerText = "TRY AGAIN";
-        document.getElementById('feedback').style.color = "#b7102a"; 
+        document.getElementById('feedback').className = "mb-2 font-label tracking-widest font-bold uppercase text-sm h-6 text-tertiary-fixed-dim text-center"; 
+        
+        // --- NEW: Inject the Yellow X FAB (Temporary) ---
+        const fabContainer = document.getElementById('fab-container');
+        fabContainer.innerHTML = `
+          <button class="w-14 h-14 rounded-full bg-tertiary-fixed-dim text-on-tertiary-fixed shadow-xl flex items-center justify-center animate-[pop-up_0.3s_ease-out]">
+            <span class="material-symbols-outlined text-2xl">close</span>
+          </button>
+        `;
+        fabContainer.classList.remove('hidden');
+        
+        // Hide the error FAB after 1 second so they can keep guessing
+        setTimeout(() => {
+            fabContainer.classList.add('hidden');
+        }, 1000);
+
         playAudio();
       }
     });
@@ -165,42 +187,47 @@ function nextQuestion() {
   if (words.length === 0) return;
 
   // Reset UI state
-  document.querySelector('.options').style.display = 'flex'; 
+  document.querySelector('.options').style.display = 'grid'; 
   const playBtn = document.getElementById('play-btn');
   playBtn.style.transform = "scale(1)"; 
+  
+  // NEW: Hide the FAB
+  document.getElementById('fab-container').classList.add('hidden');
 
   currentItem = words[Math.floor(Math.random() * words.length)];
   const display = document.getElementById('pinyin-display');
   const buttons = document.querySelectorAll('.tone-btn');
 
-  // Format UI based on Game Mode
+  // Format UI based on Game Mode using Tailwind Typography
   if (currentGameMode === 'tones') {
       display.innerHTML = `
-        <div style="font-size: 3rem; line-height: 1; color: var(--black-accent);">${currentItem.hanzi}</div>
-        <div style="font-size: 1.5rem; color: #5b403f; font-weight: normal;">${currentItem.pinyin_base}</div>
+        <div class="font-headline text-8xl font-black text-on-surface tracking-tighter mb-4">${currentItem.hanzi}</div>
+        <div class="font-body text-on-surface-variant text-3xl font-medium">${currentItem.pinyin_base}</div>
       `;
-      buttons.forEach((btn, i) => btn.innerText = currentItem.tone_options[i]);
+      buttons.forEach((btn, i) => {
+          btn.querySelector('.option-text').innerText = currentItem.tone_options[i]
+      });
 
   } else if (currentGameMode === 'initials') {
       display.innerHTML = `
-        <div style="font-size: 3rem; line-height: 1; color: var(--black-accent);">${currentItem.hanzi}</div>
-        <div style="font-size: 1.5rem; color: #5b403f; font-weight: normal; display: flex; align-items: flex-end; justify-content: center; gap: 2px;">
-          <span style="display:inline-block; width: 1.5rem; border-bottom: 3px solid currentColor; margin-bottom: 0.3rem;"></span>${currentItem.ending_correct}
+        <div class="font-headline text-8xl font-black text-on-surface tracking-tighter mb-4">${currentItem.hanzi}</div>
+        <div class="font-body text-on-surface-variant text-3xl font-medium flex items-end justify-center gap-1">
+          <span class="inline-block w-8 border-b-4 border-on-surface-variant mb-1"></span>${currentItem.ending_correct}
         </div>
       `;
       buttons.forEach((btn, i) => {
-          btn.innerText = currentItem.initial_options[i] === "" ? "∅" : currentItem.initial_options[i];
+          btn.querySelector('.option-text').innerText = currentItem.initial_options[i] === "" ? "∅" : currentItem.initial_options[i];
       });
 
   } else if (currentGameMode === 'endings') {
       display.innerHTML = `
-        <div style="font-size: 3rem; line-height: 1; color: var(--black-accent);">${currentItem.hanzi}</div>
-        <div style="font-size: 1.5rem; color: #5b403f; font-weight: normal; display: flex; align-items: flex-end; justify-content: center; gap: 2px;">
-          ${currentItem.initial}<span style="display:inline-block; width: 2rem; border-bottom: 3px solid currentColor; margin-bottom: 0.3rem;"></span>
+        <div class="font-headline text-8xl font-black text-on-surface tracking-tighter mb-4">${currentItem.hanzi}</div>
+        <div class="font-body text-on-surface-variant text-3xl font-medium flex items-end justify-center gap-1">
+          ${currentItem.initial}<span class="inline-block w-12 border-b-4 border-on-surface-variant mb-1"></span>
         </div>
       `;
       buttons.forEach((btn, i) => {
-          btn.innerText = removeTones(currentItem.ending_options[i]);
+          btn.querySelector('.option-text').innerText = removeTones(currentItem.ending_options[i]);
       });
   }
 
@@ -208,15 +235,9 @@ function nextQuestion() {
   buttons.forEach(btn => void btn.offsetWidth);
 
   document.getElementById('feedback').innerText = "";
+  document.getElementById('feedback').className = "mb-2 font-label tracking-widest font-bold uppercase text-sm h-6";
   playAudio();
 }
-
-const toneColors = {
-  1: '#b7102a', 
-  2: '#ffba27', 
-  3: '#485f84', 
-  4: '#7a5500'
-};
 
 // Initialize the app
 setupButtons();
