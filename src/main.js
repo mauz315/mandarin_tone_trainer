@@ -4,24 +4,61 @@ let currentItem = null;
 let audioInstance = null;
 let currentGameMode = 'tones'; // Options: 'tones', 'initials', 'endings'
 
+function removeTones(str) {
+  const toneMap = {
+    'ā':'a', 'á':'a', 'ǎ':'a', 'à':'a',
+    'ē':'e', 'é':'e', 'ě':'e', 'è':'e',
+    'ī':'i', 'í':'i', 'ǐ':'i', 'ì':'i',
+    'ō':'o', 'ó':'o', 'ǒ':'o', 'ò':'o',
+    'ū':'u', 'ú':'u', 'ǔ':'u', 'ù':'u',
+    'ǖ':'ü', 'ǘ':'ü', 'ǚ':'ü', 'ǜ':'ü'
+  };
+  return str.replace(/[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/g, match => toneMap[match]);
+}
+
 function setupMenu() {
   const menuScreen = document.getElementById('menu-screen');
   const gameScreen = document.getElementById('game-screen');
   
+  // Menu Wrappers
+  const mainMenu = document.getElementById('main-menu');
+  const submenu = document.getElementById('submenu');
+  
+  // Main Menu Buttons
   const startTonesBtn = document.getElementById('start-tones-btn');
+  const openSubmenuBtn = document.getElementById('open-submenu-btn');
+  const closeSubmenuBtn = document.getElementById('close-submenu-btn');
+  
+  // Submenu Game Buttons
   const startInitialsBtn = document.getElementById('start-initials-btn');
   const startEndingsBtn = document.getElementById('start-endings-btn');
+  
   const backBtn = document.getElementById('back-to-menu-btn');
 
-  // Menu Click Handlers
+  // --- Submenu Navigation ---
+  openSubmenuBtn.addEventListener('click', () => {
+    mainMenu.classList.add('hidden');
+    submenu.classList.remove('hidden');
+  });
+  
+  closeSubmenuBtn.addEventListener('click', () => {
+    submenu.classList.add('hidden');
+    mainMenu.classList.remove('hidden');
+  });
+
+  // --- Start Game Handlers ---
   startTonesBtn.addEventListener('click', () => startGame('tones'));
   startInitialsBtn.addEventListener('click', () => startGame('initials'));
   startEndingsBtn.addEventListener('click', () => startGame('endings'));
 
-  // Return to Menu
+  // --- Return to Menu (from Game) ---
   backBtn.addEventListener('click', () => {
     gameScreen.classList.add('hidden');
     menuScreen.classList.remove('hidden');
+
+    // Always reset to the main menu, not the submenu
+    submenu.classList.add('hidden');
+    mainMenu.classList.remove('hidden');
 
     // Reset the game UI
     document.querySelector('.options').style.display = 'flex';
@@ -83,7 +120,7 @@ function setupButtons() {
           isCorrect = true;
       } else if (currentGameMode === 'initials' && userGuess === currentItem.initial) {
           isCorrect = true;
-      } else if (currentGameMode === 'endings' && userGuess === currentItem.ending_correct) {
+      } else if (currentGameMode === 'endings' && userGuess === currentItem.ending_base) {
           isCorrect = true;
       }
 
@@ -147,20 +184,24 @@ function nextQuestion() {
   } else if (currentGameMode === 'initials') {
       display.innerHTML = `
         <div style="font-size: 3rem; line-height: 1; color: var(--black-accent);">${currentItem.hanzi}</div>
-        <div style="font-size: 1.5rem; color: #5b403f; font-weight: normal;">___${currentItem.ending_correct}</div>
+        <div style="font-size: 1.5rem; color: #5b403f; font-weight: normal; display: flex; align-items: flex-end; justify-content: center; gap: 2px;">
+          <span style="display:inline-block; width: 1.5rem; border-bottom: 3px solid currentColor; margin-bottom: 0.3rem;"></span>${currentItem.ending_correct}
+        </div>
       `;
       buttons.forEach((btn, i) => {
-          // If a word has no initial (like 'an' or 'ou'), it shows empty strings as options
-          // Let's replace empty strings with a dash or keep it blank for clarity
           btn.innerText = currentItem.initial_options[i] === "" ? "∅" : currentItem.initial_options[i];
       });
 
   } else if (currentGameMode === 'endings') {
       display.innerHTML = `
         <div style="font-size: 3rem; line-height: 1; color: var(--black-accent);">${currentItem.hanzi}</div>
-        <div style="font-size: 1.5rem; color: #5b403f; font-weight: normal;">${currentItem.initial}___</div>
+        <div style="font-size: 1.5rem; color: #5b403f; font-weight: normal; display: flex; align-items: flex-end; justify-content: center; gap: 2px;">
+          ${currentItem.initial}<span style="display:inline-block; width: 2rem; border-bottom: 3px solid currentColor; margin-bottom: 0.3rem;"></span>
+        </div>
       `;
-      buttons.forEach((btn, i) => btn.innerText = currentItem.ending_options[i]);
+      buttons.forEach((btn, i) => {
+          btn.innerText = removeTones(currentItem.ending_options[i]);
+      });
   }
 
   // Force reflow

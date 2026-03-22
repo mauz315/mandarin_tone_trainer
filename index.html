@@ -15,17 +15,35 @@
       <div id="menu-screen">
         <h1 class="main-title">MANDARIN<br>CONSTRUCTOR</h1>
 
-        <div class="menu-stack">
+        <!-- Main Menu -->
+        <div id="main-menu" class="menu-stack">
           <button id="start-tones-btn" class="menu-block red-block">
             <span class="icon">■</span> TONE TRAINER
           </button>
 
-          <button id="start-initials-btn" class="menu-block yellow-block">
-            <span class="icon">▲</span> INITIALS TRAINER
+          <!-- Opens the submenu -->
+          <button id="open-submenu-btn" class="menu-block yellow-block">
+            <span class="icon">▲</span> INITIALS & ENDINGS
           </button>
 
-          <button id="start-endings-btn" class="menu-block blue-block">
-            <span class="icon">●</span> ENDINGS TRAINER
+          <!-- Future game -->
+          <button id="start-words-btn" class="menu-block blue-block disabled">
+            <span class="icon">●</span> WORD TRAINER
+          </button>
+        </div>
+
+        <!-- Submenu (Hidden by default) -->
+        <div id="submenu" class="menu-stack hidden">
+          <button id="close-submenu-btn" class="menu-block" style="background-color: #dce5d9; color: var(--black-accent);">
+            ✖ BACK
+          </button>
+
+          <button id="start-initials-btn" class="menu-block yellow-block">
+            INITIALS
+          </button>
+
+          <button id="start-endings-btn" class="menu-block yellow-block">
+            ENDINGS
           </button>
         </div>
       </div>
