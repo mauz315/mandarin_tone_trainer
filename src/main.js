@@ -112,37 +112,25 @@ function playAudio() {
 function setupButtons() {
   document.querySelectorAll('.tone-btn').forEach((btn, index) => {
     btn.addEventListener('click', (e) => {
-      // Get text from the nested span, not the whole button text which might include empty space
       const userGuess = btn.querySelector('.option-text').innerText;
       let isCorrect = false;
 
       // Check correctness based on mode
       if (currentGameMode === 'tones' && userGuess === currentItem.pinyin_correct) {
           isCorrect = true;
-      } else if (currentGameMode === 'initials' && userGuess === currentItem.initial) {
+      } else if (currentGameMode === 'initials' && (userGuess === currentItem.initial || (userGuess === '∅' && currentItem.initial === ''))) {
           isCorrect = true;
       } else if (currentGameMode === 'endings' && userGuess === currentItem.ending_base) {
           isCorrect = true;
       }
 
       if (isCorrect) {
-          // Tailwind Color Classes to add dynamically instead of CSS custom properties
-          const flashColors = ['bg-secondary', 'bg-primary', 'bg-tertiary-fixed-dim', 'bg-tertiary'];
-          
-          const dot = btn.querySelector('div');
-          dot.classList.add(flashColors[index]);
-
-          setTimeout(() => {
-              dot.classList.remove(flashColors[index]);
-          }, 500);
-
         document.getElementById('feedback').innerText = "CORRECT";
         document.getElementById('feedback').className = "mb-2 font-label tracking-widest font-bold uppercase text-sm h-6 text-tertiary text-center";
 
         // Hide options 
         document.querySelector('.options').style.display = 'none';
         
-        // --- NEW: Inject the Blue Checkmark FAB ---
         const fabContainer = document.getElementById('fab-container');
         fabContainer.innerHTML = `
           <button class="w-14 h-14 rounded-full bg-secondary text-on-secondary shadow-xl flex items-center justify-center animate-[pop-up_0.3s_ease-out]">
@@ -151,18 +139,40 @@ function setupButtons() {
         `;
         fabContainer.classList.remove('hidden');
 
-        // Show Correct Hanzi + Full Pinyin (Tailwind Classes)
         document.getElementById('pinyin-display').innerHTML = `
-            <div class="font-headline text-8xl font-black text-on-surface tracking-tighter mb-4">${currentItem.hanzi}</div>
-            <div class="font-body text-on-surface-variant text-3xl font-medium">${currentItem.pinyin_correct}</div>
+            <div class="font-headline text-6xl md:text-8xl font-black text-on-surface tracking-tighter mb-4">${currentItem.hanzi}</div>
+            <div class="font-body text-on-surface-variant text-xl md:text-3xl font-medium">${currentItem.pinyin_correct}</div>
         `;
+        
+        const explanationBox = document.getElementById('explanation-box');
+        let explanationContent = '';
 
-        setTimeout(nextQuestion, 1500); 
+        if (currentGameMode === 'initials') {
+            explanationContent = `
+                <p class="text-sm text-left">
+                    <strong class="font-bold text-on-surface">${currentItem.initial || '∅'}:</strong> 
+                    ${currentItem.initial_explanation}
+                </p>
+            `;
+        } else if (currentGameMode === 'endings') {
+            explanationContent = `
+                <p class="text-sm text-left">
+                    <strong class="font-bold text-on-surface">${currentItem.ending_base}:</strong> 
+                    ${currentItem.final_explanation}
+                </p>
+            `;
+        }
+
+        if (explanationContent) {
+            explanationBox.innerHTML = explanationContent;
+            explanationBox.classList.remove('hidden');
+        }
+
+        setTimeout(nextQuestion, 2500); 
       } else {
         document.getElementById('feedback').innerText = "TRY AGAIN";
         document.getElementById('feedback').className = "mb-2 font-label tracking-widest font-bold uppercase text-sm h-6 text-tertiary-fixed-dim text-center"; 
         
-        // --- NEW: Inject the Yellow X FAB (Temporary) ---
         const fabContainer = document.getElementById('fab-container');
         fabContainer.innerHTML = `
           <button class="w-14 h-14 rounded-full bg-tertiary-fixed-dim text-on-tertiary-fixed shadow-xl flex items-center justify-center animate-[pop-up_0.3s_ease-out]">
@@ -171,7 +181,6 @@ function setupButtons() {
         `;
         fabContainer.classList.remove('hidden');
         
-        // Hide the error FAB after 1 second so they can keep guessing
         setTimeout(() => {
             fabContainer.classList.add('hidden');
         }, 1000);
@@ -191,8 +200,8 @@ function nextQuestion() {
   const playBtn = document.getElementById('play-btn');
   playBtn.style.transform = "scale(1)"; 
   
-  // NEW: Hide the FAB
   document.getElementById('fab-container').classList.add('hidden');
+  document.getElementById('explanation-box').classList.add('hidden');
 
   currentItem = words[Math.floor(Math.random() * words.length)];
   const display = document.getElementById('pinyin-display');
@@ -201,8 +210,8 @@ function nextQuestion() {
   // Format UI based on Game Mode using Tailwind Typography
   if (currentGameMode === 'tones') {
       display.innerHTML = `
-        <div class="font-headline text-8xl font-black text-on-surface tracking-tighter mb-4">${currentItem.hanzi}</div>
-        <div class="font-body text-on-surface-variant text-3xl font-medium">${currentItem.pinyin_base}</div>
+        <div class="font-headline text-6xl md:text-8xl font-black text-on-surface tracking-tighter mb-4">${currentItem.hanzi}</div>
+        <div class="font-body text-on-surface-variant text-xl md:text-3xl font-medium">${currentItem.pinyin_base}</div>
       `;
       buttons.forEach((btn, i) => {
           btn.querySelector('.option-text').innerText = currentItem.tone_options[i]
@@ -210,9 +219,9 @@ function nextQuestion() {
 
   } else if (currentGameMode === 'initials') {
       display.innerHTML = `
-        <div class="font-headline text-8xl font-black text-on-surface tracking-tighter mb-4">${currentItem.hanzi}</div>
-        <div class="font-body text-on-surface-variant text-3xl font-medium flex items-end justify-center gap-1">
-          <span class="inline-block w-8 border-b-4 border-on-surface-variant mb-1"></span>${currentItem.ending_correct}
+        <div class="font-headline text-6xl md:text-8xl font-black text-on-surface tracking-tighter mb-4">${currentItem.hanzi}</div>
+        <div class="font-body text-on-surface-variant text-xl md:text-3xl font-medium flex items-end justify-center gap-1">
+          <span class="inline-block w-6 md:w-8 border-b-4 border-on-surface-variant mb-1"></span>${currentItem.ending_correct}
         </div>
       `;
       buttons.forEach((btn, i) => {
@@ -221,9 +230,9 @@ function nextQuestion() {
 
   } else if (currentGameMode === 'endings') {
       display.innerHTML = `
-        <div class="font-headline text-8xl font-black text-on-surface tracking-tighter mb-4">${currentItem.hanzi}</div>
-        <div class="font-body text-on-surface-variant text-3xl font-medium flex items-end justify-center gap-1">
-          ${currentItem.initial}<span class="inline-block w-12 border-b-4 border-on-surface-variant mb-1"></span>
+        <div class="font-headline text-6xl md:text-8xl font-black text-on-surface tracking-tighter mb-4">${currentItem.hanzi}</div>
+        <div class="font-body text-on-surface-variant text-xl md:text-3xl font-medium flex items-end justify-center gap-1">
+          ${currentItem.initial}<span class="inline-block w-8 md:w-12 border-b-4 border-on-surface-variant mb-1"></span>
         </div>
       `;
       buttons.forEach((btn, i) => {
