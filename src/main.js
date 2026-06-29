@@ -20,22 +20,18 @@ function setupMenu() {
   const menuScreen = document.getElementById('menu-screen');
   const gameScreen = document.getElementById('game-screen');
   
-  // Menu Wrappers
   const mainMenu = document.getElementById('main-menu');
   const submenu = document.getElementById('submenu');
   
-  // Main Menu Buttons
   const startTonesBtn = document.getElementById('start-tones-btn');
   const openSubmenuBtn = document.getElementById('open-submenu-btn');
   const closeSubmenuBtn = document.getElementById('close-submenu-btn');
   
-  // Submenu Game Buttons
   const startInitialsBtn = document.getElementById('start-initials-btn');
   const startEndingsBtn = document.getElementById('start-endings-btn');
   
   const backBtn = document.getElementById('back-to-menu-btn');
 
-  // --- Submenu Navigation ---
   openSubmenuBtn.addEventListener('click', () => {
     mainMenu.classList.add('hidden');
     submenu.classList.remove('hidden');
@@ -46,21 +42,15 @@ function setupMenu() {
     mainMenu.classList.remove('hidden');
   });
 
-  // --- Start Game Handlers ---
   startTonesBtn.addEventListener('click', () => startGame('tones'));
   startInitialsBtn.addEventListener('click', () => startGame('initials'));
   startEndingsBtn.addEventListener('click', () => startGame('endings'));
 
-  // --- Return to Menu (from Game) ---
   backBtn.addEventListener('click', () => {
     gameScreen.classList.add('hidden');
     menuScreen.classList.remove('hidden');
-
-    // Always reset to the main menu, not the submenu
     submenu.classList.add('hidden');
     mainMenu.classList.remove('hidden');
-
-    // Reset the game UI
     document.querySelector('.options').style.display = 'grid';
     document.getElementById('play-btn').style.transform = "scale(1)";
     document.getElementById('feedback').innerText = "";
@@ -78,19 +68,11 @@ async function init() {
   try {
     const response = await fetch('./single_words.json');
     if (!response.ok) throw new Error("JSON not found in public folder");
-
     words = await response.json();
     console.log("App Ready. Vocabulary loaded:", words.length);
-    
-    // We don't automatically call nextQuestion() anymore on init
-    // nextQuestion() will be called when they pick a game mode.
-    
     setTimeout(() => {
-      document.querySelectorAll('.tone-btn').forEach(btn => {
-        btn.classList.remove('pop-up');
-      });
+      document.querySelectorAll('.tone-btn').forEach(btn => btn.classList.remove('pop-up'));
     }, 1000);
-
   } catch (err) {
     console.error("Initialization error:", err);
   }
@@ -98,12 +80,10 @@ async function init() {
 
 function playAudio() {
   if (!currentItem) return;
-
   if (audioInstance) {
     audioInstance.pause();
     audioInstance.currentTime = 0;
   }
-
   audioInstance = new Audio(`./${currentItem.audio}`);
   audioInstance.play().catch(e => console.error("Audio failed:", e));
 }
@@ -115,7 +95,6 @@ function setupButtons() {
       const userGuess = btn.querySelector('.option-text').innerText;
       let isCorrect = false;
 
-      // Check correctness based on mode
       if (currentGameMode === 'tones' && userGuess === currentItem.pinyin_correct) {
           isCorrect = true;
       } else if (currentGameMode === 'initials' && (userGuess === currentItem.initial || (userGuess === '∅' && currentItem.initial === ''))) {
@@ -127,8 +106,6 @@ function setupButtons() {
       if (isCorrect) {
         document.getElementById('feedback').innerText = "CORRECT";
         document.getElementById('feedback').className = "mb-2 font-label tracking-widest font-bold uppercase text-sm h-6 text-tertiary text-center";
-
-        // Hide options 
         document.querySelector('.options').style.display = 'none';
         
         const fabContainer = document.getElementById('fab-container');
@@ -147,28 +124,30 @@ function setupButtons() {
         const explanationBox = document.getElementById('explanation-box');
         let explanationContent = '';
 
-        if (currentGameMode === 'initials') {
-            explanationContent = `
-                <p class="text-sm text-left">
-                    <strong class="font-bold text-on-surface">${currentItem.initial || '∅'}:</strong> 
-                    ${currentItem.initial_explanation}
-                </p>
-            `;
-        } else if (currentGameMode === 'endings') {
-            explanationContent = `
-                <p class="text-sm text-left">
-                    <strong class="font-bold text-on-surface">${currentItem.ending_base}:</strong> 
-                    ${currentItem.final_explanation}
-                </p>
-            `;
-        }
+        if (currentGameMode === 'initials' || currentGameMode === 'endings') {
+            const term = (currentGameMode === 'initials') ? (currentItem.initial || '∅') : currentItem.ending_base;
+            const explanation = (currentGameMode === 'initials') ? currentItem.initial_explanation : currentItem.final_explanation;
 
-        if (explanationContent) {
+            explanationContent = `
+                <div class="relative p-4 text-center">
+                    <p class="text-sm text-left">
+                        <strong class="font-bold text-on-surface">${term}:</strong> 
+                        ${explanation}
+                    </p>
+                    <button id="next-question-btn" class="mt-4 w-12 h-12 rounded-full bg-primary-container text-on-primary-container shadow-lg flex items-center justify-center mx-auto hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
+                </div>
+            `;
             explanationBox.innerHTML = explanationContent;
             explanationBox.classList.remove('hidden');
-        }
 
-        setTimeout(nextQuestion, 2500); 
+            const nextBtn = document.getElementById('next-question-btn');
+            nextBtn.addEventListener('click', nextQuestion, { once: true });
+
+        } else {
+            setTimeout(nextQuestion, 1500);
+        }
       } else {
         document.getElementById('feedback').innerText = "TRY AGAIN";
         document.getElementById('feedback').className = "mb-2 font-label tracking-widest font-bold uppercase text-sm h-6 text-tertiary-fixed-dim text-center"; 
@@ -193,9 +172,6 @@ function setupButtons() {
 }
 
 function nextQuestion() {
-  if (words.length === 0) return;
-
-  // Reset UI state
   document.querySelector('.options').style.display = 'grid'; 
   const playBtn = document.getElementById('play-btn');
   playBtn.style.transform = "scale(1)"; 
@@ -207,7 +183,6 @@ function nextQuestion() {
   const display = document.getElementById('pinyin-display');
   const buttons = document.querySelectorAll('.tone-btn');
 
-  // Format UI based on Game Mode using Tailwind Typography
   if (currentGameMode === 'tones') {
       display.innerHTML = `
         <div class="font-headline text-6xl md:text-8xl font-black text-on-surface tracking-tighter mb-4">${currentItem.hanzi}</div>
@@ -240,7 +215,6 @@ function nextQuestion() {
       });
   }
 
-  // Force reflow
   buttons.forEach(btn => void btn.offsetWidth);
 
   document.getElementById('feedback').innerText = "";
