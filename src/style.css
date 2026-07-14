@@ -28,3 +28,23 @@
 .card {
   animation: slide-in-left 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
+
+/* Custom styles for the Audio Library Scroller */
+.scroll-snap-y-mandatory {
+  scroll-snap-type: y mandatory;
+}
+
+.scroll-snap-align-center {
+  scroll-snap-align: center;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}

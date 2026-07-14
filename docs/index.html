@@ -95,20 +95,22 @@
       .kinetic-blur {
         filter: blur(40px);
       }
+      .scroll-snap-y-mandatory { scroll-snap-type: y mandatory; }
+      .scroll-snap-align-center { scroll-snap-align: center; }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
-    <script type="module" crossorigin src="/mandarin_tone_trainer/assets/index-BOi3-Pwe.js"></script>
-    <link rel="stylesheet" crossorigin href="/mandarin_tone_trainer/assets/index-BctJTNp3.css">
+    <script type="module" crossorigin src="/mandarin_tone_trainer/assets/index-CTCtnRJh.js"></script>
+    <link rel="stylesheet" crossorigin href="/mandarin_tone_trainer/assets/index-Cdsb99ar.css">
   </head>
   <body class="bg-surface font-body text-on-surface h-[100dvh] selection:bg-secondary-container selection:text-on-secondary-container overflow-hidden">
 
-    <!-- Kinetic Background Shapes -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
       <div class="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-secondary/5 kinetic-blur"></div>
       <div class="absolute top-1/2 -left-32 w-80 h-80 rounded-full bg-primary/5 kinetic-blur"></div>
       <div class="absolute bottom-24 right-1/4 w-64 h-64 rounded-xl bg-tertiary/10 rotate-12 kinetic-blur"></div>
     </div>
 
-    <!-- Top Navigation Anchor (Centered Title Only) -->
     <header class="bg-[#f3fcf0] dark:bg-[#161d16] flex justify-center items-center w-full px-6 py-4 fixed top-0 z-50">
       <h1 class="font-headline font-bold tracking-tighter text-xl font-black text-primary uppercase">MANDARIN CONSTRUCTOR</h1>
     </header>
@@ -123,10 +125,7 @@
           </h2>
         </section>
 
-        <!-- Main Menu -->
         <div id="main-menu" class="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4">
-
-          <!-- Tone Trainer Card -->
           <button id="start-tones-btn" class="md:col-span-12 lg:col-span-8 bg-surface-container-low rounded-xl p-4 md:p-6 flex flex-col justify-between min-h-[100px] md:min-h-[140px] relative overflow-hidden group hover:bg-surface-container transition-colors duration-300 text-left w-full">
             <div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[100px] z-0"></div>
             <div class="relative z-10 flex gap-4 items-center">
@@ -140,7 +139,6 @@
             </div>
           </button>
 
-          <!-- Initials & Endings (Opens Submenu) -->
           <button id="open-submenu-btn" class="md:col-span-6 lg:col-span-4 bg-surface-container-low rounded-xl p-4 md:p-6 flex flex-col justify-between min-h-[100px] md:min-h-[140px] relative overflow-hidden group hover:bg-surface-container transition-colors duration-300 text-left w-full">
             <div class="absolute -bottom-8 -right-8 w-24 h-24 bg-secondary/10 rounded-full z-0"></div>
             <div class="relative z-10 flex gap-4 items-center">
@@ -154,30 +152,37 @@
             </div>
           </button>
 
-          <!-- Word Trainer (Disabled) -->
-          <button id="start-words-btn" class="md:col-span-6 lg:col-span-12 bg-surface-container-low rounded-xl p-4 md:p-6 flex flex-col md:flex-row justify-between items-start md:items-center relative overflow-hidden group opacity-50 cursor-not-allowed grayscale text-left w-full min-h-[60px] md:min-h-[80px]">
+          <button id="open-library-btn" class="md:col-span-6 lg:col-span-7 bg-surface-container-low rounded-xl p-4 md:p-6 flex flex-col justify-between min-h-[100px] md:min-h-[140px] relative overflow-hidden group hover:bg-surface-container transition-colors duration-300 text-left w-full">
+            <div class="absolute -bottom-8 -left-8 w-24 h-24 bg-tertiary/10 rounded-full z-0"></div>
+            <div class="relative z-10 flex gap-4 items-center">
+              <div class="w-10 h-10 bg-tertiary-container rounded-lg flex items-center justify-center shadow-lg shrink-0">
+                <span class="material-symbols-outlined text-on-tertiary-container text-xl">music_note</span>
+              </div>
+              <div>
+                <h3 class="font-headline text-lg font-bold text-on-surface mb-1 leading-tight">Audio Library</h3>
+                <p class="text-xs text-on-surface-variant">Explore all Pinyin sound combinations.</p>
+              </div>
+            </div>
+          </button>
+
+          <button id="start-words-btn" class="md:col-span-6 lg:col-span-5 bg-surface-container-low rounded-xl p-4 md:p-6 flex flex-col justify-between items-start relative overflow-hidden group opacity-50 cursor-not-allowed grayscale text-left w-full min-h-[100px] md:min-h-[140px]">
             <div class="absolute left-1/2 top-0 -translate-x-1/2 w-48 h-4 bg-tertiary-fixed-dim/20 rounded-b-full z-0"></div>
-            <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-4">
+            <div class="relative z-10 flex gap-4 items-center">
               <div class="w-10 h-10 bg-tertiary-fixed-dim rounded-full flex items-center justify-center shadow-lg shrink-0">
                 <span class="material-symbols-outlined text-tertiary text-xl">auto_stories</span>
               </div>
               <div>
                 <h3 class="font-headline text-lg font-bold text-on-surface mb-1 leading-tight">Word Trainer</h3>
-                <p class="text-xs text-on-surface-variant max-w-md">Apply your listening skills to real vocabulary. (Coming Soon)</p>
+                <p class="text-xs text-on-surface-variant max-w-md">Coming Soon</p>
               </div>
             </div>
           </button>
         </div>
 
-        <!-- Submenu (Hidden by default) -->
         <div id="submenu" class="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 hidden">
-
-          <!-- Back Button -->
           <button id="close-submenu-btn" class="col-span-full font-label text-xs font-bold tracking-widest text-on-surface/40 hover:text-primary uppercase flex items-center gap-2">
              <span class="material-symbols-outlined text-sm">arrow_back</span> BACK TO MENU
           </button>
-
-          <!-- Initials Card -->
           <button id="start-initials-btn" class="bg-surface-container-low rounded-xl p-4 md:p-6 flex flex-col justify-between min-h-[100px] md:min-h-[140px] relative overflow-hidden group hover:bg-surface-container transition-colors duration-300 text-left w-full">
             <div class="absolute -bottom-8 -right-8 w-24 h-24 bg-tertiary-fixed-dim/20 rounded-full z-0"></div>
             <div class="relative z-10 flex gap-4 items-center">
@@ -190,8 +195,6 @@
               </div>
             </div>
           </button>
-
-          <!-- Endings Card -->
           <button id="start-endings-btn" class="bg-surface-container-low rounded-xl p-4 md:p-6 flex flex-col justify-between min-h-[100px] md:min-h-[140px] relative overflow-hidden group hover:bg-surface-container transition-colors duration-300 text-left w-full">
              <div class="absolute top-0 right-0 w-32 h-32 bg-secondary/10 rounded-bl-[100px] z-0"></div>
             <div class="relative z-10 flex gap-4 items-center">
@@ -209,72 +212,86 @@
 
       <!-- GAME SCREEN -->
       <div id="game-screen" class="hidden flex flex-col items-center w-full max-w-2xl mx-auto">
-
         <div class="w-full flex justify-start mb-0">
             <button id="back-to-menu-btn" class="font-label text-xs font-bold tracking-widest text-on-surface/40 hover:text-primary uppercase flex items-center gap-2 transition-colors">
                 <span class="material-symbols-outlined text-sm">close</span> MENU
             </button>
         </div>
-
-        <!-- Listening Core Area -->
         <div class="relative w-full flex flex-col items-center mb-2 mt-2">
-          <!-- Fluid Play Button -->
           <div class="relative group cursor-pointer active:scale-95 transition-all duration-300">
             <div class="absolute inset-0 bg-primary opacity-5 blur-2xl rounded-full scale-150 group-hover:opacity-10 transition-opacity"></div>
-            <!-- Main Button Body -->
             <button id="play-btn" class="relative w-16 h-16 md:w-20 md:h-20 bg-primary-container rounded-3xl shadow-xl flex items-center justify-center text-on-primary-container overflow-hidden">
-              <!-- Bauhaus Geometric Detail -->
               <div class="absolute -top-1 -right-1 w-4 h-4 bg-tertiary rounded-full group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></div>
               <span class="material-symbols-outlined text-4xl md:text-5xl" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
             </button>
           </div>
-
-          <!-- Pinyin Display -->
           <div id="pinyin-display" class="mt-2 text-center card min-h-[80px] md:min-h-[100px] flex flex-col justify-center">
             <div>...</div>
             <div>...</div>
           </div>
         </div>
-
         <div id="feedback" class="mb-0 font-label tracking-widest font-bold uppercase text-sm h-6"></div>
-
-        <!-- Explanation Box (hidden by default) -->
-        <div id="explanation-box" class="hidden mt-4 p-4 bg-surface-container rounded-lg text-on-surface-variant text-center">
-          <!-- Explanation content will be injected here by JavaScript -->
-        </div>
-
-        <!-- Geometric Answer Options (Forced 2x2 Grid) -->
+        <div id="explanation-box" class="hidden mt-4 p-4 bg-surface-container rounded-lg text-on-surface-variant text-center"></div>
         <div class="options w-full grid grid-cols-2 gap-2 relative mt-2">
-
-          <!-- Option 1 -->
           <button class="tone-btn pop-up bg-surface-container-lowest h-12 md:h-16 rounded-2xl flex flex-col items-center justify-center hover:bg-secondary-container/10 transition-colors border-2 border-transparent hover:border-secondary group relative overflow-hidden active:translate-y-1 shadow-sm" data-index="0">
             <div class="absolute top-2 right-2 w-2 h-2 bg-secondary/20 rounded-full group-hover:bg-secondary transition-colors"></div>
             <span class="font-headline text-xl md:text-2xl font-bold text-on-surface option-text">1</span>
           </button>
-
-          <!-- Option 2 -->
           <button class="tone-btn pop-up bg-surface-container-lowest h-12 md:h-16 rounded-2xl flex flex-col items-center justify-center hover:bg-primary-container/10 transition-colors border-2 border-transparent hover:border-primary group relative overflow-hidden active:translate-y-1 shadow-sm" data-index="1">
             <div class="absolute top-2 right-2 w-2 h-2 bg-primary/20 rounded-full group-hover:bg-primary transition-colors"></div>
             <span class="font-headline text-xl md:text-2xl font-bold text-on-surface option-text">2</span>
           </button>
-
-          <!-- Option 3 -->
           <button class="tone-btn pop-up bg-surface-container-lowest h-12 md:h-16 rounded-2xl flex flex-col items-center justify-center hover:bg-tertiary-fixed-dim/10 transition-colors border-2 border-transparent hover:border-tertiary-fixed-dim group relative overflow-hidden active:translate-y-1 shadow-sm" data-index="2">
             <div class="absolute top-2 right-2 w-2 h-2 bg-tertiary-fixed-dim/20 rounded-full group-hover:bg-tertiary-fixed-dim transition-colors"></div>
             <span class="font-headline text-xl md:text-2xl font-bold text-on-surface option-text">3</span>
           </button>
-
-          <!-- Option 4 -->
           <button class="tone-btn pop-up bg-surface-container-lowest h-12 md:h-16 rounded-2xl flex flex-col items-center justify-center hover:bg-tertiary/10 transition-colors border-2 border-transparent hover:border-tertiary group relative overflow-hidden active:translate-y-1 shadow-sm" data-index="3">
             <div class="absolute top-2 right-2 w-2 h-2 bg-tertiary/20 rounded-full group-hover:bg-tertiary transition-colors"></div>
             <span class="font-headline text-xl md:text-2xl font-bold text-on-surface option-text">4</span>
           </button>
-
         </div>
-
-        <!-- FAB Container for Correct/Incorrect Icons -->
         <div id="fab-container" class="fixed bottom-12 right-6 z-40 hidden"></div>
+      </div>
 
+      <!-- AUDIO LIBRARY SCREEN -->
+      <div id="audio-library-screen" class="hidden h-full flex flex-col">
+        <div class="w-full flex justify-start mb-2">
+            <button id="back-to-main-menu-btn" class="font-label text-xs font-bold tracking-widest text-on-surface/40 hover:text-primary uppercase flex items-center gap-2 transition-colors">
+                <span class="material-symbols-outlined text-sm">arrow_back</span> MAIN MENU
+            </button>
+        </div>
+        <div id="library-scrollers" class="flex-1 grid grid-cols-12 gap-2 overflow-hidden relative transition-opacity duration-300">
+            <div id="initials-scroller" class="col-span-5 h-full overflow-y-auto scroll-snap-y-mandatory no-scrollbar">
+              <ul id="initials-list" class="space-y-1"></ul>
+            </div>
+            <div id="finals-scroller" class="col-span-7 h-full overflow-y-auto scroll-snap-y-mandatory no-scrollbar">
+              <ul id="finals-list" class="space-y-1"></ul>
+            </div>
+        </div>
+        <div id="library-playback-ui" class="hidden flex-1 flex-col items-center justify-center transition-opacity duration-300">
+            <div id="library-pinyin-display" class="font-headline text-8xl font-black text-on-surface"></div>
+            <button id="library-play-btn" class="mt-8 w-24 h-24 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-lg hover:scale-105 transition-transform">
+                <span class="material-symbols-outlined text-5xl">play_arrow</span>
+            </button>
+        </div>
+        <div class="mt-2 p-3 rounded-xl bg-surface-container-highest flex items-center justify-between">
+          <div id="library-selection-display" class="font-headline text-2xl font-bold text-on-surface-variant">Select...</div>
+          <button id="library-main-play-btn" class="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-lg hover:scale-105 transition-transform disabled:opacity-50 disabled:scale-100" disabled>
+            <span class="material-symbols-outlined text-3xl">play_arrow</span>
+          </button>
+        </div>
+        <div id="library-tone-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+            <div class="bg-surface-container p-8 rounded-2xl shadow-2xl flex flex-col items-center gap-4">
+                <h3 id="modal-pinyin-display" class="font-headline text-5xl font-bold text-on-surface"></h3>
+                <div class="flex gap-3 mt-4">
+                    <button data-tone="1" class="tone-select-btn w-14 h-14 rounded-full bg-surface-container-high hover:bg-primary-container transition-colors">1</button>
+                    <button data-tone="2" class="tone-select-btn w-14 h-14 rounded-full bg-surface-container-high hover:bg-primary-container transition-colors">2</button>
+                    <button data-tone="3" class="tone-select-btn w-14 h-14 rounded-full bg-surface-container-high hover:bg-primary-container transition-colors">3</button>
+                    <button data-tone="4" class="tone-select-btn w-14 h-14 rounded-full bg-surface-container-high hover:bg-primary-container transition-colors">4</button>
+                </div>
+                <button id="close-modal-btn" class="mt-6 text-sm font-bold text-on-surface-variant/80 hover:text-primary">Close</button>
+            </div>
+        </div>
       </div>
 
     </div>
