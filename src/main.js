@@ -44,6 +44,17 @@ if (typeof window !== 'undefined') {
   unlockEvents.forEach(evt => {
     window.addEventListener(evt, unlockHandler, { passive: true });
   });
+
+  // Mobile-only debug helpers
+  if (/iPhone|iPad|iPod|Android/.test(navigator.userAgent)) {
+    console.log('[DEBUG] Mobile UA detected:', navigator.userAgent);
+    window.addEventListener('error', (e) => {
+      console.error('[DEBUG] Uncaught error:', e.message, 'at', e.filename, 'line', e.lineno);
+    });
+    window.addEventListener('unhandledrejection', (e) => {
+      console.error('[DEBUG] Unhandled rejection:', e.reason);
+    });
+  }
 }
 
 function decodeAudioDataSafe(ctx, arrayBuffer) {
@@ -310,26 +321,44 @@ async function playAudio(customPath) {
   const audioPath = (typeof customPath === 'string' && customPath.trim().length > 0)
     ? customPath.trim()
     : (currentItem ? `${import.meta.env.BASE_URL}${currentItem.audio}` : null);
-  if (!audioPath) return;
+
+  console.log('[DEBUG] playAudio | customPath:', customPath, '| resolved:', audioPath, '| currentItem:', currentItem ? currentItem.audio : null);
+
+  if (!audioPath) {
+    console.warn('[DEBUG] playAudio: no audioPath, aborting');
+    return;
+  }
 
   const ctx = getAudioContext();
+  console.log('[DEBUG] AudioContext state:', ctx ? ctx.state : 'null');
 
-  // 1. Primary Engine: Web Audio API (Reliably plays automatically on mobile inside timeouts & callbacks)
+  // 1. Primary Engine: Web Audio API
   if (ctx) {
     try {
       if (ctx.state === 'suspended') {
+        console.log('[DEBUG] Resuming suspended AudioContext...');
         await ctx.resume();
+        console.log('[DEBUG] AudioContext state after resume:', ctx.state);
       }
       let buffer = audioBufferCache.get(audioPath);
       if (!buffer) {
+        console.log('[DEBUG] Fetching audio:', audioPath);
         const resp = await fetch(audioPath);
+        console.log('[DEBUG] Fetch response:', resp.status, resp.ok);
         if (resp.ok) {
           const arrayBuf = await resp.arrayBuffer();
           buffer = await decodeAudioDataSafe(ctx, arrayBuf);
           if (buffer) {
             audioBufferCache.set(audioPath, buffer);
+            console.log('[DEBUG] Buffer decoded and cached');
+          } else {
+            console.warn('[DEBUG] decodeAudioDataSafe returned null');
           }
+        } else {
+          console.error('[DEBUG] Fetch failed with status:', resp.status);
         }
+      } else {
+        console.log('[DEBUG] Using cached buffer for:', audioPath);
       }
       if (buffer) {
         if (currentWebAudioSource) {
@@ -341,14 +370,15 @@ async function playAudio(customPath) {
         source.connect(ctx.destination);
         source.start(0);
         currentWebAudioSource = source;
+        console.log('[DEBUG] WebAudio playback started OK');
         return;
       }
     } catch (err) {
-      console.warn("Web Audio playback failed, trying HTMLAudio fallback:", err);
+      console.warn('[DEBUG] Web Audio failed, falling back to HTMLAudio:', err);
     }
   }
 
-  // 2. Resilient Fallback to reused HTML5 Audio element
+  // 2. HTML5 Audio fallback
   try {
     if (!htmlAudioInstance) {
       htmlAudioInstance = new Audio();
@@ -356,12 +386,15 @@ async function playAudio(customPath) {
     htmlAudioInstance.pause();
     htmlAudioInstance.currentTime = 0;
     htmlAudioInstance.src = audioPath;
+    console.log('[DEBUG] HTMLAudio .play() called for:', audioPath);
     const playPromise = htmlAudioInstance.play();
     if (playPromise && typeof playPromise.catch === 'function') {
-      playPromise.catch(e => console.warn("Audio play prevented:", e));
+      playPromise
+        .then(() => console.log('[DEBUG] HTMLAudio play resolved OK'))
+        .catch(e => console.error('[DEBUG] HTMLAudio play rejected:', e));
     }
   } catch (e) {
-    console.error("Audio failed:", e);
+    console.error('[DEBUG] HTMLAudio threw synchronously:', e);
   }
 }
 
