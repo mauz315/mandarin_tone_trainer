@@ -1,3 +1,4 @@
+import './style.css';
 let words = [];
 let audioInstance = null;
 let selectedInitial = null;
@@ -7,9 +8,9 @@ let selectedTone = null;
 function pinyin_to_tone(pinyin_with_number) {
     const base_clean = pinyin_with_number.replace('uu', 'ü').replace('v', 'ü').replace('lue', 'lüe').replace('nue', 'nüe');
     const tones = {'a': 'āáǎà', 'e': 'ēéěè', 'i': 'īíǐì', 'o': 'ōóǒò', 'u': 'ūúǔù', 'v': 'ǖǘǚǜ', 'ü': 'ǖǘǚǜ'};
-    if (!base_clean[-1].isdigit()) return base_clean;
+    if (!base_clean.slice(-1).match(/\d/)) return base_clean;
     try { 
-        const tone_num = parseInt(base_clean[-1]);
+        const tone_num = parseInt(base_clean.slice(-1));
         const base = base_clean.slice(0, -1);
         if (tone_num === 0 || tone_num === 5) return base;
         let idx_to_change = -1;

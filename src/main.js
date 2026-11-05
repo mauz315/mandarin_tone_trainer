@@ -1,4 +1,9 @@
 import './style.css';
+import 'keen-slider/keen-slider.min.css';
+import KS from 'keen-slider';
+
+const KeenSlider = KS.default || KS;
+
 let words = [];
 let currentItem = null;
 let audioInstance = null;
@@ -8,6 +13,8 @@ let nextQuestionTimer = null;
 // --- Audio Library State ---
 let selectedInitial = null;
 let selectedFinal = null;
+let initialsSlider = null;
+let finalsSlider = null;
 
 function removeTones(str) {
   const toneMap = {
@@ -88,6 +95,10 @@ function setupMenu() {
     mainMenu.classList.add('hidden');
     submenu.classList.add('hidden');
     audioLibraryScreen.classList.remove('hidden');
+    setTimeout(() => {
+      if (initialsSlider) initialsSlider.update();
+      if (finalsSlider) finalsSlider.update();
+    }, 60);
   });
 
   backToMainMenuBtn.addEventListener('click', () => {
@@ -119,7 +130,7 @@ function startGame(mode) {
 
 async function init() {
   try {
-    const response = await fetch('./single_words.json');
+    const response = await fetch(`${import.meta.env.BASE_URL}single_words.json`);
     if (!response.ok) throw new Error("JSON not found in public folder");
     words = await response.json();
     console.log("App Ready. Vocabulary loaded:", words.length);
@@ -140,7 +151,8 @@ function playAudio() {
     audioInstance.pause();
     audioInstance.currentTime = 0;
   }
-  audioInstance = new Audio(`./${currentItem.audio}`);
+  const audioPath = `${import.meta.env.BASE_URL}${currentItem.audio}`;
+  audioInstance = new Audio(audioPath);
   audioInstance.play().catch(e => console.error("Audio failed:", e));
 }
 
@@ -282,95 +294,252 @@ function nextQuestion() {
   playAudio();
 }
 
+function WheelPlugin(slider) {
+  let isMoving = false;
+  slider.on('created', () => {
+    slider.container.addEventListener(
+      'wheel',
+      (e) => {
+        e.preventDefault();
+        if (isMoving) return;
+        const delta = e.deltaY;
+        if (Math.abs(delta) < 8) return;
+        isMoving = true;
+        if (delta > 0) {
+          slider.next();
+        } else {
+          slider.prev();
+        }
+        setTimeout(() => {
+          isMoving = false;
+        }, 90);
+      },
+      { passive: false }
+    );
+  });
+}
+
 function setupAudioLibrary() {
-    const initialsList = document.getElementById('initials-list');
-    const finalsList = document.getElementById('finals-list');
+    const initialsContainer = document.getElementById('initials-scroller');
+    const finalsContainer = document.getElementById('finals-scroller');
     const toneModal = document.getElementById('library-tone-modal');
     const modalPinyinDisplay = document.getElementById('modal-pinyin-display');
     const closeModalBtn = document.getElementById('close-modal-btn');
+    const selectionDisplay = document.getElementById('library-selection-display');
+    const mainPlayBtn = document.getElementById('library-main-play-btn');
 
     const allInitials = [...new Set(words.map(w => w.initial))].sort();
     const allFinals = [...new Set(words.map(w => w.ending_base))].sort();
 
-    const populateList = (listEl, items, type) => {
-        listEl.innerHTML = '';
-        items.forEach(item => {
-            const li = document.createElement('li');
-            li.className = "font-headline text-2xl text-center text-on-surface-variant/50 p-2 rounded-lg cursor-pointer transition-all duration-200 scroll-snap-align-center";
-            li.textContent = item === "" ? "∅" : item;
-            li.dataset[type] = item;
-            listEl.appendChild(li);
+    initialsContainer.innerHTML = '';
+    finalsContainer.innerHTML = '';
+
+    allInitials.forEach((item, index) => {
+        const slide = document.createElement('div');
+        slide.className = 'keen-slider__slide flex items-center justify-center cursor-pointer select-none';
+        slide.dataset.index = index;
+
+        const label = document.createElement('span');
+        label.className = 'slide-label font-headline text-2xl font-bold transition-all duration-150';
+        label.textContent = item === '' ? '∅' : item;
+        slide.appendChild(label);
+
+        initialsContainer.appendChild(slide);
+    });
+
+    allFinals.forEach((item, index) => {
+        const slide = document.createElement('div');
+        slide.className = 'keen-slider__slide flex items-center justify-center cursor-pointer select-none';
+        slide.dataset.index = index;
+
+        const label = document.createElement('span');
+        label.className = 'slide-label font-headline text-2xl font-bold transition-all duration-150';
+        label.textContent = item;
+        slide.appendChild(label);
+
+        finalsContainer.appendChild(slide);
+    });
+
+    function updateSlideStyles(slider, type) {
+        if (!slider.track || !slider.track.details) return;
+        const details = slider.track.details;
+        const labels = slider.container.querySelectorAll('.slide-label');
+        details.slides.forEach((slideDetail, idx) => {
+            const label = labels[idx];
+            if (!label) return;
+            const distance = Math.abs(slideDetail.distance);
+            if (distance < 0.5) {
+                label.style.opacity = '1';
+                label.style.transform = `scale(${1.25 - distance * 0.2})`;
+                label.style.color = type === 'initial' ? '#8e001b' : '#2559bd';
+                label.style.fontWeight = '900';
+            } else if (distance < 1.5) {
+                label.style.opacity = '0.5';
+                label.style.transform = 'scale(0.95)';
+                label.style.color = '';
+                label.style.fontWeight = '600';
+            } else {
+                label.style.opacity = '0.2';
+                label.style.transform = 'scale(0.8)';
+                label.style.color = '';
+                label.style.fontWeight = '500';
+            }
         });
-    };
+    }
 
-    populateList(initialsList, allInitials, 'initial');
-    populateList(finalsList, allFinals, 'final');
-
-    const handleSelection = (list, li, type) => {
-        if (type === 'initial') selectedInitial = li.dataset.initial;
-        if (type === 'final') selectedFinal = li.dataset.final;
-
-        [...list.children].forEach(child => child.classList.remove('bg-secondary-container', 'text-on-secondary-container', 'font-bold'));
-        li.classList.add('bg-secondary-container', 'text-on-secondary-container', 'font-bold');
-        li.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    function syncSelection() {
+        if (!initialsSlider || !finalsSlider) return;
+        if (!initialsSlider.track || !finalsSlider.track) return;
+        if (!initialsSlider.track.details || !finalsSlider.track.details) return;
         
-        updateLibraryUI();
-    };
+        const initIdx = initialsSlider.track.details.rel;
+        const finalIdx = finalsSlider.track.details.rel;
+        selectedInitial = allInitials[initIdx];
+        selectedFinal = allFinals[finalIdx];
 
-    initialsList.addEventListener('click', e => {
-        const li = e.target.closest('li');
-        if (li) handleSelection(initialsList, li, 'initial');
+        const initialKey = selectedInitial === '∅' ? '' : selectedInitial;
+        const pinyinBase = initialKey + selectedFinal;
+        const matchingWords = words.filter(w => w.initial === initialKey && w.ending_base === selectedFinal);
+
+        if (matchingWords.length > 0) {
+            selectionDisplay.innerHTML = `
+                <span class="font-headline text-3xl font-black text-primary">${pinyinBase}</span>
+                <span class="ml-2 text-xs uppercase tracking-wider font-bold text-on-surface-variant/70">
+                  (${matchingWords.length} tone${matchingWords.length > 1 ? 's' : ''})
+                </span>
+            `;
+            mainPlayBtn.disabled = false;
+        } else {
+            selectionDisplay.innerHTML = `
+                <span class="font-headline text-2xl font-bold text-on-surface/30 line-through">${pinyinBase}</span>
+                <span class="ml-2 text-xs uppercase tracking-wider text-error/70 font-semibold">(No syllable)</span>
+            `;
+            mainPlayBtn.disabled = true;
+        }
+    }
+
+    initialsSlider = new KeenSlider(initialsContainer, {
+        vertical: true,
+        mode: 'free-snap',
+        rubberband: true,
+        slides: {
+            origin: 'center',
+            perView: 5,
+            spacing: 0,
+        },
+        initial: 0,
+        created(s) {
+            updateSlideStyles(s, 'initial');
+        },
+        detailsChanged(s) {
+            updateSlideStyles(s, 'initial');
+        },
+        slideChanged() {
+            syncSelection();
+        },
+    }, [WheelPlugin]);
+
+    finalsSlider = new KeenSlider(finalsContainer, {
+        vertical: true,
+        mode: 'free-snap',
+        rubberband: true,
+        slides: {
+            origin: 'center',
+            perView: 5,
+            spacing: 0,
+        },
+        initial: 0,
+        created(s) {
+            updateSlideStyles(s, 'final');
+        },
+        detailsChanged(s) {
+            updateSlideStyles(s, 'final');
+        },
+        slideChanged() {
+            syncSelection();
+        },
+    }, [WheelPlugin]);
+
+    // Click on slide to center it smoothly
+    initialsContainer.addEventListener('click', e => {
+        const slide = e.target.closest('.keen-slider__slide');
+        if (slide && initialsSlider) {
+            const idx = parseInt(slide.dataset.index);
+            initialsSlider.moveToIdx(idx, true, { duration: 250 });
+        }
     });
 
-    finalsList.addEventListener('click', e => {
-        const li = e.target.closest('li');
-        if (li) handleSelection(finalsList, li, 'final');
+    finalsContainer.addEventListener('click', e => {
+        const slide = e.target.closest('.keen-slider__slide');
+        if (slide && finalsSlider) {
+            const idx = parseInt(slide.dataset.index);
+            finalsSlider.moveToIdx(idx, true, { duration: 250 });
+        }
     });
-    
+
+    function openToneModal() {
+        if (!selectedInitial || !selectedFinal) syncSelection();
+        const initialKey = selectedInitial === '∅' ? '' : selectedInitial;
+        const pinyinBase = initialKey + selectedFinal;
+        modalPinyinDisplay.textContent = pinyinBase;
+
+        const toneButtons = toneModal.querySelectorAll('.tone-select-btn');
+        toneButtons.forEach((btn, i) => {
+            const tone = i + 1;
+            const pinyinWithTone = pinyin_to_tone(`${pinyinBase}${tone}`);
+            btn.textContent = pinyinWithTone;
+
+            const word = words.find(w => 
+                w.initial === initialKey && 
+                w.ending_base === selectedFinal && 
+                w.tone === tone
+            );
+
+            if (word) {
+                btn.disabled = false;
+                btn.classList.remove('opacity-30', 'cursor-not-allowed', 'pointer-events-none');
+                btn.classList.add('hover:bg-primary-container', 'cursor-pointer');
+            } else {
+                btn.disabled = true;
+                btn.classList.add('opacity-30', 'cursor-not-allowed', 'pointer-events-none');
+                btn.classList.remove('hover:bg-primary-container', 'cursor-pointer');
+            }
+        });
+
+        toneModal.classList.remove('hidden');
+    }
+
+    mainPlayBtn.addEventListener('click', openToneModal);
+
     closeModalBtn.addEventListener('click', () => {
         toneModal.classList.add('hidden');
     });
 
     toneModal.addEventListener('click', e => {
         const toneBtn = e.target.closest('.tone-select-btn');
-        if (toneBtn) {
-            const tone = toneBtn.dataset.tone;
-            const pinyinBase = (selectedInitial === '∅' ? '' : selectedInitial) + selectedFinal;
-            const audioFile = `${pinyinBase}${tone}.mp3`;
+        if (toneBtn && !toneBtn.disabled) {
+            const tone = parseInt(toneBtn.dataset.tone);
+            const initialKey = selectedInitial === '∅' ? '' : selectedInitial;
             
-            const word = words.find(w => w.audio === `audio/${audioFile}`);
+            const word = words.find(w => 
+                w.initial === initialKey && 
+                w.ending_base === selectedFinal && 
+                w.tone === tone
+            );
+
             if (word) {
                 if (audioInstance) audioInstance.pause();
-                audioInstance = new Audio(`./${word.audio}`);
+                const audioPath = `${import.meta.env.BASE_URL}${word.audio}`;
+                audioInstance = new Audio(audioPath);
                 audioInstance.play().catch(err => console.error("Audio failed:", err));
             } else {
-                console.error(`Audio for ${audioFile} not found.`);
+                console.warn(`No audio found for ${initialKey}${selectedFinal}${tone}`);
             }
         }
     });
 
-    function updateLibraryUI() {
-        if (selectedInitial !== null && selectedFinal !== null) {
-            const pinyinBase = (selectedInitial === '∅' ? '' : selectedInitial) + selectedFinal;
-            modalPinyinDisplay.textContent = pinyinBase;
-
-            const toneButtons = toneModal.querySelectorAll('.tone-select-btn');
-            toneButtons.forEach((btn, i) => {
-                const tone = i + 1;
-                const pinyinWithTone = pinyin_to_tone(`${pinyinBase}${tone}`);
-                btn.textContent = pinyinWithTone;
-            });
-
-            toneModal.classList.remove('hidden');
-        }
-    }
-
-    document.getElementById('back-to-main-menu-btn').addEventListener('click', () => {
-        selectedInitial = null;
-        selectedFinal = null;
-        [...initialsList.children].forEach(child => child.classList.remove('bg-secondary-container', 'text-on-secondary-container', 'font-bold'));
-        [...finalsList.children].forEach(child => child.classList.remove('bg-secondary-container', 'text-on-secondary-container', 'font-bold'));
-    });
+    // Initial sync
+    setTimeout(syncSelection, 50);
 }
 
 // Initialize the app

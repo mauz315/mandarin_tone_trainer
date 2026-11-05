@@ -1,6 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /*
-  Since we migrated to Tailwind CSS, almost all custom CSS has been removed.
-  We only keep standard CSS properties for custom animations that Tailwind doesn't have by default.
+  Custom animations and utility classes that complement Tailwind.
 */
 
 @keyframes slide-in-bottom {
@@ -47,4 +50,24 @@
 .no-scrollbar {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
+}
+
+/* Keen-Slider Picker Wheel Cylinder Mask */
+.picker-wheel-mask {
+  mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
+}
+
+/* Keen-Slider Vertical Picker Slide Dimensions */
+.keen-slider--vertical {
+  height: 100% !important;
+}
+.keen-slider--vertical .keen-slider__slide {
+  height: 20% !important;
+  min-height: 20% !important;
+  max-height: 20% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: visible !important;
 }
