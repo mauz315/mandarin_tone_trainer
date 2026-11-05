@@ -6,14 +6,17 @@ const KeenSlider = KS.default || KS;
 
 let words = [];
 let currentItem = null;
-let audioInstance = typeof Audio !== 'undefined' ? new Audio() : null;
-let audioCtx = null;
-const audioBufferCache = new Map();
+let nextPendingItem = null;
 let currentGameMode = 'tones'; // Options: 'tones', 'initials', 'endings'
 let nextQuestionTimer = null; 
 
-// Unlock Web Audio API & HTMLAudioElement on mobile gestures
-function unlockAudioContext() {
+// Resilient Web Audio & HTMLAudio pipeline for mobile browsers
+let audioCtx = null;
+let currentWebAudioSource = null;
+let htmlAudioInstance = typeof Audio !== 'undefined' ? new Audio() : null;
+const audioBufferCache = new Map();
+
+function getAudioContext() {
   if (!audioCtx) {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (AudioContextClass) {
@@ -23,18 +26,85 @@ function unlockAudioContext() {
   if (audioCtx && audioCtx.state === 'suspended') {
     audioCtx.resume().catch(() => {});
   }
-  if (audioInstance && !audioInstance.src) {
-    audioInstance.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
-    audioInstance.play().then(() => {
-      audioInstance.pause();
-    }).catch(() => {});
+  return audioCtx;
+}
+
+function ensureAudioUnlocked() {
+  getAudioContext();
+  if (!htmlAudioInstance && typeof Audio !== 'undefined') {
+    htmlAudioInstance = new Audio();
   }
 }
 
 if (typeof window !== 'undefined') {
-  window.addEventListener('touchstart', unlockAudioContext, { passive: true });
-  window.addEventListener('touchend', unlockAudioContext, { passive: true });
-  window.addEventListener('click', unlockAudioContext, { passive: true });
+  const unlockEvents = ['touchstart', 'touchend', 'click', 'keydown'];
+  const unlockHandler = () => {
+    ensureAudioUnlocked();
+  };
+  unlockEvents.forEach(evt => {
+    window.addEventListener(evt, unlockHandler, { passive: true });
+  });
+}
+
+function decodeAudioDataSafe(ctx, arrayBuffer) {
+  return new Promise((resolve, reject) => {
+    try {
+      const bufferCopy = arrayBuffer.slice(0);
+      let isResolved = false;
+
+      const promise = ctx.decodeAudioData(
+        bufferCopy,
+        (decoded) => {
+          if (!isResolved) {
+            isResolved = true;
+            resolve(decoded);
+          }
+        },
+        (err) => {
+          if (!isResolved) {
+            isResolved = true;
+            reject(err);
+          }
+        }
+      );
+
+      if (promise && typeof promise.then === 'function') {
+        promise.then(
+          (decoded) => {
+            if (!isResolved) {
+              isResolved = true;
+              resolve(decoded);
+            }
+          },
+          (err) => {
+            if (!isResolved) {
+              isResolved = true;
+              reject(err);
+            }
+          }
+        );
+      }
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+
+async function preloadAudio(url) {
+  if (!url || audioBufferCache.has(url)) return;
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const resp = await fetch(url);
+    if (!resp.ok) return;
+    const arrayBuf = await resp.arrayBuffer();
+    const buffer = await decodeAudioDataSafe(ctx, arrayBuf);
+    if (buffer) {
+      audioBufferCache.set(url, buffer);
+    }
+  } catch (_) {
+    // Ignore preload failures
+  }
 } 
 
 // --- Audio Library State ---
@@ -198,6 +268,7 @@ function setupMenu() {
 }
 
 function startGame(mode) {
+  ensureAudioUnlocked();
   currentGameMode = mode;
   document.getElementById('menu-screen').classList.add('hidden');
   document.getElementById('game-screen').classList.remove('hidden');
@@ -235,30 +306,41 @@ async function init() {
 }
 
 async function playAudio(customPath) {
-  unlockAudioContext();
-  const audioPath = customPath || (currentItem ? `${import.meta.env.BASE_URL}${currentItem.audio}` : null);
+  ensureAudioUnlocked();
+  const audioPath = (typeof customPath === 'string' && customPath.trim().length > 0)
+    ? customPath.trim()
+    : (currentItem ? `${import.meta.env.BASE_URL}${currentItem.audio}` : null);
   if (!audioPath) return;
 
-  // 1. Web Audio API (Reliably plays automatically on mobile inside setTimeout)
-  if (audioCtx) {
+  const ctx = getAudioContext();
+
+  // 1. Primary Engine: Web Audio API (Reliably plays automatically on mobile inside timeouts & callbacks)
+  if (ctx) {
     try {
-      if (audioCtx.state === 'suspended') {
-        await audioCtx.resume();
+      if (ctx.state === 'suspended') {
+        await ctx.resume();
       }
       let buffer = audioBufferCache.get(audioPath);
       if (!buffer) {
         const resp = await fetch(audioPath);
         if (resp.ok) {
           const arrayBuf = await resp.arrayBuffer();
-          buffer = await audioCtx.decodeAudioData(arrayBuf);
-          audioBufferCache.set(audioPath, buffer);
+          buffer = await decodeAudioDataSafe(ctx, arrayBuf);
+          if (buffer) {
+            audioBufferCache.set(audioPath, buffer);
+          }
         }
       }
       if (buffer) {
-        const source = audioCtx.createBufferSource();
+        if (currentWebAudioSource) {
+          try { currentWebAudioSource.stop(); } catch (_) {}
+          currentWebAudioSource = null;
+        }
+        const source = ctx.createBufferSource();
         source.buffer = buffer;
-        source.connect(audioCtx.destination);
+        source.connect(ctx.destination);
         source.start(0);
+        currentWebAudioSource = source;
         return;
       }
     } catch (err) {
@@ -266,16 +348,16 @@ async function playAudio(customPath) {
     }
   }
 
-  // 2. Fallback to reused HTML5 Audio element
+  // 2. Resilient Fallback to reused HTML5 Audio element
   try {
-    if (!audioInstance) {
-      audioInstance = new Audio();
+    if (!htmlAudioInstance) {
+      htmlAudioInstance = new Audio();
     }
-    audioInstance.pause();
-    audioInstance.currentTime = 0;
-    audioInstance.src = audioPath;
-    const playPromise = audioInstance.play();
-    if (playPromise && playPromise.catch) {
+    htmlAudioInstance.pause();
+    htmlAudioInstance.currentTime = 0;
+    htmlAudioInstance.src = audioPath;
+    const playPromise = htmlAudioInstance.play();
+    if (playPromise && typeof playPromise.catch === 'function') {
       playPromise.catch(e => console.warn("Audio play prevented:", e));
     }
   } catch (e) {
@@ -286,7 +368,7 @@ async function playAudio(customPath) {
 function setupButtons() {
   document.querySelectorAll('.tone-btn').forEach((btn, index) => {
     btn.addEventListener('click', (e) => {
-      unlockAudioContext();
+      ensureAudioUnlocked();
       const optionSpan = btn.querySelector('.option-text');
       const userGuess = (optionSpan ? optionSpan.textContent : btn.textContent || '').trim().toLowerCase();
       let isCorrect = false;
@@ -348,10 +430,18 @@ function setupButtons() {
             explanationBox.classList.remove('hidden');
 
             const nextBtn = document.getElementById('next-question-btn');
-            nextBtn.addEventListener('click', nextQuestion, { once: true });
+            nextBtn.addEventListener('click', () => nextQuestion(), { once: true });
 
         } else {
-            setTimeout(nextQuestion, 1500);
+            // Tone Trainer: Pre-select next item and preload audio immediately during user gesture!
+            nextPendingItem = words[Math.floor(Math.random() * words.length)];
+            if (nextPendingItem && nextPendingItem.audio) {
+              preloadAudio(`${import.meta.env.BASE_URL}${nextPendingItem.audio}`);
+            }
+            if (nextQuestionTimer) {
+              clearTimeout(nextQuestionTimer);
+            }
+            nextQuestionTimer = setTimeout(nextQuestion, 1500);
         }
       } else {
         document.getElementById('feedback').innerHTML = `<span class="bg-badge-red text-white px-3 py-1 rounded-full border border-black font-mono font-bold text-xs uppercase shadow-hard-black tracking-wider">TRY AGAIN</span>`;
@@ -372,7 +462,7 @@ function setupButtons() {
       }
     });
   });
-  document.getElementById('play-btn').addEventListener('click', playAudio);
+  document.getElementById('play-btn').addEventListener('click', () => playAudio());
 }
 
 function nextQuestion() {
@@ -388,7 +478,12 @@ function nextQuestion() {
   document.getElementById('fab-container').classList.add('hidden');
   document.getElementById('explanation-box').classList.add('hidden');
 
-  currentItem = words[Math.floor(Math.random() * words.length)];
+  if (nextPendingItem) {
+    currentItem = nextPendingItem;
+    nextPendingItem = null;
+  } else {
+    currentItem = words[Math.floor(Math.random() * words.length)];
+  }
   const display = document.getElementById('pinyin-display');
   const buttons = document.querySelectorAll('.tone-btn');
 
