@@ -12,6 +12,18 @@ export default {
   theme: {
     extend: {
       colors: {
+        'canvas-navy': '#202A36',
+        'canvas-acid': '#B8F526',
+        'canvas-ice': '#B4D7E8',
+        'canvas-graphite': '#282A2E',
+        'horizon-forest': '#0C3B20',
+        'horizon-violet': '#5F3993',
+        'badge-pink': '#FF4092',
+        'badge-tangerine': '#FF5C1C',
+        'badge-red': '#E52421',
+        'badge-butter': '#FDF197',
+        'badge-cobalt': '#104FE2',
+        'badge-lavender': '#9CA4FC',
         "on-tertiary": "#ffffff",
         "secondary-container": "#6c98ff",
         "on-secondary-container": "#002f76",
@@ -61,9 +73,15 @@ export default {
         "secondary": "#2559bd"
       },
       fontFamily: {
-        "headline": ["Space Grotesk"],
-        "body": ["Plus Jakarta Sans"],
-        "label": ["Space Grotesk"]
+        speed: ['"Plus Jakarta Sans"', 'sans-serif'],
+        mono: ['"Space Mono"', 'monospace'],
+        editorial: ['"Playfair Display"', 'serif'],
+        bubble: ['"Fredoka"', 'sans-serif'],
+        grotesk: ['"Space Grotesk"', 'sans-serif'],
+        chinese: ['"Noto Sans SC"', 'sans-serif'],
+        headline: ['"Space Grotesk"', 'sans-serif'],
+        body: ['"Plus Jakarta Sans"', 'sans-serif'],
+        label: ['"Space Mono"', 'monospace']
       },
       borderRadius: {
         "DEFAULT": "0.25rem",

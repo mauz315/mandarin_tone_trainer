@@ -62,6 +62,13 @@ function pinyin_to_tone(pinyin_with_number) {
     return base_clean;
 }
 
+function setAppBackground(colorClass) {
+  const app = document.getElementById('app');
+  if (!app) return;
+  app.className = app.className.replace(/bg-canvas-\w+/g, '');
+  app.classList.add(colorClass);
+}
+
 function setupMenu() {
   const menuScreen = document.getElementById('menu-screen');
   const gameScreen = document.getElementById('game-screen');
@@ -84,17 +91,23 @@ function setupMenu() {
   openSubmenuBtn.addEventListener('click', () => {
     mainMenu.classList.add('hidden');
     submenu.classList.remove('hidden');
+    submenu.classList.add('flex');
+    setAppBackground('bg-canvas-ice');
   });
   
   closeSubmenuBtn.addEventListener('click', () => {
     submenu.classList.add('hidden');
+    submenu.classList.remove('flex');
     mainMenu.classList.remove('hidden');
+    setAppBackground('bg-canvas-acid');
   });
 
   openLibraryBtn.addEventListener('click', () => {
-    mainMenu.classList.add('hidden');
+    menuScreen.classList.add('hidden');
+    mainMenu.classList.remove('hidden');
     submenu.classList.add('hidden');
     audioLibraryScreen.classList.remove('hidden');
+    setAppBackground('bg-canvas-navy');
     setTimeout(() => {
       if (initialsSlider) initialsSlider.update();
       if (finalsSlider) finalsSlider.update();
@@ -103,7 +116,9 @@ function setupMenu() {
 
   backToMainMenuBtn.addEventListener('click', () => {
     audioLibraryScreen.classList.add('hidden');
+    menuScreen.classList.remove('hidden');
     mainMenu.classList.remove('hidden');
+    setAppBackground('bg-canvas-acid');
   });
 
   startTonesBtn.addEventListener('click', () => startGame('tones'));
@@ -115,9 +130,10 @@ function setupMenu() {
     menuScreen.classList.remove('hidden');
     submenu.classList.add('hidden');
     mainMenu.classList.remove('hidden');
+    setAppBackground('bg-canvas-acid');
     document.querySelector('.options').style.display = 'grid';
     document.getElementById('play-btn').style.transform = "scale(1)";
-    document.getElementById('feedback').innerText = "";
+    document.getElementById('feedback').innerHTML = "[IDENTIFY THE CORRECT TONE CONTOUR]";
   });
 }
 
@@ -125,6 +141,19 @@ function startGame(mode) {
   currentGameMode = mode;
   document.getElementById('menu-screen').classList.add('hidden');
   document.getElementById('game-screen').classList.remove('hidden');
+  
+  const modeBadge = document.getElementById('game-mode-badge');
+  if (mode === 'tones') {
+    setAppBackground('bg-canvas-acid');
+    if (modeBadge) modeBadge.textContent = 'DRILL // TONE TRAINER';
+  } else if (mode === 'initials') {
+    setAppBackground('bg-canvas-ice');
+    if (modeBadge) modeBadge.textContent = 'DRILL // INITIALS (声母)';
+  } else if (mode === 'endings') {
+    setAppBackground('bg-canvas-ice');
+    if (modeBadge) modeBadge.textContent = 'DRILL // ENDINGS (韵母)';
+  }
+
   nextQuestion(); 
 }
 
@@ -159,33 +188,42 @@ function playAudio() {
 function setupButtons() {
   document.querySelectorAll('.tone-btn').forEach((btn, index) => {
     btn.addEventListener('click', (e) => {
-      const userGuess = btn.querySelector('.option-text').innerText;
+      const optionSpan = btn.querySelector('.option-text');
+      const userGuess = (optionSpan ? optionSpan.textContent : btn.textContent || '').trim().toLowerCase();
       let isCorrect = false;
 
-      if (currentGameMode === 'tones' && userGuess === currentItem.pinyin_correct) {
+      if (currentGameMode === 'tones') {
+        const correct = (currentItem.pinyin_correct || '').trim().toLowerCase();
+        if (userGuess === correct) {
           isCorrect = true;
-      } else if (currentGameMode === 'initials' && (userGuess === currentItem.initial || (userGuess === '∅' && currentItem.initial === ''))) {
+        }
+      } else if (currentGameMode === 'initials') {
+        const correct = (currentItem.initial || '').trim().toLowerCase();
+        if (userGuess === correct || (userGuess === '∅' && correct === '')) {
           isCorrect = true;
-      } else if (currentGameMode === 'endings' && userGuess === currentItem.ending_base) {
+        }
+      } else if (currentGameMode === 'endings') {
+        const correct = (currentItem.ending_base || '').trim().toLowerCase();
+        if (userGuess === correct) {
           isCorrect = true;
+        }
       }
 
       if (isCorrect) {
-        document.getElementById('feedback').innerText = "CORRECT";
-        document.getElementById('feedback').className = "mb-2 font-label tracking-widest font-bold uppercase text-sm h-6 text-tertiary text-center";
+        document.getElementById('feedback').innerHTML = `<span class="bg-black text-canvas-acid px-3 py-1 rounded-full border border-black font-mono font-bold text-xs uppercase shadow-hard-black tracking-wider animate-bounce">CORRECT! +1</span>`;
         document.querySelector('.options').style.display = 'none';
         
         const fabContainer = document.getElementById('fab-container');
         fabContainer.innerHTML = `
-          <button class="w-14 h-14 rounded-full bg-secondary text-on-secondary shadow-xl flex items-center justify-center animate-[pop-up_0.3s_ease-out]">
-            <span class="material-symbols-outlined text-2xl">check</span>
-          </button>
+          <div class="w-14 h-14 rounded-2xl bg-canvas-acid text-black border-2 border-black shadow-hard-black flex items-center justify-center animate-[pop-up_0.3s_ease-out]">
+            <span class="material-symbols-outlined text-3xl">check</span>
+          </div>
         `;
         fabContainer.classList.remove('hidden');
 
         document.getElementById('pinyin-display').innerHTML = `
-            <div class="font-headline text-6xl md:text-8xl font-black text-on-surface tracking-tighter mb-4">${currentItem.hanzi}</div>
-            <div class="font-body text-on-surface-variant text-xl md:text-3xl font-medium">${currentItem.pinyin_correct}</div>
+            <div class="font-chinese font-black text-5xl sm:text-6xl text-black leading-none">${currentItem.hanzi}</div>
+            <div class="font-speed font-black italic text-2xl sm:text-3xl text-black">${currentItem.pinyin_correct}</div>
         `;
         
         const explanationBox = document.getElementById('explanation-box');
@@ -196,13 +234,14 @@ function setupButtons() {
             const explanation = (currentGameMode === 'initials') ? currentItem.initial_explanation : currentItem.final_explanation;
 
             explanationContent = `
-                <div class="relative p-4 text-center">
-                    <p class="text-sm text-left">
-                        <strong class="font-bold text-on-surface">${term}:</strong> 
+                <div class="relative p-2 text-center">
+                    <p class="font-mono text-xs sm:text-sm text-left text-black">
+                        <strong class="font-speed font-black text-black">${term}:</strong> 
                         ${explanation}
                     </p>
-                    <button id="next-question-btn" class="mt-4 w-12 h-12 rounded-full bg-primary-container text-on-primary-container shadow-lg flex items-center justify-center mx-auto hover:scale-110 transition-transform">
-                        <span class="material-symbols-outlined">arrow_forward</span>
+                    <button id="next-question-btn" class="mt-3 px-5 py-2 rounded-full bg-black text-white hover:bg-badge-pink border-2 border-black font-mono text-xs font-black uppercase tracking-wider shadow-hard-black flex items-center gap-2 mx-auto active-collapse transition-colors cursor-pointer">
+                        <span>NEXT QUESTION</span>
+                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
                     </button>
                 </div>
             `;
@@ -216,14 +255,13 @@ function setupButtons() {
             setTimeout(nextQuestion, 1500);
         }
       } else {
-        document.getElementById('feedback').innerText = "TRY AGAIN";
-        document.getElementById('feedback').className = "mb-2 font-label tracking-widest font-bold uppercase text-sm h-6 text-tertiary-fixed-dim text-center"; 
+        document.getElementById('feedback').innerHTML = `<span class="bg-badge-red text-white px-3 py-1 rounded-full border border-black font-mono font-bold text-xs uppercase shadow-hard-black tracking-wider">TRY AGAIN</span>`;
         
         const fabContainer = document.getElementById('fab-container');
         fabContainer.innerHTML = `
-          <button class="w-14 h-14 rounded-full bg-tertiary-fixed-dim text-on-tertiary-fixed shadow-xl flex items-center justify-center animate-[pop-up_0.3s_ease-out]">
-            <span class="material-symbols-outlined text-2xl">close</span>
-          </button>
+          <div class="w-14 h-14 rounded-2xl bg-badge-red text-white border-2 border-black shadow-hard-black flex items-center justify-center animate-[pop-up_0.3s_ease-out]">
+            <span class="material-symbols-outlined text-3xl">close</span>
+          </div>
         `;
         fabContainer.classList.remove('hidden');
         
@@ -257,40 +295,46 @@ function nextQuestion() {
 
   if (currentGameMode === 'tones') {
       display.innerHTML = `
-        <div class="font-headline text-6xl md:text-8xl font-black text-on-surface tracking-tighter mb-4">${currentItem.hanzi}</div>
-        <div class="font-body text-on-surface-variant text-xl md:text-3xl font-medium">${currentItem.pinyin_base}</div>
+        <div class="font-chinese font-black text-5xl sm:text-6xl text-black leading-none">${currentItem.hanzi}</div>
+        <div class="font-speed font-black italic text-2xl sm:text-3xl text-black">${currentItem.pinyin_base}</div>
       `;
+      const toneNames = ['High', 'Rising', 'Dipping', 'Falling'];
       buttons.forEach((btn, i) => {
-          btn.querySelector('.option-text').innerText = currentItem.tone_options[i]
+          btn.querySelector('.option-text').textContent = currentItem.tone_options[i];
+          const hint = btn.querySelector('.tone-hint');
+          if (hint) hint.textContent = toneNames[i];
       });
 
   } else if (currentGameMode === 'initials') {
       display.innerHTML = `
-        <div class="font-headline text-6xl md:text-8xl font-black text-on-surface tracking-tighter mb-4">${currentItem.hanzi}</div>
-        <div class="font-body text-on-surface-variant text-xl md:text-3xl font-medium flex items-end justify-center gap-1">
-          <span class="inline-block w-6 md:w-8 border-b-4 border-on-surface-variant mb-1"></span>${currentItem.ending_correct}
+        <div class="font-chinese font-black text-5xl sm:text-6xl text-black leading-none">${currentItem.hanzi}</div>
+        <div class="font-speed font-black italic text-2xl sm:text-3xl text-black flex items-end justify-center gap-1">
+          <span class="inline-block w-6 md:w-8 border-b-4 border-black mb-1"></span>${currentItem.ending_correct}
         </div>
       `;
       buttons.forEach((btn, i) => {
-          btn.querySelector('.option-text').innerText = currentItem.initial_options[i] === "" ? "∅" : currentItem.initial_options[i];
+          btn.querySelector('.option-text').textContent = currentItem.initial_options[i] === "" ? "∅" : currentItem.initial_options[i];
+          const hint = btn.querySelector('.tone-hint');
+          if (hint) hint.textContent = '';
       });
 
   } else if (currentGameMode === 'endings') {
       display.innerHTML = `
-        <div class="font-headline text-6xl md:text-8xl font-black text-on-surface tracking-tighter mb-4">${currentItem.hanzi}</div>
-        <div class="font-body text-on-surface-variant text-xl md:text-3xl font-medium flex items-end justify-center gap-1">
-          ${currentItem.initial}<span class="inline-block w-8 md:w-12 border-b-4 border-on-surface-variant mb-1"></span>
+        <div class="font-chinese font-black text-5xl sm:text-6xl text-black leading-none">${currentItem.hanzi}</div>
+        <div class="font-speed font-black italic text-2xl sm:text-3xl text-black flex items-end justify-center gap-1">
+          ${currentItem.initial}<span class="inline-block w-8 md:w-12 border-b-4 border-black mb-1"></span>
         </div>
       `;
       buttons.forEach((btn, i) => {
-          btn.querySelector('.option-text').innerText = removeTones(currentItem.ending_options[i]);
+          btn.querySelector('.option-text').textContent = removeTones(currentItem.ending_options[i]);
+          const hint = btn.querySelector('.tone-hint');
+          if (hint) hint.textContent = '';
       });
   }
 
   buttons.forEach(btn => void btn.offsetWidth);
 
-  document.getElementById('feedback').innerText = "";
-  document.getElementById('feedback').className = "mb-2 font-label tracking-widest font-bold uppercase text-sm h-6";
+  document.getElementById('feedback').innerHTML = '<span class="text-white/80">[IDENTIFY THE TARGET SOUND]</span>';
   playAudio();
 }
 
@@ -340,7 +384,7 @@ function setupAudioLibrary() {
         slide.dataset.index = index;
 
         const label = document.createElement('span');
-        label.className = 'slide-label font-headline text-2xl font-bold transition-all duration-150';
+        label.className = 'slide-label font-speed text-xl sm:text-2xl font-bold transition-all duration-150';
         label.textContent = item === '' ? '∅' : item;
         slide.appendChild(label);
 
@@ -353,7 +397,7 @@ function setupAudioLibrary() {
         slide.dataset.index = index;
 
         const label = document.createElement('span');
-        label.className = 'slide-label font-headline text-2xl font-bold transition-all duration-150';
+        label.className = 'slide-label font-speed text-xl sm:text-2xl font-bold transition-all duration-150';
         label.textContent = item;
         slide.appendChild(label);
 
@@ -370,18 +414,23 @@ function setupAudioLibrary() {
             const distance = Math.abs(slideDetail.distance);
             if (distance < 0.5) {
                 label.style.opacity = '1';
-                label.style.transform = `scale(${1.25 - distance * 0.2})`;
-                label.style.color = type === 'initial' ? '#8e001b' : '#2559bd';
+                label.style.transform = `scale(${1.2 - distance * 0.15})`;
+                label.style.color = type === 'initial' ? '#000000' : '#104FE2';
                 label.style.fontWeight = '900';
             } else if (distance < 1.5) {
-                label.style.opacity = '0.5';
+                label.style.opacity = '0.6';
                 label.style.transform = 'scale(0.95)';
-                label.style.color = '';
+                label.style.color = '#000000';
+                label.style.fontWeight = '700';
+            } else if (distance < 2.5) {
+                label.style.opacity = '0.35';
+                label.style.transform = 'scale(0.85)';
+                label.style.color = '#000000';
                 label.style.fontWeight = '600';
             } else {
-                label.style.opacity = '0.2';
-                label.style.transform = 'scale(0.8)';
-                label.style.color = '';
+                label.style.opacity = '0.15';
+                label.style.transform = 'scale(0.75)';
+                label.style.color = '#000000';
                 label.style.fontWeight = '500';
             }
         });
@@ -403,16 +452,16 @@ function setupAudioLibrary() {
 
         if (matchingWords.length > 0) {
             selectionDisplay.innerHTML = `
-                <span class="font-headline text-3xl font-black text-primary">${pinyinBase}</span>
-                <span class="ml-2 text-xs uppercase tracking-wider font-bold text-on-surface-variant/70">
-                  (${matchingWords.length} tone${matchingWords.length > 1 ? 's' : ''})
+                <span class="font-chinese font-black text-2xl sm:text-3xl text-black">${pinyinBase}</span>
+                <span class="ml-2 font-mono text-[11px] sm:text-xs uppercase tracking-wider font-bold bg-black text-canvas-acid px-2 py-0.5 rounded border border-black shadow-sm">
+                  ${matchingWords.length} TONE${matchingWords.length > 1 ? 'S' : ''}
                 </span>
             `;
             mainPlayBtn.disabled = false;
         } else {
             selectionDisplay.innerHTML = `
-                <span class="font-headline text-2xl font-bold text-on-surface/30 line-through">${pinyinBase}</span>
-                <span class="ml-2 text-xs uppercase tracking-wider text-error/70 font-semibold">(No syllable)</span>
+                <span class="font-chinese text-2xl font-bold text-black/30 line-through">${pinyinBase}</span>
+                <span class="ml-2 font-mono text-xs uppercase tracking-wider text-badge-red font-black">(No syllable)</span>
             `;
             mainPlayBtn.disabled = true;
         }
@@ -424,7 +473,7 @@ function setupAudioLibrary() {
         rubberband: true,
         slides: {
             origin: 'center',
-            perView: 5,
+            perView: 7,
             spacing: 0,
         },
         initial: 0,
@@ -445,7 +494,7 @@ function setupAudioLibrary() {
         rubberband: true,
         slides: {
             origin: 'center',
-            perView: 5,
+            perView: 7,
             spacing: 0,
         },
         initial: 0,
@@ -498,11 +547,11 @@ function setupAudioLibrary() {
             if (word) {
                 btn.disabled = false;
                 btn.classList.remove('opacity-30', 'cursor-not-allowed', 'pointer-events-none');
-                btn.classList.add('hover:bg-primary-container', 'cursor-pointer');
+                btn.classList.add('hover:bg-white', 'cursor-pointer');
             } else {
                 btn.disabled = true;
                 btn.classList.add('opacity-30', 'cursor-not-allowed', 'pointer-events-none');
-                btn.classList.remove('hover:bg-primary-container', 'cursor-pointer');
+                btn.classList.remove('hover:bg-white', 'cursor-pointer');
             }
         });
 
@@ -541,6 +590,23 @@ function setupAudioLibrary() {
     // Initial sync
     setTimeout(syncSelection, 50);
 }
+
+// Global Keyboard Navigation (1, 2, 3, 4 and Space)
+window.addEventListener('keydown', (e) => {
+  const gameScreen = document.getElementById('game-screen');
+  if (gameScreen && !gameScreen.classList.contains('hidden')) {
+    if (e.key >= '1' && e.key <= '4') {
+      const index = parseInt(e.key) - 1;
+      const targetBtn = document.querySelectorAll('.tone-btn')[index];
+      if (targetBtn && document.querySelector('.options').style.display !== 'none') {
+        targetBtn.click();
+      }
+    } else if (e.code === 'Space') {
+      e.preventDefault();
+      playAudio();
+    }
+  }
+});
 
 // Initialize the app
 setupButtons();

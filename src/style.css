@@ -6,6 +6,60 @@
   Custom animations and utility classes that complement Tailwind.
 */
 
+/* Halftone / micro-mesh dot texture overlay */
+.bg-halftone-dots {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.12) 1.25px, transparent 1.25px);
+  background-size: 14px 14px;
+}
+.bg-halftone-light {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.15) 1.25px, transparent 1.25px);
+  background-size: 14px 14px;
+}
+
+/* Tactile Hard Sticker Shadows */
+.shadow-hard-black {
+  box-shadow: 4px 4px 0px #000000;
+}
+.shadow-hard-black-lg {
+  box-shadow: 6px 6px 0px #000000;
+}
+.shadow-hard-offset {
+  box-shadow: 3.5px 3.5px 0px #000000, 6.5px 6.5px 0px rgba(255, 255, 255, 0.85);
+}
+.shadow-hard-red {
+  box-shadow: 4px 4px 0px #E52421;
+}
+
+/* Tactile active state press collapse */
+.active-collapse:active {
+  transform: translate(2px, 2px) scale(0.98) !important;
+  box-shadow: 1px 1px 0px #000000 !important;
+}
+
+/* Ticket notched corners via clip-path */
+.ticket-cutout {
+  clip-path: polygon(
+    0% 8px, 8px 0%, calc(100% - 8px) 0%, 100% 8px,
+    100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0% calc(100% - 8px)
+  );
+}
+
+/* Caution diagonal striping */
+.caution-stripe {
+  background: repeating-linear-gradient(
+    -45deg,
+    #1c1d21,
+    #1c1d21 12px,
+    #FF5C1C 12px,
+    #FF5C1C 24px
+  );
+}
+
+/* Material Symbols configuration */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24;
+}
+
 @keyframes slide-in-bottom {
   0% { transform: translateY(50px); opacity: 0; }
   100% { transform: translateY(0); opacity: 1; }
@@ -58,14 +112,14 @@
   -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
 }
 
-/* Keen-Slider Vertical Picker Slide Dimensions */
+/* Keen-Slider Vertical Picker Slide Dimensions (7 items per view) */
 .keen-slider--vertical {
   height: 100% !important;
 }
 .keen-slider--vertical .keen-slider__slide {
-  height: 20% !important;
-  min-height: 20% !important;
-  max-height: 20% !important;
+  height: 14.285% !important;
+  min-height: 14.285% !important;
+  max-height: 14.285% !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
