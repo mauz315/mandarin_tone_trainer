@@ -30,6 +30,13 @@ function getAudioContext() {
 }
 
 function ensureAudioUnlocked() {
+  // Request 'playback' audio session so iOS ignores the hardware mute switch,
+  // matching the behaviour of native media apps. Guarded for browser support.
+  if (navigator.audioSession && navigator.audioSession.type !== 'playback') {
+    try {
+      navigator.audioSession.type = 'playback';
+    } catch (_) {}
+  }
   getAudioContext();
   if (!htmlAudioInstance && typeof Audio !== 'undefined') {
     htmlAudioInstance = new Audio();
