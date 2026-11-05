@@ -12,13 +12,13 @@
 
     <!-- Material Symbols -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-    <script type="module" crossorigin src="/mandarin_tone_trainer/assets/index-nEBkbQNm.js"></script>
-    <link rel="stylesheet" crossorigin href="/mandarin_tone_trainer/assets/index-CJa57QE2.css">
+    <script type="module" crossorigin src="/mandarin_tone_trainer/assets/index-C60Kn8N0.js"></script>
+    <link rel="stylesheet" crossorigin href="/mandarin_tone_trainer/assets/index-BfoojlVX.css">
   </head>
-  <body class="bg-[#181a1d] lg:bg-transparent text-slate-900 font-grotesk min-h-[100dvh] antialiased selection:bg-badge-pink selection:text-white p-2 md:p-6 lg:p-0 flex flex-col items-center justify-center">
+  <body class="text-slate-900 font-grotesk min-h-[100dvh] antialiased selection:bg-badge-pink selection:text-white p-0 m-0 flex flex-col items-center justify-center overflow-x-hidden">
 
-    <!-- POSTER CANVAS CONTAINER (Full-bleed on desktop, contained card on mobile) -->
-    <main id="app" class="w-full max-w-xl md:max-w-2xl lg:max-w-none relative rounded-3xl lg:rounded-none overflow-hidden border-[3.5px] lg:border-0 border-black shadow-[8px_8px_0px_#000000] lg:shadow-none min-h-[100dvh] lg:h-screen lg:min-h-screen flex flex-col justify-between transition-colors duration-500 bg-canvas-acid">
+    <!-- POSTER CANVAS CONTAINER (Full-bleed on both mobile and desktop) -->
+    <main id="app" class="w-full relative overflow-hidden min-h-[100dvh] lg:h-screen lg:min-h-screen flex flex-col justify-between transition-colors duration-500 bg-canvas-acid">
       <!-- Halftone Texture Background Layer -->
       <div class="absolute inset-0 bg-halftone-dots pointer-events-none z-0"></div>
 
@@ -38,8 +38,8 @@
           
           <!-- Left Brand Header Hub -->
           <div class="w-full lg:col-span-5 flex flex-col justify-center py-2 max-w-md">
-            <!-- Brand Identity Marquee Badge Area (Collage Anchor - Drops First) -->
-            <section class="w-full pt-2 pb-2 rock-fall rock-delay-1">
+            <!-- Brand Identity Marquee Badge Area (Collage Anchor) -->
+            <section class="w-full pt-2 pb-2">
               <div class="flex items-center mb-3">
                 <span class="bg-black text-canvas-acid font-mono text-[10px] sm:text-xs font-black px-2.5 py-1 rounded border border-black uppercase tracking-wider">
                   SYS // VER 2.4.0
@@ -60,40 +60,38 @@
           <div class="w-full lg:col-span-7 flex flex-col justify-center">
             <!-- ASYMMETRIC BADGE COLLAGE MENU ITEMS (#main-menu) -->
             <div id="main-menu" class="w-full max-w-xl mx-auto lg:mx-0 flex flex-col gap-3 py-2">
-              <!-- 1. #start-tones-btn: The Heavy Speed Lozenge Ticket (Drops Second) -->
-              <div class="rock-fall rock-delay-2 w-full">
-                <button id="start-tones-btn" class="w-full text-left relative group -rotate-[1deg] hover:rotate-0 transition-transform duration-200 active-collapse">
-                  <div class="bg-badge-butter border-[3px] border-black rounded-2xl p-4 sm:p-5 shadow-hard-black group-hover:bg-[#fffaab] transition-colors relative overflow-hidden">
-                    <!-- Inline Graphic 3-Pill Slanted Lozenge Badge SVG -->
-                    <div class="absolute -right-6 -bottom-6 opacity-20 pointer-events-none group-hover:opacity-30 transition-opacity">
-                      <svg fill="none" height="100" viewBox="0 0 140 100" width="140">
-                        <rect fill="#000" height="16" rx="8" transform="rotate(-25 10 20)" width="45" x="10" y="20"></rect>
-                        <rect fill="#000" height="16" rx="8" transform="rotate(-25 40 20)" width="55" x="40" y="20"></rect>
-                        <rect fill="#000" height="16" rx="8" transform="rotate(-25 75 20)" width="60" x="75" y="20"></rect>
-                      </svg>
+              <!-- 1. #start-tones-btn: The Heavy Speed Lozenge Ticket -->
+              <button id="start-tones-btn" class="w-full text-left relative group -rotate-[1deg] hover:rotate-0 transition-transform duration-200 active-collapse">
+                <div class="bg-badge-butter border-[3px] border-black rounded-2xl p-4 sm:p-5 shadow-hard-black group-hover:bg-[#fffaab] transition-colors relative overflow-hidden">
+                  <!-- Inline Graphic 3-Pill Slanted Lozenge Badge SVG -->
+                  <div class="absolute -right-6 -bottom-6 opacity-20 pointer-events-none group-hover:opacity-30 transition-opacity">
+                    <svg fill="none" height="100" viewBox="0 0 140 100" width="140">
+                      <rect fill="#000" height="16" rx="8" transform="rotate(-25 10 20)" width="45" x="10" y="20"></rect>
+                      <rect fill="#000" height="16" rx="8" transform="rotate(-25 40 20)" width="55" x="40" y="20"></rect>
+                      <rect fill="#000" height="16" rx="8" transform="rotate(-25 75 20)" width="60" x="75" y="20"></rect>
+                    </svg>
+                  </div>
+                  <div class="flex items-start justify-between gap-3 relative z-10">
+                    <div class="space-y-1">
+                      <div class="flex items-center gap-2">
+                        <span class="bg-black text-badge-butter font-mono text-[11px] font-bold px-2 py-0.5 rounded">01</span>
+                        <span class="font-speed font-black italic tracking-tight text-2xl sm:text-3xl text-black uppercase">
+                          Tone Trainer
+                        </span>
+                      </div>
+                      <p class="font-mono text-xs sm:text-sm text-black/80 font-bold max-w-md pt-0.5">
+                        Master the four tones of Mandarin through isolated audio drills.
+                      </p>
                     </div>
-                    <div class="flex items-start justify-between gap-3 relative z-10">
-                      <div class="space-y-1">
-                        <div class="flex items-center gap-2">
-                          <span class="bg-black text-badge-butter font-mono text-[11px] font-bold px-2 py-0.5 rounded">01</span>
-                          <span class="font-speed font-black italic tracking-tight text-2xl sm:text-3xl text-black uppercase">
-                            Tone Trainer
-                          </span>
-                        </div>
-                        <p class="font-mono text-xs sm:text-sm text-black/80 font-bold max-w-md pt-0.5">
-                          Master the four tones of Mandarin through isolated audio drills.
-                        </p>
-                      </div>
-                      <div class="w-12 h-12 rounded-xl bg-black text-canvas-acid border-2 border-black flex items-center justify-center shrink-0 shadow-hard-black group-hover:scale-105 transition-transform">
-                        <span class="material-symbols-outlined text-2xl">graphic_eq</span>
-                      </div>
+                    <div class="w-12 h-12 rounded-xl bg-black text-canvas-acid border-2 border-black flex items-center justify-center shrink-0 shadow-hard-black group-hover:scale-105 transition-transform">
+                      <span class="material-symbols-outlined text-2xl">graphic_eq</span>
                     </div>
                   </div>
-                </button>
-              </div>
+                </div>
+              </button>
 
-              <!-- Staggered Two-Column Row for Badges 2 and 3 (Drops Third) -->
-              <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 w-full rock-fall rock-delay-3">
+              <!-- Staggered Two-Column Row for Badges 2 and 3 -->
+              <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 w-full">
                 <!-- 2. #open-submenu-btn: Retro Stadium Racetrack Oval Badge -->
                 <button id="open-submenu-btn" class="sm:col-span-6 text-left relative group rotate-[1.2deg] hover:rotate-0 transition-transform duration-200 active-collapse">
                   <div class="bg-badge-lavender border-[3px] border-black rounded-3xl p-4 sm:p-5 shadow-hard-black group-hover:bg-[#afb6ff] transition-colors h-full flex flex-col justify-between">
@@ -145,33 +143,31 @@
                 </button>
               </div>
 
-              <!-- 4. #start-words-btn: Industrial Dark Graphic Patch with Diagonal Stripes (Drops Fourth) -->
-              <div class="rock-fall rock-delay-4 w-full">
-                <button id="start-words-btn" class="w-full text-left relative opacity-75 cursor-not-allowed rotate-[-0.5deg]" disabled>
-                  <div class="bg-[#1c1d21] border-[3px] border-black rounded-2xl p-4 sm:p-5 shadow-hard-black relative overflow-hidden">
-                    <!-- Caution Stripe Horizon Indicator -->
-                    <div class="absolute top-0 right-0 w-36 h-full caution-stripe opacity-40"></div>
-                    <div class="flex items-center justify-between gap-4 relative z-10">
-                      <div class="space-y-1">
-                        <div class="flex items-center gap-2">
-                          <span class="bg-badge-red text-white font-mono text-[10px] font-black px-2 py-0.5 rounded uppercase">
-                            LOCKED
-                          </span>
-                          <h3 class="font-speed font-black italic text-xl sm:text-2xl text-white/70 uppercase">
-                            Word Trainer
-                          </h3>
-                        </div>
-                        <p class="font-mono text-xs text-white/50 font-bold">
-                          Coming Soon
-                        </p>
+              <!-- 4. #start-words-btn: Industrial Dark Graphic Patch with Diagonal Stripes -->
+              <button id="start-words-btn" class="w-full text-left relative opacity-75 cursor-not-allowed rotate-[-0.5deg]" disabled>
+                <div class="bg-[#1c1d21] border-[3px] border-black rounded-2xl p-4 sm:p-5 shadow-hard-black relative overflow-hidden">
+                  <!-- Caution Stripe Horizon Indicator -->
+                  <div class="absolute top-0 right-0 w-36 h-full caution-stripe opacity-40"></div>
+                  <div class="flex items-center justify-between gap-4 relative z-10">
+                    <div class="space-y-1">
+                      <div class="flex items-center gap-2">
+                        <span class="bg-badge-red text-white font-mono text-[10px] font-black px-2 py-0.5 rounded uppercase">
+                          LOCKED
+                        </span>
+                        <h3 class="font-speed font-black italic text-xl sm:text-2xl text-white/70 uppercase">
+                          Word Trainer
+                        </h3>
                       </div>
-                      <div class="w-10 h-10 rounded-xl bg-black/60 border border-white/20 flex items-center justify-center text-white/40">
-                        <span class="material-symbols-outlined text-xl">lock</span>
-                      </div>
+                      <p class="font-mono text-xs text-white/50 font-bold">
+                        Coming Soon
+                      </p>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-black/60 border border-white/20 flex items-center justify-center text-white/40">
+                      <span class="material-symbols-outlined text-xl">lock</span>
                     </div>
                   </div>
-                </button>
-              </div>
+                </div>
+              </button>
             </div>
 
             <!-- SUBMENU CONTAINER (#submenu) - Inside Menu Screen -->
@@ -211,8 +207,8 @@
 
         </div>
 
-        <!-- Bottom Graphic Footer Strip with Discreet Testing Button (Drops Fifth) -->
-        <footer class="w-full pt-3 pb-1 flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] font-bold text-black/60 border-t-2 border-black/15 rock-fall rock-delay-5">
+        <!-- Bottom Graphic Footer Strip with Discreet Testing Button -->
+        <footer class="w-full pt-3 pb-1 flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] font-bold text-black/60 border-t-2 border-black/15">
           <span>[TONE DRILLS &amp; PHONOLOGY]</span>
           <button id="open-engine-btn" class="font-mono text-[10px] font-black uppercase tracking-wider bg-black text-canvas-acid hover:bg-badge-pink hover:text-white px-2.5 py-1 rounded-full border border-black shadow-hard-black flex items-center gap-1.5 transition-all active-collapse cursor-pointer" title="Developer / Product Testbed">
             <span class="w-1.5 h-1.5 rounded-full bg-badge-pink animate-pulse"></span>
@@ -245,12 +241,21 @@
         </header>
 
         <!-- Widescreen Technical Cockpit Split (Stimulus Left | Response Right) -->
-        <div class="w-full my-auto flex-1 flex flex-col lg:grid lg:grid-cols-12 lg:gap-8 lg:items-center py-2">
+        <div class="w-full my-auto flex-1 flex flex-col justify-center lg:grid lg:grid-cols-12 lg:gap-8 lg:items-center py-2 relative z-10">
           
-          <!-- Left Column: Audio Stimulus & Pinyin Display -->
+          <!-- Left Column: Audio Stimulus & Pinyin Display (Pinyin on top, Play button below) -->
           <div class="w-full lg:col-span-6 flex flex-col items-center justify-center max-w-md mx-auto">
-            <!-- Horizon Band with Hero Play Button -->
-            <div class="w-full bg-horizon-forest border-[3px] border-black rounded-3xl p-4 sm:p-6 shadow-hard-black flex flex-col items-center relative overflow-hidden">
+            <!-- Pinyin & Hanzi Display Card (Positioned on Top) -->
+            <div id="pinyin-display" class="w-full max-w-sm lg:max-w-md bg-white border-[3px] border-black rounded-2xl p-3 sm:p-4 shadow-hard-black text-center flex flex-col items-center justify-center gap-1 min-h-[88px] sm:min-h-[96px]">
+              <div class="font-chinese font-black text-4xl sm:text-5xl text-black leading-none">...</div>
+              <div class="font-speed font-black italic text-xl sm:text-2xl text-black">...</div>
+            </div>
+
+            <!-- Explanation Box for Initials/Endings -->
+            <div id="explanation-box" class="hidden mt-2.5 p-3 bg-white border-2 border-black rounded-xl text-black text-xs text-center w-full max-w-sm lg:max-w-md shadow-hard-black"></div>
+
+            <!-- Horizon Band with Compact Play Button (Positioned Below Pinyin) -->
+            <div class="mt-3 w-full bg-horizon-forest border-[3px] border-black rounded-2xl sm:rounded-3xl p-3 sm:p-4 shadow-hard-black flex flex-col items-center relative overflow-hidden">
               <!-- Subtle diagonal speed lines on horizon background -->
               <div class="absolute -top-6 -right-6 opacity-10 pointer-events-none">
                 <svg fill="none" height="120" viewBox="0 0 160 120" width="160">
@@ -260,28 +265,19 @@
                 </svg>
               </div>
 
-              <button id="play-btn" class="bg-canvas-acid hover:bg-[#a6e612] active-collapse border-[3.5px] border-black rounded-2xl px-6 sm:px-8 py-3.5 sm:py-4 shadow-hard-black flex items-center gap-3 transition-transform relative z-10 cursor-pointer">
-                <span class="material-symbols-outlined text-4xl text-black">volume_up</span>
-                <span class="font-speed font-black italic text-xl sm:text-2xl uppercase text-black">PLAY SOUND</span>
+              <button id="play-btn" class="bg-canvas-acid hover:bg-[#a6e612] active-collapse border-[2.5px] border-black rounded-xl sm:rounded-2xl px-5 sm:px-7 py-2 sm:py-2.5 shadow-hard-black flex items-center gap-2.5 sm:gap-3 transition-transform relative z-10 cursor-pointer">
+                <span class="material-symbols-outlined text-2xl sm:text-3xl text-black">volume_up</span>
+                <span class="font-speed font-black italic text-base sm:text-lg uppercase text-black">PLAY SOUND</span>
               </button>
 
-              <div id="feedback" class="mt-2.5 font-mono text-xs text-white/90 uppercase font-bold min-h-[28px] flex items-center justify-center text-center">
-                [IDENTIFY THE CORRECT TONE CONTOUR]
+              <div id="feedback" class="mt-2 font-mono text-[11px] sm:text-xs text-white/90 uppercase font-bold min-h-[22px] flex items-center justify-center text-center">
+                [IDENTIFY THE TARGET SOUND]
               </div>
             </div>
-
-            <!-- Pinyin & Hanzi Display Card -->
-            <div id="pinyin-display" class="mt-3 bg-white border-[3px] border-black rounded-2xl p-3 sm:p-4 shadow-hard-black text-center w-full max-w-sm lg:max-w-md flex flex-col items-center justify-center gap-1 min-h-[96px] lg:min-h-[110px]">
-              <div class="font-chinese font-black text-5xl lg:text-6xl text-black leading-none">...</div>
-              <div class="font-speed font-black italic text-2xl lg:text-3xl text-black">...</div>
-            </div>
-
-            <!-- Explanation Box for Initials/Endings -->
-            <div id="explanation-box" class="hidden mt-3 p-3 bg-white border-2 border-black rounded-xl text-black text-xs text-center w-full max-w-sm lg:max-w-md shadow-hard-black"></div>
           </div>
 
-          <!-- Right Column: 4 Tactile Tone Option Badges (2x2 Matrix) -->
-          <div class="w-full lg:col-span-6 flex flex-col justify-center max-w-md mx-auto">
+          <!-- Right Column: 4 Tactile Tone Option Badges (2x2 Matrix with Mobile Spacing) -->
+          <div class="w-full lg:col-span-6 flex flex-col justify-center max-w-md mx-auto mt-5 sm:mt-6 lg:mt-0">
             <section class="options grid grid-cols-2 gap-2.5 sm:gap-3 lg:gap-3.5 shrink-0 mb-1 lg:mb-0 w-full">
               <button class="tone-btn h-14 sm:h-16 lg:h-20 bg-badge-cobalt text-white border-[3px] border-black rounded-2xl p-3 sm:p-4 flex items-center justify-between shadow-hard-black active-collapse font-speed font-black text-2xl lg:text-3xl transition-all" data-index="0">
                 <div class="flex items-center gap-2">

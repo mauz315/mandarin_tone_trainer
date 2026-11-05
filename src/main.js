@@ -6,9 +6,36 @@ const KeenSlider = KS.default || KS;
 
 let words = [];
 let currentItem = null;
-let audioInstance = null;
+let audioInstance = typeof Audio !== 'undefined' ? new Audio() : null;
+let audioCtx = null;
+const audioBufferCache = new Map();
 let currentGameMode = 'tones'; // Options: 'tones', 'initials', 'endings'
 let nextQuestionTimer = null; 
+
+// Unlock Web Audio API & HTMLAudioElement on mobile gestures
+function unlockAudioContext() {
+  if (!audioCtx) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) {
+      audioCtx = new AudioContextClass();
+    }
+  }
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume().catch(() => {});
+  }
+  if (audioInstance && !audioInstance.src) {
+    audioInstance.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+    audioInstance.play().then(() => {
+      audioInstance.pause();
+    }).catch(() => {});
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('touchstart', unlockAudioContext, { passive: true });
+  window.addEventListener('touchend', unlockAudioContext, { passive: true });
+  window.addEventListener('click', unlockAudioContext, { passive: true });
+} 
 
 // --- Audio Library State ---
 let selectedInitial = null;
@@ -207,20 +234,59 @@ async function init() {
   }
 }
 
-function playAudio() {
-  if (!currentItem) return;
-  if (audioInstance) {
+async function playAudio(customPath) {
+  unlockAudioContext();
+  const audioPath = customPath || (currentItem ? `${import.meta.env.BASE_URL}${currentItem.audio}` : null);
+  if (!audioPath) return;
+
+  // 1. Web Audio API (Reliably plays automatically on mobile inside setTimeout)
+  if (audioCtx) {
+    try {
+      if (audioCtx.state === 'suspended') {
+        await audioCtx.resume();
+      }
+      let buffer = audioBufferCache.get(audioPath);
+      if (!buffer) {
+        const resp = await fetch(audioPath);
+        if (resp.ok) {
+          const arrayBuf = await resp.arrayBuffer();
+          buffer = await audioCtx.decodeAudioData(arrayBuf);
+          audioBufferCache.set(audioPath, buffer);
+        }
+      }
+      if (buffer) {
+        const source = audioCtx.createBufferSource();
+        source.buffer = buffer;
+        source.connect(audioCtx.destination);
+        source.start(0);
+        return;
+      }
+    } catch (err) {
+      console.warn("Web Audio playback failed, trying HTMLAudio fallback:", err);
+    }
+  }
+
+  // 2. Fallback to reused HTML5 Audio element
+  try {
+    if (!audioInstance) {
+      audioInstance = new Audio();
+    }
     audioInstance.pause();
     audioInstance.currentTime = 0;
+    audioInstance.src = audioPath;
+    const playPromise = audioInstance.play();
+    if (playPromise && playPromise.catch) {
+      playPromise.catch(e => console.warn("Audio play prevented:", e));
+    }
+  } catch (e) {
+    console.error("Audio failed:", e);
   }
-  const audioPath = `${import.meta.env.BASE_URL}${currentItem.audio}`;
-  audioInstance = new Audio(audioPath);
-  audioInstance.play().catch(e => console.error("Audio failed:", e));
 }
 
 function setupButtons() {
   document.querySelectorAll('.tone-btn').forEach((btn, index) => {
     btn.addEventListener('click', (e) => {
+      unlockAudioContext();
       const optionSpan = btn.querySelector('.option-text');
       const userGuess = (optionSpan ? optionSpan.textContent : btn.textContent || '').trim().toLowerCase();
       let isCorrect = false;
@@ -610,10 +676,8 @@ function setupAudioLibrary() {
             );
 
             if (word) {
-                if (audioInstance) audioInstance.pause();
                 const audioPath = `${import.meta.env.BASE_URL}${word.audio}`;
-                audioInstance = new Audio(audioPath);
-                audioInstance.play().catch(err => console.error("Audio failed:", err));
+                playAudio(audioPath);
             } else {
                 console.warn(`No audio found for ${initialKey}${selectedFinal}${tone}`);
             }
