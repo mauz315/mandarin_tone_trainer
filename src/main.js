@@ -765,7 +765,7 @@ function setupEnginePlaceholders() {
     if (count === 1) {
       // 1 Syllable Geometry: Narrower proportional horizontal axis (~0.32s duration)
       if (pitchChartWrapper) {
-        pitchChartWrapper.className = 'flex gap-1.5 items-center justify-center max-w-[340px] sm:max-w-[380px] mx-auto transition-all duration-300';
+        pitchChartWrapper.className = 'flex gap-1.5 items-center justify-center max-w-[340px] sm:max-w-[380px] lg:max-w-[420px] mx-auto my-auto transition-all duration-300';
       }
       if (pitchSvg) {
         pitchSvg.setAttribute('viewBox', '0 0 350 155');
@@ -857,7 +857,7 @@ function setupEnginePlaceholders() {
     } else {
       // 2 or 3 Syllables Geometry: Full-width multi-syllable chart
       if (pitchChartWrapper) {
-        pitchChartWrapper.className = 'flex gap-1.5 items-center justify-center w-full transition-all duration-300';
+        pitchChartWrapper.className = 'flex gap-1.5 items-center justify-center w-full my-auto transition-all duration-300';
       }
       if (pitchSvg) {
         pitchSvg.setAttribute('viewBox', '0 0 660 155');
