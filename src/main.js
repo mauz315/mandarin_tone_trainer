@@ -87,12 +87,34 @@ function setupMenu() {
   const startEndingsBtn = document.getElementById('start-endings-btn');
   
   const backBtn = document.getElementById('back-to-menu-btn');
+  const engineScreen = document.getElementById('engine-screen');
+  const openEngineBtn = document.getElementById('open-engine-btn');
+  const backFromEngineBtn = document.getElementById('back-from-engine-btn');
+
+  if (openEngineBtn) {
+    openEngineBtn.addEventListener('click', () => {
+      menuScreen.classList.add('hidden');
+      mainMenu.classList.remove('hidden');
+      submenu.classList.add('hidden');
+      if (engineScreen) engineScreen.classList.remove('hidden');
+      setAppBackground('bg-canvas-ice');
+    });
+  }
+
+  if (backFromEngineBtn) {
+    backFromEngineBtn.addEventListener('click', () => {
+      if (engineScreen) engineScreen.classList.add('hidden');
+      menuScreen.classList.remove('hidden');
+      mainMenu.classList.remove('hidden');
+      setAppBackground('bg-canvas-acid');
+    });
+  }
 
   openSubmenuBtn.addEventListener('click', () => {
     mainMenu.classList.add('hidden');
     submenu.classList.remove('hidden');
     submenu.classList.add('flex');
-    setAppBackground('bg-canvas-ice');
+    setAppBackground('bg-canvas-lavender');
   });
   
   closeSubmenuBtn.addEventListener('click', () => {
@@ -128,9 +150,20 @@ function setupMenu() {
   backBtn.addEventListener('click', () => {
     gameScreen.classList.add('hidden');
     menuScreen.classList.remove('hidden');
-    submenu.classList.add('hidden');
-    mainMenu.classList.remove('hidden');
-    setAppBackground('bg-canvas-acid');
+    
+    // If returning from Initials or Endings, return to the Submenu (Lavender)
+    if (currentGameMode === 'initials' || currentGameMode === 'endings') {
+      mainMenu.classList.add('hidden');
+      submenu.classList.remove('hidden');
+      submenu.classList.add('flex');
+      setAppBackground('bg-canvas-lavender');
+    } else {
+      submenu.classList.add('hidden');
+      submenu.classList.remove('flex');
+      mainMenu.classList.remove('hidden');
+      setAppBackground('bg-canvas-acid');
+    }
+
     document.querySelector('.options').style.display = 'grid';
     document.getElementById('play-btn').style.transform = "scale(1)";
     document.getElementById('feedback').innerHTML = "[IDENTIFY THE CORRECT TONE CONTOUR]";
@@ -144,13 +177,13 @@ function startGame(mode) {
   
   const modeBadge = document.getElementById('game-mode-badge');
   if (mode === 'tones') {
-    setAppBackground('bg-canvas-acid');
+    setAppBackground('bg-canvas-mint');
     if (modeBadge) modeBadge.textContent = 'DRILL // TONE TRAINER';
   } else if (mode === 'initials') {
-    setAppBackground('bg-canvas-ice');
+    setAppBackground('bg-canvas-butter');
     if (modeBadge) modeBadge.textContent = 'DRILL // INITIALS (声母)';
   } else if (mode === 'endings') {
-    setAppBackground('bg-canvas-ice');
+    setAppBackground('bg-canvas-pink');
     if (modeBadge) modeBadge.textContent = 'DRILL // ENDINGS (韵母)';
   }
 
@@ -594,6 +627,8 @@ function setupAudioLibrary() {
 // Global Keyboard Navigation (1, 2, 3, 4 and Space)
 window.addEventListener('keydown', (e) => {
   const gameScreen = document.getElementById('game-screen');
+  const engineScreen = document.getElementById('engine-screen');
+
   if (gameScreen && !gameScreen.classList.contains('hidden')) {
     if (e.key >= '1' && e.key <= '4') {
       const index = parseInt(e.key) - 1;
@@ -605,10 +640,723 @@ window.addEventListener('keydown', (e) => {
       e.preventDefault();
       playAudio();
     }
+  } else if (engineScreen && !engineScreen.classList.contains('hidden')) {
+    if (e.code === 'Space') {
+      e.preventDefault();
+      const recordBtn = document.getElementById('engine-record-btn');
+      if (recordBtn) recordBtn.click();
+    }
   }
 });
+
+// ========================================================
+// ACOUSTIC PRONUNCIATION ENGINE: EXTENSIBLE UI HOOKS
+// Aero Sky Ice & Racing Tangerine Palette | Multi-Syllable Scenarios (1, 2, 3)
+// ========================================================
+function setupEnginePlaceholders() {
+  const recordBtn = document.getElementById('engine-record-btn');
+  const nextBtn = document.getElementById('engine-next-btn');
+  const resetBtn = document.getElementById('engine-reset-btn');
+  const coachPlayBtn = document.getElementById('coach-hear-user-btn');
+  const stepCounter = document.getElementById('engine-step-counter');
+
+  // Multi-scenario vocabulary deck across 1, 2, and 3 syllables
+  const lessonWords = [
+    { syllablesCount: 2, hanzi: "你 好", pinyin: "nǐ hǎo", gloss: "Hello", sandhi: "/ 3rd + 3rd ➔ 2nd + 3rd /", spoken: "ní hǎo" },
+    { syllablesCount: 1, hanzi: "妈", pinyin: "mā", gloss: "Mother", sandhi: "/ Tone 1: High Level 55 /", spoken: "mā" },
+    { syllablesCount: 3, hanzi: "对 不 起", pinyin: "duì bu qǐ", gloss: "Sorry", sandhi: "/ 4th + Neutral + 3rd /", spoken: "duì bu qǐ" },
+    { syllablesCount: 2, hanzi: "可 以", pinyin: "kě yǐ", gloss: "Can / May", sandhi: "/ 3rd + 3rd ➔ 2nd + 3rd /", spoken: "ké yǐ" },
+    { syllablesCount: 1, hanzi: "好", pinyin: "hǎo", gloss: "Good", sandhi: "/ Tone 3: Low-Dipping 214 /", spoken: "hǎo" },
+    { syllablesCount: 3, hanzi: "冰 淇 淋", pinyin: "bīng qí lín", gloss: "Ice Cream", sandhi: "/ 1st + 2nd + 2nd /", spoken: "bīng qí lín" },
+    { syllablesCount: 2, hanzi: "水 果", pinyin: "shuǐ guǒ", gloss: "Fruit", sandhi: "/ 3rd + 3rd ➔ 2nd + 3rd /", spoken: "shuí guǒ" },
+    { syllablesCount: 3, hanzi: "没 关 系", pinyin: "méi guān xi", gloss: "It's Okay", sandhi: "/ 2nd + 1st + Neutral /", spoken: "méi guān xi" },
+    { syllablesCount: 1, hanzi: "马", pinyin: "mǎ", gloss: "Horse", sandhi: "/ Tone 3: Low-Dipping 214 /", spoken: "mǎ" },
+    { syllablesCount: 2, hanzi: "手 表", pinyin: "shǒu biǎo", gloss: "Watch", sandhi: "/ 3rd + 3rd ➔ 2nd + 3rd /", spoken: "shóu biǎo" }
+  ];
+
+  let isRecording = false;
+  let activeIndex = 0;
+  let currentSyllableCount = 2;
+
+  // Reacts dynamically to 1, 2, or 3 syllables across ALL layout components
+  function renderSyllableScenario(count, customData) {
+    currentSyllableCount = count;
+
+    // 1. Update Top Syllable Selector Button Styles
+    const sylBtns = document.querySelectorAll('#engine-syllable-toggle-group button');
+    sylBtns.forEach((btn, idx) => {
+      const btnCount = idx + 1;
+      if (btnCount === count) {
+        btn.className = 'px-2 py-0.5 rounded bg-black text-badge-tangerine border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer';
+      } else {
+        btn.className = 'px-2 py-0.5 rounded bg-white border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer';
+      }
+    });
+
+    // 2. Resolve Word Data
+    let word = customData;
+    if (!word) {
+      if (count === 1) {
+        word = { syllablesCount: 1, hanzi: "妈", pinyin: "mā", gloss: "Mother", sandhi: "/ Tone 1: High Level 55 /", spoken: "mā" };
+      } else if (count === 3) {
+        word = { syllablesCount: 3, hanzi: "对 不 起", pinyin: "duì bu qǐ", gloss: "Sorry", sandhi: "/ 4th + Neutral + 3rd /", spoken: "duì bu qǐ" };
+      } else {
+        word = { syllablesCount: 2, hanzi: "你 好", pinyin: "nǐ hǎo", gloss: "Hello", sandhi: "/ 3rd + 3rd ➔ 2nd + 3rd /", spoken: "ní hǎo" };
+      }
+    }
+
+    // 3. Update Header Context Card
+    const hanziEl = document.getElementById('engine-hanzi-display');
+    const pinyinEl = document.getElementById('engine-pinyin-display');
+    const glossEl = document.getElementById('engine-gloss-display');
+    const stageLabel = document.getElementById('engine-stage-label');
+    const sandhiBadge = document.getElementById('engine-sandhi-badge');
+    const arenaSubtitle = document.getElementById('engine-arena-subtitle');
+
+    if (hanziEl) hanziEl.textContent = word.hanzi;
+    if (pinyinEl) pinyinEl.textContent = word.pinyin;
+    if (glossEl) glossEl.textContent = `"${word.gloss}"`;
+
+    if (count === 1) {
+      if (stageLabel) stageLabel.textContent = '[STAGE 1: ISOLATED SYLLABLE]';
+      if (arenaSubtitle) arenaSubtitle.textContent = 'CHAO 5-LEVEL SINGLE-CONTOUR';
+      if (sandhiBadge) {
+        sandhiBadge.innerHTML = `
+          <span class="block text-[9px] text-white/90 uppercase font-black">Isolated Tone Profile</span>
+          <span class="font-speed font-black text-xs sm:text-sm text-white">${word.sandhi}</span>
+          <span class="block text-[10px] text-black font-black bg-white/90 px-1.5 py-0.2 rounded mt-0.5">Target Spoken: ${word.spoken}</span>
+        `;
+      }
+    } else if (count === 3) {
+      if (stageLabel) stageLabel.textContent = '[STAGE 3: 3-SYLLABLE & NEUTRAL TONE]';
+      if (arenaSubtitle) arenaSubtitle.textContent = 'CHAO 5-LEVEL TRIPLE-CONTOUR';
+      if (sandhiBadge) {
+        sandhiBadge.innerHTML = `
+          <span class="block text-[9px] text-white/90 uppercase font-black">Compound Rule Applied</span>
+          <span class="font-speed font-black text-xs sm:text-sm text-white">${word.sandhi}</span>
+          <span class="block text-[10px] text-black font-black bg-white/90 px-1.5 py-0.2 rounded mt-0.5">Target Spoken: ${word.spoken}</span>
+        `;
+      }
+    } else {
+      if (stageLabel) stageLabel.textContent = '[STAGE 2: TONE SANDHI]';
+      if (arenaSubtitle) arenaSubtitle.textContent = 'CHAO 5-LEVEL DUAL-CONTOUR';
+      if (sandhiBadge) {
+        sandhiBadge.innerHTML = `
+          <span class="block text-[9px] text-white/90 uppercase font-black">Sandhi Rule Applied</span>
+          <span class="font-speed font-black text-xs sm:text-sm text-white">${word.sandhi}</span>
+          <span class="block text-[10px] text-black font-black bg-white/90 px-1.5 py-0.2 rounded mt-0.5">Target Spoken: ${word.spoken}</span>
+        `;
+      }
+    }
+
+    // 4. Update SVG Pitch Arena Geometry (Narrower Proportional Axis for 1-Syllable Words)
+    const pitchChartWrapper = document.getElementById('pitch-chart-wrapper');
+    const pitchSvg = document.getElementById('pitch-chart-svg');
+    const gridLevelsContainer = document.getElementById('pitch-grid-levels');
+    const dividersContainer = document.getElementById('pitch-syllable-dividers');
+    const ribbonsContainer = document.getElementById('pitch-target-ribbons');
+    const pathsContainer = document.getElementById('user-pitch-paths-container');
+    const pointsContainer = document.getElementById('user-pitch-points-container');
+    const waveformGroup = document.getElementById('engine-live-waveform-group');
+    const milestonesContainer = document.getElementById('pitch-time-milestones');
+    const timelineFill = document.getElementById('pitch-timeline-fill');
+    const timelineText = document.getElementById('pitch-timeline-text');
+
+    if (count === 1) {
+      // 1 Syllable Geometry: Narrower proportional horizontal axis (~0.32s duration)
+      if (pitchChartWrapper) {
+        pitchChartWrapper.className = 'flex gap-1.5 items-center justify-center max-w-[340px] sm:max-w-[380px] mx-auto transition-all duration-300';
+      }
+      if (pitchSvg) {
+        pitchSvg.setAttribute('viewBox', '0 0 350 155');
+      }
+
+      // Proportional Horizontal Grid Lines (Level 5 down to Level 1 across 350px)
+      if (gridLevelsContainer) {
+        gridLevelsContainer.innerHTML = `
+          <line x1="15" y1="15" x2="335" y2="15" />
+          <line x1="15" y1="46" x2="335" y2="46" />
+          <line x1="15" y1="78" x2="335" y2="78" />
+          <line x1="15" y1="110" x2="335" y2="110" />
+          <line x1="15" y1="140" x2="335" y2="140" />
+        `;
+      }
+
+      if (dividersContainer) dividersContainer.innerHTML = '';
+      
+      const isDipping = word.sandhi && word.sandhi.includes('Dipping');
+      if (ribbonsContainer) {
+        if (isDipping) {
+          // Tone 3 Dipping Ribbon across ~0.32s
+          ribbonsContainer.innerHTML = `
+            <polygon id="target-ribbon-s1" points="40,105 160,146 310,48 310,30 160,126 40,85" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />
+          `;
+        } else {
+          // Tone 1 High-Level Corridor across ~0.32s
+          ribbonsContainer.innerHTML = `
+            <polygon id="target-ribbon-s1" points="40,22 310,22 310,8 40,8" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />
+          `;
+        }
+      }
+
+      if (pathsContainer) {
+        if (isDipping) {
+          pathsContainer.innerHTML = `
+            <path id="user-pitch-path-s1" d="M 40,95 Q 160,142 310,40" fill="none" stroke="#000000" stroke-width="4.5" stroke-linecap="round" />
+          `;
+        } else {
+          pathsContainer.innerHTML = `
+            <path id="user-pitch-path-s1" d="M 40,15 Q 175,13 310,15" fill="none" stroke="#000000" stroke-width="4.5" stroke-linecap="round" />
+          `;
+        }
+      }
+
+      if (pointsContainer) {
+        if (isDipping) {
+          pointsContainer.innerHTML = `
+            <g id="user-pitch-points-s1">
+              <circle cx="40" cy="95" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+              <circle cx="100" cy="118" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+              <circle cx="160" cy="142" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+              <circle cx="235" cy="95" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+              <circle cx="310" cy="40" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+            </g>
+          `;
+        } else {
+          pointsContainer.innerHTML = `
+            <g id="user-pitch-points-s1">
+              <circle cx="40" cy="15" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+              <circle cx="95" cy="14" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+              <circle cx="150" cy="13" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+              <circle cx="205" cy="13" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+              <circle cx="260" cy="14" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+              <circle cx="310" cy="15" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+            </g>
+          `;
+        }
+      }
+
+      if (waveformGroup) {
+        waveformGroup.innerHTML = `
+          <path d="M 30,80 Q 70,50 110,80 T 190,80 T 270,80 T 320,80" fill="none" stroke="#FF5C1C" stroke-width="3" stroke-linecap="round" class="animate-pulse" />
+          <text x="175" y="75" class="font-mono text-xs font-black fill-badge-tangerine" text-anchor="middle">CAPTURING VOCAL SPECTRUM...</text>
+        `;
+      }
+
+      if (milestonesContainer) {
+        milestonesContainer.innerHTML = `
+          <text x="40" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.00s</text>
+          <text x="175" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">[${word.pinyin}] ~320ms</text>
+          <text x="310" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.32s</text>
+        `;
+      }
+
+      if (timelineFill) timelineFill.style.width = '55%';
+      if (timelineText) timelineText.textContent = '0.18s / 0.32s';
+
+    } else {
+      // 2 or 3 Syllables Geometry: Full-width multi-syllable chart
+      if (pitchChartWrapper) {
+        pitchChartWrapper.className = 'flex gap-1.5 items-center justify-center w-full transition-all duration-300';
+      }
+      if (pitchSvg) {
+        pitchSvg.setAttribute('viewBox', '0 0 660 155');
+      }
+
+      if (gridLevelsContainer) {
+        gridLevelsContainer.innerHTML = `
+          <line x1="20" y1="15" x2="640" y2="15" />
+          <line x1="20" y1="46" x2="640" y2="46" />
+          <line x1="20" y1="78" x2="640" y2="78" />
+          <line x1="20" y1="110" x2="640" y2="110" />
+          <line x1="20" y1="140" x2="640" y2="140" />
+        `;
+      }
+
+      if (waveformGroup) {
+        waveformGroup.innerHTML = `
+          <path d="M 50,80 Q 90,50 130,80 T 210,80 T 290,80 T 370,80 T 450,80 T 530,80 T 610,80" fill="none" stroke="#FF5C1C" stroke-width="3" stroke-linecap="round" class="animate-pulse" />
+          <text x="330" y="75" class="font-mono text-xs font-black fill-badge-tangerine" text-anchor="middle">CAPTURING VOCAL SPECTRUM...</text>
+        `;
+      }
+
+      if (count === 3) {
+        // 3 Syllables Geometry: 3 partitions (33% each) across ~0.85s
+        if (dividersContainer) {
+          dividersContainer.innerHTML = `
+            <line x1="225" y1="8" x2="225" y2="142" class="stroke-black/30 stroke-[2] stroke-dasharray-[4,4]" />
+            <text x="231" y="20" class="font-mono text-[8px] fill-black/60 font-black">SYL 2 [bu] ➔</text>
+            <line x1="435" y1="8" x2="435" y2="142" class="stroke-black/30 stroke-[2] stroke-dasharray-[4,4]" />
+            <text x="441" y="20" class="font-mono text-[8px] fill-black/60 font-black">SYL 3 [qǐ] ➔</text>
+          `;
+        }
+
+        if (ribbonsContainer) {
+          ribbonsContainer.innerHTML = `
+            <polygon id="target-ribbon-s1" points="35,16 195,135 195,115 35,6" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />
+            <polygon id="target-ribbon-s2" points="245,95 405,102 405,86 245,80" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />
+            <polygon id="target-ribbon-s3" points="455,98 535,146 625,56 625,38 535,126 455,78" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />
+          `;
+        }
+
+        if (pathsContainer) {
+          pathsContainer.innerHTML = `
+            <path id="user-pitch-path-s1" d="M 35,18 Q 115,70 195,126" fill="none" stroke="#000000" stroke-width="4.5" stroke-linecap="round" />
+            <path id="user-pitch-path-s2" d="M 245,90 Q 325,92 405,96" fill="none" stroke="#000000" stroke-width="4.5" stroke-linecap="round" />
+            <path id="user-pitch-path-s3" d="M 455,92 Q 535,142 625,48" fill="none" stroke="#000000" stroke-width="4.5" stroke-linecap="round" />
+          `;
+        }
+
+        if (pointsContainer) {
+          pointsContainer.innerHTML = `
+            <g id="user-pitch-points-s1">
+              <circle cx="35" cy="18" r="4" fill="#B8F526" stroke="#000" stroke-width="2" />
+              <circle cx="115" cy="70" r="4" fill="#B8F526" stroke="#000" stroke-width="2" />
+              <circle cx="195" cy="126" r="4" fill="#B8F526" stroke="#000" stroke-width="2" />
+            </g>
+            <g id="user-pitch-points-s2">
+              <circle cx="245" cy="90" r="4" fill="#FDF197" stroke="#000" stroke-width="2" />
+              <circle cx="325" cy="92" r="4" fill="#FF5C1C" stroke="#000" stroke-width="2" />
+              <circle cx="405" cy="96" r="4" fill="#FF5C1C" stroke="#000" stroke-width="2" />
+            </g>
+            <g id="user-pitch-points-s3">
+              <circle cx="455" cy="92" r="4" fill="#B8F526" stroke="#000" stroke-width="2" />
+              <circle cx="535" cy="142" r="4" fill="#B8F526" stroke="#000" stroke-width="2" />
+              <circle cx="625" cy="48" r="4" fill="#B8F526" stroke="#000" stroke-width="2" />
+            </g>
+          `;
+        }
+
+        if (milestonesContainer) {
+          milestonesContainer.innerHTML = `
+            <text x="35" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.00s</text>
+            <text x="115" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">[duì]</text>
+            <text x="195" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.28s</text>
+            <text x="245" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.30s</text>
+            <text x="325" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">[bu]</text>
+            <text x="405" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.46s</text>
+            <text x="455" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.48s</text>
+            <text x="540" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">[qǐ]</text>
+            <text x="625" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.85s</text>
+          `;
+        }
+
+        if (timelineFill) timelineFill.style.width = '55%';
+        if (timelineText) timelineText.textContent = '0.46s / 0.85s';
+
+      } else {
+        // 2 Syllables Geometry: Default 50% split across ~0.72s
+        if (dividersContainer) {
+          dividersContainer.innerHTML = `
+            <line x1="330" y1="8" x2="330" y2="142" class="stroke-black/30 stroke-[2] stroke-dasharray-[4,4]" />
+            <text x="336" y="20" class="font-mono text-[9px] fill-black/60 font-black">SYLLABLE 2 [hǎo] ➔</text>
+          `;
+        }
+
+        if (ribbonsContainer) {
+          ribbonsContainer.innerHTML = `
+            <polygon id="target-ribbon-s1" points="70,95 300,28 300,10 70,75" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />
+            <polygon id="target-ribbon-s2" points="360,98 470,146 600,52 600,32 470,126 360,78" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />
+          `;
+        }
+
+        if (pathsContainer) {
+          pathsContainer.innerHTML = `
+            <path id="user-pitch-path-s1" d="M 70,85 Q 180,54 300,48" fill="none" stroke="#000000" stroke-width="4.5" stroke-linecap="round" />
+            <path id="user-pitch-path-s2" d="M 360,88 Q 465,138 600,45" fill="none" stroke="#000000" stroke-width="4.5" stroke-linecap="round" />
+          `;
+        }
+
+        if (pointsContainer) {
+          pointsContainer.innerHTML = `
+            <g id="user-pitch-points-s1">
+              <circle cx="70" cy="85" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+              <circle cx="120" cy="70" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+              <circle cx="180" cy="58" r="4.5" fill="#FDF197" stroke="#000" stroke-width="2" />
+              <circle cx="240" cy="50" r="5" fill="#FF5C1C" stroke="#000" stroke-width="2" />
+              <circle cx="300" cy="48" r="5" fill="#FF5C1C" stroke="#000" stroke-width="2" />
+            </g>
+            <g id="user-pitch-points-s2">
+              <circle cx="360" cy="88" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+              <circle cx="410" cy="112" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+              <circle cx="465" cy="138" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+              <circle cx="530" cy="90" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+              <circle cx="600" cy="45" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+            </g>
+          `;
+        }
+
+        if (milestonesContainer) {
+          milestonesContainer.innerHTML = `
+            <text x="70" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.00s</text>
+            <text x="180" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">[Initial: n] [Final: í]</text>
+            <text x="300" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.32s</text>
+            <text x="360" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.34s</text>
+            <text x="480" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">[Initial: h] [Final: ǎo]</text>
+            <text x="600" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.72s</text>
+          `;
+        }
+
+        if (timelineFill) timelineFill.style.width = '45%';
+        if (timelineText) timelineText.textContent = '0.32s / 0.72s';
+      }
+    }
+
+    // 5. Update Phonetic Audit Section Responsive Grid
+    const auditGrid = document.getElementById('phonetic-audit-grid');
+    if (auditGrid) {
+      if (count === 1) {
+        auditGrid.className = 'grid grid-cols-1 max-w-sm sm:max-w-md mx-auto gap-2';
+        auditGrid.innerHTML = `
+          <div class="bg-white border-[2.5px] border-black rounded-xl p-2.5 shadow-hard-black">
+            <div class="flex items-center justify-between mb-1 pb-1 border-b border-black/10">
+              <span class="font-speed font-black text-xs uppercase text-black">SYLLABLE 1: [${word.pinyin}]</span>
+              <span class="font-mono text-[9px] font-black text-black bg-canvas-acid px-1.5 py-0.2 rounded border border-black">ACCURATE CONTOUR</span>
+            </div>
+            <div class="grid grid-cols-3 gap-1 font-mono text-center">
+              <div class="bg-slate-100 border border-black rounded-lg p-1">
+                <span class="block text-[8px] text-black/60 font-black">INITIAL: m</span>
+                <span class="font-speed font-black text-xs sm:text-sm text-black">96%</span>
+                <span class="block text-[8px] text-emerald-700 font-bold">✓ Clean</span>
+              </div>
+              <div class="bg-slate-100 border border-black rounded-lg p-1">
+                <span class="block text-[8px] text-black/60 font-black">FINAL: a</span>
+                <span class="font-speed font-black text-xs sm:text-sm text-black">92%</span>
+                <span class="block text-[8px] text-emerald-700 font-bold">✓ Exact</span>
+              </div>
+              <div class="bg-canvas-acid/40 border border-black rounded-lg p-1">
+                <span class="block text-[8px] text-black font-black">TONE: 1</span>
+                <span class="font-speed font-black text-xs sm:text-sm text-black">98%</span>
+                <span class="block text-[8px] text-emerald-700 font-bold">✓ 55 Flat</span>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (count === 3) {
+        auditGrid.className = 'grid grid-cols-1 sm:grid-cols-3 gap-1.5 sm:gap-2';
+        auditGrid.innerHTML = `
+          <div class="bg-white border-[2.5px] border-black rounded-xl p-2 shadow-hard-black">
+            <div class="flex items-center justify-between mb-1 pb-1 border-b border-black/10">
+              <span class="font-speed font-black text-[11px] uppercase text-black">SYL 1: [duì]</span>
+              <span class="font-mono text-[8px] font-black text-black bg-canvas-acid px-1 rounded border border-black">✓ 4TH</span>
+            </div>
+            <div class="grid grid-cols-3 gap-1 font-mono text-center">
+              <div class="bg-slate-100 border border-black rounded-lg p-0.5">
+                <span class="block text-[8px] text-black/60 font-black">INIT: d</span>
+                <span class="font-speed font-black text-xs text-black">91%</span>
+              </div>
+              <div class="bg-slate-100 border border-black rounded-lg p-0.5">
+                <span class="block text-[8px] text-black/60 font-black">FIN: ui</span>
+                <span class="font-speed font-black text-xs text-black">88%</span>
+              </div>
+              <div class="bg-canvas-acid/40 border border-black rounded-lg p-0.5">
+                <span class="block text-[8px] text-black font-black">TONE: 4</span>
+                <span class="font-speed font-black text-xs text-black">94%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white border-[2.5px] border-black rounded-xl p-2 shadow-hard-black">
+            <div class="flex items-center justify-between mb-1 pb-1 border-b border-black/10">
+              <span class="font-speed font-black text-[11px] uppercase text-black">SYL 2: [bu]</span>
+              <span class="font-mono text-[8px] font-black text-white bg-badge-tangerine px-1 rounded border border-black">⚠ STRESSED</span>
+            </div>
+            <div class="grid grid-cols-3 gap-1 font-mono text-center">
+              <div class="bg-slate-100 border border-black rounded-lg p-0.5">
+                <span class="block text-[8px] text-black/60 font-black">INIT: b</span>
+                <span class="font-speed font-black text-xs text-black">89%</span>
+              </div>
+              <div class="bg-slate-100 border border-black rounded-lg p-0.5">
+                <span class="block text-[8px] text-black/60 font-black">FIN: u</span>
+                <span class="font-speed font-black text-xs text-black">92%</span>
+              </div>
+              <div class="bg-badge-tangerine/15 border border-badge-tangerine rounded-lg p-0.5">
+                <span class="block text-[8px] text-badge-tangerine font-black">NEUTRAL</span>
+                <span class="font-speed font-black text-xs text-badge-tangerine">62%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white border-[2.5px] border-black rounded-xl p-2 shadow-hard-black">
+            <div class="flex items-center justify-between mb-1 pb-1 border-b border-black/10">
+              <span class="font-speed font-black text-[11px] uppercase text-black">SYL 3: [qǐ]</span>
+              <span class="font-mono text-[8px] font-black text-black bg-canvas-acid px-1 rounded border border-black">✓ 3RD</span>
+            </div>
+            <div class="grid grid-cols-3 gap-1 font-mono text-center">
+              <div class="bg-slate-100 border border-black rounded-lg p-0.5">
+                <span class="block text-[8px] text-black/60 font-black">INIT: q</span>
+                <span class="font-speed font-black text-xs text-black">85%</span>
+              </div>
+              <div class="bg-slate-100 border border-black rounded-lg p-0.5">
+                <span class="block text-[8px] text-black/60 font-black">FIN: i</span>
+                <span class="font-speed font-black text-xs text-black">90%</span>
+              </div>
+              <div class="bg-canvas-acid/40 border border-black rounded-lg p-0.5">
+                <span class="block text-[8px] text-black font-black">TONE: 3</span>
+                <span class="font-speed font-black text-xs text-black">93%</span>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        auditGrid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-2';
+        auditGrid.innerHTML = `
+          <div class="bg-white border-[2.5px] border-black rounded-xl p-2.5 shadow-hard-black">
+            <div class="flex items-center justify-between mb-1 pb-1 border-b border-black/10">
+              <span class="font-speed font-black text-xs uppercase text-black">SYLLABLE 1: [ní]</span>
+              <span class="font-mono text-[9px] font-black text-white bg-badge-tangerine px-1.5 py-0.2 rounded border border-black">TONE DIVERGENCE</span>
+            </div>
+            <div class="grid grid-cols-3 gap-1 font-mono text-center">
+              <div class="bg-slate-100 border border-black rounded-lg p-1">
+                <span class="block text-[8px] text-black/60 font-black">INITIAL: n</span>
+                <span class="font-speed font-black text-xs sm:text-sm text-black">94%</span>
+                <span class="block text-[8px] text-emerald-700 font-bold">✓ Clean</span>
+              </div>
+              <div class="bg-slate-100 border border-black rounded-lg p-1">
+                <span class="block text-[8px] text-black/60 font-black">FINAL: i</span>
+                <span class="font-speed font-black text-xs sm:text-sm text-black">90%</span>
+                <span class="block text-[8px] text-emerald-700 font-bold">✓ Exact</span>
+              </div>
+              <div class="bg-badge-tangerine/15 border-2 border-badge-tangerine rounded-lg p-1">
+                <span class="block text-[8px] text-badge-tangerine font-black">TONE: 2</span>
+                <span class="font-speed font-black text-xs sm:text-sm text-badge-tangerine">61%</span>
+                <span class="block text-[8px] text-badge-tangerine font-bold">⚠ Flat</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white border-[2.5px] border-black rounded-xl p-2.5 shadow-hard-black">
+            <div class="flex items-center justify-between mb-1 pb-1 border-b border-black/10">
+              <span class="font-speed font-black text-xs uppercase text-black">SYLLABLE 2: [hǎo]</span>
+              <span class="font-mono text-[9px] font-black text-black bg-canvas-acid px-1.5 py-0.2 rounded border border-black">ACCURATE CONTOUR</span>
+            </div>
+            <div class="grid grid-cols-3 gap-1 font-mono text-center">
+              <div class="bg-slate-100 border border-black rounded-lg p-1">
+                <span class="block text-[8px] text-black/60 font-black">INITIAL: h</span>
+                <span class="font-speed font-black text-xs sm:text-sm text-black">89%</span>
+                <span class="block text-[8px] text-emerald-700 font-bold">✓ Clean</span>
+              </div>
+              <div class="bg-slate-100 border border-black rounded-lg p-1">
+                <span class="block text-[8px] text-black/60 font-black">FINAL: ao</span>
+                <span class="font-speed font-black text-xs sm:text-sm text-black">85%</span>
+                <span class="block text-[8px] text-emerald-700 font-bold">✓ Open</span>
+              </div>
+              <div class="bg-slate-100 border border-black rounded-lg p-1">
+                <span class="block text-[8px] text-black/60 font-black">TONE: 3</span>
+                <span class="font-speed font-black text-xs sm:text-sm text-black">94%</span>
+                <span class="block text-[8px] text-emerald-700 font-bold">✓ Dipped</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // 6. Update Coach Advice
+    const coachText = document.getElementById('coach-advice-text');
+    if (coachText) {
+      if (count === 1) {
+        coachText.innerHTML = `"Laser-flat pitch! Keep your voice steady at <strong class="bg-black text-white px-1.5 py-0.5 rounded">Level 5 (55)</strong> without letting it drift down at the end."`;
+      } else if (count === 3) {
+        coachText.innerHTML = `"On the neutral tone <strong class="bg-badge-tangerine text-white px-1.5 py-0.5 rounded">'bu'</strong>, keep it ultra-brief (~100ms) and light. Do not stress or lengthen it—it should bounce smoothly into <em class="text-badge-cobalt font-black">'qǐ'</em>."`;
+      } else {
+        coachText.innerHTML = `"You flattened out too early on <strong class="bg-badge-tangerine text-white px-1.5 py-0.5 rounded">'ní'</strong>. Keep your pitch climbing all the way to the top, like asking a surprised question: <em class="text-badge-cobalt font-black">'Really?!'</em>"`;
+      }
+    }
+  }
+
+  function activateWordIndex(index) {
+    activeIndex = Math.max(0, Math.min(index, lessonWords.length - 1));
+    const word = lessonWords[activeIndex];
+    if (word) {
+      renderSyllableScenario(word.syllablesCount, word);
+    }
+    if (stepCounter) {
+      stepCounter.textContent = `STEP ${activeIndex + 1} / ${lessonWords.length}`;
+    }
+  }
+
+  // Next Word Button advances to next lesson pair & automatically updates syllable scenario
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      const nextIndex = (activeIndex + 1) % lessonWords.length;
+      activateWordIndex(nextIndex);
+    });
+  }
+
+  // Reset Button resets to index 0 and re-primes
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      activateWordIndex(0);
+      if (window.PronunciationEngine) {
+        window.PronunciationEngine.setRevealState(1);
+      }
+    });
+  }
+
+  // Playback My Voice simulation
+  if (coachPlayBtn) {
+    coachPlayBtn.addEventListener('click', () => {
+      const originalHtml = coachPlayBtn.innerHTML;
+      coachPlayBtn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">sync</span> PLAYING USER TRACK...';
+      coachPlayBtn.classList.add('bg-badge-tangerine', 'text-white');
+      setTimeout(() => {
+        coachPlayBtn.innerHTML = originalHtml;
+        coachPlayBtn.classList.remove('bg-badge-tangerine', 'text-white');
+      }, 1200);
+    });
+  }
+
+  // Tap-to-Record / Retry toggle simulation
+  if (recordBtn) {
+    recordBtn.addEventListener('click', () => {
+      isRecording = !isRecording;
+      const label = recordBtn.querySelector('span:nth-child(2)');
+      const pulseDot = recordBtn.querySelector('span:nth-child(1)');
+      if (isRecording) {
+        recordBtn.classList.replace('bg-badge-tangerine', 'bg-black');
+        recordBtn.classList.add('text-badge-tangerine');
+        recordBtn.classList.remove('text-white');
+        if (label) label.textContent = 'LISTENING... (TAP TO STOP)';
+        if (pulseDot) pulseDot.classList.add('bg-badge-tangerine', 'scale-125');
+      } else {
+        recordBtn.classList.replace('bg-black', 'bg-badge-tangerine');
+        recordBtn.classList.remove('text-badge-tangerine');
+        recordBtn.classList.add('text-white');
+        if (label) label.textContent = 'TAP TO RETRY';
+        if (pulseDot) pulseDot.classList.remove('bg-badge-tangerine', 'scale-125');
+      }
+    });
+  }
+
+  // Exposed API on window for future backend / DSP agent
+  window.PronunciationEngine = {
+    // 0. Progressive Reveal State Switcher (1: Priming, 2: Capture, 4: Audit & Coach)
+    setRevealState(state) {
+      const userTrack = document.getElementById('user-voice-track-group');
+      const waveform = document.getElementById('engine-live-waveform-group');
+      const auditSec = document.getElementById('phonetic-audit-section');
+      const coachCard = document.getElementById('articulatory-coach-card');
+      const stateBtns = document.querySelectorAll('#engine-state-toggle-group button');
+
+      // Update state button styles
+      stateBtns.forEach((b, idx) => {
+        const targetState = idx === 0 ? 1 : (idx === 1 ? 2 : 4);
+        if (targetState === state) {
+          b.className = 'px-1.5 py-0.5 rounded bg-black text-badge-tangerine border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer';
+        } else {
+          b.className = 'px-1.5 py-0.5 rounded bg-white border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer';
+        }
+      });
+
+      if (state === 1) {
+        // State 1: Priming - Target corridor only, no user contour yet
+        if (userTrack) userTrack.classList.add('hidden');
+        if (waveform) waveform.classList.add('hidden');
+        if (auditSec) auditSec.classList.add('hidden');
+        if (coachCard) coachCard.classList.add('hidden');
+        if (recordBtn) {
+          recordBtn.className = 'flex-1 py-3.5 sm:py-4 px-3 sm:px-6 bg-badge-tangerine text-white hover:bg-[#ff4800] border-[3.5px] border-black rounded-2xl shadow-hard-black flex items-center justify-center gap-2 sm:gap-3 active-collapse cursor-pointer';
+          recordBtn.innerHTML = `
+            <span class="w-4 h-4 rounded-full bg-white animate-pulse border border-black shrink-0"></span>
+            <span class="font-speed font-black italic text-base sm:text-xl uppercase tracking-tight sm:tracking-wide">TAP TO RECORD</span>
+            <span class="font-mono text-[10px] bg-black text-white px-1.5 py-0.5 rounded hidden sm:inline">[SPACE]</span>
+          `;
+        }
+      } else if (state === 2) {
+        // State 2: Capture - Live audio input simulation, waveform pulsing
+        if (userTrack) userTrack.classList.add('hidden');
+        if (waveform) waveform.classList.remove('hidden');
+        if (auditSec) auditSec.classList.add('hidden');
+        if (coachCard) coachCard.classList.add('hidden');
+        if (recordBtn) {
+          recordBtn.className = 'flex-1 py-3.5 sm:py-4 px-3 sm:px-6 bg-black text-badge-tangerine border-[3.5px] border-black rounded-2xl shadow-hard-black flex items-center justify-center gap-2 sm:gap-3 active-collapse cursor-pointer';
+          recordBtn.innerHTML = `
+            <span class="w-4 h-4 rounded-full bg-badge-tangerine animate-ping border border-black shrink-0"></span>
+            <span class="font-speed font-black italic text-base sm:text-xl uppercase tracking-tight sm:tracking-wide">RECORDING...</span>
+            <span class="font-mono text-[10px] bg-badge-tangerine text-black px-1.5 py-0.5 rounded hidden sm:inline">[STOP]</span>
+          `;
+        }
+      } else {
+        // State 4: Diagnostic Audit & Articulatory Coach
+        if (userTrack) userTrack.classList.remove('hidden');
+        if (waveform) waveform.classList.add('hidden');
+        if (auditSec) auditSec.classList.remove('hidden');
+        if (coachCard) coachCard.classList.remove('hidden');
+        if (recordBtn) {
+          recordBtn.className = 'flex-1 py-3.5 sm:py-4 px-3 sm:px-6 bg-badge-tangerine text-white hover:bg-[#ff4800] border-[3.5px] border-black rounded-2xl shadow-hard-black flex items-center justify-center gap-2 sm:gap-3 active-collapse cursor-pointer';
+          recordBtn.innerHTML = `
+            <span class="w-4 h-4 rounded-full bg-white animate-pulse border border-black shrink-0"></span>
+            <span class="font-speed font-black italic text-base sm:text-xl uppercase tracking-tight sm:tracking-wide">TAP TO RETRY</span>
+            <span class="font-mono text-[10px] bg-black text-white px-1.5 py-0.5 rounded hidden sm:inline">[SPACE]</span>
+          `;
+        }
+      }
+    },
+
+    // 1. Reactive Syllable Scenario Switcher (1, 2, or 3 Syllables)
+    setSyllableCount(count, customData) {
+      renderSyllableScenario(count, customData);
+    },
+
+    // 2. Update Target Word Information
+    setTargetWord(wordData) {
+      if (wordData.syllablesCount) {
+        renderSyllableScenario(wordData.syllablesCount, wordData);
+      } else {
+        if (wordData.hanzi) document.getElementById('engine-hanzi-display').textContent = wordData.hanzi;
+        if (wordData.pinyin) document.getElementById('engine-pinyin-display').textContent = wordData.pinyin;
+        if (wordData.gloss) document.getElementById('engine-gloss-display').textContent = `"${wordData.gloss}"`;
+      }
+    },
+
+    // 3. Select Word Index Programmatically
+    selectWordIndex(idx) {
+      activateWordIndex(idx);
+    },
+
+    // 4. Redraw User Pitch Splines (SVG Bézier path strings)
+    updateUserCurves({ pathS1, pathS2, pathS3 }) {
+      if (pathS1) {
+        const p1 = document.getElementById('user-pitch-path-s1');
+        if (p1) p1.setAttribute('d', pathS1);
+      }
+      if (pathS2) {
+        const p2 = document.getElementById('user-pitch-path-s2');
+        if (p2) p2.setAttribute('d', pathS2);
+      }
+      if (pathS3) {
+        const p3 = document.getElementById('user-pitch-path-s3');
+        if (p3) p3.setAttribute('d', pathS3);
+      }
+    },
+
+    // 5. Update Target Chao Corridor Ribbons (SVG Polygon points)
+    updateTargetRibbons({ pointsS1, pointsS2, pointsS3 }) {
+      if (pointsS1) {
+        const r1 = document.getElementById('target-ribbon-s1');
+        if (r1) r1.setAttribute('points', pointsS1);
+      }
+      if (pointsS2) {
+        const r2 = document.getElementById('target-ribbon-s2');
+        if (r2) r2.setAttribute('points', pointsS2);
+      }
+      if (pointsS3) {
+        const r3 = document.getElementById('target-ribbon-s3');
+        if (r3) r3.setAttribute('points', pointsS3);
+      }
+    },
+
+    // 6. Update Articulatory Coaching Advice
+    setCoachingAdvice(adviceHtml) {
+      const coachText = document.getElementById('coach-advice-text');
+      if (coachText) coachText.innerHTML = adviceHtml;
+    }
+  };
+}
 
 // Initialize the app
 setupButtons();
 setupMenu();
+setupEnginePlaceholders();
 init();

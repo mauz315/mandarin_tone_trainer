@@ -12,8 +12,8 @@
 
     <!-- Material Symbols -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-    <script type="module" crossorigin src="/mandarin_tone_trainer/assets/index-D3TeSIOz.js"></script>
-    <link rel="stylesheet" crossorigin href="/mandarin_tone_trainer/assets/index-D7Zc-BZR.css">
+    <script type="module" crossorigin src="/mandarin_tone_trainer/assets/index-Dv381pjR.js"></script>
+    <link rel="stylesheet" crossorigin href="/mandarin_tone_trainer/assets/index-CV5uRPaD.css">
   </head>
   <body class="bg-[#181a1d] text-slate-900 font-grotesk min-h-[100dvh] antialiased selection:bg-badge-pink selection:text-white p-2 md:p-6 flex flex-col items-center justify-center">
 
@@ -198,9 +198,13 @@
           </div>
         </div>
 
-        <!-- Bottom Graphic Footer Strip -->
-        <footer class="w-full pt-3 pb-1 flex items-center justify-between font-mono text-[11px] font-bold text-black/60 border-t-2 border-black/15">
+        <!-- Bottom Graphic Footer Strip with Discreet Testing Button -->
+        <footer class="w-full pt-3 pb-1 flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] font-bold text-black/60 border-t-2 border-black/15">
           <span>[TONE DRILLS &amp; PHONOLOGY]</span>
+          <button id="open-engine-btn" class="font-mono text-[10px] font-black uppercase tracking-wider bg-black text-canvas-acid hover:bg-badge-pink hover:text-white px-2.5 py-1 rounded-full border border-black shadow-hard-black flex items-center gap-1.5 transition-all active-collapse cursor-pointer" title="Developer / Product Testbed">
+            <span class="w-1.5 h-1.5 rounded-full bg-badge-pink animate-pulse"></span>
+            <span>LAB WORKS: PRONUNCIATION ENGINE [TEST] ➔</span>
+          </button>
           <span class="flex items-center gap-1 font-chinese text-black">
             声调训练器 ✦
           </span>
@@ -366,6 +370,311 @@
             </button>
           </div>
         </div>
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- [04] ACOUSTIC PRONUNCIATION ENGINE SCREEN (#engine-screen) -->
+      <!-- Aero Sky Ice & Racing Tangerine Palette | Fixed Bottom Scroller & Dock -->
+      <!-- ======================================================== -->
+      <div id="engine-screen" class="relative z-10 w-full h-[100dvh] md:h-[780px] max-h-[100dvh] p-3 sm:p-4 flex flex-col justify-between overflow-hidden bg-canvas-ice bg-halftone-dots hidden">
+        
+        <!-- [1] Top Navigation Bar (Fixed) -->
+        <header class="w-full flex items-center justify-between shrink-0 mb-1.5">
+          <button id="back-from-engine-btn" class="bg-black text-white hover:bg-badge-tangerine px-3 py-1.5 rounded-full border-2 border-black font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-hard-black transition-colors active-collapse cursor-pointer">
+            <span class="material-symbols-outlined text-sm">arrow_back</span> LESSON 04
+          </button>
+          <div class="bg-white border-2 border-black px-3 py-1 rounded-full font-mono text-xs font-bold shadow-hard-black flex items-center gap-2 uppercase">
+            <span class="w-2.5 h-2.5 rounded-full bg-badge-tangerine animate-pulse border border-black"></span>
+            <span>PRONUNCIATION LAB</span>
+          </div>
+          <div id="engine-step-counter" class="font-mono text-xs font-black text-white bg-badge-cobalt border-2 border-black px-2.5 py-0.5 rounded-full shadow-sm">
+            STEP 4 / 10
+          </div>
+        </header>
+
+        <!-- Progressive Reveal & Syllable Scenario Telemetry Bar -->
+        <div class="w-full mb-2 shrink-0 flex flex-wrap items-center justify-between gap-1.5 bg-white/85 backdrop-blur-sm border-2 border-black rounded-xl p-1.5 text-[10px] font-mono font-bold text-black shadow-sm">
+          <!-- Syllable Count Scenario Switcher (1, 2, or 3 Syllables) -->
+          <div class="flex items-center gap-1">
+            <span class="font-speed font-black uppercase text-black text-[9px]">SYLLABLES:</span>
+            <div class="flex gap-1" id="engine-syllable-toggle-group">
+              <button type="button" class="px-2 py-0.5 rounded bg-white border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer" onclick="window.PronunciationEngine && window.PronunciationEngine.setSyllableCount(1)">
+                1: [mā]
+              </button>
+              <button type="button" class="px-2 py-0.5 rounded bg-black text-badge-tangerine border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer" onclick="window.PronunciationEngine && window.PronunciationEngine.setSyllableCount(2)">
+                2: [nǐ hǎo]
+              </button>
+              <button type="button" class="px-2 py-0.5 rounded bg-white border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer" onclick="window.PronunciationEngine && window.PronunciationEngine.setSyllableCount(3)">
+                3: [duì bu qǐ]
+              </button>
+            </div>
+          </div>
+
+          <!-- Progressive Reveal State Switcher -->
+          <div class="flex items-center gap-1">
+            <span class="font-speed font-black uppercase text-black text-[9px]">STATE:</span>
+            <div class="flex gap-1" id="engine-state-toggle-group">
+              <button type="button" class="px-1.5 py-0.5 rounded bg-white border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer" onclick="window.PronunciationEngine && window.PronunciationEngine.setRevealState(1)">
+                1: Priming
+              </button>
+              <button type="button" class="px-1.5 py-0.5 rounded bg-white border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer" onclick="window.PronunciationEngine && window.PronunciationEngine.setRevealState(2)">
+                2: Capture
+              </button>
+              <button type="button" class="px-1.5 py-0.5 rounded bg-black text-badge-tangerine border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer" onclick="window.PronunciationEngine && window.PronunciationEngine.setRevealState(4)">
+                4: Audit
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- [2] Fluid Middle Content Area (Contained & Smooth Scrollable if needed) -->
+        <div class="flex-1 overflow-y-auto no-scrollbar space-y-2 pr-0.5 pb-1">
+          
+          <!-- 1. Header Context Card: Target Word & Sandhi Indicator -->
+          <section class="w-full bg-white border-[3px] border-black rounded-2xl p-3 shadow-hard-black shrink-0 flex flex-wrap items-center justify-between gap-2 relative overflow-hidden">
+            <div class="space-y-0.5 z-10">
+              <div class="flex items-center gap-2">
+                <span class="bg-black text-canvas-ice font-mono text-[9px] font-black px-2 py-0.5 rounded">TARGET WORD</span>
+                <span id="engine-stage-label" class="font-mono text-[11px] font-bold text-black/60">[STAGE 2: TONE SANDHI]</span>
+              </div>
+              <div class="flex items-baseline gap-2.5 pt-0.5">
+                <span id="engine-hanzi-display" class="font-chinese font-black text-3xl sm:text-4xl text-black leading-none">你 好</span>
+                <span id="engine-pinyin-display" class="font-speed font-black italic text-xl sm:text-2xl text-black">nǐ hǎo</span>
+                <span id="engine-gloss-display" class="font-mono text-xs sm:text-sm font-bold text-black/60">"Hello"</span>
+              </div>
+            </div>
+            <!-- Racing Tangerine Sandhi Banner -->
+            <div id="engine-sandhi-badge" class="bg-badge-tangerine text-white border-2 border-black rounded-xl p-2 font-mono text-xs font-bold text-right shadow-sm z-10">
+              <span class="block text-[9px] text-white/90 uppercase font-black">Sandhi Rule Applied</span>
+              <span class="font-speed font-black text-xs sm:text-sm text-white">/ 3rd + 3rd ➔ 2nd + 3rd /</span>
+              <span class="block text-[10px] text-black font-black bg-white/90 px-1.5 py-0.2 rounded mt-0.5">Target Spoken: ní hǎo</span>
+            </div>
+          </section>
+
+          <!-- 2. The Pitch Arena: Chao 5-Level Multi-Contour Chart -->
+          <section class="w-full bg-white border-[3px] border-black rounded-2xl p-2.5 sm:p-3 shadow-hard-black shrink-0 relative">
+            <!-- Arena Header & Legend -->
+            <div class="flex flex-wrap items-center justify-between gap-1.5 mb-1.5 pb-1 border-b-2 border-black/10">
+              <div class="flex items-center gap-2">
+                <span class="font-speed font-black text-[11px] uppercase tracking-wider bg-black text-white px-2 py-0.5 rounded border border-black shadow-sm">
+                  THE PITCH ARENA
+                </span>
+                <span id="engine-arena-subtitle" class="font-mono text-[10px] font-bold text-black/70">
+                  CHAO 5-LEVEL DUAL-CONTOUR
+                </span>
+              </div>
+              <!-- Legend Indicators -->
+              <div class="flex items-center gap-2.5 font-mono text-[9px] font-bold text-black">
+                <span class="flex items-center gap-1">
+                  <span class="inline-block w-3 h-2 rounded bg-badge-cobalt/25 border border-badge-cobalt"></span>
+                  ░ Target Ribbon (±0.5 tol.)
+                </span>
+                <span class="flex items-center gap-1">
+                  <span class="inline-block w-3.5 h-1 bg-black rounded-full"></span>
+                  ──● Your Voice Pitch
+                </span>
+              </div>
+            </div>
+
+            <!-- Pitch Chart Area with Chao Y-Axis -->
+            <div id="pitch-chart-wrapper" class="flex gap-1.5 items-center justify-center transition-all duration-300">
+              <!-- Chao 5-Level Y-Axis Labels -->
+              <div class="flex flex-col justify-between h-[155px] font-mono text-[9px] font-black text-black/70 text-right pr-1 select-none shrink-0 border-r-2 border-black/20">
+                <span title="Level 5: High (Tone 1 / 55)">5 [High]</span>
+                <span title="Level 4: Mid-High">4 [Mid-H]</span>
+                <span title="Level 3: Mid (Tone 2 start)">3 [Mid]</span>
+                <span title="Level 2: Mid-Low">2 [Mid-L]</span>
+                <span title="Level 1: Low (Tone 3 dip)">1 [Low]</span>
+              </div>
+
+              <!-- SVG MULTI-CONTOUR PITCH CANVAS (Proportionally sized for 1, 2, or 3 syllables) -->
+              <div id="pitch-svg-chassis" class="flex-1 relative overflow-hidden bg-slate-50 rounded-xl border-2 border-black/20 p-1 transition-all duration-300">
+                <svg id="pitch-chart-svg" viewBox="0 0 660 155" class="w-full h-[155px] overflow-visible select-none transition-all duration-300">
+                  <!-- Background Horizontal Grid Lines for Chao Levels 1 to 5 -->
+                  <g id="pitch-grid-levels" class="stroke-black/15 stroke-[1.5] stroke-dasharray-[3,3]">
+                    <line x1="20" y1="15" x2="640" y2="15" /> <!-- Level 5 -->
+                    <line x1="20" y1="46" x2="640" y2="46" /> <!-- Level 4 -->
+                    <line x1="20" y1="78" x2="640" y2="78" /> <!-- Level 3 -->
+                    <line x1="20" y1="110" x2="640" y2="110" /> <!-- Level 2 -->
+                    <line x1="20" y1="140" x2="640" y2="140" /> <!-- Level 1 -->
+                  </g>
+
+                  <!-- Dynamic Syllable Dividers (0 for 1-syl, 1 for 2-syl, 2 for 3-syl) -->
+                  <g id="pitch-syllable-dividers">
+                    <line x1="330" y1="8" x2="330" y2="142" class="stroke-black/30 stroke-[2] stroke-dasharray-[4,4]" />
+                    <text x="336" y="20" class="font-mono text-[9px] fill-black/60 font-black">SYLLABLE 2 [hǎo] ➔</text>
+                  </g>
+
+                  <!-- Dynamic Target Corridor Ribbons (1, 2, or 3 polygons) -->
+                  <g id="pitch-target-ribbons">
+                    <polygon id="target-ribbon-s1" points="70,95 300,28 300,10 70,75" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />
+                    <polygon id="target-ribbon-s2" points="360,98 470,146 600,52 600,32 470,126 360,78" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />
+                  </g>
+
+                  <!-- Dynamic User Voice Pitch Paths & Points -->
+                  <g id="user-voice-track-group">
+                    <g id="user-pitch-paths-container">
+                      <path id="user-pitch-path-s1" d="M 70,85 Q 180,54 300,48" fill="none" stroke="#000000" stroke-width="4.5" stroke-linecap="round" />
+                      <path id="user-pitch-path-s2" d="M 360,88 Q 465,138 600,45" fill="none" stroke="#000000" stroke-width="4.5" stroke-linecap="round" />
+                    </g>
+
+                    <g id="user-pitch-points-container">
+                      <g id="user-pitch-points-s1">
+                        <circle cx="70" cy="85" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+                        <circle cx="120" cy="70" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+                        <circle cx="180" cy="58" r="4.5" fill="#FDF197" stroke="#000" stroke-width="2" />
+                        <circle cx="240" cy="50" r="5" fill="#FF5C1C" stroke="#000" stroke-width="2" />
+                        <circle cx="300" cy="48" r="5" fill="#FF5C1C" stroke="#000" stroke-width="2" />
+                      </g>
+                      <g id="user-pitch-points-s2">
+                        <circle cx="360" cy="88" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+                        <circle cx="410" cy="112" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+                        <circle cx="465" cy="138" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+                        <circle cx="530" cy="90" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+                        <circle cx="600" cy="45" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
+                      </g>
+                    </g>
+                  </g>
+
+                  <!-- Live Waveform Pulse Simulation Container for State 2 (Hidden by default) -->
+                  <g id="engine-live-waveform-group" class="hidden">
+                    <path d="M 50,80 Q 90,50 130,80 T 210,80 T 290,80 T 370,80 T 450,80 T 530,80 T 610,80" fill="none" stroke="#FF5C1C" stroke-width="3" stroke-linecap="round" class="animate-pulse" />
+                    <text x="330" y="75" class="font-mono text-xs font-black fill-badge-tangerine" text-anchor="middle">CAPTURING VOCAL SPECTRUM...</text>
+                  </g>
+
+                  <!-- Dynamic Time Axis Milestones & Boundary Subtitles -->
+                  <g id="pitch-time-milestones">
+                    <text x="70" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.00s</text>
+                    <text x="180" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">[Initial: n] [Final: í]</text>
+                    <text x="300" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.32s</text>
+                    <text x="360" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.34s</text>
+                    <text x="480" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">[Initial: h] [Final: ǎo]</text>
+                    <text x="600" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.72s</text>
+                  </g>
+                </svg>
+
+                <!-- Interactive Time Scrubber Track (PRD Section 7.3 Scrubbing) -->
+                <div class="w-full mt-1 px-2 flex items-center gap-2 border-t border-black/10 pt-1">
+                  <span class="font-mono text-[8px] font-bold text-black/60 shrink-0">AUDIO TIMELINE:</span>
+                  <div class="flex-1 relative h-2 bg-black/10 rounded-full flex items-center cursor-pointer" id="pitch-timeline-bar" title="Interactive Pitch Scrubbing">
+                    <div id="pitch-timeline-fill" class="h-full bg-badge-cobalt rounded-full w-[45%]"></div>
+                    <div id="pitch-timeline-thumb" class="w-3 h-3 bg-white border-2 border-black rounded-full shadow-sm -ml-1.5 cursor-grab"></div>
+                  </div>
+                  <span id="pitch-timeline-text" class="font-mono text-[8px] font-bold text-black/60 shrink-0">0.32s / 0.72s</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 3. Phonetic Component Audit (Dynamic Reactive Grid for 1, 2, or 3 Syllables) -->
+          <section id="phonetic-audit-section" class="w-full shrink-0">
+            <div id="phonetic-audit-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <!-- Syllable 1 Diagnostic Card -->
+              <div class="bg-white border-[2.5px] border-black rounded-xl p-2.5 shadow-hard-black">
+                <div class="flex items-center justify-between mb-1 pb-1 border-b border-black/10">
+                  <span class="font-speed font-black text-xs uppercase text-black">SYLLABLE 1: [ní]</span>
+                  <span class="font-mono text-[9px] font-black text-white bg-badge-tangerine px-1.5 py-0.2 rounded border border-black">TONE DIVERGENCE</span>
+                </div>
+                <div class="grid grid-cols-3 gap-1 font-mono text-center">
+                  <div class="bg-slate-100 border border-black rounded-lg p-1">
+                    <span class="block text-[8px] text-black/60 font-black">INITIAL: n</span>
+                    <span class="font-speed font-black text-xs sm:text-sm text-black">94%</span>
+                    <span class="block text-[8px] text-emerald-700 font-bold">✓ Clean</span>
+                  </div>
+                  <div class="bg-slate-100 border border-black rounded-lg p-1">
+                    <span class="block text-[8px] text-black/60 font-black">FINAL: i</span>
+                    <span class="font-speed font-black text-xs sm:text-sm text-black">90%</span>
+                    <span class="block text-[8px] text-emerald-700 font-bold">✓ Exact</span>
+                  </div>
+                  <div class="bg-badge-tangerine/15 border-2 border-badge-tangerine rounded-lg p-1">
+                    <span class="block text-[8px] text-badge-tangerine font-black">TONE: 2</span>
+                    <span class="font-speed font-black text-xs sm:text-sm text-badge-tangerine">61%</span>
+                    <span class="block text-[8px] text-badge-tangerine font-bold">⚠ Flat</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Syllable 2 Diagnostic Card -->
+              <div class="bg-white border-[2.5px] border-black rounded-xl p-2.5 shadow-hard-black">
+                <div class="flex items-center justify-between mb-1 pb-1 border-b border-black/10">
+                  <span class="font-speed font-black text-xs uppercase text-black">SYLLABLE 2: [hǎo]</span>
+                  <span class="font-mono text-[9px] font-black text-black bg-canvas-acid px-1.5 py-0.2 rounded border border-black">ACCURATE CONTOUR</span>
+                </div>
+                <div class="grid grid-cols-3 gap-1 font-mono text-center">
+                  <div class="bg-slate-100 border border-black rounded-lg p-1">
+                    <span class="block text-[8px] text-black/60 font-black">INITIAL: h</span>
+                    <span class="font-speed font-black text-xs sm:text-sm text-black">89%</span>
+                    <span class="block text-[8px] text-emerald-700 font-bold">✓ Clean</span>
+                  </div>
+                  <div class="bg-slate-100 border border-black rounded-lg p-1">
+                    <span class="block text-[8px] text-black/60 font-black">FINAL: ao</span>
+                    <span class="font-speed font-black text-xs sm:text-sm text-black">85%</span>
+                    <span class="block text-[8px] text-emerald-700 font-bold">✓ Open</span>
+                  </div>
+                  <div class="bg-slate-100 border border-black rounded-lg p-1">
+                    <span class="block text-[8px] text-black/60 font-black">TONE: 3</span>
+                    <span class="font-speed font-black text-xs sm:text-sm text-black">94%</span>
+                    <span class="block text-[8px] text-emerald-700 font-bold">✓ Dipped</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 4. Articulatory Coach Card (Horizon Lavender / Violet Palette Accent) -->
+          <section id="articulatory-coach-card" class="w-full bg-[#9CA4FC] border-[3px] border-black rounded-2xl p-3 shadow-hard-black shrink-0">
+            <div class="flex items-center justify-between gap-2 mb-1.5">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-badge-tangerine animate-pulse border border-black"></span>
+                <span class="font-speed font-black text-xs uppercase tracking-tight text-black">
+                  PRIORITY FIX: First Syllable Tone (ní)
+                </span>
+              </div>
+              <span class="font-mono text-[9px] font-black uppercase bg-black text-white px-2 py-0.5 rounded">
+                COACH ADVICE
+              </span>
+            </div>
+            <div class="bg-white border-2 border-black rounded-xl p-2.5 shadow-sm mb-2">
+              <p id="coach-advice-text" class="font-mono text-xs sm:text-sm text-black font-bold leading-snug">
+                "You flattened out too early on <strong class="bg-badge-tangerine text-white px-1.5 py-0.5 rounded">'ní'</strong>. Keep your pitch climbing all the way to the top, like asking a surprised question: <em class="text-badge-cobalt font-black">'Really?!'</em>"
+              </p>
+            </div>
+            <div>
+              <button id="coach-hear-user-btn" class="bg-black text-white hover:bg-badge-tangerine px-4 py-1.5 rounded-full border-2 border-black font-mono text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 active-collapse cursor-pointer shadow-hard-black transition-colors">
+                <span class="material-symbols-outlined text-sm">play_circle</span> PLAYBACK MY VOICE
+              </button>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- [3] FIXED BOTTOM ACTION DOCK                             -->
+        <!-- Hero dominant record button, compact mobile side actions -->
+        <!-- ======================================================== -->
+        <div id="engine-fixed-bottom-bar" class="shrink-0 w-full py-2 px-1 border-t-[3px] border-black bg-canvas-ice/95 backdrop-blur-md sticky bottom-0 z-30">
+          <footer id="engine-action-dock" class="w-full flex items-center justify-between gap-2 sm:gap-3">
+            <!-- Reset Trigger (Compact Square on Mobile) -->
+            <button id="engine-reset-btn" class="w-11 h-11 sm:w-auto sm:px-3.5 sm:py-3 bg-white hover:bg-slate-100 text-black rounded-xl border-[2.5px] border-black font-mono text-xs font-black uppercase shadow-hard-black active-collapse flex items-center justify-center gap-1.5 shrink-0 cursor-pointer" title="Reset Audio & Pitch Capture">
+              <span class="material-symbols-outlined text-lg sm:text-base">restart_alt</span>
+              <span class="hidden sm:inline">RESET</span>
+            </button>
+
+            <!-- Hero Tap-to-Retry Trigger (Expanded, Large Hit Area on Mobile & Desktop) -->
+            <button id="engine-record-btn" class="flex-1 py-3.5 sm:py-4 px-3 sm:px-6 bg-badge-tangerine text-white hover:bg-[#ff4800] border-[3.5px] border-black rounded-2xl shadow-hard-black flex items-center justify-center gap-2 sm:gap-3 active-collapse cursor-pointer">
+              <span class="w-4 h-4 rounded-full bg-white animate-pulse border border-black shrink-0"></span>
+              <span class="font-speed font-black italic text-base sm:text-xl uppercase tracking-tight sm:tracking-wide">TAP TO RETRY</span>
+              <span class="font-mono text-[10px] bg-black text-white px-1.5 py-0.5 rounded hidden sm:inline">[SPACE]</span>
+            </button>
+
+            <!-- Next Word Trigger (Compact Square on Mobile) -->
+            <button id="engine-next-btn" class="w-11 h-11 sm:w-auto sm:px-3.5 sm:py-3 bg-badge-cobalt hover:bg-[#003dd4] text-white rounded-xl border-[2.5px] border-black font-mono text-xs font-black uppercase shadow-hard-black active-collapse flex items-center justify-center gap-1.5 shrink-0 cursor-pointer" title="Next Word">
+              <span class="hidden sm:inline">NEXT</span>
+              <span class="material-symbols-outlined text-lg sm:text-base">arrow_forward</span>
+            </button>
+          </footer>
+        </div>
+
       </div>
 
     </main>
