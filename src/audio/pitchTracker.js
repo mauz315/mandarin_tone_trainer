@@ -161,7 +161,7 @@ export class PitchTracker {
    */
   static resampleContour(values, numPoints = 30) {
     const clean = values.filter((v) => v !== null && v !== undefined && !Number.isNaN(v));
-    if (clean.length < 3) return null;
+    if (clean.length < 2) return null;
 
     const n = clean.length;
     const resampled = new Array(numPoints);

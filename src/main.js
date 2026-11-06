@@ -1120,18 +1120,22 @@ function setupEnginePlaceholders() {
       const spans = getSyllableSpans(count);
       let ribbonsHtml = '';
 
-      if (profile && profile.f0_norm && profile.f0_norm.length >= 3) {
-        const f0 = profile.f0_norm;
-        const ptsPerSyl = Math.floor(f0.length / spans.length);
-
-        spans.forEach((span, i) => {
+      spans.forEach((span, i) => {
+        let sylF0 = null;
+        if (profile?.syllables?.[i]?.f0_norm && profile.syllables[i].f0_norm.length >= 2) {
+          sylF0 = profile.syllables[i].f0_norm;
+        } else if (profile?.f0_norm && profile.f0_norm.length >= 2) {
+          const f0 = profile.f0_norm;
+          const ptsPerSyl = Math.floor(f0.length / spans.length);
           const sliceStart = i * ptsPerSyl;
           const sliceEnd = i === spans.length - 1 ? f0.length : (i + 1) * ptsPerSyl;
-          const sylF0 = f0.slice(sliceStart, sliceEnd);
-          if (sylF0.length < 2) return;
+          sylF0 = f0.slice(sliceStart, sliceEnd);
+        }
 
-          const upperPts = [];
-          const lowerPts = [];
+        const upperPts = [];
+        const lowerPts = [];
+
+        if (sylF0 && sylF0.length >= 2) {
           for (let k = 0; k < sylF0.length; k++) {
             const x = span.xMin + (k / (sylF0.length - 1)) * (span.xMax - span.xMin);
             const st = sylF0[k];
@@ -1139,15 +1143,9 @@ function setupEnginePlaceholders() {
             upperPts.push(`${x.toFixed(1)},${Math.max(10, centerY - 9).toFixed(1)}`);
             lowerPts.unshift(`${x.toFixed(1)},${Math.min(144, centerY + 9).toFixed(1)}`);
           }
-          const allPts = upperPts.concat(lowerPts).join(' ');
-          ribbonsHtml += `<polygon id="${span.id}" points="${allPts}" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />`;
-        });
-      } else {
-        // Fallback canonical Chao ribbons
-        spans.forEach((span, i) => {
+        } else {
+          // Fallback canonical Chao ribbon
           const syl = syllables[i] || { tone: 1 };
-          let upperPts = [];
-          let lowerPts = [];
           const N = 10;
           for (let k = 0; k < N; k++) {
             const x = span.xMin + (k / (N - 1)) * (span.xMax - span.xMin);
@@ -1160,10 +1158,10 @@ function setupEnginePlaceholders() {
             upperPts.push(`${x.toFixed(1)},${Math.max(10, centerY - 9).toFixed(1)}`);
             lowerPts.unshift(`${x.toFixed(1)},${Math.min(144, centerY + 9).toFixed(1)}`);
           }
-          const allPts = upperPts.concat(lowerPts).join(' ');
-          ribbonsHtml += `<polygon id="${span.id}" points="${allPts}" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />`;
-        });
-      }
+        }
+        const allPts = upperPts.concat(lowerPts).join(' ');
+        ribbonsHtml += `<polygon id="${span.id}" points="${allPts}" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />`;
+      });
       ribbonsContainer.innerHTML = ribbonsHtml;
     }
 
@@ -1436,27 +1434,37 @@ function setupEnginePlaceholders() {
 
   function renderTargetRibbonFromProfile(refProfile, count) {
     const ribbonsContainer = document.getElementById('pitch-target-ribbons');
-    if (!ribbonsContainer || !refProfile || !refProfile.f0_norm || refProfile.f0_norm.length < 3) return;
+    if (!ribbonsContainer || !refProfile) return;
 
-    const f0 = refProfile.f0_norm;
     const spans = getSyllableSpans(count);
     let ribbonsHtml = '';
-    const ptsPerSyl = Math.floor(f0.length / spans.length);
+    const hasSylNorm = refProfile.syllables && refProfile.syllables.some(s => s.f0_norm && s.f0_norm.length >= 2);
+    const hasFullNorm = refProfile.f0_norm && refProfile.f0_norm.length >= 2;
+
+    if (!hasSylNorm && !hasFullNorm) return;
 
     spans.forEach((span, i) => {
-      const sliceStart = i * ptsPerSyl;
-      const sliceEnd = i === spans.length - 1 ? f0.length : (i + 1) * ptsPerSyl;
-      const sylF0 = f0.slice(sliceStart, sliceEnd);
-      if (sylF0.length < 2) return;
+      let sylF0 = null;
+      if (refProfile.syllables && refProfile.syllables[i]?.f0_norm && refProfile.syllables[i].f0_norm.length >= 2) {
+        sylF0 = refProfile.syllables[i].f0_norm;
+      } else if (hasFullNorm) {
+        const f0 = refProfile.f0_norm;
+        const ptsPerSyl = Math.floor(f0.length / spans.length);
+        const sliceStart = i * ptsPerSyl;
+        const sliceEnd = i === spans.length - 1 ? f0.length : (i + 1) * ptsPerSyl;
+        sylF0 = f0.slice(sliceStart, sliceEnd);
+      }
+
+      if (!sylF0 || sylF0.length < 2) return;
 
       const upperPts = [];
       const lowerPts = [];
       for (let k = 0; k < sylF0.length; k++) {
         const x = span.xMin + (k / (sylF0.length - 1)) * (span.xMax - span.xMin);
         const st = sylF0[k];
-        const centerY = Math.max(12, Math.min(142, 78 - st * 16));
-        upperPts.push(`${x.toFixed(1)},${Math.max(8, centerY - 9).toFixed(1)}`);
-        lowerPts.unshift(`${x.toFixed(1)},${Math.min(146, centerY + 9).toFixed(1)}`);
+        const centerY = Math.max(16, Math.min(138, 78 - st * 16));
+        upperPts.push(`${x.toFixed(1)},${Math.max(10, centerY - 9).toFixed(1)}`);
+        lowerPts.unshift(`${x.toFixed(1)},${Math.min(144, centerY + 9).toFixed(1)}`);
       }
       const allPts = upperPts.concat(lowerPts).join(' ');
       ribbonsHtml += `<polygon id="${span.id}" points="${allPts}" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />`;
@@ -1484,7 +1492,7 @@ function setupEnginePlaceholders() {
         return; // Unvoiced / silent
       }
 
-      // Convert 30 normalized points to (x, y) coordinates
+      // Convert normalized points to (x, y) coordinates independently of vector length
       const pts = [];
       const numPts = syl.userF0Norm.length;
       for (let k = 0; k < numPts; k++) {
@@ -1507,18 +1515,23 @@ function setupEnginePlaceholders() {
 
       pathHtml += `<path id="${span.pathId}" d="${d}" fill="none" stroke="#000000" stroke-width="4.5" stroke-linecap="round" />`;
 
-      // Select 5 milestone circles
+      // Select 5 milestone circles mapped proportionally across vector lengths
       const circleIndices = [0, Math.floor(numPts * 0.25), Math.floor(numPts * 0.5), Math.floor(numPts * 0.75), numPts - 1];
       let sylPointsHtml = `<g id="${span.ptsId}">`;
       circleIndices.forEach(idx => {
         const pt = pts[idx];
         if (!pt) return;
         let color = '#B8F526'; // Green
-        if (syl.referenceF0Norm && syl.referenceF0Norm[idx] !== undefined) {
-          const refY = Math.max(12, Math.min(142, 78 - syl.referenceF0Norm[idx] * 16));
-          const diff = Math.abs(pt.y - refY);
-          if (diff > 35) color = '#FF5C1C';
-          else if (diff > 20) color = '#FDF197';
+        if (syl.referenceF0Norm && syl.referenceF0Norm.length > 0) {
+          const t = numPts > 1 ? idx / (numPts - 1) : 0;
+          const refIdx = Math.min(syl.referenceF0Norm.length - 1, Math.round(t * (syl.referenceF0Norm.length - 1)));
+          const refVal = syl.referenceF0Norm[refIdx];
+          if (refVal !== undefined && refVal !== null) {
+            const refY = Math.max(12, Math.min(142, 78 - refVal * 16));
+            const diff = Math.abs(pt.y - refY);
+            if (diff > 35) color = '#FF5C1C';
+            else if (diff > 20) color = '#FDF197';
+          }
         }
         sylPointsHtml += `<circle cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="4.5" fill="${color}" stroke="#000" stroke-width="2" />`;
       });
@@ -1537,91 +1550,57 @@ function setupEnginePlaceholders() {
     const coachText = document.getElementById('coach-advice-text');
     if (!auditGrid) return;
 
-    let totalScore = 0;
     let cardHtml = '';
     const adviceList = [];
 
     result.syllables.forEach((syl, i) => {
-      let sylScore = 88;
-      let toneStatus = 'ACCURATE CONTOUR';
+      const finalScore = syl.finalScore !== undefined ? syl.finalScore : 88;
+      const dtwScore = syl.dtwScore !== undefined ? syl.dtwScore : 90;
+      const slopeScore = syl.slopeScore !== undefined ? syl.slopeScore : 85;
+      const status = syl.status || 'ACCURATE CONTOUR';
+      const comment = syl.comment || '✓ Exact';
+
       let toneBadgeClass = 'bg-canvas-acid text-black';
-      let toneComment = '✓ Exact';
+      let toneCommentClass = 'text-emerald-700 font-bold';
+      let dtwCommentClass = 'text-emerald-700 font-bold';
 
       if (!syl.userF0Norm) {
-        sylScore = 40;
-        toneStatus = 'UNVOICED';
         toneBadgeClass = 'bg-slate-300 text-black';
-        toneComment = '⚠ Silent';
+        toneCommentClass = 'text-slate-600 font-bold';
+        dtwCommentClass = 'text-slate-600 font-bold';
         adviceList.push(`Could not detect vocal pitch on <strong>'${syl.syllable}'</strong>. Speak closer to the microphone.`);
-      } else {
-        const firstHalf = syl.userF0Norm.slice(0, 15);
-        const secondHalf = syl.userF0Norm.slice(15);
-        const avgFirst = firstHalf.reduce((a, b) => a + b, 0) / firstHalf.length;
-        const avgSecond = secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length;
-        const delta = avgSecond - avgFirst;
-
-        if (syl.tone === 1) {
-          if (delta < -1.5) {
-            sylScore = 65;
-            toneStatus = 'FALLING';
-            toneBadgeClass = 'bg-badge-tangerine text-white';
-            toneComment = '⚠ Dropped';
-            adviceList.push(`Tone 1 on <strong>'${syl.syllable}'</strong> dropped at the end. Keep it level and steady.`);
-          } else {
-            sylScore = 94;
-            toneComment = '✓ High Flat';
-          }
-        } else if (syl.tone === 2) {
-          if (delta < 0.8) {
-            sylScore = 62;
-            toneStatus = 'FLAT TONE';
-            toneBadgeClass = 'bg-badge-tangerine text-white';
-            toneComment = '⚠ Flat';
-            adviceList.push(`Raise your pitch more decisively on <strong>'${syl.syllable}'</strong>, like asking a question: <em>'Really?!'</em>`);
-          } else {
-            sylScore = 92;
-            toneComment = '✓ Rising';
-          }
-        } else if (syl.tone === 4) {
-          if (delta > -1.0) {
-            sylScore = 60;
-            toneStatus = 'NOT FALLING';
-            toneBadgeClass = 'bg-badge-tangerine text-white';
-            toneComment = '⚠ Flat';
-            adviceList.push(`Tone 4 on <strong>'${syl.syllable}'</strong> needs a sharper plunge. Start high and drop firmly, like commanding <em>'No!'</em>`);
-          } else {
-            sylScore = 95;
-            toneComment = '✓ Dropped';
-          }
-        } else {
-          sylScore = 90;
-          toneComment = '✓ Good';
-        }
+      } else if (finalScore < 70) {
+        toneBadgeClass = 'bg-badge-tangerine text-white';
+        toneCommentClass = 'text-badge-tangerine font-bold';
+        dtwCommentClass = dtwScore < 70 ? 'text-badge-tangerine font-bold' : 'text-emerald-700 font-bold';
+        if (syl.advice) adviceList.push(syl.advice);
+      } else if (finalScore < 85) {
+        toneBadgeClass = 'bg-badge-tangerine text-white';
+        toneCommentClass = 'text-amber-700 font-bold';
+        if (syl.advice) adviceList.push(syl.advice);
       }
-
-      totalScore += sylScore;
 
       cardHtml += `
         <div class="bg-white border-[2.5px] border-black rounded-xl p-2.5 shadow-hard-black">
           <div class="flex items-center justify-between mb-1 pb-1 border-b border-black/10">
             <span class="font-speed font-black text-xs uppercase text-black">SYLLABLE ${i + 1}: [${syl.syllable}]</span>
-            <span class="font-mono text-[9px] font-black px-1.5 py-0.2 rounded border border-black ${toneBadgeClass}">${toneStatus}</span>
+            <span class="font-mono text-[9px] font-black px-1.5 py-0.2 rounded border border-black ${toneBadgeClass}">${status}</span>
           </div>
           <div class="grid grid-cols-3 gap-1 font-mono text-center">
             <div class="bg-slate-100 border border-black rounded-lg p-1">
-              <span class="block text-[8px] text-black/60 font-black">INITIAL</span>
-              <span class="font-speed font-black text-xs sm:text-sm text-black">92%</span>
-              <span class="block text-[8px] text-emerald-700 font-bold">✓ Clean</span>
+              <span class="block text-[8px] text-black/60 font-black">ALIGNMENT</span>
+              <span class="font-speed font-black text-xs sm:text-sm text-black">${dtwScore}%</span>
+              <span class="block text-[8px] ${dtwCommentClass}">${dtwScore >= 80 ? '✓ DTW Match' : '⚠ Distorted'}</span>
             </div>
             <div class="bg-slate-100 border border-black rounded-lg p-1">
-              <span class="block text-[8px] text-black/60 font-black">FINAL</span>
-              <span class="font-speed font-black text-xs sm:text-sm text-black">89%</span>
-              <span class="block text-[8px] text-emerald-700 font-bold">✓ Exact</span>
+              <span class="block text-[8px] text-black/60 font-black">DIRECTION</span>
+              <span class="font-speed font-black text-xs sm:text-sm text-black">${slopeScore}%</span>
+              <span class="block text-[8px] ${toneCommentClass}">${slopeScore >= 80 ? '✓ Slope Check' : '⚠ Wrong Slope'}</span>
             </div>
             <div class="bg-slate-100 border border-black rounded-lg p-1">
               <span class="block text-[8px] text-black/60 font-black">TONE: ${syl.tone}</span>
-              <span class="font-speed font-black text-xs sm:text-sm text-black">${sylScore}%</span>
-              <span class="block text-[8px] text-emerald-700 font-bold">${toneComment}</span>
+              <span class="font-speed font-black text-xs sm:text-sm text-black">${finalScore}%</span>
+              <span class="block text-[8px] ${toneCommentClass}">${comment}</span>
             </div>
           </div>
         </div>
@@ -1634,7 +1613,8 @@ function setupEnginePlaceholders() {
       if (adviceList.length > 0) {
         coachText.innerHTML = `"${adviceList.join(' ')}"`;
       } else {
-        coachText.innerHTML = `"Excellent pitch contour! Your pronunciation on <strong class="bg-black text-white px-1.5 py-0.5 rounded">'${wordData.hanzi_simp || wordData.hanzi}'</strong> aligned cleanly with the native reference curve."`;
+        const accuracy = result.overallScore !== undefined ? result.overallScore : 94;
+        coachText.innerHTML = `"Outstanding pitch contour! Your pronunciation on <strong class="bg-black text-white px-1.5 py-0.5 rounded">'${wordData.hanzi_simp || wordData.hanzi}'</strong> matched the native model with <strong class="text-emerald-600 font-bold">${accuracy}%</strong> accuracy."`;
       }
     }
   }
