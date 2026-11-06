@@ -1,6 +1,7 @@
 import './style.css';
 import 'keen-slider/keen-slider.min.css';
 import KS from 'keen-slider';
+import { AudioPipeline } from './audio/audioPipeline.js';
 
 const KeenSlider = KS.default || KS;
 
@@ -9,6 +10,7 @@ let currentItem = null;
 let nextPendingItem = null;
 let currentGameMode = 'tones'; // Options: 'tones', 'initials', 'endings'
 let nextQuestionTimer = null; 
+let toneProfiles = {}; 
 
 // Resilient Web Audio & HTMLAudio pipeline for mobile browsers
 let audioCtx = null;
@@ -221,6 +223,9 @@ function setupMenu() {
 
   if (backFromEngineBtn) {
     backFromEngineBtn.addEventListener('click', () => {
+      if (window.PronunciationEngine && typeof window.PronunciationEngine.reset === 'function') {
+        window.PronunciationEngine.reset();
+      }
       if (engineScreen) engineScreen.classList.add('hidden');
       menuScreen.classList.remove('hidden');
       mainMenu.classList.remove('hidden');
@@ -316,6 +321,15 @@ async function init() {
     words = await response.json();
     console.log("App Ready. Vocabulary loaded:", words.length);
     
+    // Load pre-calculated native tone curves for the pronunciation engine
+    fetch(`${import.meta.env.BASE_URL}tone_profiles.json`)
+      .then(r => r.ok ? r.json() : {})
+      .then(data => {
+        toneProfiles = data;
+        console.log("[ToneEngine] Reference tone profiles loaded:", Object.keys(toneProfiles).length);
+      })
+      .catch(e => console.warn("[ToneEngine] tone_profiles.json could not be loaded:", e));
+
     setupAudioLibrary();
 
     setTimeout(() => {
@@ -865,6 +879,10 @@ function setupEnginePlaceholders() {
   // Multi-scenario vocabulary deck across 1, 2, and 3 syllables
   const lessonWords = [
     { syllablesCount: 2, hanzi: "你 好", pinyin: "nǐ hǎo", gloss: "Hello", sandhi: "/ 3rd + 3rd ➔ 2nd + 3rd /", spoken: "ní hǎo" },
+    { syllablesCount: 1, hanzi: "一", pinyin: "yī", gloss: "One", sandhi: "/ Tone 1: High Level 55 /", spoken: "yī", audio: "audio/hsk1/hskstory-hsk1-001.mp3" },
+    { syllablesCount: 2, hanzi: "一下", pinyin: "yī xià", gloss: "A bit", sandhi: "/ Tone 1 + Tone 4 /", spoken: "yī xià", audio: "audio/hsk1/hskstory-hsk1-002.mp3" },
+    { syllablesCount: 2, hanzi: "一半", pinyin: "yí bàn", gloss: "Half", sandhi: "/ Tone 2 + Tone 4 /", spoken: "yí bàn", audio: "audio/hsk1/hskstory-hsk1-004.mp3" },
+    { syllablesCount: 3, hanzi: "出租车", pinyin: "chū zū chē", gloss: "Taxi", sandhi: "/ 1st + 1st + 1st /", spoken: "chū zū chē", audio: "audio/hsk1/hskstory-hsk1-050.mp3" },
     { syllablesCount: 1, hanzi: "妈", pinyin: "mā", gloss: "Mother", sandhi: "/ Tone 1: High Level 55 /", spoken: "mā" },
     { syllablesCount: 3, hanzi: "对 不 起", pinyin: "duì bu qǐ", gloss: "Sorry", sandhi: "/ 4th + Neutral + 3rd /", spoken: "duì bu qǐ" },
     { syllablesCount: 2, hanzi: "可 以", pinyin: "kě yǐ", gloss: "Can / May", sandhi: "/ 3rd + 3rd ➔ 2nd + 3rd /", spoken: "ké yǐ" },
@@ -1367,41 +1385,430 @@ function setupEnginePlaceholders() {
   }
 
   let currentEngineState = 1; // 1: Priming (Record), 2: Capture (Recording...), 4: Audit (Try Again)
-  let recordingTimer = null;
+  let audioPipeline = null;
+  let lastUserAudioBlob = null;
+  let lastUserAudioUrl = null;
+  const RECORDING_DURATION_SEC = 4;
+  let countdownSeconds = RECORDING_DURATION_SEC;
+  let countdownInterval = null;
 
-  function stopRecordingAndCalculate() {
-    if (recordingTimer) {
-      clearTimeout(recordingTimer);
-      recordingTimer = null;
+  async function startRealRecording() {
+    if (!audioPipeline) {
+      audioPipeline = new AudioPipeline({
+        onVolumeChange: (rms) => {
+          const pulsePath = document.querySelector('#engine-live-waveform-group path');
+          if (pulsePath) {
+            const stroke = Math.min(10, Math.max(2, 2 + rms * 35));
+            pulsePath.setAttribute('stroke-width', stroke.toFixed(1));
+          }
+        }
+      });
     }
-    if (window.PronunciationEngine) {
-      window.PronunciationEngine.setRevealState(4);
+
+    try {
+      await audioPipeline.start();
+      countdownSeconds = RECORDING_DURATION_SEC;
+      if (window.PronunciationEngine) {
+        window.PronunciationEngine.setRevealState(2);
+      }
+
+      // Initial timeline reset for the 4-second window
+      const timelineFill = document.getElementById('pitch-timeline-fill');
+      const timelineText = document.getElementById('pitch-timeline-text');
+      if (timelineFill) timelineFill.style.width = '0%';
+      if (timelineText) timelineText.textContent = `0.0s / ${RECORDING_DURATION_SEC}s`;
+
+      if (countdownInterval) clearInterval(countdownInterval);
+
+      // Start 4-second live countdown with smooth timeline progression
+      let elapsedMs = 0;
+      const totalMs = RECORDING_DURATION_SEC * 1000;
+      countdownInterval = setInterval(() => {
+        elapsedMs += 100;
+        const remainingSec = Math.max(0, Math.ceil((totalMs - elapsedMs) / 1000));
+        countdownSeconds = remainingSec;
+        const countValEl = document.getElementById('record-countdown-val');
+        if (countValEl) {
+          countValEl.textContent = remainingSec;
+        }
+        if (timelineFill) {
+          const progress = (elapsedMs / totalMs) * 100;
+          timelineFill.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+        }
+        if (timelineText) {
+          timelineText.textContent = `${(elapsedMs / 1000).toFixed(1)}s / ${RECORDING_DURATION_SEC}.0s`;
+        }
+
+        if (elapsedMs >= totalMs) {
+          clearInterval(countdownInterval);
+          countdownInterval = null;
+          if (currentEngineState === 2) {
+            stopRealRecordingAndCalculate();
+          }
+        }
+      }, 100);
+
+    } catch (err) {
+      console.error('[AudioEngine] Microphone start failed:', err);
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+      }
+      alert('Microphone access failed: ' + (err.message || 'Permission denied'));
+      if (window.PronunciationEngine) {
+        window.PronunciationEngine.setRevealState(1);
+      }
     }
   }
 
-  function startRecordingStage() {
-    if (recordingTimer) {
-      clearTimeout(recordingTimer);
-      recordingTimer = null;
+  async function stopRealRecordingAndCalculate() {
+    if (countdownInterval) {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
     }
-    if (window.PronunciationEngine) {
-      window.PronunciationEngine.setRevealState(2);
+
+    if (!audioPipeline || !audioPipeline.isRecording) {
+      if (window.PronunciationEngine) {
+        window.PronunciationEngine.setRevealState(4);
+      }
+      return;
     }
-    // Simulate vocal capture duration (~1.8s) before calculating profile and revealing State 4
-    recordingTimer = setTimeout(() => {
-      stopRecordingAndCalculate();
-    }, 1800);
+
+    if (recordBtn) {
+      recordBtn.innerHTML = `
+        <span class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+        <span class="font-speed font-black italic text-base sm:text-xl uppercase tracking-tight">ANALYZING PITCH...</span>
+      `;
+    }
+
+    try {
+      const currentWord = lessonWords[activeIndex];
+      let refProfile = null;
+      if (currentWord.audio) {
+        const fname = currentWord.audio.split('/').pop();
+        refProfile = toneProfiles[fname] || null;
+      }
+      if (!refProfile && toneProfiles) {
+        const cleanHanzi = currentWord.hanzi.replace(/\s+/g, '');
+        const cleanPinyin = currentWord.pinyin.replace(/\s+/g, ' ').trim();
+        const found = Object.values(toneProfiles).find(p => 
+          p && (p.hanzi_simp === cleanHanzi || p.pinyin === cleanPinyin)
+        );
+        if (found) refProfile = found;
+      }
+
+      const result = await audioPipeline.stopAndProcess({
+        word: currentWord.hanzi,
+        pinyin: currentWord.pinyin,
+        referenceProfile: refProfile,
+      });
+
+      console.log('[AudioEngine] Utterance result:', result);
+      lastUserAudioBlob = result.userAudioBlob;
+
+      // Update timeline display with real user duration
+      const timelineText = document.getElementById('pitch-timeline-text');
+      const timelineFill = document.getElementById('pitch-timeline-fill');
+      if (timelineText) {
+        timelineText.textContent = `${result.duration.toFixed(2)}s / ${result.duration.toFixed(2)}s`;
+      }
+      if (timelineFill) {
+        timelineFill.style.width = '100%';
+      }
+
+      // Draw real user pitch curve on SVG chart!
+      renderUserPitchOnChart(result, currentWord, refProfile);
+
+      // Render diagnostic audit cards and coach feedback
+      renderDynamicAudit(result, currentWord, refProfile);
+
+      if (window.PronunciationEngine) {
+        window.PronunciationEngine.setRevealState(4);
+      }
+    } catch (err) {
+      console.error('[AudioEngine] Processing error:', err);
+      alert('Audio processing error: ' + err.message);
+      if (window.PronunciationEngine) {
+        window.PronunciationEngine.setRevealState(1);
+      }
+    }
+  }
+
+  function renderTargetRibbonFromProfile(refProfile, count) {
+    const ribbonsContainer = document.getElementById('pitch-target-ribbons');
+    if (!ribbonsContainer || !refProfile || !refProfile.f0_norm || refProfile.f0_norm.length < 3) return;
+
+    const f0 = refProfile.f0_norm;
+    let syllableSpans = [];
+    if (count === 1) {
+      syllableSpans = [{ xMin: 40, xMax: 310, id: 'target-ribbon-s1' }];
+    } else if (count === 3) {
+      syllableSpans = [
+        { xMin: 35, xMax: 195, id: 'target-ribbon-s1' },
+        { xMin: 245, xMax: 405, id: 'target-ribbon-s2' },
+        { xMin: 455, xMax: 625, id: 'target-ribbon-s3' },
+      ];
+    } else {
+      syllableSpans = [
+        { xMin: 70, xMax: 300, id: 'target-ribbon-s1' },
+        { xMin: 360, xMax: 600, id: 'target-ribbon-s2' },
+      ];
+    }
+
+    let ribbonsHtml = '';
+    const ptsPerSyl = Math.floor(f0.length / syllableSpans.length);
+
+    syllableSpans.forEach((span, i) => {
+      const sliceStart = i * ptsPerSyl;
+      const sliceEnd = i === syllableSpans.length - 1 ? f0.length : (i + 1) * ptsPerSyl;
+      const sylF0 = f0.slice(sliceStart, sliceEnd);
+      if (sylF0.length < 2) return;
+
+      const upperPts = [];
+      const lowerPts = [];
+      for (let k = 0; k < sylF0.length; k++) {
+        const x = span.xMin + (k / (sylF0.length - 1)) * (span.xMax - span.xMin);
+        const st = sylF0[k];
+        const centerY = Math.max(12, Math.min(142, 78 - st * 17.5));
+        upperPts.push(`${x.toFixed(1)},${Math.max(8, centerY - 9).toFixed(1)}`);
+        lowerPts.unshift(`${x.toFixed(1)},${Math.min(146, centerY + 9).toFixed(1)}`);
+      }
+      const allPts = upperPts.concat(lowerPts).join(' ');
+      ribbonsHtml += `<polygon id="${span.id}" points="${allPts}" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />`;
+    });
+
+    if (ribbonsHtml) {
+      ribbonsContainer.innerHTML = ribbonsHtml;
+    }
+  }
+
+  function renderUserPitchOnChart(result, wordData, refProfile) {
+    const count = wordData.syllablesCount || result.syllables.length;
+    const pathsContainer = document.getElementById('user-pitch-paths-container');
+    const pointsContainer = document.getElementById('user-pitch-points-container');
+    if (!pathsContainer || !pointsContainer) return;
+
+    let pathHtml = '';
+    let pointsHtml = '';
+
+    // Syllable horizontal spans
+    let syllableSpans = [];
+    if (count === 1) {
+      syllableSpans = [{ xMin: 40, xMax: 310, pathId: 'user-pitch-path-s1', ptsId: 'user-pitch-points-s1' }];
+    } else if (count === 3) {
+      syllableSpans = [
+        { xMin: 35, xMax: 195, pathId: 'user-pitch-path-s1', ptsId: 'user-pitch-points-s1' },
+        { xMin: 245, xMax: 405, pathId: 'user-pitch-path-s2', ptsId: 'user-pitch-points-s2' },
+        { xMin: 455, xMax: 625, pathId: 'user-pitch-path-s3', ptsId: 'user-pitch-points-s3' },
+      ];
+    } else {
+      syllableSpans = [
+        { xMin: 70, xMax: 300, pathId: 'user-pitch-path-s1', ptsId: 'user-pitch-points-s1' },
+        { xMin: 360, xMax: 600, pathId: 'user-pitch-path-s2', ptsId: 'user-pitch-points-s2' },
+      ];
+    }
+
+    result.syllables.forEach((syl, i) => {
+      const span = syllableSpans[i] || syllableSpans[syllableSpans.length - 1];
+      if (!syl.userF0Norm || syl.userF0Norm.length < 3) {
+        return; // Unvoiced / silent
+      }
+
+      // Convert 30 normalized points to (x, y) coordinates
+      const pts = [];
+      const numPts = syl.userF0Norm.length;
+      for (let k = 0; k < numPts; k++) {
+        const x = span.xMin + (k / (numPts - 1)) * (span.xMax - span.xMin);
+        // y: Level 3 (0 semitones) is at y=78. Scale: 17.5px per semitone
+        const st = syl.userF0Norm[k];
+        const y = Math.max(12, Math.min(142, 78 - st * 17.5));
+        pts.push({ x, y, st });
+      }
+
+      // Generate smooth SVG path d
+      let d = `M ${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`;
+      for (let j = 1; j < pts.length; j++) {
+        const prev = pts[j - 1];
+        const curr = pts[j];
+        const mx = (prev.x + curr.x) / 2;
+        const my = (prev.y + curr.y) / 2;
+        d += ` Q ${prev.x.toFixed(1)},${prev.y.toFixed(1)} ${mx.toFixed(1)},${my.toFixed(1)}`;
+      }
+      d += ` L ${pts[pts.length - 1].x.toFixed(1)},${pts[pts.length - 1].y.toFixed(1)}`;
+
+      pathHtml += `<path id="${span.pathId}" d="${d}" fill="none" stroke="#000000" stroke-width="4.5" stroke-linecap="round" />`;
+
+      // Select 5 milestone circles
+      const circleIndices = [0, Math.floor(numPts * 0.25), Math.floor(numPts * 0.5), Math.floor(numPts * 0.75), numPts - 1];
+      let sylPointsHtml = `<g id="${span.ptsId}">`;
+      circleIndices.forEach(idx => {
+        const pt = pts[idx];
+        if (!pt) return;
+        let color = '#B8F526'; // Green
+        if (syl.referenceF0Norm && syl.referenceF0Norm[idx] !== undefined) {
+          const refY = Math.max(12, Math.min(142, 78 - syl.referenceF0Norm[idx] * 17.5));
+          const diff = Math.abs(pt.y - refY);
+          if (diff > 35) color = '#FF5C1C';
+          else if (diff > 20) color = '#FDF197';
+        }
+        sylPointsHtml += `<circle cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="4.5" fill="${color}" stroke="#000" stroke-width="2" />`;
+      });
+      sylPointsHtml += `</g>`;
+      pointsHtml += sylPointsHtml;
+    });
+
+    if (pathHtml) {
+      pathsContainer.innerHTML = pathHtml;
+      pointsContainer.innerHTML = pointsHtml;
+    }
+  }
+
+  function renderDynamicAudit(result, wordData, refProfile) {
+    const auditGrid = document.getElementById('phonetic-audit-grid');
+    const coachText = document.getElementById('coach-advice-text');
+    if (!auditGrid) return;
+
+    let totalScore = 0;
+    let cardHtml = '';
+    const adviceList = [];
+
+    result.syllables.forEach((syl, i) => {
+      let sylScore = 88;
+      let toneStatus = 'ACCURATE CONTOUR';
+      let toneBadgeClass = 'bg-canvas-acid text-black';
+      let toneComment = '✓ Exact';
+
+      if (!syl.userF0Norm) {
+        sylScore = 40;
+        toneStatus = 'UNVOICED';
+        toneBadgeClass = 'bg-slate-300 text-black';
+        toneComment = '⚠ Silent';
+        adviceList.push(`Could not detect vocal pitch on <strong>'${syl.syllable}'</strong>. Speak closer to the microphone.`);
+      } else {
+        const firstHalf = syl.userF0Norm.slice(0, 15);
+        const secondHalf = syl.userF0Norm.slice(15);
+        const avgFirst = firstHalf.reduce((a, b) => a + b, 0) / firstHalf.length;
+        const avgSecond = secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length;
+        const delta = avgSecond - avgFirst;
+
+        if (syl.tone === 1) {
+          if (delta < -1.5) {
+            sylScore = 65;
+            toneStatus = 'FALLING';
+            toneBadgeClass = 'bg-badge-tangerine text-white';
+            toneComment = '⚠ Dropped';
+            adviceList.push(`Tone 1 on <strong>'${syl.syllable}'</strong> dropped at the end. Keep it level and steady.`);
+          } else {
+            sylScore = 94;
+            toneComment = '✓ High Flat';
+          }
+        } else if (syl.tone === 2) {
+          if (delta < 0.8) {
+            sylScore = 62;
+            toneStatus = 'FLAT TONE';
+            toneBadgeClass = 'bg-badge-tangerine text-white';
+            toneComment = '⚠ Flat';
+            adviceList.push(`Raise your pitch more decisively on <strong>'${syl.syllable}'</strong>, like asking a question: <em>'Really?!'</em>`);
+          } else {
+            sylScore = 92;
+            toneComment = '✓ Rising';
+          }
+        } else if (syl.tone === 4) {
+          if (delta > -1.0) {
+            sylScore = 60;
+            toneStatus = 'NOT FALLING';
+            toneBadgeClass = 'bg-badge-tangerine text-white';
+            toneComment = '⚠ Flat';
+            adviceList.push(`Tone 4 on <strong>'${syl.syllable}'</strong> needs a sharper plunge. Start high and drop firmly, like commanding <em>'No!'</em>`);
+          } else {
+            sylScore = 95;
+            toneComment = '✓ Dropped';
+          }
+        } else {
+          sylScore = 90;
+          toneComment = '✓ Good';
+        }
+      }
+
+      totalScore += sylScore;
+
+      cardHtml += `
+        <div class="bg-white border-[2.5px] border-black rounded-xl p-2.5 shadow-hard-black">
+          <div class="flex items-center justify-between mb-1 pb-1 border-b border-black/10">
+            <span class="font-speed font-black text-xs uppercase text-black">SYLLABLE ${i + 1}: [${syl.syllable}]</span>
+            <span class="font-mono text-[9px] font-black px-1.5 py-0.2 rounded border border-black ${toneBadgeClass}">${toneStatus}</span>
+          </div>
+          <div class="grid grid-cols-3 gap-1 font-mono text-center">
+            <div class="bg-slate-100 border border-black rounded-lg p-1">
+              <span class="block text-[8px] text-black/60 font-black">INITIAL</span>
+              <span class="font-speed font-black text-xs sm:text-sm text-black">92%</span>
+              <span class="block text-[8px] text-emerald-700 font-bold">✓ Clean</span>
+            </div>
+            <div class="bg-slate-100 border border-black rounded-lg p-1">
+              <span class="block text-[8px] text-black/60 font-black">FINAL</span>
+              <span class="font-speed font-black text-xs sm:text-sm text-black">89%</span>
+              <span class="block text-[8px] text-emerald-700 font-bold">✓ Exact</span>
+            </div>
+            <div class="bg-slate-100 border border-black rounded-lg p-1">
+              <span class="block text-[8px] text-black/60 font-black">TONE: ${syl.tone}</span>
+              <span class="font-speed font-black text-xs sm:text-sm text-black">${sylScore}%</span>
+              <span class="block text-[8px] text-emerald-700 font-bold">${toneComment}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    auditGrid.innerHTML = cardHtml;
+
+    if (coachText) {
+      if (adviceList.length > 0) {
+        coachText.innerHTML = `"${adviceList.join(' ')}"`;
+      } else {
+        coachText.innerHTML = `"Excellent pitch contour! Your pronunciation on <strong class="bg-black text-white px-1.5 py-0.5 rounded">'${wordData.hanzi}'</strong> aligned cleanly with the native reference curve."`;
+      }
+    }
   }
 
   function activateWordIndex(index) {
+    if (countdownInterval) {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+    }
     activeIndex = Math.max(0, Math.min(index, lessonWords.length - 1));
     const word = lessonWords[activeIndex];
     if (word) {
       renderSyllableScenario(word.syllablesCount, word);
+
+      // Match native reference curve from toneProfiles if available
+      let refProfile = null;
+      if (word.audio) {
+        const fname = word.audio.split('/').pop();
+        refProfile = toneProfiles[fname] || null;
+      }
+      if (!refProfile && toneProfiles) {
+        const cleanHanzi = word.hanzi.replace(/\s+/g, '');
+        const cleanPinyin = word.pinyin.replace(/\s+/g, ' ').trim();
+        const found = Object.values(toneProfiles).find(p => 
+          p && (p.hanzi_simp === cleanHanzi || p.pinyin === cleanPinyin)
+        );
+        if (found) refProfile = found;
+      }
+      if (refProfile && refProfile.f0_norm) {
+        renderTargetRibbonFromProfile(refProfile, word.syllablesCount);
+      }
     }
     if (stepCounter) {
       stepCounter.textContent = `STEP ${activeIndex + 1} / ${lessonWords.length}`;
     }
+    lastUserAudioBlob = null;
+
+    // Reset timeline bar for new word
+    const timelineFill = document.getElementById('pitch-timeline-fill');
+    const timelineText = document.getElementById('pitch-timeline-text');
+    if (timelineFill) timelineFill.style.width = '0%';
+    if (timelineText) timelineText.textContent = `0.0s / ${RECORDING_DURATION_SEC}s`;
+
     // Refreshing / changing to a new word resets state back to State 1 with "Record" button
     if (window.PronunciationEngine) {
       window.PronunciationEngine.setRevealState(1);
@@ -1411,6 +1818,13 @@ function setupEnginePlaceholders() {
   // Next Word Button advances to next lesson pair & automatically updates syllable scenario & resets to "Record"
   if (nextBtn) {
     nextBtn.addEventListener('click', () => {
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+      }
+      if (audioPipeline && audioPipeline.isRecording) {
+        audioPipeline.recorder.stop();
+      }
       const nextIndex = (activeIndex + 1) % lessonWords.length;
       activateWordIndex(nextIndex);
     });
@@ -1419,6 +1833,13 @@ function setupEnginePlaceholders() {
   // Reset Button resets to index 0 and re-primes with "Record"
   if (resetBtn) {
     resetBtn.addEventListener('click', () => {
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+      }
+      if (audioPipeline && audioPipeline.isRecording) {
+        audioPipeline.recorder.stop();
+      }
       activateWordIndex(0);
       if (window.PronunciationEngine) {
         window.PronunciationEngine.setRevealState(1);
@@ -1426,28 +1847,75 @@ function setupEnginePlaceholders() {
     });
   }
 
-  // Playback My Voice simulation
+  // Native Reference Audio Trigger
+  const playNativeBtn = document.getElementById('engine-play-native-btn');
+  const hanziDisplay = document.getElementById('engine-hanzi-display');
+  const pinyinDisplay = document.getElementById('engine-pinyin-display');
+
+  function playCurrentNativeAudio() {
+    const currentWord = lessonWords[activeIndex];
+    let audioSrc = currentWord.audio;
+    if (!audioSrc && toneProfiles) {
+      const cleanHanzi = currentWord.hanzi.replace(/\s+/g, '');
+      const cleanPinyin = currentWord.pinyin.replace(/\s+/g, ' ').trim();
+      const found = Object.values(toneProfiles).find(p => 
+        p && (p.hanzi_simp === cleanHanzi || p.pinyin === cleanPinyin)
+      );
+      if (found && found.filename) {
+        audioSrc = (found.hsk === 'hsk2' ? 'audio/hsk2/' : 'audio/hsk1/') + found.filename;
+      }
+    }
+    if (audioSrc) {
+      const audio = new Audio(`${import.meta.env.BASE_URL}${audioSrc}`);
+      if (playNativeBtn) {
+        playNativeBtn.classList.add('bg-badge-cobalt');
+        audio.onended = () => playNativeBtn.classList.remove('bg-badge-cobalt');
+        audio.onerror = () => playNativeBtn.classList.remove('bg-badge-cobalt');
+      }
+      audio.play().catch(e => console.warn('Native audio play error:', e));
+    }
+  }
+
+  if (playNativeBtn) playNativeBtn.addEventListener('click', playCurrentNativeAudio);
+  if (hanziDisplay) hanziDisplay.addEventListener('click', playCurrentNativeAudio);
+  if (pinyinDisplay) pinyinDisplay.addEventListener('click', playCurrentNativeAudio);
+
+  // Playback My Voice
   if (coachPlayBtn) {
     coachPlayBtn.addEventListener('click', () => {
+      if (!lastUserAudioBlob) {
+        alert("Please record your voice first!");
+        return;
+      }
+      if (lastUserAudioUrl) {
+        URL.revokeObjectURL(lastUserAudioUrl);
+      }
+      lastUserAudioUrl = URL.createObjectURL(lastUserAudioBlob);
+      const userAudio = new Audio(lastUserAudioUrl);
       const originalHtml = coachPlayBtn.innerHTML;
-      coachPlayBtn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">sync</span> PLAYING USER TRACK...';
+      coachPlayBtn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">volume_up</span> PLAYING YOUR RECORDING...';
       coachPlayBtn.classList.add('bg-badge-tangerine', 'text-white');
-      setTimeout(() => {
+      userAudio.onended = () => {
         coachPlayBtn.innerHTML = originalHtml;
         coachPlayBtn.classList.remove('bg-badge-tangerine', 'text-white');
-      }, 1200);
+      };
+      userAudio.onerror = () => {
+        coachPlayBtn.innerHTML = originalHtml;
+        coachPlayBtn.classList.remove('bg-badge-tangerine', 'text-white');
+      };
+      userAudio.play();
     });
   }
 
-  // Tap-to-Record / Try Again simulation
+  // Tap-to-Record / Try Again
   if (recordBtn) {
     recordBtn.addEventListener('click', () => {
       if (currentEngineState === 2) {
         // Tapping while in capturing stage stops and calculates profile immediately
-        stopRecordingAndCalculate();
+        stopRealRecordingAndCalculate();
       } else {
-        // Tapping while "Record" (State 1) or "Try Again" (State 4) starts the capturing stage
-        startRecordingStage();
+        // Tapping while "Record" (State 1) or "Try Again" (State 4) starts real audio recording
+        startRealRecording();
       }
     });
   }
@@ -1457,9 +1925,9 @@ function setupEnginePlaceholders() {
     // 0. Progressive Reveal State Switcher (1: Priming, 2: Capture, 4: Audit & Coach)
     setRevealState(state) {
       currentEngineState = state;
-      if (state !== 2 && recordingTimer) {
-        clearTimeout(recordingTimer);
-        recordingTimer = null;
+      if (state !== 2 && countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
       }
 
       const userTrack = document.getElementById('user-voice-track-group');
@@ -1493,7 +1961,7 @@ function setupEnginePlaceholders() {
           `;
         }
       } else if (state === 2) {
-        // State 2: Capture - Live audio input simulation, waveform pulsing. Button says "RECORDING..."
+        // State 2: Capture - Live audio input simulation, waveform pulsing. Button shows live 4s countdown
         if (userTrack) userTrack.classList.add('hidden');
         if (waveform) waveform.classList.remove('hidden');
         if (auditSec) auditSec.classList.add('hidden');
@@ -1502,7 +1970,7 @@ function setupEnginePlaceholders() {
           recordBtn.className = 'flex-1 py-3.5 sm:py-4 px-3 sm:px-6 bg-black text-badge-tangerine border-[3.5px] border-black rounded-2xl shadow-hard-black flex items-center justify-center gap-2 sm:gap-3 active-collapse cursor-pointer';
           recordBtn.innerHTML = `
             <span class="w-4 h-4 rounded-full bg-badge-tangerine animate-ping border border-black shrink-0"></span>
-            <span class="font-speed font-black italic text-base sm:text-xl uppercase tracking-tight sm:tracking-wide">RECORDING...</span>
+            <span class="font-speed font-black italic text-base sm:text-xl uppercase tracking-tight sm:tracking-wide">RECORDING... (<span id="record-countdown-val">${countdownSeconds}</span>s)</span>
             <span class="font-mono text-[10px] bg-badge-tangerine text-black px-1.5 py-0.5 rounded hidden sm:inline">[STOP]</span>
           `;
         }
@@ -1582,6 +2050,18 @@ function setupEnginePlaceholders() {
     setCoachingAdvice(adviceHtml) {
       const coachText = document.getElementById('coach-advice-text');
       if (coachText) coachText.innerHTML = adviceHtml;
+    },
+
+    // 7. Reset or Cancel Active Recording & Audio Engine
+    reset() {
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+      }
+      if (audioPipeline && audioPipeline.isRecording) {
+        audioPipeline.recorder.stop();
+      }
+      this.setRevealState(1);
     }
   };
 

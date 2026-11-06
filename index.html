@@ -525,10 +525,13 @@
                 <span class="bg-black text-canvas-ice font-mono text-[9px] font-black px-2 py-0.5 rounded">TARGET WORD</span>
                 <span id="engine-stage-label" class="font-mono text-[11px] font-bold text-black/60">[STAGE 2: TONE SANDHI]</span>
               </div>
-              <div class="flex items-baseline gap-2.5 pt-0.5">
-                <span id="engine-hanzi-display" class="font-chinese font-black text-3xl sm:text-4xl text-black leading-none">你 好</span>
-                <span id="engine-pinyin-display" class="font-speed font-black italic text-xl sm:text-2xl text-black">nǐ hǎo</span>
+              <div class="flex items-center gap-2.5 pt-0.5">
+                <span id="engine-hanzi-display" class="font-chinese font-black text-3xl sm:text-4xl text-black leading-none cursor-pointer" title="Hear native audio">你 好</span>
+                <span id="engine-pinyin-display" class="font-speed font-black italic text-xl sm:text-2xl text-black cursor-pointer" title="Hear native audio">nǐ hǎo</span>
                 <span id="engine-gloss-display" class="font-mono text-xs sm:text-sm font-bold text-black/60">"Hello"</span>
+                <button id="engine-play-native-btn" class="p-1.5 rounded-lg bg-black text-white hover:bg-badge-cobalt transition-colors active-collapse cursor-pointer shadow-sm flex items-center justify-center shrink-0" title="Hear Native Pronunciation">
+                  <span class="material-symbols-outlined text-base leading-none">volume_up</span>
+                </button>
               </div>
             </div>
             <!-- Racing Tangerine Sandhi Banner -->
