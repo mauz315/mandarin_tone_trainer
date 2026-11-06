@@ -948,6 +948,7 @@ function setupEnginePlaceholders() {
   let currentTargetWord = null;
   let practicedCount = 0;
   let currentSyllableCount = 1;
+  let currentSyllables = [];
 
   let currentEngineState = 1; // 1: Priming (Record), 2: Capture (Recording...), 4: Audit (Try Again)
   let audioPipeline = null;
@@ -1227,6 +1228,7 @@ function setupEnginePlaceholders() {
     }
     const count = syllables.length;
     currentSyllableCount = count;
+    currentSyllables = syllables;
 
     // 1. Update Header Context Card
     const hanziEl = document.getElementById('engine-hanzi-display');
@@ -1268,9 +1270,9 @@ function setupEnginePlaceholders() {
 
     if (sandhiBadge) {
       if (sandhiInfo.isSandhi) {
-        sandhiBadge.className = 'bg-badge-tangerine text-white border-2 border-black rounded-xl p-2 font-mono text-xs font-bold text-right shadow-sm z-10 transition-colors';
+        sandhiBadge.className = 'w-full bg-badge-tangerine text-white border-2 border-black rounded-xl p-2 font-mono text-xs font-bold shadow-sm z-10 transition-colors flex items-center justify-between gap-2 min-h-[50px]';
       } else {
-        sandhiBadge.className = 'bg-badge-cobalt text-white border-2 border-black rounded-xl p-2 font-mono text-xs font-bold text-right shadow-sm z-10 transition-colors';
+        sandhiBadge.className = 'w-full bg-badge-cobalt text-white border-2 border-black rounded-xl p-2 font-mono text-xs font-bold shadow-sm z-10 transition-colors flex items-center justify-between gap-2 min-h-[50px]';
       }
     }
 
@@ -1595,12 +1597,128 @@ function setupEnginePlaceholders() {
     };
   }
 
+  function decomposePinyin(sylPinyin) {
+    if (!sylPinyin) return { initial: '∅', final: '—' };
+    const clean = sylPinyin.toLowerCase();
+    const initials = ['zh', 'ch', 'sh', 'b', 'p', 'm', 'f', 'd', 't', 'n', 'l', 'g', 'k', 'h', 'j', 'q', 'x', 'r', 'z', 'c', 's', 'y', 'w'];
+    for (const init of initials) {
+      if (clean.startsWith(init)) {
+        return { initial: init, final: sylPinyin.slice(init.length) || '—' };
+      }
+    }
+    return { initial: '∅', final: sylPinyin };
+  }
+
+  function renderEmptyAudit() {
+    const auditGrid = document.getElementById('phonetic-audit-grid');
+    const priorityHeader = document.getElementById('coach-priority-header');
+    const priorityDot = document.getElementById('coach-priority-dot');
+    const coachPlayBtn = document.getElementById('coach-hear-user-btn');
+    if (!auditGrid) return;
+
+    const syllables = (currentSyllables && currentSyllables.length > 0)
+      ? currentSyllables
+      : (currentTargetWord ? parsePinyinSyllables(currentTargetWord.pinyin) : [{ syllable: '', tone: 1 }]);
+    const sylCount = syllables.length;
+
+    // Dynamically adjust grid columns across full 12-column width (same as renderDynamicAudit)
+    if (sylCount === 1) {
+      auditGrid.className = 'grid grid-cols-1 max-w-xl mx-auto gap-3.5';
+    } else if (sylCount === 2) {
+      auditGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-3.5';
+    } else if (sylCount === 3) {
+      auditGrid.className = 'grid grid-cols-1 md:grid-cols-3 gap-3';
+    } else {
+      auditGrid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3';
+    }
+
+    let cardHtml = '';
+    syllables.forEach((syl, i) => {
+      const sylPinyin = syl.syllable || (syl.initial ? (syl.initial + (syl.final || '')) : `S${i + 1}`);
+      const toneNum = syl.tone || 1;
+      const decomp = decomposePinyin(sylPinyin);
+      const initSym = syl.initial || decomp.initial;
+      const finSym = syl.final || decomp.final;
+
+      cardHtml += `
+        <div class="bg-white border-[2.5px] border-black/30 rounded-xl p-3 sm:p-3.5 shadow-sm flex flex-col justify-between border-dashed">
+          <!-- Card Header: Syllable label & Overall Badge (Empty / Primed) -->
+          <div class="flex items-center justify-between mb-2.5 pb-2 border-b border-black/10">
+            <div class="flex items-center gap-2">
+              <span class="font-speed font-black text-sm uppercase text-black/60">SYLLABLE ${i + 1}:</span>
+              <span class="font-mono text-sm font-black bg-black/10 text-black/80 px-2 py-0.5 rounded shadow-xs">[${sylPinyin}]</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-[10px] font-bold text-black/40 uppercase">OVERALL:</span>
+              <span class="font-speed font-black text-xs sm:text-sm px-2.5 py-0.5 rounded border border-black/20 bg-slate-100 text-black/40">
+                --%
+              </span>
+              <span class="hidden sm:inline-block font-mono text-[9px] font-black uppercase px-2 py-0.5 rounded border border-black/20 bg-slate-50 text-black/50">
+                AWAITING RECORDING
+              </span>
+            </div>
+          </div>
+
+          <!-- Phonetic Triad Grid: Initial -> Tone -> Final -->
+          <div class="grid grid-cols-3 gap-2 font-mono text-center">
+            <!-- 1. INITIAL -->
+            <div class="border-[1.5px] border-dashed border-black/20 bg-slate-50/70 rounded-lg p-2 flex flex-col justify-between">
+              <span class="block text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-black/45 truncate">[1. INITIAL: ${initSym}]</span>
+              <span class="font-speed font-black text-sm sm:text-base md:text-lg my-0.5 text-black/30">--%</span>
+              <span class="block text-[9px] sm:text-[10px] font-bold leading-tight text-black/40 truncate">Ready to Record</span>
+              <span class="block text-[8px] sm:text-[9px] text-black/35 font-semibold mt-0.5 truncate">Voiced Attack</span>
+            </div>
+
+            <!-- 2. TONE -->
+            <div class="border-[1.5px] border-dashed border-black/20 bg-slate-50/70 rounded-lg p-2 flex flex-col justify-between">
+              <span class="block text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-black/45 truncate">[2. TONE: T${toneNum}]</span>
+              <span class="font-speed font-black text-sm sm:text-base md:text-lg my-0.5 text-black/30">--%</span>
+              <span class="block text-[9px] sm:text-[10px] font-bold leading-tight text-black/40 truncate">Corridor Primed</span>
+              <span class="block text-[8px] sm:text-[9px] text-black/35 font-semibold mt-0.5 truncate">Chao DTW</span>
+            </div>
+
+            <!-- 3. FINAL -->
+            <div class="border-[1.5px] border-dashed border-black/20 bg-slate-50/70 rounded-lg p-2 flex flex-col justify-between">
+              <span class="block text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-black/45 truncate">[3. FINAL: ${finSym}]</span>
+              <span class="font-speed font-black text-sm sm:text-base md:text-lg my-0.5 text-black/30">--%</span>
+              <span class="block text-[9px] sm:text-[10px] font-bold leading-tight text-black/40 truncate">Ready to Record</span>
+              <span class="block text-[8px] sm:text-[9px] text-black/35 font-semibold mt-0.5 truncate">Formant Track</span>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    auditGrid.innerHTML = cardHtml;
+
+    if (priorityHeader && priorityDot) {
+      priorityHeader.textContent = 'AWAITING VOCAL CAPTURE • COACH READY';
+      priorityDot.className = 'w-2.5 h-2.5 rounded-full bg-slate-300 border border-black';
+    }
+
+    if (coachPlayBtn) {
+      coachPlayBtn.classList.add('opacity-40', 'pointer-events-none', 'cursor-not-allowed');
+    }
+  }
+
   function renderDynamicAudit(result, wordData, refProfile) {
     const auditGrid = document.getElementById('phonetic-audit-grid');
     const coachText = document.getElementById('coach-advice-text');
     const priorityHeader = document.getElementById('coach-priority-header');
     const priorityDot = document.getElementById('coach-priority-dot');
     if (!auditGrid) return;
+
+    // Dynamically adjust grid columns across full 12-column width
+    const sylCount = result.syllables.length;
+    if (sylCount === 1) {
+      auditGrid.className = 'grid grid-cols-1 max-w-xl mx-auto gap-3.5';
+    } else if (sylCount === 2) {
+      auditGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-3.5';
+    } else if (sylCount === 3) {
+      auditGrid.className = 'grid grid-cols-1 md:grid-cols-3 gap-3';
+    } else {
+      auditGrid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3';
+    }
 
     let cardHtml = '';
 
@@ -1640,48 +1758,48 @@ function setupEnginePlaceholders() {
       }
 
       cardHtml += `
-        <div class="bg-white border-[2.5px] border-black rounded-xl p-2.5 sm:p-3 shadow-hard-black flex flex-col justify-between">
+        <div class="bg-white border-[2.5px] border-black rounded-xl p-3 sm:p-3.5 shadow-hard-black flex flex-col justify-between">
           <!-- Card Header: Syllable label & Overall Badge -->
-          <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-black/10">
-            <div class="flex items-center gap-1.5">
-              <span class="font-speed font-black text-xs uppercase text-black">SYLLABLE ${i + 1}:</span>
-              <span class="font-mono text-xs font-black bg-black text-white px-1.5 py-0.5 rounded">[${syl.syllable}]</span>
+          <div class="flex items-center justify-between mb-2.5 pb-2 border-b border-black/10">
+            <div class="flex items-center gap-2">
+              <span class="font-speed font-black text-sm uppercase text-black">SYLLABLE ${i + 1}:</span>
+              <span class="font-mono text-sm font-black bg-black text-white px-2 py-0.5 rounded shadow-xs">[${syl.syllable}]</span>
             </div>
-            <div class="flex items-center gap-1.5">
-              <span class="font-mono text-[9px] font-bold text-black/60 uppercase">OVERALL:</span>
-              <span class="font-speed font-black text-xs px-2 py-0.5 rounded border border-black ${overallTheme.badgeClass}">
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-[10px] font-bold text-black/60 uppercase">OVERALL:</span>
+              <span class="font-speed font-black text-xs sm:text-sm px-2.5 py-0.5 rounded border border-black ${overallTheme.badgeClass}">
                 ${compositeScore}%
               </span>
-              <span class="hidden sm:inline-block font-mono text-[8px] font-black uppercase px-1 py-0.2 rounded border border-black/30 bg-slate-100 text-black/70">
+              <span class="hidden sm:inline-block font-mono text-[9px] font-black uppercase px-2 py-0.5 rounded border border-black/30 bg-slate-100 text-black/80">
                 ${statusText}
               </span>
             </div>
           </div>
 
           <!-- Phonetic Triad Grid: Initial -> Tone -> Final -->
-          <div class="grid grid-cols-3 gap-1.5 font-mono text-center">
+          <div class="grid grid-cols-3 gap-2 font-mono text-center">
             <!-- 1. INITIAL -->
-            <div class="border-[1.5px] rounded-lg p-1.5 flex flex-col justify-between ${initTheme.boxClass}">
-              <span class="block text-[8px] font-black uppercase tracking-wider text-black/70 truncate">[1. INITIAL: ${init.symbol || '∅'}]</span>
-              <span class="font-speed font-black text-xs sm:text-sm my-0.5 ${initTheme.scoreClass}">${init.score}%</span>
-              <span class="block text-[8px] font-bold leading-tight line-clamp-1 ${initTheme.labelClass}" title="${init.sublabel}">${init.sublabel}</span>
-              <span class="block text-[7px] text-black/50 font-semibold mt-0.5 truncate">${initMetricText}</span>
+            <div class="border-[1.5px] rounded-lg p-2 flex flex-col justify-between ${initTheme.boxClass}">
+              <span class="block text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-black/75 truncate">[1. INITIAL: ${init.symbol || '∅'}]</span>
+              <span class="font-speed font-black text-sm sm:text-base md:text-lg my-0.5 ${initTheme.scoreClass}">${init.score}%</span>
+              <span class="block text-[9px] sm:text-[10px] font-bold leading-tight line-clamp-1 ${initTheme.labelClass}" title="${init.sublabel}">${init.sublabel}</span>
+              <span class="block text-[8px] sm:text-[9px] text-black/60 font-semibold mt-0.5 truncate">${initMetricText}</span>
             </div>
 
             <!-- 2. TONE -->
-            <div class="border-[1.5px] rounded-lg p-1.5 flex flex-col justify-between ${toneTheme.boxClass}">
-              <span class="block text-[8px] font-black uppercase tracking-wider text-black/70 truncate">[2. TONE: T${syl.tone}]</span>
-              <span class="font-speed font-black text-xs sm:text-sm my-0.5 ${toneTheme.scoreClass}">${toneScore}%</span>
-              <span class="block text-[8px] font-bold leading-tight line-clamp-1 ${toneTheme.labelClass}" title="${toneSublabel}">${toneSublabel}</span>
-              <span class="block text-[7px] text-black/50 font-semibold mt-0.5 truncate">${toneMetricText}</span>
+            <div class="border-[1.5px] rounded-lg p-2 flex flex-col justify-between ${toneTheme.boxClass}">
+              <span class="block text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-black/75 truncate">[2. TONE: T${syl.tone}]</span>
+              <span class="font-speed font-black text-sm sm:text-base md:text-lg my-0.5 ${toneTheme.scoreClass}">${toneScore}%</span>
+              <span class="block text-[9px] sm:text-[10px] font-bold leading-tight line-clamp-1 ${toneTheme.labelClass}" title="${toneSublabel}">${toneSublabel}</span>
+              <span class="block text-[8px] sm:text-[9px] text-black/60 font-semibold mt-0.5 truncate">${toneMetricText}</span>
             </div>
 
             <!-- 3. FINAL -->
-            <div class="border-[1.5px] rounded-lg p-1.5 flex flex-col justify-between ${finalTheme.boxClass}">
-              <span class="block text-[8px] font-black uppercase tracking-wider text-black/70 truncate">[3. FINAL: ${fin.symbol || 'V'}]</span>
-              <span class="font-speed font-black text-xs sm:text-sm my-0.5 ${finalTheme.scoreClass}">${fin.score}%</span>
-              <span class="block text-[8px] font-bold leading-tight line-clamp-1 ${finalTheme.labelClass}" title="${fin.sublabel}">${fin.sublabel}</span>
-              <span class="block text-[7px] text-black/50 font-semibold mt-0.5 truncate">${finalMetricText}</span>
+            <div class="border-[1.5px] rounded-lg p-2 flex flex-col justify-between ${finalTheme.boxClass}">
+              <span class="block text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-black/75 truncate">[3. FINAL: ${fin.symbol || 'V'}]</span>
+              <span class="font-speed font-black text-sm sm:text-base md:text-lg my-0.5 ${finalTheme.scoreClass}">${fin.score}%</span>
+              <span class="block text-[9px] sm:text-[10px] font-bold leading-tight line-clamp-1 ${finalTheme.labelClass}" title="${fin.sublabel}">${fin.sublabel}</span>
+              <span class="block text-[8px] sm:text-[9px] text-black/60 font-semibold mt-0.5 truncate">${finalMetricText}</span>
             </div>
           </div>
         </div>
@@ -1715,6 +1833,11 @@ function setupEnginePlaceholders() {
         priorityHeader.textContent = `PHONETIC TRIAD VERIFIED (NATIVE RESIDUAL)`;
         priorityDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 border border-black';
       }
+    }
+
+    const coachPlayBtn = document.getElementById('coach-hear-user-btn');
+    if (coachPlayBtn) {
+      coachPlayBtn.classList.remove('opacity-40', 'pointer-events-none', 'cursor-not-allowed');
     }
   }
 
@@ -1994,11 +2117,14 @@ function setupEnginePlaceholders() {
       const auditSec = document.getElementById('phonetic-audit-section');
       const coachCard = document.getElementById('articulatory-coach-card');
 
+      // Audit section and Coach Card always remain visible in layout to maintain constant vertical height
+      if (auditSec) auditSec.classList.remove('hidden');
+      if (coachCard) coachCard.classList.remove('hidden');
+
       if (state === 1) {
         if (userTrack) userTrack.classList.add('hidden');
         if (waveform) waveform.classList.add('hidden');
-        if (auditSec) auditSec.classList.add('hidden');
-        if (coachCard) coachCard.classList.add('hidden');
+        renderEmptyAudit();
         if (recordBtn) {
           recordBtn.className = 'flex-1 py-3.5 sm:py-4 px-3 sm:px-6 bg-badge-tangerine text-white hover:bg-[#ff4800] border-[3.5px] border-black rounded-2xl shadow-hard-black flex items-center justify-center gap-2 sm:gap-3 active-collapse cursor-pointer';
           recordBtn.innerHTML = `
@@ -2010,8 +2136,6 @@ function setupEnginePlaceholders() {
       } else if (state === 2) {
         if (userTrack) userTrack.classList.add('hidden');
         if (waveform) waveform.classList.remove('hidden');
-        if (auditSec) auditSec.classList.add('hidden');
-        if (coachCard) coachCard.classList.add('hidden');
         if (recordBtn) {
           recordBtn.className = 'flex-1 py-3.5 sm:py-4 px-3 sm:px-6 bg-black text-badge-tangerine border-[3.5px] border-black rounded-2xl shadow-hard-black flex items-center justify-center gap-2 sm:gap-3 active-collapse cursor-pointer';
           recordBtn.innerHTML = `
@@ -2023,8 +2147,6 @@ function setupEnginePlaceholders() {
       } else {
         if (userTrack) userTrack.classList.remove('hidden');
         if (waveform) waveform.classList.add('hidden');
-        if (auditSec) auditSec.classList.remove('hidden');
-        if (coachCard) coachCard.classList.remove('hidden');
         if (recordBtn) {
           recordBtn.className = 'flex-1 py-3.5 sm:py-4 px-3 sm:px-6 bg-badge-tangerine text-white hover:bg-[#ff4800] border-[3.5px] border-black rounded-2xl shadow-hard-black flex items-center justify-center gap-2 sm:gap-3 active-collapse cursor-pointer';
           recordBtn.innerHTML = `
