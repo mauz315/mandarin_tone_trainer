@@ -11,7 +11,13 @@ let currentItem = null;
 let nextPendingItem = null;
 let currentGameMode = 'tones'; // Options: 'tones', 'initials', 'endings'
 let nextQuestionTimer = null; 
-let toneProfiles = {}; 
+let toneProfiles = {}; // Human story audio reference profiles (tone_profiles.json)
+let toneProfilesTTS = {}; // Neural citation TTS reference profiles (tone_profiles_tts.json)
+
+// Parallel Audio Track & Speed State (TTS vs Human Story)
+let audioTrackMode = localStorage.getItem('tone_trainer_track_mode') || 'tts'; // 'tts' | 'human'
+let humanPlaybackSpeed = parseFloat(localStorage.getItem('tone_trainer_human_speed') || '1.0'); // 1.0 | 0.8
+let lastProcessedResult = null; 
 
 // Resilient Web Audio & HTMLAudio pipeline for mobile browsers
 let audioCtx = null;
@@ -345,7 +351,7 @@ async function init() {
       console.log('App Ready. Vocabulary loaded:', words.length);
     }
 
-    // Load pre-calculated native tone curves for the pronunciation engine
+    // Load pre-calculated native tone curves for the pronunciation engine (Human Story)
     const profilePromise = fetchJsonSafe('tone_profiles.json')
       .then(data => {
         if (data) {
@@ -354,6 +360,16 @@ async function init() {
         }
       })
       .catch(e => console.warn('[ToneEngine] tone_profiles.json could not be loaded:', e));
+
+    // Load pre-calculated native tone curves for Neural TTS citation audio
+    const ttsProfilePromise = fetchJsonSafe('tone_profiles_tts.json')
+      .then(data => {
+        if (data) {
+          toneProfilesTTS = data;
+          console.log('[ToneEngine] TTS reference tone profiles loaded:', Object.keys(toneProfilesTTS).length);
+        }
+      })
+      .catch(e => console.warn('[ToneEngine] tone_profiles_tts.json could not be loaded:', e));
 
     // Load combined HSK 1 & HSK 2 2026 deck (497 words)
     const deckPromise = fetchJsonSafe('hsk_deck.json')
@@ -365,7 +381,7 @@ async function init() {
       })
       .catch(e => console.warn('[PronunciationDeck] hsk_deck.json could not be loaded:', e));
 
-    await Promise.all([profilePromise, deckPromise]);
+    await Promise.all([profilePromise, ttsProfilePromise, deckPromise]);
 
     // Initialize random shuffle bag and immediately prime the first random word
     if (window.PronunciationEngine && typeof window.PronunciationEngine.initDeck === 'function') {
@@ -1170,24 +1186,36 @@ function setupEnginePlaceholders() {
     if (userPts) userPts.innerHTML = '';
   }
 
+  function getActiveProfileForWord(word) {
+    if (!word) return null;
+    const audioRel = word.audio || '';
+    const origFname = audioRel.split('/').pop();
+
+    if (audioTrackMode === 'tts') {
+      const ttsFname = origFname.replace('hskstory-', 'tts-');
+      if (toneProfilesTTS && toneProfilesTTS[ttsFname]) {
+        return toneProfilesTTS[ttsFname];
+      }
+      const cleanHanzi = (word.hanzi_simp || word.hanzi || '').replace(/\s+/g, '');
+      const found = Object.values(toneProfilesTTS || {}).find(p => p && p.hanzi_simp === cleanHanzi);
+      if (found) return found;
+    }
+
+    if (toneProfiles && toneProfiles[origFname]) {
+      return toneProfiles[origFname];
+    }
+    const cleanHanzi = (word.hanzi_simp || word.hanzi || '').replace(/\s+/g, '');
+    const found = Object.values(toneProfiles || {}).find(p => p && p.hanzi_simp === cleanHanzi);
+    return found || null;
+  }
+
   function displayWord(word) {
     if (!word) return;
     currentTargetWord = word;
+    lastProcessedResult = null; // Reset previous utterance for new word
 
-    // Resolve reference tone profile
-    let refProfile = null;
-    if (word.audio && toneProfiles) {
-      const fname = word.audio.split('/').pop();
-      refProfile = toneProfiles[fname] || null;
-    }
-    if (!refProfile && toneProfiles) {
-      const cleanHanzi = (word.hanzi_simp || word.hanzi || '').replace(/\s+/g, '');
-      const cleanPinyin = (word.pinyin || '').replace(/\s+/g, ' ').trim();
-      const found = Object.values(toneProfiles).find(p =>
-        p && (p.hanzi_simp === cleanHanzi || p.pinyin === cleanPinyin)
-      );
-      if (found) refProfile = found;
-    }
+    // Resolve reference tone profile using active track (TTS or Human Story)
+    const refProfile = getActiveProfileForWord(word);
 
     // Determine syllables and count
     let syllables = [];
@@ -1382,19 +1410,7 @@ function setupEnginePlaceholders() {
 
     try {
       const currentWord = currentTargetWord || (hskDeck && hskDeck[0]) || { hanzi: '你好', pinyin: 'nǐ hǎo' };
-      let refProfile = null;
-      if (currentWord.audio && toneProfiles) {
-        const fname = currentWord.audio.split('/').pop();
-        refProfile = toneProfiles[fname] || null;
-      }
-      if (!refProfile && toneProfiles) {
-        const cleanHanzi = (currentWord.hanzi_simp || currentWord.hanzi || '').replace(/\s+/g, '');
-        const cleanPinyin = (currentWord.pinyin || '').replace(/\s+/g, ' ').trim();
-        const found = Object.values(toneProfiles).find(p => 
-          p && (p.hanzi_simp === cleanHanzi || p.pinyin === cleanPinyin)
-        );
-        if (found) refProfile = found;
-      }
+      const refProfile = getActiveProfileForWord(currentWord);
 
       const result = await audioPipeline.stopAndProcess({
         word: currentWord.hanzi_simp || currentWord.hanzi,
@@ -1403,6 +1419,7 @@ function setupEnginePlaceholders() {
       });
 
       console.log('[AudioEngine] Utterance result:', result);
+      lastProcessedResult = result;
       lastUserAudioBlob = result.userAudioBlob;
 
       // Update practice counter telemetry
@@ -1685,23 +1702,27 @@ function setupEnginePlaceholders() {
     });
   });
 
-  // Native Reference Audio Trigger
+  // Native Reference Audio Trigger (Supports Dual-Track: Neural TTS & Human Story + 0.8x Speed)
   function playCurrentNativeAudio() {
     const currentWord = currentTargetWord || (hskDeck && hskDeck[0]);
     if (!currentWord) return;
+
     let audioSrc = currentWord.audio;
-    if (!audioSrc && toneProfiles) {
-      const cleanHanzi = (currentWord.hanzi_simp || currentWord.hanzi || '').replace(/\s+/g, '');
-      const cleanPinyin = (currentWord.pinyin || '').replace(/\s+/g, ' ').trim();
-      const found = Object.values(toneProfiles).find(p => 
-        p && (p.hanzi_simp === cleanHanzi || p.pinyin === cleanPinyin)
-      );
-      if (found && found.filename) {
-        audioSrc = (found.hsk === 'hsk2' ? 'audio/hsk2/' : 'audio/hsk1/') + found.filename;
-      }
+    let targetSpeed = 1.0;
+
+    if (audioTrackMode === 'tts') {
+      const origFname = (currentWord.audio || '').split('/').pop();
+      const ttsFname = origFname.replace('hskstory-', 'tts-');
+      audioSrc = `audio/hsk_tts/${ttsFname}`;
+      targetSpeed = 1.0;
+    } else {
+      audioSrc = currentWord.audio;
+      targetSpeed = humanPlaybackSpeed;
     }
+
     if (audioSrc) {
       const audio = new Audio(`${import.meta.env.BASE_URL}${audioSrc}`);
+      audio.playbackRate = targetSpeed;
       if (playNativeBtn) {
         playNativeBtn.classList.add('bg-badge-cobalt');
         audio.onended = () => playNativeBtn.classList.remove('bg-badge-cobalt');
@@ -1710,6 +1731,107 @@ function setupEnginePlaceholders() {
       audio.play().catch(e => console.warn('Native audio play error:', e));
     }
   }
+
+  // Dual-Track UI State Controller & Real-Time Rescoring
+  function updateAudioTrackUI() {
+    const ttsBtn = document.getElementById('audio-track-tts-btn');
+    const humanBtn = document.getElementById('audio-track-human-btn');
+    const humanSpeedControls = document.getElementById('human-speed-controls');
+    const speed1xBtn = document.getElementById('audio-speed-1x-btn');
+    const speed08xBtn = document.getElementById('audio-speed-08x-btn');
+
+    if (ttsBtn && humanBtn) {
+      if (audioTrackMode === 'tts') {
+        ttsBtn.className = 'px-2 py-0.5 rounded text-[10px] font-mono font-black uppercase transition-all bg-black text-white shadow-xs cursor-pointer';
+        humanBtn.className = 'px-2 py-0.5 rounded text-[10px] font-mono font-black uppercase transition-all bg-transparent text-black hover:bg-black/10 cursor-pointer';
+        if (humanSpeedControls) humanSpeedControls.classList.add('hidden');
+      } else {
+        ttsBtn.className = 'px-2 py-0.5 rounded text-[10px] font-mono font-black uppercase transition-all bg-transparent text-black hover:bg-black/10 cursor-pointer';
+        humanBtn.className = 'px-2 py-0.5 rounded text-[10px] font-mono font-black uppercase transition-all bg-black text-white shadow-xs cursor-pointer';
+        if (humanSpeedControls) humanSpeedControls.classList.remove('hidden');
+      }
+    }
+
+    if (speed1xBtn && speed08xBtn) {
+      if (humanPlaybackSpeed === 0.8) {
+        speed1xBtn.className = 'px-1.5 py-0.5 rounded text-[10px] font-mono font-black uppercase transition-all bg-transparent text-black hover:bg-black/10 cursor-pointer';
+        speed08xBtn.className = 'px-1.5 py-0.5 rounded text-[10px] font-mono font-black uppercase transition-all bg-black text-white shadow-xs cursor-pointer';
+      } else {
+        speed1xBtn.className = 'px-1.5 py-0.5 rounded text-[10px] font-mono font-black uppercase transition-all bg-black text-white shadow-xs cursor-pointer';
+        speed08xBtn.className = 'px-1.5 py-0.5 rounded text-[10px] font-mono font-black uppercase transition-all bg-transparent text-black hover:bg-black/10 cursor-pointer';
+      }
+    }
+  }
+
+  function reevaluateUtteranceAgainstProfile(result, wordData, profile) {
+    if (!result || !result.syllables) return;
+
+    result.syllables.forEach((syl, i) => {
+      let refContour = null;
+      if (profile?.syllables?.[i]?.f0_norm && profile.syllables[i].f0_norm.length >= 2) {
+        refContour = PitchTracker.resampleContour(profile.syllables[i].f0_norm, 30);
+      } else if (profile?.f0_norm && profile.f0_norm.length >= 2) {
+        const fullRef = profile.f0_norm;
+        const ptsPerSyl = Math.floor(fullRef.length / result.syllables.length);
+        const sliceStart = i * ptsPerSyl;
+        const sliceEnd = i === result.syllables.length - 1 ? fullRef.length : (i + 1) * ptsPerSyl;
+        const sylSlice = fullRef.slice(sliceStart, sliceEnd);
+        refContour = PitchTracker.resampleContour(sylSlice, 30);
+      }
+      if (!refContour || refContour.length < 2) {
+        refContour = DTWComparator.getCanonicalContour(syl.tone, 30);
+      }
+
+      syl.referenceF0Norm = refContour;
+      if (syl.userF0Norm && syl.userF0Norm.length >= 3) {
+        const dtwResult = DTWComparator.compare(syl.userF0Norm, refContour);
+        const evalResult = ToneClassifier.evaluate(syl.userF0Norm, syl.tone, syl.syllable);
+        syl.dtwScore = dtwResult.score;
+        syl.slopeScore = evalResult.score;
+        syl.finalScore = Math.round(0.60 * dtwResult.score + 0.40 * evalResult.score);
+        syl.status = evalResult.status;
+        syl.comment = evalResult.comment;
+        syl.tip = evalResult.tip;
+      }
+    });
+
+    renderUserPitchOnChart(result, wordData, profile);
+    renderDynamicAudit(result, wordData, profile);
+  }
+
+  function setAudioTrackMode(mode) {
+    audioTrackMode = mode;
+    localStorage.setItem('tone_trainer_track_mode', mode);
+    updateAudioTrackUI();
+
+    if (currentTargetWord) {
+      const activeProf = getActiveProfileForWord(currentTargetWord);
+      renderTargetRibbonFromProfile(activeProf, currentSyllableCount);
+
+      if (lastProcessedResult && lastProcessedResult.syllables) {
+        reevaluateUtteranceAgainstProfile(lastProcessedResult, currentTargetWord, activeProf);
+      }
+    }
+  }
+
+  function setHumanPlaybackSpeed(speed) {
+    humanPlaybackSpeed = speed;
+    localStorage.setItem('tone_trainer_human_speed', speed.toString());
+    updateAudioTrackUI();
+  }
+
+  const trackTtsBtn = document.getElementById('audio-track-tts-btn');
+  const trackHumanBtn = document.getElementById('audio-track-human-btn');
+  const speed1xBtn = document.getElementById('audio-speed-1x-btn');
+  const speed08xBtn = document.getElementById('audio-speed-08x-btn');
+
+  if (trackTtsBtn) trackTtsBtn.addEventListener('click', () => setAudioTrackMode('tts'));
+  if (trackHumanBtn) trackHumanBtn.addEventListener('click', () => setAudioTrackMode('human'));
+  if (speed1xBtn) speed1xBtn.addEventListener('click', () => setHumanPlaybackSpeed(1.0));
+  if (speed08xBtn) speed08xBtn.addEventListener('click', () => setHumanPlaybackSpeed(0.8));
+
+  // Initialize UI buttons state on load
+  updateAudioTrackUI();
 
   if (playNativeBtn) playNativeBtn.addEventListener('click', playCurrentNativeAudio);
   if (hanziDisplay) hanziDisplay.addEventListener('click', playCurrentNativeAudio);
