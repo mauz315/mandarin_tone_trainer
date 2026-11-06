@@ -213,6 +213,9 @@ function setupMenu() {
       submenu.classList.add('hidden');
       if (engineScreen) engineScreen.classList.remove('hidden');
       setAppBackground('bg-canvas-ice');
+      if (window.PronunciationEngine) {
+        window.PronunciationEngine.setRevealState(1);
+      }
     });
   }
 
@@ -873,7 +876,6 @@ function setupEnginePlaceholders() {
     { syllablesCount: 2, hanzi: "手 表", pinyin: "shǒu biǎo", gloss: "Watch", sandhi: "/ 3rd + 3rd ➔ 2nd + 3rd /", spoken: "shóu biǎo" }
   ];
 
-  let isRecording = false;
   let activeIndex = 0;
   let currentSyllableCount = 2;
 
@@ -1364,6 +1366,33 @@ function setupEnginePlaceholders() {
     }
   }
 
+  let currentEngineState = 1; // 1: Priming (Record), 2: Capture (Recording...), 4: Audit (Try Again)
+  let recordingTimer = null;
+
+  function stopRecordingAndCalculate() {
+    if (recordingTimer) {
+      clearTimeout(recordingTimer);
+      recordingTimer = null;
+    }
+    if (window.PronunciationEngine) {
+      window.PronunciationEngine.setRevealState(4);
+    }
+  }
+
+  function startRecordingStage() {
+    if (recordingTimer) {
+      clearTimeout(recordingTimer);
+      recordingTimer = null;
+    }
+    if (window.PronunciationEngine) {
+      window.PronunciationEngine.setRevealState(2);
+    }
+    // Simulate vocal capture duration (~1.8s) before calculating profile and revealing State 4
+    recordingTimer = setTimeout(() => {
+      stopRecordingAndCalculate();
+    }, 1800);
+  }
+
   function activateWordIndex(index) {
     activeIndex = Math.max(0, Math.min(index, lessonWords.length - 1));
     const word = lessonWords[activeIndex];
@@ -1373,9 +1402,13 @@ function setupEnginePlaceholders() {
     if (stepCounter) {
       stepCounter.textContent = `STEP ${activeIndex + 1} / ${lessonWords.length}`;
     }
+    // Refreshing / changing to a new word resets state back to State 1 with "Record" button
+    if (window.PronunciationEngine) {
+      window.PronunciationEngine.setRevealState(1);
+    }
   }
 
-  // Next Word Button advances to next lesson pair & automatically updates syllable scenario
+  // Next Word Button advances to next lesson pair & automatically updates syllable scenario & resets to "Record"
   if (nextBtn) {
     nextBtn.addEventListener('click', () => {
       const nextIndex = (activeIndex + 1) % lessonWords.length;
@@ -1383,7 +1416,7 @@ function setupEnginePlaceholders() {
     });
   }
 
-  // Reset Button resets to index 0 and re-primes
+  // Reset Button resets to index 0 and re-primes with "Record"
   if (resetBtn) {
     resetBtn.addEventListener('click', () => {
       activateWordIndex(0);
@@ -1406,24 +1439,15 @@ function setupEnginePlaceholders() {
     });
   }
 
-  // Tap-to-Record / Retry toggle simulation
+  // Tap-to-Record / Try Again simulation
   if (recordBtn) {
     recordBtn.addEventListener('click', () => {
-      isRecording = !isRecording;
-      const label = recordBtn.querySelector('span:nth-child(2)');
-      const pulseDot = recordBtn.querySelector('span:nth-child(1)');
-      if (isRecording) {
-        recordBtn.classList.replace('bg-badge-tangerine', 'bg-black');
-        recordBtn.classList.add('text-badge-tangerine');
-        recordBtn.classList.remove('text-white');
-        if (label) label.textContent = 'LISTENING... (TAP TO STOP)';
-        if (pulseDot) pulseDot.classList.add('bg-badge-tangerine', 'scale-125');
+      if (currentEngineState === 2) {
+        // Tapping while in capturing stage stops and calculates profile immediately
+        stopRecordingAndCalculate();
       } else {
-        recordBtn.classList.replace('bg-black', 'bg-badge-tangerine');
-        recordBtn.classList.remove('text-badge-tangerine');
-        recordBtn.classList.add('text-white');
-        if (label) label.textContent = 'TAP TO RETRY';
-        if (pulseDot) pulseDot.classList.remove('bg-badge-tangerine', 'scale-125');
+        // Tapping while "Record" (State 1) or "Try Again" (State 4) starts the capturing stage
+        startRecordingStage();
       }
     });
   }
@@ -1432,6 +1456,12 @@ function setupEnginePlaceholders() {
   window.PronunciationEngine = {
     // 0. Progressive Reveal State Switcher (1: Priming, 2: Capture, 4: Audit & Coach)
     setRevealState(state) {
+      currentEngineState = state;
+      if (state !== 2 && recordingTimer) {
+        clearTimeout(recordingTimer);
+        recordingTimer = null;
+      }
+
       const userTrack = document.getElementById('user-voice-track-group');
       const waveform = document.getElementById('engine-live-waveform-group');
       const auditSec = document.getElementById('phonetic-audit-section');
@@ -1449,7 +1479,7 @@ function setupEnginePlaceholders() {
       });
 
       if (state === 1) {
-        // State 1: Priming - Target corridor only, no user contour yet
+        // State 1: Priming - Target corridor only, no user contour yet. Button says "Record"
         if (userTrack) userTrack.classList.add('hidden');
         if (waveform) waveform.classList.add('hidden');
         if (auditSec) auditSec.classList.add('hidden');
@@ -1458,12 +1488,12 @@ function setupEnginePlaceholders() {
           recordBtn.className = 'flex-1 py-3.5 sm:py-4 px-3 sm:px-6 bg-badge-tangerine text-white hover:bg-[#ff4800] border-[3.5px] border-black rounded-2xl shadow-hard-black flex items-center justify-center gap-2 sm:gap-3 active-collapse cursor-pointer';
           recordBtn.innerHTML = `
             <span class="w-4 h-4 rounded-full bg-white animate-pulse border border-black shrink-0"></span>
-            <span class="font-speed font-black italic text-base sm:text-xl uppercase tracking-tight sm:tracking-wide">TAP TO RECORD</span>
+            <span class="font-speed font-black italic text-base sm:text-xl uppercase tracking-tight sm:tracking-wide">RECORD</span>
             <span class="font-mono text-[10px] bg-black text-white px-1.5 py-0.5 rounded hidden sm:inline">[SPACE]</span>
           `;
         }
       } else if (state === 2) {
-        // State 2: Capture - Live audio input simulation, waveform pulsing
+        // State 2: Capture - Live audio input simulation, waveform pulsing. Button says "RECORDING..."
         if (userTrack) userTrack.classList.add('hidden');
         if (waveform) waveform.classList.remove('hidden');
         if (auditSec) auditSec.classList.add('hidden');
@@ -1477,7 +1507,7 @@ function setupEnginePlaceholders() {
           `;
         }
       } else {
-        // State 4: Diagnostic Audit & Articulatory Coach
+        // State 4: Diagnostic Audit & Articulatory Coach (Calculated profile). Button says "Try Again"
         if (userTrack) userTrack.classList.remove('hidden');
         if (waveform) waveform.classList.add('hidden');
         if (auditSec) auditSec.classList.remove('hidden');
@@ -1486,7 +1516,7 @@ function setupEnginePlaceholders() {
           recordBtn.className = 'flex-1 py-3.5 sm:py-4 px-3 sm:px-6 bg-badge-tangerine text-white hover:bg-[#ff4800] border-[3.5px] border-black rounded-2xl shadow-hard-black flex items-center justify-center gap-2 sm:gap-3 active-collapse cursor-pointer';
           recordBtn.innerHTML = `
             <span class="w-4 h-4 rounded-full bg-white animate-pulse border border-black shrink-0"></span>
-            <span class="font-speed font-black italic text-base sm:text-xl uppercase tracking-tight sm:tracking-wide">TAP TO RETRY</span>
+            <span class="font-speed font-black italic text-base sm:text-xl uppercase tracking-tight sm:tracking-wide">TRY AGAIN</span>
             <span class="font-mono text-[10px] bg-black text-white px-1.5 py-0.5 rounded hidden sm:inline">[SPACE]</span>
           `;
         }
@@ -1496,6 +1526,7 @@ function setupEnginePlaceholders() {
     // 1. Reactive Syllable Scenario Switcher (1, 2, or 3 Syllables)
     setSyllableCount(count, customData) {
       renderSyllableScenario(count, customData);
+      window.PronunciationEngine.setRevealState(1);
     },
 
     // 2. Update Target Word Information
@@ -1507,6 +1538,7 @@ function setupEnginePlaceholders() {
         if (wordData.pinyin) document.getElementById('engine-pinyin-display').textContent = wordData.pinyin;
         if (wordData.gloss) document.getElementById('engine-gloss-display').textContent = `"${wordData.gloss}"`;
       }
+      window.PronunciationEngine.setRevealState(1);
     },
 
     // 3. Select Word Index Programmatically
@@ -1552,6 +1584,12 @@ function setupEnginePlaceholders() {
       if (coachText) coachText.innerHTML = adviceHtml;
     }
   };
+
+  // Prime initial word and State 1 ("Record")
+  activateWordIndex(0);
+  if (window.PronunciationEngine) {
+    window.PronunciationEngine.setRevealState(1);
+  }
 }
 
 // Initialize the app

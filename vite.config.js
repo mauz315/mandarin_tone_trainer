@@ -5,5 +5,6 @@ export default defineConfig({
   base: '/mandarin_tone_trainer/',
     build: {
     outDir: 'docs', // <--- This is the magic change
+    emptyOutDir: false,
   }
 })

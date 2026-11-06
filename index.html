@@ -502,13 +502,13 @@
           <div class="flex items-center gap-1">
             <span class="font-speed font-black uppercase text-black text-[9px]">STATE:</span>
             <div class="flex gap-1" id="engine-state-toggle-group">
-              <button type="button" class="px-1.5 py-0.5 rounded bg-white border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer" onclick="window.PronunciationEngine && window.PronunciationEngine.setRevealState(1)">
+              <button type="button" class="px-1.5 py-0.5 rounded bg-black text-badge-tangerine border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer" onclick="window.PronunciationEngine && window.PronunciationEngine.setRevealState(1)">
                 1: Priming
               </button>
               <button type="button" class="px-1.5 py-0.5 rounded bg-white border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer" onclick="window.PronunciationEngine && window.PronunciationEngine.setRevealState(2)">
                 2: Capture
               </button>
-              <button type="button" class="px-1.5 py-0.5 rounded bg-black text-badge-tangerine border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer" onclick="window.PronunciationEngine && window.PronunciationEngine.setRevealState(4)">
+              <button type="button" class="px-1.5 py-0.5 rounded bg-white border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer" onclick="window.PronunciationEngine && window.PronunciationEngine.setRevealState(4)">
                 4: Audit
               </button>
             </div>
@@ -599,8 +599,8 @@
                     <polygon id="target-ribbon-s2" points="360,98 470,146 600,52 600,32 470,126 360,78" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />
                   </g>
 
-                  <!-- Dynamic User Voice Pitch Paths & Points -->
-                  <g id="user-voice-track-group">
+                  <!-- Dynamic User Voice Pitch Paths & Points (Hidden in State 1 Priming) -->
+                  <g id="user-voice-track-group" class="hidden">
                     <g id="user-pitch-paths-container">
                       <path id="user-pitch-path-s1" d="M 70,85 Q 180,54 300,48" fill="none" stroke="#000000" stroke-width="4.5" stroke-linecap="round" />
                       <path id="user-pitch-path-s2" d="M 360,88 Q 465,138 600,45" fill="none" stroke="#000000" stroke-width="4.5" stroke-linecap="round" />
@@ -654,8 +654,8 @@
             </div>
           </section>
 
-          <!-- 3. Phonetic Component Audit (Dynamic Reactive Grid for 1, 2, or 3 Syllables) -->
-          <section id="phonetic-audit-section" class="w-full shrink-0 lg:col-span-5 lg:row-start-2">
+          <!-- 3. Phonetic Component Audit (Dynamic Reactive Grid for 1, 2, or 3 Syllables, Hidden in State 1) -->
+          <section id="phonetic-audit-section" class="w-full shrink-0 lg:col-span-5 lg:row-start-2 hidden">
             <div id="phonetic-audit-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <!-- Syllable 1 Diagnostic Card -->
               <div class="bg-white border-[2.5px] border-black rounded-xl p-2.5 shadow-hard-black">
@@ -709,8 +709,8 @@
             </div>
           </section>
 
-          <!-- 4. Articulatory Coach Card (Horizon Lavender / Violet Palette Accent) -->
-          <section id="articulatory-coach-card" class="w-full bg-[#9CA4FC] border-[3px] border-black rounded-2xl p-3 shadow-hard-black shrink-0 lg:col-span-5 lg:row-start-3">
+          <!-- 4. Articulatory Coach Card (Hidden in State 1) -->
+          <section id="articulatory-coach-card" class="w-full bg-[#9CA4FC] border-[3px] border-black rounded-2xl p-3 shadow-hard-black shrink-0 lg:col-span-5 lg:row-start-3 hidden">
             <div class="flex items-center justify-between gap-2 mb-1.5">
               <div class="flex items-center gap-1.5">
                 <span class="w-2.5 h-2.5 rounded-full bg-badge-tangerine animate-pulse border border-black"></span>
@@ -748,10 +748,10 @@
               <span class="hidden sm:inline">RESET</span>
             </button>
 
-            <!-- Hero Tap-to-Retry Trigger (Expanded, Large Hit Area on Mobile & Desktop) -->
+            <!-- Hero Record Trigger (Expanded, Large Hit Area on Mobile & Desktop) -->
             <button id="engine-record-btn" class="flex-1 py-3.5 sm:py-4 px-3 sm:px-6 bg-badge-tangerine text-white hover:bg-[#ff4800] border-[3.5px] border-black rounded-2xl shadow-hard-black flex items-center justify-center gap-2 sm:gap-3 active-collapse cursor-pointer">
               <span class="w-4 h-4 rounded-full bg-white animate-pulse border border-black shrink-0"></span>
-              <span class="font-speed font-black italic text-base sm:text-xl uppercase tracking-tight sm:tracking-wide">TAP TO RETRY</span>
+              <span class="font-speed font-black italic text-base sm:text-xl uppercase tracking-tight sm:tracking-wide">RECORD</span>
               <span class="font-mono text-[10px] bg-black text-white px-1.5 py-0.5 rounded hidden sm:inline">[SPACE]</span>
             </button>
 
