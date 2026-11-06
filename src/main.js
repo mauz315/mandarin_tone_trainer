@@ -1570,62 +1570,118 @@ function setupEnginePlaceholders() {
     }
   }
 
+  function getTriadTheme(score, tier) {
+    if (score >= 85 || tier === 'EMERALD') {
+      return {
+        boxClass: 'bg-emerald-500/10 border-emerald-500 text-emerald-950',
+        scoreClass: 'text-emerald-700',
+        labelClass: 'text-emerald-800 font-bold',
+        badgeClass: 'bg-emerald-600 text-white',
+      };
+    }
+    if (score >= 65 || tier === 'AMBER') {
+      return {
+        boxClass: 'bg-amber-500/10 border-amber-500 text-amber-950',
+        scoreClass: 'text-amber-700',
+        labelClass: 'text-amber-800 font-bold',
+        badgeClass: 'bg-amber-600 text-white',
+      };
+    }
+    return {
+      boxClass: 'bg-rose-500/10 border-rose-500 text-rose-950',
+      scoreClass: 'text-rose-700',
+      labelClass: 'text-rose-800 font-bold',
+      badgeClass: 'bg-rose-600 text-white',
+    };
+  }
+
   function renderDynamicAudit(result, wordData, refProfile) {
     const auditGrid = document.getElementById('phonetic-audit-grid');
     const coachText = document.getElementById('coach-advice-text');
+    const priorityHeader = document.getElementById('coach-priority-header');
+    const priorityDot = document.getElementById('coach-priority-dot');
     if (!auditGrid) return;
 
     let cardHtml = '';
-    const adviceList = [];
 
     result.syllables.forEach((syl, i) => {
-      const finalScore = syl.finalScore !== undefined ? syl.finalScore : 88;
-      const dtwScore = syl.dtwScore !== undefined ? syl.dtwScore : 90;
-      const slopeScore = syl.slopeScore !== undefined ? syl.slopeScore : 85;
-      const status = syl.status || 'ACCURATE CONTOUR';
-      const comment = syl.comment || '✓ Exact';
+      const compositeScore = syl.finalScore !== undefined ? syl.finalScore : 88;
+      const toneScore = syl.toneScore !== undefined ? syl.toneScore : (syl.toneResult?.score || 85);
+      const toneSublabel = syl.toneResult?.sublabel || syl.comment || '✓ Exact';
+      const toneDtw = syl.dtwScore !== undefined ? syl.dtwScore : 90;
 
-      let toneBadgeClass = 'bg-canvas-acid text-black';
-      let toneCommentClass = 'text-emerald-700 font-bold';
-      let dtwCommentClass = 'text-emerald-700 font-bold';
+      const init = syl.initial || { symbol: '', score: 92, sublabel: '✓ Clean Onset', tier: 'EMERALD', votMs: 0 };
+      const fin = syl.final || { symbol: 'a', score: 88, sublabel: '✓ Open Vowel', tier: 'EMERALD', f1Hz: 750, f2Hz: 1200 };
 
+      const initTheme = getTriadTheme(init.score, init.tier);
+      const toneTheme = getTriadTheme(toneScore, syl.toneResult?.tier || (toneScore >= 85 ? 'EMERALD' : (toneScore >= 65 ? 'AMBER' : 'ROSE')));
+      const finalTheme = getTriadTheme(fin.score, fin.tier);
+      const overallTheme = getTriadTheme(compositeScore);
+
+      // Formatting human-readable sub-metrics
+      let initMetricText = 'Voiced Attack';
+      if (init.votMs !== undefined && init.votMs > 0) {
+        initMetricText = `VOT: ${init.votMs}ms`;
+      } else if (init.cogHz) {
+        initMetricText = `CoG: ${init.cogHz}Hz`;
+      }
+
+      const toneMetricText = `DTW: ${toneDtw}%`;
+      const finalMetricText = fin.f1Hz && fin.f2Hz ? `F1: ${fin.f1Hz} • F2: ${fin.f2Hz}` : `Vowel Clarity`;
+
+      // Status pill at card top
+      let statusText = 'TARGET MET';
       if (!syl.userF0Norm) {
-        toneBadgeClass = 'bg-slate-300 text-black';
-        toneCommentClass = 'text-slate-600 font-bold';
-        dtwCommentClass = 'text-slate-600 font-bold';
-        adviceList.push(`Could not detect vocal pitch on <strong>'${syl.syllable}'</strong>. Speak closer to the microphone.`);
-      } else if (finalScore < 70) {
-        toneBadgeClass = 'bg-badge-tangerine text-white';
-        toneCommentClass = 'text-badge-tangerine font-bold';
-        dtwCommentClass = dtwScore < 70 ? 'text-badge-tangerine font-bold' : 'text-emerald-700 font-bold';
-        if (syl.advice) adviceList.push(syl.advice);
-      } else if (finalScore < 85) {
-        toneBadgeClass = 'bg-badge-tangerine text-white';
-        toneCommentClass = 'text-amber-700 font-bold';
-        if (syl.advice) adviceList.push(syl.advice);
+        statusText = 'NO VOICING';
+      } else if (compositeScore < 65) {
+        statusText = 'NEEDS POLISH';
+      } else if (compositeScore < 85) {
+        statusText = 'COMPREHENSIBLE';
       }
 
       cardHtml += `
-        <div class="bg-white border-[2.5px] border-black rounded-xl p-2.5 shadow-hard-black">
-          <div class="flex items-center justify-between mb-1 pb-1 border-b border-black/10">
-            <span class="font-speed font-black text-xs uppercase text-black">SYLLABLE ${i + 1}: [${syl.syllable}]</span>
-            <span class="font-mono text-[9px] font-black px-1.5 py-0.2 rounded border border-black ${toneBadgeClass}">${status}</span>
+        <div class="bg-white border-[2.5px] border-black rounded-xl p-2.5 sm:p-3 shadow-hard-black flex flex-col justify-between">
+          <!-- Card Header: Syllable label & Overall Badge -->
+          <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-black/10">
+            <div class="flex items-center gap-1.5">
+              <span class="font-speed font-black text-xs uppercase text-black">SYLLABLE ${i + 1}:</span>
+              <span class="font-mono text-xs font-black bg-black text-white px-1.5 py-0.5 rounded">[${syl.syllable}]</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="font-mono text-[9px] font-bold text-black/60 uppercase">OVERALL:</span>
+              <span class="font-speed font-black text-xs px-2 py-0.5 rounded border border-black ${overallTheme.badgeClass}">
+                ${compositeScore}%
+              </span>
+              <span class="hidden sm:inline-block font-mono text-[8px] font-black uppercase px-1 py-0.2 rounded border border-black/30 bg-slate-100 text-black/70">
+                ${statusText}
+              </span>
+            </div>
           </div>
-          <div class="grid grid-cols-3 gap-1 font-mono text-center">
-            <div class="bg-slate-100 border border-black rounded-lg p-1">
-              <span class="block text-[8px] text-black/60 font-black">ALIGNMENT</span>
-              <span class="font-speed font-black text-xs sm:text-sm text-black">${dtwScore}%</span>
-              <span class="block text-[8px] ${dtwCommentClass}">${dtwScore >= 80 ? '✓ DTW Match' : '⚠ Distorted'}</span>
+
+          <!-- Phonetic Triad Grid: Initial -> Tone -> Final -->
+          <div class="grid grid-cols-3 gap-1.5 font-mono text-center">
+            <!-- 1. INITIAL -->
+            <div class="border-[1.5px] rounded-lg p-1.5 flex flex-col justify-between ${initTheme.boxClass}">
+              <span class="block text-[8px] font-black uppercase tracking-wider text-black/70 truncate">[1. INITIAL: ${init.symbol || '∅'}]</span>
+              <span class="font-speed font-black text-xs sm:text-sm my-0.5 ${initTheme.scoreClass}">${init.score}%</span>
+              <span class="block text-[8px] font-bold leading-tight line-clamp-1 ${initTheme.labelClass}" title="${init.sublabel}">${init.sublabel}</span>
+              <span class="block text-[7px] text-black/50 font-semibold mt-0.5 truncate">${initMetricText}</span>
             </div>
-            <div class="bg-slate-100 border border-black rounded-lg p-1">
-              <span class="block text-[8px] text-black/60 font-black">DIRECTION</span>
-              <span class="font-speed font-black text-xs sm:text-sm text-black">${slopeScore}%</span>
-              <span class="block text-[8px] ${toneCommentClass}">${slopeScore >= 80 ? '✓ Slope Check' : '⚠ Wrong Slope'}</span>
+
+            <!-- 2. TONE -->
+            <div class="border-[1.5px] rounded-lg p-1.5 flex flex-col justify-between ${toneTheme.boxClass}">
+              <span class="block text-[8px] font-black uppercase tracking-wider text-black/70 truncate">[2. TONE: T${syl.tone}]</span>
+              <span class="font-speed font-black text-xs sm:text-sm my-0.5 ${toneTheme.scoreClass}">${toneScore}%</span>
+              <span class="block text-[8px] font-bold leading-tight line-clamp-1 ${toneTheme.labelClass}" title="${toneSublabel}">${toneSublabel}</span>
+              <span class="block text-[7px] text-black/50 font-semibold mt-0.5 truncate">${toneMetricText}</span>
             </div>
-            <div class="bg-slate-100 border border-black rounded-lg p-1">
-              <span class="block text-[8px] text-black/60 font-black">TONE: ${syl.tone}</span>
-              <span class="font-speed font-black text-xs sm:text-sm text-black">${finalScore}%</span>
-              <span class="block text-[8px] ${toneCommentClass}">${comment}</span>
+
+            <!-- 3. FINAL -->
+            <div class="border-[1.5px] rounded-lg p-1.5 flex flex-col justify-between ${finalTheme.boxClass}">
+              <span class="block text-[8px] font-black uppercase tracking-wider text-black/70 truncate">[3. FINAL: ${fin.symbol || 'V'}]</span>
+              <span class="font-speed font-black text-xs sm:text-sm my-0.5 ${finalTheme.scoreClass}">${fin.score}%</span>
+              <span class="block text-[8px] font-bold leading-tight line-clamp-1 ${finalTheme.labelClass}" title="${fin.sublabel}">${fin.sublabel}</span>
+              <span class="block text-[7px] text-black/50 font-semibold mt-0.5 truncate">${finalMetricText}</span>
             </div>
           </div>
         </div>
@@ -1634,12 +1690,30 @@ function setupEnginePlaceholders() {
 
     auditGrid.innerHTML = cardHtml;
 
+    // The "One Critical Fix" Articulatory Coach Card
     if (coachText) {
-      if (adviceList.length > 0) {
-        coachText.innerHTML = `"${adviceList.join(' ')}"`;
+      if (result.coachingAdvice) {
+        coachText.innerHTML = `"${result.coachingAdvice}"`;
       } else {
         const accuracy = result.overallScore !== undefined ? result.overallScore : 94;
         coachText.innerHTML = `"Outstanding pitch contour! Your pronunciation on <strong class="bg-black text-white px-1.5 py-0.5 rounded">'${wordData.hanzi_simp || wordData.hanzi}'</strong> matched the native model with <strong class="text-emerald-600 font-bold">${accuracy}%</strong> accuracy."`;
+      }
+    }
+
+    if (priorityHeader && priorityDot) {
+      const p = result.coachingPriority;
+      if (p === 'TONE') {
+        priorityHeader.textContent = `PRIORITY FIX: TONE CONTOUR DIRECTION`;
+        priorityDot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse border border-black';
+      } else if (p === 'FINAL') {
+        priorityHeader.textContent = `PRIORITY FIX: VOWEL MOUTH & LIP SHAPE`;
+        priorityDot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse border border-black';
+      } else if (p === 'INITIAL') {
+        priorityHeader.textContent = `PRIORITY FIX: CONSONANT BREATH RELEASE`;
+        priorityDot.className = 'w-2.5 h-2.5 rounded-full bg-badge-tangerine animate-pulse border border-black';
+      } else {
+        priorityHeader.textContent = `PHONETIC TRIAD VERIFIED (NATIVE RESIDUAL)`;
+        priorityDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 border border-black';
       }
     }
   }
@@ -1799,12 +1873,30 @@ function setupEnginePlaceholders() {
         const evalResult = ToneClassifier.evaluate(syl.userF0Norm, syl.tone, syl.syllable);
         syl.dtwScore = dtwResult.score;
         syl.slopeScore = evalResult.score;
-        syl.finalScore = Math.round(0.60 * dtwResult.score + 0.40 * evalResult.score);
+        syl.toneScore = Math.round(0.60 * dtwResult.score + 0.40 * evalResult.score);
         syl.status = evalResult.status;
         syl.comment = evalResult.comment;
-        syl.tip = evalResult.tip;
+        syl.advice = evalResult.advice;
+
+        if (syl.toneResult) {
+          syl.toneResult.score = syl.toneScore;
+          syl.toneResult.dtwScore = dtwResult.score;
+          syl.toneResult.slopeScore = evalResult.score;
+          syl.toneResult.sublabel = evalResult.comment || "✓ Exact";
+          syl.toneResult.tier = syl.toneScore >= 85 ? "EMERALD" : (syl.toneScore >= 65 ? "AMBER" : "ROSE");
+          syl.toneResult.advice = evalResult.advice || "";
+        }
+
+        const initialScore = syl.initial?.score !== undefined ? syl.initial.score : 90;
+        const finalScore = syl.final?.score !== undefined ? syl.final.score : 85;
+        syl.finalScore = Math.round(0.50 * syl.toneScore + 0.30 * finalScore + 0.20 * initialScore);
+        syl.overallScore = syl.finalScore;
       }
     });
+
+    result.overallScore = result.syllables.length > 0
+      ? Math.round(result.syllables.reduce((acc, s) => acc + s.finalScore, 0) / result.syllables.length)
+      : 0;
 
     renderUserPitchOnChart(result, wordData, profile);
     renderDynamicAudit(result, wordData, profile);

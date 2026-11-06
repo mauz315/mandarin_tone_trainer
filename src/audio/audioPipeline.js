@@ -23,6 +23,9 @@ import { PitchTracker } from "./pitchTracker.js";
 import { AlignerClient } from "./alignerClient.js";
 import { DTWComparator } from "./dtwComparator.js";
 import { ToneClassifier } from "./toneClassifier.js";
+import { PinyinUtils } from "./pinyinUtils.js";
+import { InitialEvaluator } from "./initialEvaluator.js";
+import { FormantTracker } from "./formantTracker.js";
 
 export class AudioPipeline {
   constructor(options = {}) {
@@ -118,14 +121,70 @@ export class AudioPipeline {
         refContour = DTWComparator.getCanonicalContour(syl.tone, 30);
       }
 
-      // Phase 4: DTW Trajectory Matching & Directional Slope Classification
+      // Phase 4: DTW Trajectory Matching & Directional Slope Classification (Tone)
       const dtwResult = DTWComparator.compare(userNormContour, refContour);
       const evalResult = ToneClassifier.evaluate(userNormContour, syl.tone, syl.syllable);
-
-      // Composite score: 60% DTW trajectory shape, 40% directional slope check
-      const compositeScore = userNormContour
+      const toneScore = userNormContour
         ? Math.round(0.60 * dtwResult.score + 0.40 * evalResult.score)
         : 35;
+      const toneTier = toneScore >= 85 ? "EMERALD" : (toneScore >= 65 ? "AMBER" : "ROSE");
+
+      // Phonetic Triad: Pinyin linguistic decomposition
+      const rawSylPinyin = syl.syllable || syl.pinyin || (pinyin ? pinyin.trim().split(/\s+/)[i] : "") || "";
+      const sylDecomp = PinyinUtils.decompose(rawSylPinyin);
+
+      // Phonetic Triad: Initial Consonant Evaluation (VOT & Fricative CoG)
+      const initialResult = InitialEvaluator.evaluate(syllablePcm, sampleRate, sylDecomp, syllablePitch.f0);
+
+      // Phonetic Triad: Final Vowel Evaluation (10kHz downsampling & LPC Formants)
+      const finalResult = FormantTracker.evaluate(
+        syllablePcm,
+        sampleRate,
+        sylDecomp.vowelTarget,
+        sylDecomp.initial,
+        syllablePitch.f0
+      );
+
+      // Weighted Composite Syllable Score: 50% Tone + 30% Final Vowel + 20% Initial Consonant
+      const compositeScore = userNormContour
+        ? Math.round(0.50 * toneScore + 0.30 * finalResult.score + 0.20 * initialResult.score)
+        : 35;
+
+      // The "One Critical Fix" Feedback Hierarchy per syllable: Tone (<65%) -> Final (<65%) -> Initial (<65%)
+      let sylPriority = "PERFECT";
+      let sylAdvice = "Excellent pronunciation! All phonemic targets verified.";
+
+      if (toneScore < 65) {
+        sylPriority = "TONE";
+        sylAdvice = evalResult.advice || `Tone ${syl.tone} pitch contour collapsed. Adjust your pitch direction.`;
+      } else if (finalResult.score < 65) {
+        sylPriority = "FINAL";
+        sylAdvice = finalResult.advice || `Vowel resonance muffled. Adjust your mouth opening.`;
+      } else if (initialResult.score < 65) {
+        sylPriority = "INITIAL";
+        sylAdvice = initialResult.advice || `Consonant burst timing off. Adjust your breath puff.`;
+      } else if (toneScore < 85) {
+        sylPriority = "TONE";
+        sylAdvice = evalResult.advice || `Good tone contour. Polish your pitch stability.`;
+      } else if (finalResult.score < 85) {
+        sylPriority = "FINAL";
+        sylAdvice = finalResult.advice || `Almost clear vowel. Fine-tune your lip and jaw position.`;
+      } else if (initialResult.score < 85) {
+        sylPriority = "INITIAL";
+        sylAdvice = initialResult.advice || `Good consonant attack. Keep the release crisp.`;
+      }
+
+      const toneResultObj = {
+        tone: syl.tone,
+        score: toneScore,
+        dtwScore: dtwResult.score,
+        slopeScore: evalResult.score,
+        sublabel: evalResult.comment || "✓ Exact",
+        status: evalResult.status,
+        diagnosticCode: evalResult.diagnosticCode,
+        tier: toneTier,
+        advice: evalResult.advice || "",
+      };
 
       return {
         syllable: syl.syllable,
@@ -138,7 +197,8 @@ export class AudioPipeline {
         dtwDistance: dtwResult.distance,
         dtwScore: dtwResult.score,
         slopeScore: evalResult.score,
-        finalScore: compositeScore,
+        finalScore: compositeScore, // Triad composite score
+        toneScore: toneScore,
         detectedTone: evalResult.detectedTone,
         isAccurate: evalResult.isAccurate,
         status: evalResult.status,
@@ -147,12 +207,52 @@ export class AudioPipeline {
         advice: evalResult.advice,
         metrics: evalResult.metrics,
         dtwPath: dtwResult.path,
+        // Phonetic Triad Structured Outputs
+        initial: initialResult,
+        toneResult: toneResultObj,
+        final: finalResult,
+        overallScore: compositeScore,
+        coachingPriority: sylPriority,
+        coachingAdvice: sylAdvice,
+        decomposition: sylDecomp,
       };
     });
 
     const overallScore = processedSyllables.length > 0
       ? Math.round(processedSyllables.reduce((acc, s) => acc + s.finalScore, 0) / processedSyllables.length)
       : 0;
+
+    // Utterance-level "One Critical Fix" selection across all syllables
+    let utterancePriority = "PERFECT";
+    let primaryAdvice = "Outstanding pronunciation! All phonemic targets verified.";
+
+    // 1. Any critical Tone failure (<65%) across all syllables
+    const criticalToneSyl = processedSyllables.find(s => s.toneScore < 65);
+    if (criticalToneSyl) {
+      utterancePriority = "TONE";
+      primaryAdvice = criticalToneSyl.advice || criticalToneSyl.coachingAdvice;
+    } else {
+      // 2. Any critical Final failure (<65%)
+      const criticalFinalSyl = processedSyllables.find(s => s.final?.score < 65);
+      if (criticalFinalSyl) {
+        utterancePriority = "FINAL";
+        primaryAdvice = criticalFinalSyl.final?.advice || criticalFinalSyl.coachingAdvice;
+      } else {
+        // 3. Any critical Initial failure (<65%)
+        const criticalInitialSyl = processedSyllables.find(s => s.initial?.score < 65);
+        if (criticalInitialSyl) {
+          utterancePriority = "INITIAL";
+          primaryAdvice = criticalInitialSyl.initial?.advice || criticalInitialSyl.coachingAdvice;
+        } else {
+          // 4. Amber polish tips (<85%)
+          const amberSyl = processedSyllables.find(s => s.finalScore < 85 && s.coachingAdvice);
+          if (amberSyl) {
+            utterancePriority = amberSyl.coachingPriority;
+            primaryAdvice = amberSyl.coachingAdvice;
+          }
+        }
+      }
+    }
 
     return {
       word,
@@ -164,6 +264,8 @@ export class AudioPipeline {
       userMedianHz,
       voicedRatio: overallPitch.voicedRatio,
       overallScore,
+      coachingPriority: utterancePriority,
+      coachingAdvice: primaryAdvice,
       syllables: processedSyllables,
     };
   }
