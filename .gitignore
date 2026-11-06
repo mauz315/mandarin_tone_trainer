@@ -140,3 +140,11 @@ vite.config.ts.timestamp-*
 
 node_modules/
 .DS_Store
+
+# Sherpa-ONNX large binary model assets (download with: node scripts/download_model.js)
+public/models/sherpa-onnx/*.wasm
+public/models/sherpa-onnx/*.onnx
+public/models/sherpa-onnx/*.txt
+public/models/sherpa-onnx/*.js
+# Keep the README so setup instructions are always available
+!public/models/sherpa-onnx/README.md
