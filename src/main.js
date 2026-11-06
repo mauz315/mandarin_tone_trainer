@@ -16,7 +16,8 @@ let toneProfilesTTS = {}; // Neural citation TTS reference profiles (tone_profil
 
 // Parallel Audio Track & Speed State (TTS vs Human Story)
 let audioTrackMode = localStorage.getItem('tone_trainer_track_mode') || 'tts'; // 'tts' | 'human'
-let humanPlaybackSpeed = parseFloat(localStorage.getItem('tone_trainer_human_speed') || '1.0'); // 1.0 | 0.8
+let parsedSpeed = parseFloat(localStorage.getItem('tone_trainer_human_speed') || '1.0');
+let humanPlaybackSpeed = (parsedSpeed === 0.8 || parsedSpeed === 0.65) ? 0.65 : 1.0; // 1.0 | 0.65 (0.8 migrated to 0.65)
 let lastProcessedResult = null; 
 
 // Resilient Web Audio & HTMLAudio pipeline for mobile browsers
@@ -1702,7 +1703,7 @@ function setupEnginePlaceholders() {
     });
   });
 
-  // Native Reference Audio Trigger (Supports Dual-Track: Neural TTS & Human Story + 0.8x Speed)
+  // Native Reference Audio Trigger (Supports Dual-Track: Neural TTS & Human Story + 0.65x Speed)
   function playCurrentNativeAudio() {
     const currentWord = currentTargetWord || (hskDeck && hskDeck[0]);
     if (!currentWord) return;
@@ -1717,7 +1718,7 @@ function setupEnginePlaceholders() {
       targetSpeed = 1.0;
     } else {
       audioSrc = currentWord.audio;
-      targetSpeed = humanPlaybackSpeed;
+      targetSpeed = (humanPlaybackSpeed === 0.8 || humanPlaybackSpeed === 0.65) ? 0.65 : humanPlaybackSpeed;
     }
 
     if (audioSrc) {
@@ -1738,6 +1739,7 @@ function setupEnginePlaceholders() {
     const humanBtn = document.getElementById('audio-track-human-btn');
     const humanSpeedControls = document.getElementById('human-speed-controls');
     const speed1xBtn = document.getElementById('audio-speed-1x-btn');
+    const speed065xBtn = document.getElementById('audio-speed-065x-btn');
     const speed08xBtn = document.getElementById('audio-speed-08x-btn');
 
     if (ttsBtn && humanBtn) {
@@ -1752,15 +1754,24 @@ function setupEnginePlaceholders() {
       }
     }
 
-    if (speed1xBtn && speed08xBtn) {
-      if (humanPlaybackSpeed === 0.8) {
+    const isSlow = (humanPlaybackSpeed === 0.65 || humanPlaybackSpeed === 0.8);
+    if (speed1xBtn && (speed065xBtn || speed08xBtn)) {
+      if (isSlow) {
         speed1xBtn.className = 'px-1.5 py-0.5 rounded text-[10px] font-mono font-black uppercase transition-all bg-transparent text-black hover:bg-black/10 cursor-pointer';
-        speed08xBtn.className = 'px-1.5 py-0.5 rounded text-[10px] font-mono font-black uppercase transition-all bg-black text-white shadow-xs cursor-pointer';
       } else {
         speed1xBtn.className = 'px-1.5 py-0.5 rounded text-[10px] font-mono font-black uppercase transition-all bg-black text-white shadow-xs cursor-pointer';
-        speed08xBtn.className = 'px-1.5 py-0.5 rounded text-[10px] font-mono font-black uppercase transition-all bg-transparent text-black hover:bg-black/10 cursor-pointer';
       }
     }
+
+    [speed065xBtn, speed08xBtn].forEach(btn => {
+      if (btn) {
+        if (isSlow) {
+          btn.className = 'px-1.5 py-0.5 rounded text-[10px] font-mono font-black uppercase transition-all bg-black text-white shadow-xs cursor-pointer';
+        } else {
+          btn.className = 'px-1.5 py-0.5 rounded text-[10px] font-mono font-black uppercase transition-all bg-transparent text-black hover:bg-black/10 cursor-pointer';
+        }
+      }
+    });
   }
 
   function reevaluateUtteranceAgainstProfile(result, wordData, profile) {
@@ -1823,12 +1834,14 @@ function setupEnginePlaceholders() {
   const trackTtsBtn = document.getElementById('audio-track-tts-btn');
   const trackHumanBtn = document.getElementById('audio-track-human-btn');
   const speed1xBtn = document.getElementById('audio-speed-1x-btn');
+  const speed065xBtn = document.getElementById('audio-speed-065x-btn');
   const speed08xBtn = document.getElementById('audio-speed-08x-btn');
 
   if (trackTtsBtn) trackTtsBtn.addEventListener('click', () => setAudioTrackMode('tts'));
   if (trackHumanBtn) trackHumanBtn.addEventListener('click', () => setAudioTrackMode('human'));
   if (speed1xBtn) speed1xBtn.addEventListener('click', () => setHumanPlaybackSpeed(1.0));
-  if (speed08xBtn) speed08xBtn.addEventListener('click', () => setHumanPlaybackSpeed(0.8));
+  if (speed065xBtn) speed065xBtn.addEventListener('click', () => setHumanPlaybackSpeed(0.65));
+  if (speed08xBtn) speed08xBtn.addEventListener('click', () => setHumanPlaybackSpeed(0.65));
 
   // Initialize UI buttons state on load
   updateAudioTrackUI();
