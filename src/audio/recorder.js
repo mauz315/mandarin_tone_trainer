@@ -30,6 +30,12 @@ export class AudioRecorder {
    * Request microphone permission and prepare AudioContext.
    */
   async init() {
+    if (typeof navigator !== "undefined" && navigator.audioSession) {
+      try {
+        navigator.audioSession.type = "play-and-record";
+      } catch (_) {}
+    }
+
     if (this.audioContext && this.audioContext.state !== "closed") {
       if (this.audioContext.state === "suspended") {
         await this.audioContext.resume();
@@ -52,6 +58,12 @@ export class AudioRecorder {
    * Start recording from the microphone.
    */
   async start() {
+    if (typeof navigator !== "undefined" && navigator.audioSession) {
+      try {
+        navigator.audioSession.type = "play-and-record";
+      } catch (_) {}
+    }
+
     await this.init();
 
     if (this.isRecording) {
@@ -64,14 +76,25 @@ export class AudioRecorder {
     this.startTime = performance.now();
 
     try {
-      this.mediaStream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          channelCount: 1,
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
-      });
+      if (typeof navigator !== "undefined" && navigator.audioSession) {
+        try {
+          navigator.audioSession.type = "play-and-record";
+        } catch (_) {}
+      }
+
+      try {
+        this.mediaStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            channelCount: 1,
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+          },
+        });
+      } catch (constraintErr) {
+        console.warn("[AudioRecorder] Detailed audio constraints failed, retrying with basic audio constraints:", constraintErr);
+        this.mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      }
 
       this.sourceNode = this.audioContext.createMediaStreamSource(this.mediaStream);
 

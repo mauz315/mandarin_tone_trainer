@@ -33,11 +33,11 @@ function getAudioContext() {
 }
 
 function ensureAudioUnlocked() {
-  // Request 'playback' audio session so iOS ignores the hardware mute switch,
-  // matching the behaviour of native media apps. Guarded for browser support.
-  if (navigator.audioSession && navigator.audioSession.type !== 'playback') {
+  // Request 'play-and-record' audio session so iOS ignores the hardware mute switch,
+  // matching the behaviour of native media apps while keeping mic recording enabled.
+  if (navigator.audioSession && navigator.audioSession.type !== 'play-and-record') {
     try {
-      navigator.audioSession.type = 'playback';
+      navigator.audioSession.type = 'play-and-record';
     } catch (_) {}
   }
   getAudioContext();
@@ -1287,6 +1287,13 @@ function setupEnginePlaceholders() {
   }
 
   async function startRealRecording() {
+    ensureAudioUnlocked();
+    if (typeof navigator !== 'undefined' && navigator.audioSession) {
+      try {
+        navigator.audioSession.type = 'play-and-record';
+      } catch (_) {}
+    }
+
     if (!audioPipeline) {
       audioPipeline = new AudioPipeline({
         onVolumeChange: (rms) => {
