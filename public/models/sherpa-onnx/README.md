@@ -31,10 +31,9 @@ public/models/sherpa-onnx/
 
 ### Option A — Automated (recommended)
 
-Run the helper script from the `mandarin_tone_trainer/` directory:
+Run the helper script from the workspace root directory:
 
 ```bash
-cd mandarin_tone_trainer
 node scripts/download_model.js
 ```
 
