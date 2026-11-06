@@ -6,6 +6,7 @@ import { AudioPipeline } from './audio/audioPipeline.js';
 const KeenSlider = KS.default || KS;
 
 let words = [];
+let hskDeck = [];
 let currentItem = null;
 let nextPendingItem = null;
 let currentGameMode = 'tones'; // Options: 'tones', 'initials', 'endings'
@@ -217,6 +218,11 @@ function setupMenu() {
       setAppBackground('bg-canvas-ice');
       if (window.PronunciationEngine) {
         window.PronunciationEngine.setRevealState(1);
+        if (typeof window.PronunciationEngine.hasPickedWord === 'function') {
+          if (!window.PronunciationEngine.hasPickedWord()) {
+            window.PronunciationEngine.pickRandomWord();
+          }
+        }
       }
     });
   }
@@ -314,21 +320,57 @@ function startGame(mode) {
   nextQuestion(); 
 }
 
+async function fetchJsonSafe(relativePath) {
+  const urlsToTry = [
+    `${import.meta.env.BASE_URL}${relativePath}`,
+    relativePath,
+    `/${relativePath}`,
+  ];
+  for (const url of urlsToTry) {
+    try {
+      const resp = await fetch(url);
+      if (resp.ok) {
+        return await resp.json();
+      }
+    } catch (_) {}
+  }
+  return null;
+}
+
 async function init() {
   try {
-    const response = await fetch(`${import.meta.env.BASE_URL}single_words.json`);
-    if (!response.ok) throw new Error("JSON not found in public folder");
-    words = await response.json();
-    console.log("App Ready. Vocabulary loaded:", words.length);
-    
+    const loadedWords = await fetchJsonSafe('single_words.json');
+    if (loadedWords) {
+      words = loadedWords;
+      console.log('App Ready. Vocabulary loaded:', words.length);
+    }
+
     // Load pre-calculated native tone curves for the pronunciation engine
-    fetch(`${import.meta.env.BASE_URL}tone_profiles.json`)
-      .then(r => r.ok ? r.json() : {})
+    const profilePromise = fetchJsonSafe('tone_profiles.json')
       .then(data => {
-        toneProfiles = data;
-        console.log("[ToneEngine] Reference tone profiles loaded:", Object.keys(toneProfiles).length);
+        if (data) {
+          toneProfiles = data;
+          console.log('[ToneEngine] Reference tone profiles loaded:', Object.keys(toneProfiles).length);
+        }
       })
-      .catch(e => console.warn("[ToneEngine] tone_profiles.json could not be loaded:", e));
+      .catch(e => console.warn('[ToneEngine] tone_profiles.json could not be loaded:', e));
+
+    // Load combined HSK 1 & HSK 2 2026 deck (497 words)
+    const deckPromise = fetchJsonSafe('hsk_deck.json')
+      .then(data => {
+        if (data && Array.isArray(data)) {
+          hskDeck = data;
+          console.log('[PronunciationDeck] Loaded HSK deck:', hskDeck.length, 'words');
+        }
+      })
+      .catch(e => console.warn('[PronunciationDeck] hsk_deck.json could not be loaded:', e));
+
+    await Promise.all([profilePromise, deckPromise]);
+
+    // Initialize random shuffle bag and immediately prime the first random word
+    if (window.PronunciationEngine && typeof window.PronunciationEngine.initDeck === 'function') {
+      window.PronunciationEngine.initDeck(hskDeck);
+    }
 
     setupAudioLibrary();
 
@@ -336,7 +378,7 @@ async function init() {
       document.querySelectorAll('.tone-btn').forEach(btn => btn.classList.remove('pop-up'));
     }, 1000);
   } catch (err) {
-    console.error("Initialization error:", err);
+    console.error('Initialization error:', err);
   }
 }
 
@@ -869,520 +911,26 @@ window.addEventListener('keydown', (e) => {
 // ACOUSTIC PRONUNCIATION ENGINE: EXTENSIBLE UI HOOKS
 // Aero Sky Ice & Racing Tangerine Palette | Multi-Syllable Scenarios (1, 2, 3)
 // ========================================================
+// ========================================================
+// ACOUSTIC PRONUNCIATION ENGINE: EXTENSIBLE UI HOOKS
+// Aero Sky Ice & Racing Tangerine Palette | Dynamic Multi-Syllable Scenarios (1-4 Syllables)
+// ========================================================
 function setupEnginePlaceholders() {
   const recordBtn = document.getElementById('engine-record-btn');
   const nextBtn = document.getElementById('engine-next-btn');
   const resetBtn = document.getElementById('engine-reset-btn');
   const coachPlayBtn = document.getElementById('coach-hear-user-btn');
   const stepCounter = document.getElementById('engine-step-counter');
+  const practiceCounter = document.getElementById('engine-practice-counter');
+  const playNativeBtn = document.getElementById('engine-play-native-btn');
+  const hanziDisplay = document.getElementById('engine-hanzi-display');
+  const pinyinDisplay = document.getElementById('engine-pinyin-display');
 
-  // Multi-scenario vocabulary deck across 1, 2, and 3 syllables
-  const lessonWords = [
-    { syllablesCount: 2, hanzi: "你 好", pinyin: "nǐ hǎo", gloss: "Hello", sandhi: "/ 3rd + 3rd ➔ 2nd + 3rd /", spoken: "ní hǎo" },
-    { syllablesCount: 1, hanzi: "一", pinyin: "yī", gloss: "One", sandhi: "/ Tone 1: High Level 55 /", spoken: "yī", audio: "audio/hsk1/hskstory-hsk1-001.mp3" },
-    { syllablesCount: 2, hanzi: "一下", pinyin: "yī xià", gloss: "A bit", sandhi: "/ Tone 1 + Tone 4 /", spoken: "yī xià", audio: "audio/hsk1/hskstory-hsk1-002.mp3" },
-    { syllablesCount: 2, hanzi: "一半", pinyin: "yí bàn", gloss: "Half", sandhi: "/ Tone 2 + Tone 4 /", spoken: "yí bàn", audio: "audio/hsk1/hskstory-hsk1-004.mp3" },
-    { syllablesCount: 3, hanzi: "出租车", pinyin: "chū zū chē", gloss: "Taxi", sandhi: "/ 1st + 1st + 1st /", spoken: "chū zū chē", audio: "audio/hsk1/hskstory-hsk1-050.mp3" },
-    { syllablesCount: 1, hanzi: "妈", pinyin: "mā", gloss: "Mother", sandhi: "/ Tone 1: High Level 55 /", spoken: "mā" },
-    { syllablesCount: 3, hanzi: "对 不 起", pinyin: "duì bu qǐ", gloss: "Sorry", sandhi: "/ 4th + Neutral + 3rd /", spoken: "duì bu qǐ" },
-    { syllablesCount: 2, hanzi: "可 以", pinyin: "kě yǐ", gloss: "Can / May", sandhi: "/ 3rd + 3rd ➔ 2nd + 3rd /", spoken: "ké yǐ" },
-    { syllablesCount: 1, hanzi: "好", pinyin: "hǎo", gloss: "Good", sandhi: "/ Tone 3: Low-Dipping 214 /", spoken: "hǎo" },
-    { syllablesCount: 3, hanzi: "冰 淇 淋", pinyin: "bīng qí lín", gloss: "Ice Cream", sandhi: "/ 1st + 2nd + 2nd /", spoken: "bīng qí lín" },
-    { syllablesCount: 2, hanzi: "水 果", pinyin: "shuǐ guǒ", gloss: "Fruit", sandhi: "/ 3rd + 3rd ➔ 2nd + 3rd /", spoken: "shuí guǒ" },
-    { syllablesCount: 3, hanzi: "没 关 系", pinyin: "méi guān xi", gloss: "It's Okay", sandhi: "/ 2nd + 1st + Neutral /", spoken: "méi guān xi" },
-    { syllablesCount: 1, hanzi: "马", pinyin: "mǎ", gloss: "Horse", sandhi: "/ Tone 3: Low-Dipping 214 /", spoken: "mǎ" },
-    { syllablesCount: 2, hanzi: "手 表", pinyin: "shǒu biǎo", gloss: "Watch", sandhi: "/ 3rd + 3rd ➔ 2nd + 3rd /", spoken: "shóu biǎo" }
-  ];
-
-  let activeIndex = 0;
-  let currentSyllableCount = 2;
-
-  // Reacts dynamically to 1, 2, or 3 syllables across ALL layout components
-  function renderSyllableScenario(count, customData) {
-    currentSyllableCount = count;
-
-    // 1. Update Top Syllable Selector Button Styles
-    const sylBtns = document.querySelectorAll('#engine-syllable-toggle-group button');
-    sylBtns.forEach((btn, idx) => {
-      const btnCount = idx + 1;
-      if (btnCount === count) {
-        btn.className = 'px-2 py-0.5 rounded bg-black text-badge-tangerine border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer';
-      } else {
-        btn.className = 'px-2 py-0.5 rounded bg-white border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer';
-      }
-    });
-
-    // 2. Resolve Word Data
-    let word = customData;
-    if (!word) {
-      if (count === 1) {
-        word = { syllablesCount: 1, hanzi: "妈", pinyin: "mā", gloss: "Mother", sandhi: "/ Tone 1: High Level 55 /", spoken: "mā" };
-      } else if (count === 3) {
-        word = { syllablesCount: 3, hanzi: "对 不 起", pinyin: "duì bu qǐ", gloss: "Sorry", sandhi: "/ 4th + Neutral + 3rd /", spoken: "duì bu qǐ" };
-      } else {
-        word = { syllablesCount: 2, hanzi: "你 好", pinyin: "nǐ hǎo", gloss: "Hello", sandhi: "/ 3rd + 3rd ➔ 2nd + 3rd /", spoken: "ní hǎo" };
-      }
-    }
-
-    // 3. Update Header Context Card
-    const hanziEl = document.getElementById('engine-hanzi-display');
-    const pinyinEl = document.getElementById('engine-pinyin-display');
-    const glossEl = document.getElementById('engine-gloss-display');
-    const stageLabel = document.getElementById('engine-stage-label');
-    const sandhiBadge = document.getElementById('engine-sandhi-badge');
-    const arenaSubtitle = document.getElementById('engine-arena-subtitle');
-
-    if (hanziEl) hanziEl.textContent = word.hanzi;
-    if (pinyinEl) pinyinEl.textContent = word.pinyin;
-    if (glossEl) glossEl.textContent = `"${word.gloss}"`;
-
-    if (count === 1) {
-      if (stageLabel) stageLabel.textContent = '[STAGE 1: ISOLATED SYLLABLE]';
-      if (arenaSubtitle) arenaSubtitle.textContent = 'CHAO 5-LEVEL SINGLE-CONTOUR';
-      if (sandhiBadge) {
-        sandhiBadge.innerHTML = `
-          <span class="block text-[9px] text-white/90 uppercase font-black">Isolated Tone Profile</span>
-          <span class="font-speed font-black text-xs sm:text-sm text-white">${word.sandhi}</span>
-          <span class="block text-[10px] text-black font-black bg-white/90 px-1.5 py-0.2 rounded mt-0.5">Target Spoken: ${word.spoken}</span>
-        `;
-      }
-    } else if (count === 3) {
-      if (stageLabel) stageLabel.textContent = '[STAGE 3: 3-SYLLABLE & NEUTRAL TONE]';
-      if (arenaSubtitle) arenaSubtitle.textContent = 'CHAO 5-LEVEL TRIPLE-CONTOUR';
-      if (sandhiBadge) {
-        sandhiBadge.innerHTML = `
-          <span class="block text-[9px] text-white/90 uppercase font-black">Compound Rule Applied</span>
-          <span class="font-speed font-black text-xs sm:text-sm text-white">${word.sandhi}</span>
-          <span class="block text-[10px] text-black font-black bg-white/90 px-1.5 py-0.2 rounded mt-0.5">Target Spoken: ${word.spoken}</span>
-        `;
-      }
-    } else {
-      if (stageLabel) stageLabel.textContent = '[STAGE 2: TONE SANDHI]';
-      if (arenaSubtitle) arenaSubtitle.textContent = 'CHAO 5-LEVEL DUAL-CONTOUR';
-      if (sandhiBadge) {
-        sandhiBadge.innerHTML = `
-          <span class="block text-[9px] text-white/90 uppercase font-black">Sandhi Rule Applied</span>
-          <span class="font-speed font-black text-xs sm:text-sm text-white">${word.sandhi}</span>
-          <span class="block text-[10px] text-black font-black bg-white/90 px-1.5 py-0.2 rounded mt-0.5">Target Spoken: ${word.spoken}</span>
-        `;
-      }
-    }
-
-    // 4. Update SVG Pitch Arena Geometry (Narrower Proportional Axis for 1-Syllable Words)
-    const pitchChartWrapper = document.getElementById('pitch-chart-wrapper');
-    const pitchSvg = document.getElementById('pitch-chart-svg');
-    const gridLevelsContainer = document.getElementById('pitch-grid-levels');
-    const dividersContainer = document.getElementById('pitch-syllable-dividers');
-    const ribbonsContainer = document.getElementById('pitch-target-ribbons');
-    const pathsContainer = document.getElementById('user-pitch-paths-container');
-    const pointsContainer = document.getElementById('user-pitch-points-container');
-    const waveformGroup = document.getElementById('engine-live-waveform-group');
-    const milestonesContainer = document.getElementById('pitch-time-milestones');
-    const timelineFill = document.getElementById('pitch-timeline-fill');
-    const timelineText = document.getElementById('pitch-timeline-text');
-
-    if (count === 1) {
-      // 1 Syllable Geometry: Narrower proportional horizontal axis (~0.32s duration)
-      if (pitchChartWrapper) {
-        pitchChartWrapper.className = 'flex gap-1.5 items-center justify-center max-w-[340px] sm:max-w-[380px] lg:max-w-[420px] mx-auto my-auto transition-all duration-300';
-      }
-      if (pitchSvg) {
-        pitchSvg.setAttribute('viewBox', '0 0 350 155');
-      }
-
-      // Proportional Horizontal Grid Lines (Level 5 down to Level 1 across 350px)
-      if (gridLevelsContainer) {
-        gridLevelsContainer.innerHTML = `
-          <line x1="15" y1="15" x2="335" y2="15" />
-          <line x1="15" y1="46" x2="335" y2="46" />
-          <line x1="15" y1="78" x2="335" y2="78" />
-          <line x1="15" y1="110" x2="335" y2="110" />
-          <line x1="15" y1="140" x2="335" y2="140" />
-        `;
-      }
-
-      if (dividersContainer) dividersContainer.innerHTML = '';
-      
-      const isDipping = word.sandhi && word.sandhi.includes('Dipping');
-      if (ribbonsContainer) {
-        if (isDipping) {
-          // Tone 3 Dipping Ribbon across ~0.32s
-          ribbonsContainer.innerHTML = `
-            <polygon id="target-ribbon-s1" points="40,105 160,146 310,48 310,30 160,126 40,85" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />
-          `;
-        } else {
-          // Tone 1 High-Level Corridor across ~0.32s
-          ribbonsContainer.innerHTML = `
-            <polygon id="target-ribbon-s1" points="40,22 310,22 310,8 40,8" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />
-          `;
-        }
-      }
-
-      if (pathsContainer) {
-        if (isDipping) {
-          pathsContainer.innerHTML = `
-            <path id="user-pitch-path-s1" d="M 40,95 Q 160,142 310,40" fill="none" stroke="#000000" stroke-width="4.5" stroke-linecap="round" />
-          `;
-        } else {
-          pathsContainer.innerHTML = `
-            <path id="user-pitch-path-s1" d="M 40,15 Q 175,13 310,15" fill="none" stroke="#000000" stroke-width="4.5" stroke-linecap="round" />
-          `;
-        }
-      }
-
-      if (pointsContainer) {
-        if (isDipping) {
-          pointsContainer.innerHTML = `
-            <g id="user-pitch-points-s1">
-              <circle cx="40" cy="95" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
-              <circle cx="100" cy="118" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
-              <circle cx="160" cy="142" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
-              <circle cx="235" cy="95" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
-              <circle cx="310" cy="40" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
-            </g>
-          `;
-        } else {
-          pointsContainer.innerHTML = `
-            <g id="user-pitch-points-s1">
-              <circle cx="40" cy="15" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
-              <circle cx="95" cy="14" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
-              <circle cx="150" cy="13" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
-              <circle cx="205" cy="13" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
-              <circle cx="260" cy="14" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
-              <circle cx="310" cy="15" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
-            </g>
-          `;
-        }
-      }
-
-      if (waveformGroup) {
-        waveformGroup.innerHTML = `
-          <path d="M 30,80 Q 70,50 110,80 T 190,80 T 270,80 T 320,80" fill="none" stroke="#FF5C1C" stroke-width="3" stroke-linecap="round" class="animate-pulse" />
-          <text x="175" y="75" class="font-mono text-xs font-black fill-badge-tangerine" text-anchor="middle">CAPTURING VOCAL SPECTRUM...</text>
-        `;
-      }
-
-      if (milestonesContainer) {
-        milestonesContainer.innerHTML = `
-          <text x="40" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.00s</text>
-          <text x="175" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">[${word.pinyin}] ~320ms</text>
-          <text x="310" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.32s</text>
-        `;
-      }
-
-      if (timelineFill) timelineFill.style.width = '55%';
-      if (timelineText) timelineText.textContent = '0.18s / 0.32s';
-
-    } else {
-      // 2 or 3 Syllables Geometry: Full-width multi-syllable chart
-      if (pitchChartWrapper) {
-        pitchChartWrapper.className = 'flex gap-1.5 items-center justify-center w-full my-auto transition-all duration-300';
-      }
-      if (pitchSvg) {
-        pitchSvg.setAttribute('viewBox', '0 0 660 155');
-      }
-
-      if (gridLevelsContainer) {
-        gridLevelsContainer.innerHTML = `
-          <line x1="20" y1="15" x2="640" y2="15" />
-          <line x1="20" y1="46" x2="640" y2="46" />
-          <line x1="20" y1="78" x2="640" y2="78" />
-          <line x1="20" y1="110" x2="640" y2="110" />
-          <line x1="20" y1="140" x2="640" y2="140" />
-        `;
-      }
-
-      if (waveformGroup) {
-        waveformGroup.innerHTML = `
-          <path d="M 50,80 Q 90,50 130,80 T 210,80 T 290,80 T 370,80 T 450,80 T 530,80 T 610,80" fill="none" stroke="#FF5C1C" stroke-width="3" stroke-linecap="round" class="animate-pulse" />
-          <text x="330" y="75" class="font-mono text-xs font-black fill-badge-tangerine" text-anchor="middle">CAPTURING VOCAL SPECTRUM...</text>
-        `;
-      }
-
-      if (count === 3) {
-        // 3 Syllables Geometry: 3 partitions (33% each) across ~0.85s
-        if (dividersContainer) {
-          dividersContainer.innerHTML = `
-            <line x1="225" y1="8" x2="225" y2="142" class="stroke-black/30 stroke-[2] stroke-dasharray-[4,4]" />
-            <text x="231" y="20" class="font-mono text-[8px] fill-black/60 font-black">SYL 2 [bu] ➔</text>
-            <line x1="435" y1="8" x2="435" y2="142" class="stroke-black/30 stroke-[2] stroke-dasharray-[4,4]" />
-            <text x="441" y="20" class="font-mono text-[8px] fill-black/60 font-black">SYL 3 [qǐ] ➔</text>
-          `;
-        }
-
-        if (ribbonsContainer) {
-          ribbonsContainer.innerHTML = `
-            <polygon id="target-ribbon-s1" points="35,16 195,135 195,115 35,6" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />
-            <polygon id="target-ribbon-s2" points="245,95 405,102 405,86 245,80" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />
-            <polygon id="target-ribbon-s3" points="455,98 535,146 625,56 625,38 535,126 455,78" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />
-          `;
-        }
-
-        if (pathsContainer) {
-          pathsContainer.innerHTML = `
-            <path id="user-pitch-path-s1" d="M 35,18 Q 115,70 195,126" fill="none" stroke="#000000" stroke-width="4.5" stroke-linecap="round" />
-            <path id="user-pitch-path-s2" d="M 245,90 Q 325,92 405,96" fill="none" stroke="#000000" stroke-width="4.5" stroke-linecap="round" />
-            <path id="user-pitch-path-s3" d="M 455,92 Q 535,142 625,48" fill="none" stroke="#000000" stroke-width="4.5" stroke-linecap="round" />
-          `;
-        }
-
-        if (pointsContainer) {
-          pointsContainer.innerHTML = `
-            <g id="user-pitch-points-s1">
-              <circle cx="35" cy="18" r="4" fill="#B8F526" stroke="#000" stroke-width="2" />
-              <circle cx="115" cy="70" r="4" fill="#B8F526" stroke="#000" stroke-width="2" />
-              <circle cx="195" cy="126" r="4" fill="#B8F526" stroke="#000" stroke-width="2" />
-            </g>
-            <g id="user-pitch-points-s2">
-              <circle cx="245" cy="90" r="4" fill="#FDF197" stroke="#000" stroke-width="2" />
-              <circle cx="325" cy="92" r="4" fill="#FF5C1C" stroke="#000" stroke-width="2" />
-              <circle cx="405" cy="96" r="4" fill="#FF5C1C" stroke="#000" stroke-width="2" />
-            </g>
-            <g id="user-pitch-points-s3">
-              <circle cx="455" cy="92" r="4" fill="#B8F526" stroke="#000" stroke-width="2" />
-              <circle cx="535" cy="142" r="4" fill="#B8F526" stroke="#000" stroke-width="2" />
-              <circle cx="625" cy="48" r="4" fill="#B8F526" stroke="#000" stroke-width="2" />
-            </g>
-          `;
-        }
-
-        if (milestonesContainer) {
-          milestonesContainer.innerHTML = `
-            <text x="35" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.00s</text>
-            <text x="115" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">[duì]</text>
-            <text x="195" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.28s</text>
-            <text x="245" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.30s</text>
-            <text x="325" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">[bu]</text>
-            <text x="405" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.46s</text>
-            <text x="455" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.48s</text>
-            <text x="540" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">[qǐ]</text>
-            <text x="625" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.85s</text>
-          `;
-        }
-
-        if (timelineFill) timelineFill.style.width = '55%';
-        if (timelineText) timelineText.textContent = '0.46s / 0.85s';
-
-      } else {
-        // 2 Syllables Geometry: Default 50% split across ~0.72s
-        if (dividersContainer) {
-          dividersContainer.innerHTML = `
-            <line x1="330" y1="8" x2="330" y2="142" class="stroke-black/30 stroke-[2] stroke-dasharray-[4,4]" />
-            <text x="336" y="20" class="font-mono text-[9px] fill-black/60 font-black">SYLLABLE 2 [hǎo] ➔</text>
-          `;
-        }
-
-        if (ribbonsContainer) {
-          ribbonsContainer.innerHTML = `
-            <polygon id="target-ribbon-s1" points="70,95 300,28 300,10 70,75" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />
-            <polygon id="target-ribbon-s2" points="360,98 470,146 600,52 600,32 470,126 360,78" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />
-          `;
-        }
-
-        if (pathsContainer) {
-          pathsContainer.innerHTML = `
-            <path id="user-pitch-path-s1" d="M 70,85 Q 180,54 300,48" fill="none" stroke="#000000" stroke-width="4.5" stroke-linecap="round" />
-            <path id="user-pitch-path-s2" d="M 360,88 Q 465,138 600,45" fill="none" stroke="#000000" stroke-width="4.5" stroke-linecap="round" />
-          `;
-        }
-
-        if (pointsContainer) {
-          pointsContainer.innerHTML = `
-            <g id="user-pitch-points-s1">
-              <circle cx="70" cy="85" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
-              <circle cx="120" cy="70" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
-              <circle cx="180" cy="58" r="4.5" fill="#FDF197" stroke="#000" stroke-width="2" />
-              <circle cx="240" cy="50" r="5" fill="#FF5C1C" stroke="#000" stroke-width="2" />
-              <circle cx="300" cy="48" r="5" fill="#FF5C1C" stroke="#000" stroke-width="2" />
-            </g>
-            <g id="user-pitch-points-s2">
-              <circle cx="360" cy="88" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
-              <circle cx="410" cy="112" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
-              <circle cx="465" cy="138" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
-              <circle cx="530" cy="90" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
-              <circle cx="600" cy="45" r="4.5" fill="#B8F526" stroke="#000" stroke-width="2" />
-            </g>
-          `;
-        }
-
-        if (milestonesContainer) {
-          milestonesContainer.innerHTML = `
-            <text x="70" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.00s</text>
-            <text x="180" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">[Initial: n] [Final: í]</text>
-            <text x="300" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.32s</text>
-            <text x="360" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.34s</text>
-            <text x="480" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">[Initial: h] [Final: ǎo]</text>
-            <text x="600" y="152" class="font-mono text-[8px] fill-black/60 font-bold" text-anchor="middle">0.72s</text>
-          `;
-        }
-
-        if (timelineFill) timelineFill.style.width = '45%';
-        if (timelineText) timelineText.textContent = '0.32s / 0.72s';
-      }
-    }
-
-    // 5. Update Phonetic Audit Section Responsive Grid
-    const auditGrid = document.getElementById('phonetic-audit-grid');
-    if (auditGrid) {
-      if (count === 1) {
-        auditGrid.className = 'grid grid-cols-1 max-w-sm sm:max-w-md mx-auto gap-2';
-        auditGrid.innerHTML = `
-          <div class="bg-white border-[2.5px] border-black rounded-xl p-2.5 shadow-hard-black">
-            <div class="flex items-center justify-between mb-1 pb-1 border-b border-black/10">
-              <span class="font-speed font-black text-xs uppercase text-black">SYLLABLE 1: [${word.pinyin}]</span>
-              <span class="font-mono text-[9px] font-black text-black bg-canvas-acid px-1.5 py-0.2 rounded border border-black">ACCURATE CONTOUR</span>
-            </div>
-            <div class="grid grid-cols-3 gap-1 font-mono text-center">
-              <div class="bg-slate-100 border border-black rounded-lg p-1">
-                <span class="block text-[8px] text-black/60 font-black">INITIAL: m</span>
-                <span class="font-speed font-black text-xs sm:text-sm text-black">96%</span>
-                <span class="block text-[8px] text-emerald-700 font-bold">✓ Clean</span>
-              </div>
-              <div class="bg-slate-100 border border-black rounded-lg p-1">
-                <span class="block text-[8px] text-black/60 font-black">FINAL: a</span>
-                <span class="font-speed font-black text-xs sm:text-sm text-black">92%</span>
-                <span class="block text-[8px] text-emerald-700 font-bold">✓ Exact</span>
-              </div>
-              <div class="bg-canvas-acid/40 border border-black rounded-lg p-1">
-                <span class="block text-[8px] text-black font-black">TONE: 1</span>
-                <span class="font-speed font-black text-xs sm:text-sm text-black">98%</span>
-                <span class="block text-[8px] text-emerald-700 font-bold">✓ 55 Flat</span>
-              </div>
-            </div>
-          </div>
-        `;
-      } else if (count === 3) {
-        auditGrid.className = 'grid grid-cols-1 sm:grid-cols-3 gap-1.5 sm:gap-2';
-        auditGrid.innerHTML = `
-          <div class="bg-white border-[2.5px] border-black rounded-xl p-2 shadow-hard-black">
-            <div class="flex items-center justify-between mb-1 pb-1 border-b border-black/10">
-              <span class="font-speed font-black text-[11px] uppercase text-black">SYL 1: [duì]</span>
-              <span class="font-mono text-[8px] font-black text-black bg-canvas-acid px-1 rounded border border-black">✓ 4TH</span>
-            </div>
-            <div class="grid grid-cols-3 gap-1 font-mono text-center">
-              <div class="bg-slate-100 border border-black rounded-lg p-0.5">
-                <span class="block text-[8px] text-black/60 font-black">INIT: d</span>
-                <span class="font-speed font-black text-xs text-black">91%</span>
-              </div>
-              <div class="bg-slate-100 border border-black rounded-lg p-0.5">
-                <span class="block text-[8px] text-black/60 font-black">FIN: ui</span>
-                <span class="font-speed font-black text-xs text-black">88%</span>
-              </div>
-              <div class="bg-canvas-acid/40 border border-black rounded-lg p-0.5">
-                <span class="block text-[8px] text-black font-black">TONE: 4</span>
-                <span class="font-speed font-black text-xs text-black">94%</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-white border-[2.5px] border-black rounded-xl p-2 shadow-hard-black">
-            <div class="flex items-center justify-between mb-1 pb-1 border-b border-black/10">
-              <span class="font-speed font-black text-[11px] uppercase text-black">SYL 2: [bu]</span>
-              <span class="font-mono text-[8px] font-black text-white bg-badge-tangerine px-1 rounded border border-black">⚠ STRESSED</span>
-            </div>
-            <div class="grid grid-cols-3 gap-1 font-mono text-center">
-              <div class="bg-slate-100 border border-black rounded-lg p-0.5">
-                <span class="block text-[8px] text-black/60 font-black">INIT: b</span>
-                <span class="font-speed font-black text-xs text-black">89%</span>
-              </div>
-              <div class="bg-slate-100 border border-black rounded-lg p-0.5">
-                <span class="block text-[8px] text-black/60 font-black">FIN: u</span>
-                <span class="font-speed font-black text-xs text-black">92%</span>
-              </div>
-              <div class="bg-badge-tangerine/15 border border-badge-tangerine rounded-lg p-0.5">
-                <span class="block text-[8px] text-badge-tangerine font-black">NEUTRAL</span>
-                <span class="font-speed font-black text-xs text-badge-tangerine">62%</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-white border-[2.5px] border-black rounded-xl p-2 shadow-hard-black">
-            <div class="flex items-center justify-between mb-1 pb-1 border-b border-black/10">
-              <span class="font-speed font-black text-[11px] uppercase text-black">SYL 3: [qǐ]</span>
-              <span class="font-mono text-[8px] font-black text-black bg-canvas-acid px-1 rounded border border-black">✓ 3RD</span>
-            </div>
-            <div class="grid grid-cols-3 gap-1 font-mono text-center">
-              <div class="bg-slate-100 border border-black rounded-lg p-0.5">
-                <span class="block text-[8px] text-black/60 font-black">INIT: q</span>
-                <span class="font-speed font-black text-xs text-black">85%</span>
-              </div>
-              <div class="bg-slate-100 border border-black rounded-lg p-0.5">
-                <span class="block text-[8px] text-black/60 font-black">FIN: i</span>
-                <span class="font-speed font-black text-xs text-black">90%</span>
-              </div>
-              <div class="bg-canvas-acid/40 border border-black rounded-lg p-0.5">
-                <span class="block text-[8px] text-black font-black">TONE: 3</span>
-                <span class="font-speed font-black text-xs text-black">93%</span>
-              </div>
-            </div>
-          </div>
-        `;
-      } else {
-        auditGrid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-2';
-        auditGrid.innerHTML = `
-          <div class="bg-white border-[2.5px] border-black rounded-xl p-2.5 shadow-hard-black">
-            <div class="flex items-center justify-between mb-1 pb-1 border-b border-black/10">
-              <span class="font-speed font-black text-xs uppercase text-black">SYLLABLE 1: [ní]</span>
-              <span class="font-mono text-[9px] font-black text-white bg-badge-tangerine px-1.5 py-0.2 rounded border border-black">TONE DIVERGENCE</span>
-            </div>
-            <div class="grid grid-cols-3 gap-1 font-mono text-center">
-              <div class="bg-slate-100 border border-black rounded-lg p-1">
-                <span class="block text-[8px] text-black/60 font-black">INITIAL: n</span>
-                <span class="font-speed font-black text-xs sm:text-sm text-black">94%</span>
-                <span class="block text-[8px] text-emerald-700 font-bold">✓ Clean</span>
-              </div>
-              <div class="bg-slate-100 border border-black rounded-lg p-1">
-                <span class="block text-[8px] text-black/60 font-black">FINAL: i</span>
-                <span class="font-speed font-black text-xs sm:text-sm text-black">90%</span>
-                <span class="block text-[8px] text-emerald-700 font-bold">✓ Exact</span>
-              </div>
-              <div class="bg-badge-tangerine/15 border-2 border-badge-tangerine rounded-lg p-1">
-                <span class="block text-[8px] text-badge-tangerine font-black">TONE: 2</span>
-                <span class="font-speed font-black text-xs sm:text-sm text-badge-tangerine">61%</span>
-                <span class="block text-[8px] text-badge-tangerine font-bold">⚠ Flat</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-white border-[2.5px] border-black rounded-xl p-2.5 shadow-hard-black">
-            <div class="flex items-center justify-between mb-1 pb-1 border-b border-black/10">
-              <span class="font-speed font-black text-xs uppercase text-black">SYLLABLE 2: [hǎo]</span>
-              <span class="font-mono text-[9px] font-black text-black bg-canvas-acid px-1.5 py-0.2 rounded border border-black">ACCURATE CONTOUR</span>
-            </div>
-            <div class="grid grid-cols-3 gap-1 font-mono text-center">
-              <div class="bg-slate-100 border border-black rounded-lg p-1">
-                <span class="block text-[8px] text-black/60 font-black">INITIAL: h</span>
-                <span class="font-speed font-black text-xs sm:text-sm text-black">89%</span>
-                <span class="block text-[8px] text-emerald-700 font-bold">✓ Clean</span>
-              </div>
-              <div class="bg-slate-100 border border-black rounded-lg p-1">
-                <span class="block text-[8px] text-black/60 font-black">FINAL: ao</span>
-                <span class="font-speed font-black text-xs sm:text-sm text-black">85%</span>
-                <span class="block text-[8px] text-emerald-700 font-bold">✓ Open</span>
-              </div>
-              <div class="bg-slate-100 border border-black rounded-lg p-1">
-                <span class="block text-[8px] text-black/60 font-black">TONE: 3</span>
-                <span class="font-speed font-black text-xs sm:text-sm text-black">94%</span>
-                <span class="block text-[8px] text-emerald-700 font-bold">✓ Dipped</span>
-              </div>
-            </div>
-          </div>
-        `;
-      }
-    }
-
-    // 6. Update Coach Advice
-    const coachText = document.getElementById('coach-advice-text');
-    if (coachText) {
-      if (count === 1) {
-        coachText.innerHTML = `"Laser-flat pitch! Keep your voice steady at <strong class="bg-black text-white px-1.5 py-0.5 rounded">Level 5 (55)</strong> without letting it drift down at the end."`;
-      } else if (count === 3) {
-        coachText.innerHTML = `"On the neutral tone <strong class="bg-badge-tangerine text-white px-1.5 py-0.5 rounded">'bu'</strong>, keep it ultra-brief (~100ms) and light. Do not stress or lengthen it—it should bounce smoothly into <em class="text-badge-cobalt font-black">'qǐ'</em>."`;
-      } else {
-        coachText.innerHTML = `"You flattened out too early on <strong class="bg-badge-tangerine text-white px-1.5 py-0.5 rounded">'ní'</strong>. Keep your pitch climbing all the way to the top, like asking a surprised question: <em class="text-badge-cobalt font-black">'Really?!'</em>"`;
-      }
-    }
-  }
+  let currentDeckFilter = 'all'; // 'all' | 'hsk1' | 'hsk2'
+  let shuffleBag = [];
+  let currentTargetWord = null;
+  let practicedCount = 0;
+  let currentSyllableCount = 1;
 
   let currentEngineState = 1; // 1: Priming (Record), 2: Capture (Recording...), 4: Audit (Try Again)
   let audioPipeline = null;
@@ -1391,6 +939,354 @@ function setupEnginePlaceholders() {
   const RECORDING_DURATION_SEC = 4;
   let countdownSeconds = RECORDING_DURATION_SEC;
   let countdownInterval = null;
+
+  // Syllable horizontal SVG spans (ViewBox 0 0 660 155)
+  function getSyllableSpans(count) {
+    if (count === 1) {
+      return [{ xMin: 80, xMax: 580, id: 'target-ribbon-s1', pathId: 'user-pitch-path-s1', ptsId: 'user-pitch-points-s1' }];
+    } else if (count === 2) {
+      return [
+        { xMin: 70, xMax: 300, id: 'target-ribbon-s1', pathId: 'user-pitch-path-s1', ptsId: 'user-pitch-points-s1' },
+        { xMin: 360, xMax: 600, id: 'target-ribbon-s2', pathId: 'user-pitch-path-s2', ptsId: 'user-pitch-points-s2' },
+      ];
+    } else if (count === 3) {
+      return [
+        { xMin: 35, xMax: 195, id: 'target-ribbon-s1', pathId: 'user-pitch-path-s1', ptsId: 'user-pitch-points-s1' },
+        { xMin: 245, xMax: 405, id: 'target-ribbon-s2', pathId: 'user-pitch-path-s2', ptsId: 'user-pitch-points-s2' },
+        { xMin: 455, xMax: 625, id: 'target-ribbon-s3', pathId: 'user-pitch-path-s3', ptsId: 'user-pitch-points-s3' },
+      ];
+    } else {
+      return [
+        { xMin: 25, xMax: 155, id: 'target-ribbon-s1', pathId: 'user-pitch-path-s1', ptsId: 'user-pitch-points-s1' },
+        { xMin: 185, xMax: 315, id: 'target-ribbon-s2', pathId: 'user-pitch-path-s2', ptsId: 'user-pitch-points-s2' },
+        { xMin: 345, xMax: 475, id: 'target-ribbon-s3', pathId: 'user-pitch-path-s3', ptsId: 'user-pitch-points-s3' },
+        { xMin: 505, xMax: 635, id: 'target-ribbon-s4', pathId: 'user-pitch-path-s4', ptsId: 'user-pitch-points-s4' },
+      ];
+    }
+  }
+
+  function getDividers(count) {
+    if (count === 2) return [330];
+    if (count === 3) return [220, 430];
+    if (count === 4) return [170, 330, 490];
+    return [];
+  }
+
+  // Mandarin Tone Sandhi & Formula Analyzer
+  function getToneSandhiInfo(word, syllables) {
+    const tones = (syllables || []).map(s => s.tone);
+    const hanzi = (word.hanzi_simp || word.hanzi || '').trim();
+
+    // Rule 1: Two consecutive 3rd tones -> 2nd + 3rd
+    for (let i = 0; i < tones.length - 1; i++) {
+      if (tones[i] === 3 && tones[i + 1] === 3) {
+        return {
+          title: 'TONE SANDHI: 3RD + 3RD ➔ 2ND + 3RD',
+          pattern: 'Tone 3 + Tone 3 ➔ Tone 2 + Tone 3',
+          subtext: 'First 3rd tone shifts to 2nd rising tone (35).',
+          isSandhi: true,
+        };
+      }
+    }
+
+    // Rule 2: "一" (yī) Tone Sandhi
+    if (hanzi.includes('一') && tones.length > 1) {
+      const idx = hanzi.indexOf('一');
+      if (idx < tones.length - 1) {
+        const nextTone = tones[idx + 1];
+        if (nextTone === 4) {
+          return {
+            title: 'TONE SANDHI: 一 (YĪ) BEFORE 4TH TONE',
+            pattern: 'Tone 1 + Tone 4 ➔ Tone 2 + Tone 4',
+            subtext: '一 shifts from Tone 1 to rising Tone 2 (yí).',
+            isSandhi: true,
+          };
+        } else if ([1, 2, 3].includes(nextTone)) {
+          return {
+            title: `TONE SANDHI: 一 (YĪ) BEFORE TONE ${nextTone}`,
+            pattern: `Tone 1 + Tone ${nextTone} ➔ Tone 4 + Tone ${nextTone}`,
+            subtext: `一 shifts from Tone 1 to falling Tone 4 (yì).`,
+            isSandhi: true,
+          };
+        }
+      }
+    }
+
+    // Rule 3: "不" (bù) Tone Sandhi
+    if (hanzi.includes('不') && tones.length > 1) {
+      const idx = hanzi.indexOf('不');
+      if (idx < tones.length - 1) {
+        const nextTone = tones[idx + 1];
+        if (nextTone === 4) {
+          return {
+            title: 'TONE SANDHI: 不 (BÙ) BEFORE 4TH TONE',
+            pattern: 'Tone 4 + Tone 4 ➔ Tone 2 + Tone 4',
+            subtext: '不 shifts from Tone 4 to rising Tone 2 (bú).',
+            isSandhi: true,
+          };
+        }
+      }
+    }
+
+    // Standard tone pattern (not sandhi)
+    const toneNames = { 1: '55 High', 2: '35 Rising', 3: '214 Dip', 4: '51 Falling', 5: 'Neutral' };
+    return {
+      title: `TONE PROFILE: ${tones.map(t => 'T' + t).join(' + ')}`,
+      pattern: tones.map(t => `T${t} (${toneNames[t] || 'Standard'})`).join(' • '),
+      subtext: (syllables || []).map(s => s.syllable).join(' '),
+      isSandhi: false,
+    };
+  }
+
+  function parsePinyinSyllables(pinyinStr) {
+    if (!pinyinStr) return [{ syllable: '', tone: 1 }];
+    const parts = pinyinStr.trim().split(/\s+/);
+    return parts.map(p => {
+      let tone = 5;
+      if (/[āēīōūǖ]/.test(p)) tone = 1;
+      else if (/[áéíóúǘ]/.test(p)) tone = 2;
+      else if (/[ǎěǐǒǔǚ]/.test(p)) tone = 3;
+      else if (/[àèìòùǜ]/.test(p)) tone = 4;
+      return { syllable: p, tone };
+    });
+  }
+
+  function initShuffleBag() {
+    let pool = hskDeck;
+    if (currentDeckFilter === 'hsk1') {
+      pool = hskDeck.filter(w => (w.hsk_level || '').toLowerCase().includes('1'));
+    } else if (currentDeckFilter === 'hsk2') {
+      pool = hskDeck.filter(w => (w.hsk_level || '').toLowerCase().includes('2'));
+    }
+    if (!pool || pool.length === 0) pool = hskDeck;
+
+    // Fisher-Yates shuffle
+    shuffleBag = [...pool];
+    for (let i = shuffleBag.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffleBag[i], shuffleBag[j]] = [shuffleBag[j], shuffleBag[i]];
+    }
+
+    if (stepCounter) {
+      const label = currentDeckFilter === 'all' ? 'HSK 1+2' : currentDeckFilter.toUpperCase();
+      stepCounter.textContent = `${label} • ${pool.length} WORDS`;
+    }
+  }
+
+  async function pickRandomWord() {
+    if (!hskDeck || hskDeck.length === 0) {
+      const data = await fetchJsonSafe('hsk_deck.json');
+      if (data && Array.isArray(data)) {
+        hskDeck = data;
+        initShuffleBag();
+      } else {
+        console.warn('[PronunciationEngine] hsk_deck.json could not be loaded.');
+        return;
+      }
+    }
+    if (!shuffleBag || shuffleBag.length === 0) {
+      initShuffleBag();
+    }
+    const nextWord = shuffleBag.pop();
+    if (nextWord) {
+      displayWord(nextWord);
+    }
+  }
+
+  function renderCanvasGeometry(count, syllables, profile) {
+    const dividersContainer = document.getElementById('pitch-syllable-dividers') || document.getElementById('pitch-canvas-dividers');
+    const ribbonsContainer = document.getElementById('pitch-target-ribbons');
+    const userPaths = document.getElementById('user-pitch-paths-container');
+    const userPts = document.getElementById('user-pitch-points-container');
+
+    // 1. Dividers and syllable labels
+    if (dividersContainer) {
+      const dividers = getDividers(count);
+      const spans = getSyllableSpans(count);
+      let divHtml = '';
+      dividers.forEach(x => {
+        divHtml += `<line x1="${x}" y1="8" x2="${x}" y2="148" stroke="#000000" stroke-width="1.5" stroke-dasharray="4,3" />`;
+      });
+      spans.forEach((span, i) => {
+        const syl = syllables[i] || { syllable: '', tone: '?' };
+        const midX = (span.xMin + span.xMax) / 2;
+        divHtml += `<text x="${midX.toFixed(1)}" y="148" font-family="monospace" font-size="9" font-weight="900" text-anchor="middle" fill="#000000" letter-spacing="0.5">${syl.syllable || ''} (T${syl.tone})</text>`;
+      });
+      dividersContainer.innerHTML = divHtml;
+    }
+
+    // 2. Reference Target Corridor Ribbons
+    if (ribbonsContainer) {
+      const spans = getSyllableSpans(count);
+      let ribbonsHtml = '';
+
+      if (profile && profile.f0_norm && profile.f0_norm.length >= 3) {
+        const f0 = profile.f0_norm;
+        const ptsPerSyl = Math.floor(f0.length / spans.length);
+
+        spans.forEach((span, i) => {
+          const sliceStart = i * ptsPerSyl;
+          const sliceEnd = i === spans.length - 1 ? f0.length : (i + 1) * ptsPerSyl;
+          const sylF0 = f0.slice(sliceStart, sliceEnd);
+          if (sylF0.length < 2) return;
+
+          const upperPts = [];
+          const lowerPts = [];
+          for (let k = 0; k < sylF0.length; k++) {
+            const x = span.xMin + (k / (sylF0.length - 1)) * (span.xMax - span.xMin);
+            const st = sylF0[k];
+            const centerY = Math.max(16, Math.min(138, 78 - st * 16));
+            upperPts.push(`${x.toFixed(1)},${Math.max(10, centerY - 9).toFixed(1)}`);
+            lowerPts.unshift(`${x.toFixed(1)},${Math.min(144, centerY + 9).toFixed(1)}`);
+          }
+          const allPts = upperPts.concat(lowerPts).join(' ');
+          ribbonsHtml += `<polygon id="${span.id}" points="${allPts}" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />`;
+        });
+      } else {
+        // Fallback canonical Chao ribbons
+        spans.forEach((span, i) => {
+          const syl = syllables[i] || { tone: 1 };
+          let upperPts = [];
+          let lowerPts = [];
+          const N = 10;
+          for (let k = 0; k < N; k++) {
+            const x = span.xMin + (k / (N - 1)) * (span.xMax - span.xMin);
+            const t = k / (N - 1);
+            let centerY = 78;
+            if (syl.tone === 1) centerY = 24;
+            else if (syl.tone === 2) centerY = 78 - t * 54;
+            else if (syl.tone === 3) centerY = t < 0.5 ? 95 + t * 60 : 125 - (t - 0.5) * 140;
+            else if (syl.tone === 4) centerY = 24 + t * 105;
+            upperPts.push(`${x.toFixed(1)},${Math.max(10, centerY - 9).toFixed(1)}`);
+            lowerPts.unshift(`${x.toFixed(1)},${Math.min(144, centerY + 9).toFixed(1)}`);
+          }
+          const allPts = upperPts.concat(lowerPts).join(' ');
+          ribbonsHtml += `<polygon id="${span.id}" points="${allPts}" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />`;
+        });
+      }
+      ribbonsContainer.innerHTML = ribbonsHtml;
+    }
+
+    // 3. Clear user pitch paths & points
+    if (userPaths) userPaths.innerHTML = '';
+    if (userPts) userPts.innerHTML = '';
+  }
+
+  function displayWord(word) {
+    if (!word) return;
+    currentTargetWord = word;
+
+    // Resolve reference tone profile
+    let refProfile = null;
+    if (word.audio && toneProfiles) {
+      const fname = word.audio.split('/').pop();
+      refProfile = toneProfiles[fname] || null;
+    }
+    if (!refProfile && toneProfiles) {
+      const cleanHanzi = (word.hanzi_simp || word.hanzi || '').replace(/\s+/g, '');
+      const cleanPinyin = (word.pinyin || '').replace(/\s+/g, ' ').trim();
+      const found = Object.values(toneProfiles).find(p =>
+        p && (p.hanzi_simp === cleanHanzi || p.pinyin === cleanPinyin)
+      );
+      if (found) refProfile = found;
+    }
+
+    // Determine syllables and count
+    let syllables = [];
+    if (refProfile && refProfile.syllables && refProfile.syllables.length > 0) {
+      syllables = refProfile.syllables;
+    } else {
+      syllables = parsePinyinSyllables(word.pinyin);
+    }
+    const count = syllables.length;
+    currentSyllableCount = count;
+
+    // 1. Update Header Context Card
+    const hanziEl = document.getElementById('engine-hanzi-display');
+    const pinyinEl = document.getElementById('engine-pinyin-display');
+    const glossEl = document.getElementById('engine-gloss-display');
+    const stageLabel = document.getElementById('engine-stage-label');
+    const arenaSubtitle = document.getElementById('engine-arena-subtitle');
+    const syllableBadge = document.getElementById('engine-syllable-badge');
+
+    if (hanziEl) hanziEl.textContent = word.hanzi_simp || word.hanzi || '';
+    if (pinyinEl) pinyinEl.textContent = word.pinyin || '';
+    if (glossEl) {
+      const gloss = word.english || (word.translations ? word.translations.join(', ') : word.gloss || '');
+      glossEl.textContent = `"${gloss}"`;
+    }
+    if (stageLabel) {
+      const idxStr = word.word_index != null ? `#${String(word.word_index + 1).padStart(3, '0')}` : '';
+      stageLabel.textContent = `[${word.hsk_level || 'HSK'} • ${idxStr || (word.hanzi_simp || word.hanzi)}]`;
+    }
+    if (arenaSubtitle) {
+      const contourLabels = { 1: 'SINGLE-CONTOUR', 2: 'DUAL-CONTOUR', 3: 'TRIPLE-CONTOUR', 4: 'QUAD-CONTOUR' };
+      arenaSubtitle.textContent = `CHAO 5-LEVEL ${contourLabels[count] || 'MULTI-CONTOUR'}`;
+    }
+    if (syllableBadge) {
+      const sylWord = count === 1 ? 'SYLLABLE' : 'SYLLABLES';
+      syllableBadge.textContent = `${count} ${sylWord} • ${word.hsk_level || 'HSK'}`;
+    }
+
+    // 2. Update Dynamic Tone Sandhi Banner
+    const sandhiInfo = getToneSandhiInfo(word, syllables);
+    const sandhiBadge = document.getElementById('engine-sandhi-badge');
+    const toneTitle = document.getElementById('engine-tone-title');
+    const tonePattern = document.getElementById('engine-tone-pattern');
+    const toneSubtext = document.getElementById('engine-tone-subtext');
+
+    if (toneTitle) toneTitle.textContent = sandhiInfo.title;
+    if (tonePattern) tonePattern.textContent = sandhiInfo.pattern;
+    if (toneSubtext) toneSubtext.textContent = sandhiInfo.subtext;
+
+    if (sandhiBadge) {
+      if (sandhiInfo.isSandhi) {
+        sandhiBadge.className = 'bg-badge-tangerine text-white border-2 border-black rounded-xl p-2 font-mono text-xs font-bold text-right shadow-sm z-10 transition-colors';
+      } else {
+        sandhiBadge.className = 'bg-badge-cobalt text-white border-2 border-black rounded-xl p-2 font-mono text-xs font-bold text-right shadow-sm z-10 transition-colors';
+      }
+    }
+
+    // 3. Render SVG Canvas Geometry & Pitch Ribbons
+    renderCanvasGeometry(count, syllables, refProfile);
+
+    // 4. Reset Timeline and Recording State
+    lastUserAudioBlob = null;
+    const timelineFill = document.getElementById('pitch-timeline-fill');
+    const timelineText = document.getElementById('pitch-timeline-text');
+    if (timelineFill) timelineFill.style.width = '0%';
+    if (timelineText) timelineText.textContent = `0.0s / ${RECORDING_DURATION_SEC}s`;
+
+    // 5. Default Articulatory Coach Prompt for the word
+    const coachText = document.getElementById('coach-advice-text');
+    if (coachText) {
+      if (sandhiInfo.isSandhi) {
+        coachText.innerHTML = `Tone Sandhi active! Notice how <strong>'${word.hanzi_simp || word.hanzi}'</strong> shifts tone: <em class="text-badge-cobalt font-black">${sandhiInfo.subtext}</em>`;
+      } else {
+        coachText.innerHTML = `Listen to the native model, then press <strong class="bg-badge-tangerine text-white px-1.5 py-0.5 rounded">RECORD</strong> to trace your voice against the Chao corridor.`;
+      }
+    }
+
+    // 6. Reset reveal state to State 1 (Priming / Record)
+    if (window.PronunciationEngine) {
+      window.PronunciationEngine.setRevealState(1);
+    }
+  }
+
+  // Backwards compatibility shim
+  function renderSyllableScenario(count, customData) {
+    if (customData) {
+      displayWord(customData);
+    } else if (hskDeck && hskDeck.length > 0) {
+      const match = hskDeck.find(w => {
+        const fname = (w.audio || '').split('/').pop();
+        const p = toneProfiles ? toneProfiles[fname] : null;
+        return p && p.syllables && p.syllables.length === count;
+      });
+      if (match) displayWord(match);
+      else pickRandomWord();
+    }
+  }
 
   async function startRealRecording() {
     if (!audioPipeline) {
@@ -1418,43 +1314,41 @@ function setupEnginePlaceholders() {
       if (timelineFill) timelineFill.style.width = '0%';
       if (timelineText) timelineText.textContent = `0.0s / ${RECORDING_DURATION_SEC}s`;
 
+      const startTime = performance.now();
       if (countdownInterval) clearInterval(countdownInterval);
 
-      // Start 4-second live countdown with smooth timeline progression
       let elapsedMs = 0;
       const totalMs = RECORDING_DURATION_SEC * 1000;
+
       countdownInterval = setInterval(() => {
-        elapsedMs += 100;
+        elapsedMs = performance.now() - startTime;
         const remainingSec = Math.max(0, Math.ceil((totalMs - elapsedMs) / 1000));
-        countdownSeconds = remainingSec;
+        
         const countValEl = document.getElementById('record-countdown-val');
         if (countValEl) {
           countValEl.textContent = remainingSec;
         }
+
         if (timelineFill) {
           const progress = (elapsedMs / totalMs) * 100;
           timelineFill.style.width = `${Math.min(100, Math.max(0, progress))}%`;
         }
         if (timelineText) {
-          timelineText.textContent = `${(elapsedMs / 1000).toFixed(1)}s / ${RECORDING_DURATION_SEC}.0s`;
+          const currentSec = (Math.min(totalMs, elapsedMs) / 1000).toFixed(1);
+          timelineText.textContent = `${currentSec}s / ${RECORDING_DURATION_SEC}s`;
         }
 
+        // Auto-stop exactly at 4.0 seconds
         if (elapsedMs >= totalMs) {
           clearInterval(countdownInterval);
           countdownInterval = null;
-          if (currentEngineState === 2) {
-            stopRealRecordingAndCalculate();
-          }
+          stopRealRecordingAndCalculate();
         }
-      }, 100);
+      }, 50);
 
     } catch (err) {
-      console.error('[AudioEngine] Microphone start failed:', err);
-      if (countdownInterval) {
-        clearInterval(countdownInterval);
-        countdownInterval = null;
-      }
-      alert('Microphone access failed: ' + (err.message || 'Permission denied'));
+      console.error('[AudioEngine] Microphone access failed:', err);
+      alert('Microphone access denied or audio device unavailable: ' + err.message);
       if (window.PronunciationEngine) {
         window.PronunciationEngine.setRevealState(1);
       }
@@ -1482,15 +1376,15 @@ function setupEnginePlaceholders() {
     }
 
     try {
-      const currentWord = lessonWords[activeIndex];
+      const currentWord = currentTargetWord || (hskDeck && hskDeck[0]) || { hanzi: '你好', pinyin: 'nǐ hǎo' };
       let refProfile = null;
-      if (currentWord.audio) {
+      if (currentWord.audio && toneProfiles) {
         const fname = currentWord.audio.split('/').pop();
         refProfile = toneProfiles[fname] || null;
       }
       if (!refProfile && toneProfiles) {
-        const cleanHanzi = currentWord.hanzi.replace(/\s+/g, '');
-        const cleanPinyin = currentWord.pinyin.replace(/\s+/g, ' ').trim();
+        const cleanHanzi = (currentWord.hanzi_simp || currentWord.hanzi || '').replace(/\s+/g, '');
+        const cleanPinyin = (currentWord.pinyin || '').replace(/\s+/g, ' ').trim();
         const found = Object.values(toneProfiles).find(p => 
           p && (p.hanzi_simp === cleanHanzi || p.pinyin === cleanPinyin)
         );
@@ -1498,13 +1392,19 @@ function setupEnginePlaceholders() {
       }
 
       const result = await audioPipeline.stopAndProcess({
-        word: currentWord.hanzi,
+        word: currentWord.hanzi_simp || currentWord.hanzi,
         pinyin: currentWord.pinyin,
         referenceProfile: refProfile,
       });
 
       console.log('[AudioEngine] Utterance result:', result);
       lastUserAudioBlob = result.userAudioBlob;
+
+      // Update practice counter telemetry
+      practicedCount++;
+      if (practiceCounter) {
+        practiceCounter.textContent = `PRACTICED: ${practicedCount}`;
+      }
 
       // Update timeline display with real user duration
       const timelineText = document.getElementById('pitch-timeline-text');
@@ -1539,28 +1439,13 @@ function setupEnginePlaceholders() {
     if (!ribbonsContainer || !refProfile || !refProfile.f0_norm || refProfile.f0_norm.length < 3) return;
 
     const f0 = refProfile.f0_norm;
-    let syllableSpans = [];
-    if (count === 1) {
-      syllableSpans = [{ xMin: 40, xMax: 310, id: 'target-ribbon-s1' }];
-    } else if (count === 3) {
-      syllableSpans = [
-        { xMin: 35, xMax: 195, id: 'target-ribbon-s1' },
-        { xMin: 245, xMax: 405, id: 'target-ribbon-s2' },
-        { xMin: 455, xMax: 625, id: 'target-ribbon-s3' },
-      ];
-    } else {
-      syllableSpans = [
-        { xMin: 70, xMax: 300, id: 'target-ribbon-s1' },
-        { xMin: 360, xMax: 600, id: 'target-ribbon-s2' },
-      ];
-    }
-
+    const spans = getSyllableSpans(count);
     let ribbonsHtml = '';
-    const ptsPerSyl = Math.floor(f0.length / syllableSpans.length);
+    const ptsPerSyl = Math.floor(f0.length / spans.length);
 
-    syllableSpans.forEach((span, i) => {
+    spans.forEach((span, i) => {
       const sliceStart = i * ptsPerSyl;
-      const sliceEnd = i === syllableSpans.length - 1 ? f0.length : (i + 1) * ptsPerSyl;
+      const sliceEnd = i === spans.length - 1 ? f0.length : (i + 1) * ptsPerSyl;
       const sylF0 = f0.slice(sliceStart, sliceEnd);
       if (sylF0.length < 2) return;
 
@@ -1569,7 +1454,7 @@ function setupEnginePlaceholders() {
       for (let k = 0; k < sylF0.length; k++) {
         const x = span.xMin + (k / (sylF0.length - 1)) * (span.xMax - span.xMin);
         const st = sylF0[k];
-        const centerY = Math.max(12, Math.min(142, 78 - st * 17.5));
+        const centerY = Math.max(12, Math.min(142, 78 - st * 16));
         upperPts.push(`${x.toFixed(1)},${Math.max(8, centerY - 9).toFixed(1)}`);
         lowerPts.unshift(`${x.toFixed(1)},${Math.min(146, centerY + 9).toFixed(1)}`);
       }
@@ -1583,7 +1468,7 @@ function setupEnginePlaceholders() {
   }
 
   function renderUserPitchOnChart(result, wordData, refProfile) {
-    const count = wordData.syllablesCount || result.syllables.length;
+    const count = (wordData.syllables ? wordData.syllables.length : (wordData.syllablesCount || result.syllables.length)) || 1;
     const pathsContainer = document.getElementById('user-pitch-paths-container');
     const pointsContainer = document.getElementById('user-pitch-points-container');
     if (!pathsContainer || !pointsContainer) return;
@@ -1591,22 +1476,7 @@ function setupEnginePlaceholders() {
     let pathHtml = '';
     let pointsHtml = '';
 
-    // Syllable horizontal spans
-    let syllableSpans = [];
-    if (count === 1) {
-      syllableSpans = [{ xMin: 40, xMax: 310, pathId: 'user-pitch-path-s1', ptsId: 'user-pitch-points-s1' }];
-    } else if (count === 3) {
-      syllableSpans = [
-        { xMin: 35, xMax: 195, pathId: 'user-pitch-path-s1', ptsId: 'user-pitch-points-s1' },
-        { xMin: 245, xMax: 405, pathId: 'user-pitch-path-s2', ptsId: 'user-pitch-points-s2' },
-        { xMin: 455, xMax: 625, pathId: 'user-pitch-path-s3', ptsId: 'user-pitch-points-s3' },
-      ];
-    } else {
-      syllableSpans = [
-        { xMin: 70, xMax: 300, pathId: 'user-pitch-path-s1', ptsId: 'user-pitch-points-s1' },
-        { xMin: 360, xMax: 600, pathId: 'user-pitch-path-s2', ptsId: 'user-pitch-points-s2' },
-      ];
-    }
+    const syllableSpans = getSyllableSpans(count);
 
     result.syllables.forEach((syl, i) => {
       const span = syllableSpans[i] || syllableSpans[syllableSpans.length - 1];
@@ -1619,9 +1489,8 @@ function setupEnginePlaceholders() {
       const numPts = syl.userF0Norm.length;
       for (let k = 0; k < numPts; k++) {
         const x = span.xMin + (k / (numPts - 1)) * (span.xMax - span.xMin);
-        // y: Level 3 (0 semitones) is at y=78. Scale: 17.5px per semitone
         const st = syl.userF0Norm[k];
-        const y = Math.max(12, Math.min(142, 78 - st * 17.5));
+        const y = Math.max(12, Math.min(142, 78 - st * 16));
         pts.push({ x, y, st });
       }
 
@@ -1646,7 +1515,7 @@ function setupEnginePlaceholders() {
         if (!pt) return;
         let color = '#B8F526'; // Green
         if (syl.referenceF0Norm && syl.referenceF0Norm[idx] !== undefined) {
-          const refY = Math.max(12, Math.min(142, 78 - syl.referenceF0Norm[idx] * 17.5));
+          const refY = Math.max(12, Math.min(142, 78 - syl.referenceF0Norm[idx] * 16));
           const diff = Math.abs(pt.y - refY);
           if (diff > 35) color = '#FF5C1C';
           else if (diff > 20) color = '#FDF197';
@@ -1765,57 +1634,18 @@ function setupEnginePlaceholders() {
       if (adviceList.length > 0) {
         coachText.innerHTML = `"${adviceList.join(' ')}"`;
       } else {
-        coachText.innerHTML = `"Excellent pitch contour! Your pronunciation on <strong class="bg-black text-white px-1.5 py-0.5 rounded">'${wordData.hanzi}'</strong> aligned cleanly with the native reference curve."`;
+        coachText.innerHTML = `"Excellent pitch contour! Your pronunciation on <strong class="bg-black text-white px-1.5 py-0.5 rounded">'${wordData.hanzi_simp || wordData.hanzi}'</strong> aligned cleanly with the native reference curve."`;
       }
     }
   }
 
   function activateWordIndex(index) {
-    if (countdownInterval) {
-      clearInterval(countdownInterval);
-      countdownInterval = null;
-    }
-    activeIndex = Math.max(0, Math.min(index, lessonWords.length - 1));
-    const word = lessonWords[activeIndex];
-    if (word) {
-      renderSyllableScenario(word.syllablesCount, word);
-
-      // Match native reference curve from toneProfiles if available
-      let refProfile = null;
-      if (word.audio) {
-        const fname = word.audio.split('/').pop();
-        refProfile = toneProfiles[fname] || null;
-      }
-      if (!refProfile && toneProfiles) {
-        const cleanHanzi = word.hanzi.replace(/\s+/g, '');
-        const cleanPinyin = word.pinyin.replace(/\s+/g, ' ').trim();
-        const found = Object.values(toneProfiles).find(p => 
-          p && (p.hanzi_simp === cleanHanzi || p.pinyin === cleanPinyin)
-        );
-        if (found) refProfile = found;
-      }
-      if (refProfile && refProfile.f0_norm) {
-        renderTargetRibbonFromProfile(refProfile, word.syllablesCount);
-      }
-    }
-    if (stepCounter) {
-      stepCounter.textContent = `STEP ${activeIndex + 1} / ${lessonWords.length}`;
-    }
-    lastUserAudioBlob = null;
-
-    // Reset timeline bar for new word
-    const timelineFill = document.getElementById('pitch-timeline-fill');
-    const timelineText = document.getElementById('pitch-timeline-text');
-    if (timelineFill) timelineFill.style.width = '0%';
-    if (timelineText) timelineText.textContent = `0.0s / ${RECORDING_DURATION_SEC}s`;
-
-    // Refreshing / changing to a new word resets state back to State 1 with "Record" button
-    if (window.PronunciationEngine) {
-      window.PronunciationEngine.setRevealState(1);
-    }
+    if (!hskDeck || hskDeck.length === 0) return;
+    const safeIdx = Math.max(0, Math.min(index, hskDeck.length - 1));
+    displayWord(hskDeck[safeIdx]);
   }
 
-  // Next Word Button advances to next lesson pair & automatically updates syllable scenario & resets to "Record"
+  // Next Word Button picks a random word from the shuffle bag
   if (nextBtn) {
     nextBtn.addEventListener('click', () => {
       if (countdownInterval) {
@@ -1825,12 +1655,11 @@ function setupEnginePlaceholders() {
       if (audioPipeline && audioPipeline.isRecording) {
         audioPipeline.recorder.stop();
       }
-      const nextIndex = (activeIndex + 1) % lessonWords.length;
-      activateWordIndex(nextIndex);
+      pickRandomWord();
     });
   }
 
-  // Reset Button resets to index 0 and re-primes with "Record"
+  // Reset Button resets current word or repicks
   if (resetBtn) {
     resetBtn.addEventListener('click', () => {
       if (countdownInterval) {
@@ -1840,24 +1669,43 @@ function setupEnginePlaceholders() {
       if (audioPipeline && audioPipeline.isRecording) {
         audioPipeline.recorder.stop();
       }
-      activateWordIndex(0);
+      if (currentTargetWord) {
+        displayWord(currentTargetWord);
+      } else {
+        pickRandomWord();
+      }
       if (window.PronunciationEngine) {
         window.PronunciationEngine.setRevealState(1);
       }
     });
   }
 
-  // Native Reference Audio Trigger
-  const playNativeBtn = document.getElementById('engine-play-native-btn');
-  const hanziDisplay = document.getElementById('engine-hanzi-display');
-  const pinyinDisplay = document.getElementById('engine-pinyin-display');
+  // Deck filter buttons (ALL, HSK 1, HSK 2)
+  const deckFilterBtns = document.querySelectorAll('#engine-deck-filter-group button');
+  deckFilterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const filter = btn.dataset.filter || 'all';
+      currentDeckFilter = filter;
+      deckFilterBtns.forEach(b => {
+        if (b === btn) {
+          b.className = 'px-2 py-0.5 rounded bg-black text-badge-tangerine border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer';
+        } else {
+          b.className = 'px-2 py-0.5 rounded bg-white border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer';
+        }
+      });
+      initShuffleBag();
+      pickRandomWord();
+    });
+  });
 
+  // Native Reference Audio Trigger
   function playCurrentNativeAudio() {
-    const currentWord = lessonWords[activeIndex];
+    const currentWord = currentTargetWord || (hskDeck && hskDeck[0]);
+    if (!currentWord) return;
     let audioSrc = currentWord.audio;
     if (!audioSrc && toneProfiles) {
-      const cleanHanzi = currentWord.hanzi.replace(/\s+/g, '');
-      const cleanPinyin = currentWord.pinyin.replace(/\s+/g, ' ').trim();
+      const cleanHanzi = (currentWord.hanzi_simp || currentWord.hanzi || '').replace(/\s+/g, '');
+      const cleanPinyin = (currentWord.pinyin || '').replace(/\s+/g, ' ').trim();
       const found = Object.values(toneProfiles).find(p => 
         p && (p.hanzi_simp === cleanHanzi || p.pinyin === cleanPinyin)
       );
@@ -1911,10 +1759,8 @@ function setupEnginePlaceholders() {
   if (recordBtn) {
     recordBtn.addEventListener('click', () => {
       if (currentEngineState === 2) {
-        // Tapping while in capturing stage stops and calculates profile immediately
         stopRealRecordingAndCalculate();
       } else {
-        // Tapping while "Record" (State 1) or "Try Again" (State 4) starts real audio recording
         startRealRecording();
       }
     });
@@ -1922,7 +1768,6 @@ function setupEnginePlaceholders() {
 
   // Exposed API on window for future backend / DSP agent
   window.PronunciationEngine = {
-    // 0. Progressive Reveal State Switcher (1: Priming, 2: Capture, 4: Audit & Coach)
     setRevealState(state) {
       currentEngineState = state;
       if (state !== 2 && countdownInterval) {
@@ -1934,20 +1779,8 @@ function setupEnginePlaceholders() {
       const waveform = document.getElementById('engine-live-waveform-group');
       const auditSec = document.getElementById('phonetic-audit-section');
       const coachCard = document.getElementById('articulatory-coach-card');
-      const stateBtns = document.querySelectorAll('#engine-state-toggle-group button');
-
-      // Update state button styles
-      stateBtns.forEach((b, idx) => {
-        const targetState = idx === 0 ? 1 : (idx === 1 ? 2 : 4);
-        if (targetState === state) {
-          b.className = 'px-1.5 py-0.5 rounded bg-black text-badge-tangerine border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer';
-        } else {
-          b.className = 'px-1.5 py-0.5 rounded bg-white border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer';
-        }
-      });
 
       if (state === 1) {
-        // State 1: Priming - Target corridor only, no user contour yet. Button says "Record"
         if (userTrack) userTrack.classList.add('hidden');
         if (waveform) waveform.classList.add('hidden');
         if (auditSec) auditSec.classList.add('hidden');
@@ -1961,7 +1794,6 @@ function setupEnginePlaceholders() {
           `;
         }
       } else if (state === 2) {
-        // State 2: Capture - Live audio input simulation, waveform pulsing. Button shows live 4s countdown
         if (userTrack) userTrack.classList.add('hidden');
         if (waveform) waveform.classList.remove('hidden');
         if (auditSec) auditSec.classList.add('hidden');
@@ -1975,7 +1807,6 @@ function setupEnginePlaceholders() {
           `;
         }
       } else {
-        // State 4: Diagnostic Audit & Articulatory Coach (Calculated profile). Button says "Try Again"
         if (userTrack) userTrack.classList.remove('hidden');
         if (waveform) waveform.classList.add('hidden');
         if (auditSec) auditSec.classList.remove('hidden');
@@ -1991,31 +1822,48 @@ function setupEnginePlaceholders() {
       }
     },
 
-    // 1. Reactive Syllable Scenario Switcher (1, 2, or 3 Syllables)
+    initDeck(deck) {
+      hskDeck = deck || [];
+      initShuffleBag();
+      pickRandomWord();
+    },
+
+    hasPickedWord() {
+      return currentTargetWord !== null;
+    },
+
+    getCurrentWord() {
+      return currentTargetWord;
+    },
+
+    pickRandomWord() {
+      pickRandomWord();
+    },
+
+    displayWord(word) {
+      displayWord(word);
+    },
+
+    setDeckFilter(filter) {
+      currentDeckFilter = filter;
+      initShuffleBag();
+      pickRandomWord();
+    },
+
     setSyllableCount(count, customData) {
       renderSyllableScenario(count, customData);
       window.PronunciationEngine.setRevealState(1);
     },
 
-    // 2. Update Target Word Information
     setTargetWord(wordData) {
-      if (wordData.syllablesCount) {
-        renderSyllableScenario(wordData.syllablesCount, wordData);
-      } else {
-        if (wordData.hanzi) document.getElementById('engine-hanzi-display').textContent = wordData.hanzi;
-        if (wordData.pinyin) document.getElementById('engine-pinyin-display').textContent = wordData.pinyin;
-        if (wordData.gloss) document.getElementById('engine-gloss-display').textContent = `"${wordData.gloss}"`;
-      }
-      window.PronunciationEngine.setRevealState(1);
+      displayWord(wordData);
     },
 
-    // 3. Select Word Index Programmatically
     selectWordIndex(idx) {
       activateWordIndex(idx);
     },
 
-    // 4. Redraw User Pitch Splines (SVG Bézier path strings)
-    updateUserCurves({ pathS1, pathS2, pathS3 }) {
+    updateUserCurves({ pathS1, pathS2, pathS3, pathS4 }) {
       if (pathS1) {
         const p1 = document.getElementById('user-pitch-path-s1');
         if (p1) p1.setAttribute('d', pathS1);
@@ -2028,10 +1876,13 @@ function setupEnginePlaceholders() {
         const p3 = document.getElementById('user-pitch-path-s3');
         if (p3) p3.setAttribute('d', pathS3);
       }
+      if (pathS4) {
+        const p4 = document.getElementById('user-pitch-path-s4');
+        if (p4) p4.setAttribute('d', pathS4);
+      }
     },
 
-    // 5. Update Target Chao Corridor Ribbons (SVG Polygon points)
-    updateTargetRibbons({ pointsS1, pointsS2, pointsS3 }) {
+    updateTargetRibbons({ pointsS1, pointsS2, pointsS3, pointsS4 }) {
       if (pointsS1) {
         const r1 = document.getElementById('target-ribbon-s1');
         if (r1) r1.setAttribute('points', pointsS1);
@@ -2044,15 +1895,17 @@ function setupEnginePlaceholders() {
         const r3 = document.getElementById('target-ribbon-s3');
         if (r3) r3.setAttribute('points', pointsS3);
       }
+      if (pointsS4) {
+        const r4 = document.getElementById('target-ribbon-s4');
+        if (r4) r4.setAttribute('points', pointsS4);
+      }
     },
 
-    // 6. Update Articulatory Coaching Advice
     setCoachingAdvice(adviceHtml) {
       const coachText = document.getElementById('coach-advice-text');
       if (coachText) coachText.innerHTML = adviceHtml;
     },
 
-    // 7. Reset or Cancel Active Recording & Audio Engine
     reset() {
       if (countdownInterval) {
         clearInterval(countdownInterval);
@@ -2065,8 +1918,6 @@ function setupEnginePlaceholders() {
     }
   };
 
-  // Prime initial word and State 1 ("Record")
-  activateWordIndex(0);
   if (window.PronunciationEngine) {
     window.PronunciationEngine.setRevealState(1);
   }

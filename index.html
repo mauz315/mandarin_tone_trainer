@@ -469,49 +469,43 @@
         <!-- [1] Top Navigation Bar (Fixed) -->
         <header class="w-full flex items-center justify-between shrink-0 mb-1.5 relative z-10">
           <button id="back-from-engine-btn" class="bg-black text-white hover:bg-badge-tangerine px-3 py-1.5 rounded-full border-2 border-black font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-hard-black transition-colors active-collapse cursor-pointer">
-            <span class="material-symbols-outlined text-sm">arrow_back</span> LESSON 04
+            <span class="material-symbols-outlined text-sm">arrow_back</span> MENU
           </button>
           <div class="bg-white border-2 border-black px-3 py-1 rounded-full font-mono text-xs font-bold shadow-hard-black flex items-center gap-2 uppercase">
             <span class="w-2.5 h-2.5 rounded-full bg-badge-tangerine animate-pulse border border-black"></span>
             <span>PRONUNCIATION LAB</span>
           </div>
           <div id="engine-step-counter" class="font-mono text-xs font-black text-white bg-badge-cobalt border-2 border-black px-2.5 py-0.5 rounded-full shadow-sm">
-            STEP 4 / 10
+            HSK 1+2 • 497 WORDS
           </div>
         </header>
 
-        <!-- Progressive Reveal & Syllable Scenario Telemetry Bar -->
+        <!-- Dynamic Deck Selector & Telemetry Bar -->
         <div class="w-full mb-2 shrink-0 flex flex-wrap items-center justify-between gap-1.5 bg-white/85 backdrop-blur-sm border-2 border-black rounded-xl p-1.5 text-[10px] font-mono font-bold text-black shadow-sm">
-          <!-- Syllable Count Scenario Switcher (1, 2, or 3 Syllables) -->
-          <div class="flex items-center gap-1">
-            <span class="font-speed font-black uppercase text-black text-[9px]">SYLLABLES:</span>
-            <div class="flex gap-1" id="engine-syllable-toggle-group">
-              <button type="button" class="px-2 py-0.5 rounded bg-white border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer" onclick="window.PronunciationEngine && window.PronunciationEngine.setSyllableCount(1)">
-                1: [mā]
+          <!-- Deck Filter Controls (ALL, HSK 1, HSK 2) -->
+          <div class="flex items-center gap-1.5">
+            <span class="font-speed font-black uppercase text-black text-[9px]">DECK:</span>
+            <div class="flex gap-1" id="engine-deck-filter-group">
+              <button type="button" data-filter="all" class="px-2 py-0.5 rounded bg-black text-badge-tangerine border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer">
+                ALL (497)
               </button>
-              <button type="button" class="px-2 py-0.5 rounded bg-black text-badge-tangerine border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer" onclick="window.PronunciationEngine && window.PronunciationEngine.setSyllableCount(2)">
-                2: [nǐ hǎo]
+              <button type="button" data-filter="hsk1" class="px-2 py-0.5 rounded bg-white border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer">
+                HSK 1 (300)
               </button>
-              <button type="button" class="px-2 py-0.5 rounded bg-white border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer" onclick="window.PronunciationEngine && window.PronunciationEngine.setSyllableCount(3)">
-                3: [duì bu qǐ]
+              <button type="button" data-filter="hsk2" class="px-2 py-0.5 rounded bg-white border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer">
+                HSK 2 (197)
               </button>
             </div>
           </div>
 
-          <!-- Progressive Reveal State Switcher -->
-          <div class="flex items-center gap-1">
-            <span class="font-speed font-black uppercase text-black text-[9px]">STATE:</span>
-            <div class="flex gap-1" id="engine-state-toggle-group">
-              <button type="button" class="px-1.5 py-0.5 rounded bg-black text-badge-tangerine border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer" onclick="window.PronunciationEngine && window.PronunciationEngine.setRevealState(1)">
-                1: Priming
-              </button>
-              <button type="button" class="px-1.5 py-0.5 rounded bg-white border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer" onclick="window.PronunciationEngine && window.PronunciationEngine.setRevealState(2)">
-                2: Capture
-              </button>
-              <button type="button" class="px-1.5 py-0.5 rounded bg-white border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer" onclick="window.PronunciationEngine && window.PronunciationEngine.setRevealState(4)">
-                4: Audit
-              </button>
-            </div>
+          <!-- Active Word Syllable & Practice Telemetry -->
+          <div class="flex items-center gap-2 font-mono text-[9px]">
+            <span id="engine-syllable-badge" class="px-2 py-0.5 rounded bg-slate-100 border border-black font-bold text-black uppercase">
+              2 SYLLABLES
+            </span>
+            <span id="engine-practice-counter" class="px-2 py-0.5 rounded bg-canvas-acid text-black border border-black font-black uppercase">
+              PRACTICED: 0
+            </span>
           </div>
         </div>
 
@@ -523,7 +517,7 @@
             <div class="space-y-0.5 z-10">
               <div class="flex items-center gap-2">
                 <span class="bg-black text-canvas-ice font-mono text-[9px] font-black px-2 py-0.5 rounded">TARGET WORD</span>
-                <span id="engine-stage-label" class="font-mono text-[11px] font-bold text-black/60">[STAGE 2: TONE SANDHI]</span>
+                <span id="engine-stage-label" class="font-mono text-[11px] font-bold text-black/60">[HSK 1 • #001]</span>
               </div>
               <div class="flex items-center gap-2.5 pt-0.5">
                 <span id="engine-hanzi-display" class="font-chinese font-black text-3xl sm:text-4xl text-black leading-none cursor-pointer" title="Hear native audio">你 好</span>
@@ -534,11 +528,11 @@
                 </button>
               </div>
             </div>
-            <!-- Racing Tangerine Sandhi Banner -->
-            <div id="engine-sandhi-badge" class="bg-badge-tangerine text-white border-2 border-black rounded-xl p-2 font-mono text-xs font-bold text-right shadow-sm z-10">
-              <span class="block text-[9px] text-white/90 uppercase font-black">Sandhi Rule Applied</span>
-              <span class="font-speed font-black text-xs sm:text-sm text-white">/ 3rd + 3rd ➔ 2nd + 3rd /</span>
-              <span class="block text-[10px] text-black font-black bg-white/90 px-1.5 py-0.2 rounded mt-0.5">Target Spoken: ní hǎo</span>
+            <!-- Dynamic Tone Formula / Sandhi Banner -->
+            <div id="engine-sandhi-badge" class="bg-badge-tangerine text-white border-2 border-black rounded-xl p-2 font-mono text-xs font-bold text-right shadow-sm z-10 transition-colors">
+              <span id="engine-tone-title" class="block text-[9px] text-white/90 uppercase font-black">TONE PATTERN</span>
+              <span id="engine-tone-pattern" class="font-speed font-black text-xs sm:text-sm text-white">Tone 1 + Tone 4</span>
+              <span id="engine-tone-subtext" class="block text-[10px] text-black font-black bg-white/90 px-1.5 py-0.2 rounded mt-0.5 truncate max-w-[140px]">yī xià</span>
             </div>
           </section>
 
@@ -758,10 +752,10 @@
               <span class="font-mono text-[10px] bg-black text-white px-1.5 py-0.5 rounded hidden sm:inline">[SPACE]</span>
             </button>
 
-            <!-- Next Word Trigger (Compact Square on Mobile) -->
-            <button id="engine-next-btn" class="w-11 h-11 sm:w-auto sm:px-3.5 sm:py-3 bg-badge-cobalt hover:bg-[#003dd4] text-white rounded-xl border-[2.5px] border-black font-mono text-xs font-black uppercase shadow-hard-black active-collapse flex items-center justify-center gap-1.5 shrink-0 cursor-pointer" title="Next Word">
-              <span class="hidden sm:inline">NEXT</span>
-              <span class="material-symbols-outlined text-lg sm:text-base">arrow_forward</span>
+            <!-- Random Word Trigger (Compact Square on Mobile, Expanded on Desktop) -->
+            <button id="engine-next-btn" class="w-11 h-11 sm:w-auto sm:px-3.5 sm:py-3 bg-badge-cobalt hover:bg-[#003dd4] text-white rounded-xl border-[2.5px] border-black font-mono text-xs font-black uppercase shadow-hard-black active-collapse flex items-center justify-center gap-1.5 shrink-0 cursor-pointer" title="Pick Random Word [N]">
+              <span class="hidden sm:inline">RANDOM WORD</span>
+              <span class="material-symbols-outlined text-lg sm:text-base">shuffle</span>
             </button>
           </footer>
         </div>
