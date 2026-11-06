@@ -1140,8 +1140,8 @@ function setupEnginePlaceholders() {
             const x = span.xMin + (k / (sylF0.length - 1)) * (span.xMax - span.xMin);
             const st = sylF0[k];
             const centerY = Math.max(16, Math.min(138, 78 - st * 16));
-            upperPts.push(`${x.toFixed(1)},${Math.max(10, centerY - 9).toFixed(1)}`);
-            lowerPts.unshift(`${x.toFixed(1)},${Math.min(144, centerY + 9).toFixed(1)}`);
+            upperPts.push(`${x.toFixed(1)},${Math.max(8, centerY - 10.35).toFixed(1)}`);
+            lowerPts.unshift(`${x.toFixed(1)},${Math.min(146, centerY + 10.35).toFixed(1)}`);
           }
         } else {
           // Fallback canonical Chao ribbon
@@ -1155,8 +1155,8 @@ function setupEnginePlaceholders() {
             else if (syl.tone === 2) centerY = 78 - t * 54;
             else if (syl.tone === 3) centerY = t < 0.5 ? 95 + t * 60 : 125 - (t - 0.5) * 140;
             else if (syl.tone === 4) centerY = 24 + t * 105;
-            upperPts.push(`${x.toFixed(1)},${Math.max(10, centerY - 9).toFixed(1)}`);
-            lowerPts.unshift(`${x.toFixed(1)},${Math.min(144, centerY + 9).toFixed(1)}`);
+            upperPts.push(`${x.toFixed(1)},${Math.max(8, centerY - 10.35).toFixed(1)}`);
+            lowerPts.unshift(`${x.toFixed(1)},${Math.min(146, centerY + 10.35).toFixed(1)}`);
           }
         }
         const allPts = upperPts.concat(lowerPts).join(' ');
@@ -1470,8 +1470,8 @@ function setupEnginePlaceholders() {
         const x = span.xMin + (k / (sylF0.length - 1)) * (span.xMax - span.xMin);
         const st = sylF0[k];
         const centerY = Math.max(16, Math.min(138, 78 - st * 16));
-        upperPts.push(`${x.toFixed(1)},${Math.max(10, centerY - 9).toFixed(1)}`);
-        lowerPts.unshift(`${x.toFixed(1)},${Math.min(144, centerY + 9).toFixed(1)}`);
+        upperPts.push(`${x.toFixed(1)},${Math.max(8, centerY - 10.35).toFixed(1)}`);
+        lowerPts.unshift(`${x.toFixed(1)},${Math.min(146, centerY + 10.35).toFixed(1)}`);
       }
       const allPts = upperPts.concat(lowerPts).join(' ');
       ribbonsHtml += `<polygon id="${span.id}" points="${allPts}" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />`;
