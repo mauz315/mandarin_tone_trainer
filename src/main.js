@@ -216,6 +216,32 @@ function setupMenu() {
   const openEngineBtn = document.getElementById('open-engine-btn');
   const backFromEngineBtn = document.getElementById('back-from-engine-btn');
 
+  const startWordsBtn = document.getElementById('start-words-btn');
+  const wordTrainerScreen = document.getElementById('word-trainer-screen');
+  const backFromWordsBtn = document.getElementById('back-from-words-btn');
+
+  if (startWordsBtn) {
+    startWordsBtn.addEventListener('click', () => {
+      menuScreen.classList.add('hidden');
+      mainMenu.classList.remove('hidden');
+      submenu.classList.add('hidden');
+      if (wordTrainerScreen) wordTrainerScreen.classList.remove('hidden');
+      setAppBackground('bg-[#F5F3FF]');
+      if (typeof window.initWordTrainerCanvas === 'function') {
+        window.initWordTrainerCanvas();
+      }
+    });
+  }
+
+  if (backFromWordsBtn) {
+    backFromWordsBtn.addEventListener('click', () => {
+      if (wordTrainerScreen) wordTrainerScreen.classList.add('hidden');
+      menuScreen.classList.remove('hidden');
+      mainMenu.classList.remove('hidden');
+      setAppBackground('bg-canvas-acid');
+    });
+  }
+
   if (openEngineBtn) {
     openEngineBtn.addEventListener('click', () => {
       menuScreen.classList.add('hidden');
@@ -2259,8 +2285,478 @@ function setupEnginePlaceholders() {
   }
 }
 
+// ========================================================
+// WORD TRAINER MODULE: UI HOOKS, DRAWING ENGINE & VALIDATION
+// Celadon Jade & Seal Vermilion Palette | Multisensory Lab
+// ========================================================
+function setupWordTrainerUI() {
+  const scaffoldToggleBtn = document.getElementById('scaffold-toggle-btn');
+  const clearCanvasBtn = document.getElementById('clear-canvas-btn');
+  const toneBtns = document.querySelectorAll('.tone-choice-btn');
+  const submitBtn = document.getElementById('submit-word-btn');
+  const phaseBtns = document.querySelectorAll('.phase-btn');
+  const audioReplayBtn = document.getElementById('audio-replay-btn');
+  
+  const cardRevealModal = document.getElementById('card-reveal-modal');
+  const modalNextBtn = document.getElementById('modal-next-btn');
+  const modalReplayBtn = document.getElementById('modal-replay-btn');
+  
+  const phaseCompleteModal = document.getElementById('phase-complete-modal');
+  const advancePhaseBtn = document.getElementById('advance-phase-btn');
+  const stayPhaseBtn = document.getElementById('stay-phase-btn');
+
+  const canvasGhostChar = document.getElementById('canvas-ghost-char');
+  const paintCanvas = document.getElementById('hanzi-paint-canvas');
+  const feedbackBanner = document.getElementById('validation-feedback-banner');
+  const feedbackIcon = document.getElementById('validation-feedback-icon');
+  const feedbackText = document.getElementById('validation-feedback-text');
+  const attemptPips = document.getElementById('attempt-pips');
+  
+  let isScaffoldOn = true;
+  let selectedTone = null;
+  let attemptsLeft = 3;
+  const targetTone = 4; // '日' rì (Tone 4 - falling)
+
+  // ----------------------------------------------------
+  // A. NATIVE HTML5 CANVAS DRAWING ENGINE (MOUSE + TOUCH)
+  // ----------------------------------------------------
+  let isDrawing = false;
+  let lastX = 0;
+  let lastY = 0;
+  let strokeCount = 0;
+  let currentStrokeLength = 0;
+  let totalDrawnLength = 0;
+  let ctx = null;
+
+  if (paintCanvas) {
+    ctx = paintCanvas.getContext('2d');
+  }
+
+  function initWordTrainerCanvas() {
+    if (!paintCanvas || !ctx) return;
+    const rect = paintCanvas.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return;
+    
+    const dpr = window.devicePixelRatio || 1;
+    const targetW = Math.round(rect.width * dpr);
+    const targetH = Math.round(rect.height * dpr);
+
+    if (paintCanvas.width !== targetW || paintCanvas.height !== targetH) {
+      let savedImg = null;
+      if (paintCanvas.width > 0 && paintCanvas.height > 0) {
+        try { savedImg = ctx.getImageData(0, 0, paintCanvas.width, paintCanvas.height); } catch (_) {}
+      }
+      paintCanvas.width = targetW;
+      paintCanvas.height = targetH;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = Math.max(10, Math.round(14 * dpr));
+      ctx.strokeStyle = '#1E1B2E';
+      if (savedImg) {
+        try { ctx.putImageData(savedImg, 0, 0); } catch (_) {}
+      }
+    }
+  }
+  window.initWordTrainerCanvas = initWordTrainerCanvas;
+
+  function getCanvasCoords(e) {
+    if (!paintCanvas) return { x: 0, y: 0 };
+    const rect = paintCanvas.getBoundingClientRect();
+    const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+    const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+    const dpr = window.devicePixelRatio || 1;
+    return {
+      x: (clientX - rect.left) * dpr,
+      y: (clientY - rect.top) * dpr
+    };
+  }
+
+  function startDrawing(e) {
+    if (!paintCanvas || !ctx) return;
+    initWordTrainerCanvas();
+    if (e.cancelable && (e.type.startsWith('touch') || e.type.startsWith('pointer'))) {
+      e.preventDefault();
+    }
+    isDrawing = true;
+    const coords = getCanvasCoords(e);
+    lastX = coords.x;
+    lastY = coords.y;
+    currentStrokeLength = 0;
+
+    ctx.beginPath();
+    ctx.arc(lastX, lastY, ctx.lineWidth / 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#1E1B2E';
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+
+    // If feedback had error, reset to guidance
+    if (feedbackBanner && (feedbackBanner.classList.contains('border-rose-500') || feedbackBanner.classList.contains('border-rose-600') || feedbackBanner.classList.contains('border-amber-500'))) {
+      updateFeedback('neutral', 'Drawing strokes... Select tone and submit when ready.');
+    }
+  }
+
+  function moveDrawing(e) {
+    if (!isDrawing || !ctx) return;
+    if (e.cancelable && (e.type.startsWith('touch') || e.type.startsWith('pointer'))) {
+      e.preventDefault();
+    }
+    const coords = getCanvasCoords(e);
+    const dist = Math.hypot(coords.x - lastX, coords.y - lastY);
+    currentStrokeLength += dist;
+    totalDrawnLength += dist;
+
+    ctx.lineTo(coords.x, coords.y);
+    ctx.stroke();
+
+    lastX = coords.x;
+    lastY = coords.y;
+  }
+
+  function stopDrawing(e) {
+    if (!isDrawing || !ctx) return;
+    isDrawing = false;
+    if (currentStrokeLength > 8) {
+      strokeCount++;
+    }
+    ctx.closePath();
+  }
+
+  if (paintCanvas) {
+    // Pointer Events (Unified Mouse, Pen, Touch)
+    paintCanvas.addEventListener('pointerdown', (e) => {
+      try { paintCanvas.setPointerCapture(e.pointerId); } catch (_) {}
+      startDrawing(e);
+    });
+    paintCanvas.addEventListener('pointermove', moveDrawing);
+    paintCanvas.addEventListener('pointerup', (e) => {
+      stopDrawing(e);
+      try { paintCanvas.releasePointerCapture(e.pointerId); } catch (_) {}
+    });
+    paintCanvas.addEventListener('pointercancel', (e) => {
+      stopDrawing(e);
+      try { paintCanvas.releasePointerCapture(e.pointerId); } catch (_) {}
+    });
+
+    // Touch Event fallbacks to guarantee no mobile scrolling while drawing
+    paintCanvas.addEventListener('touchstart', startDrawing, { passive: false });
+    paintCanvas.addEventListener('touchmove', moveDrawing, { passive: false });
+    paintCanvas.addEventListener('touchend', stopDrawing);
+    paintCanvas.addEventListener('touchcancel', stopDrawing);
+
+    // Mouse Event fallbacks for legacy browsers
+    paintCanvas.addEventListener('mousedown', startDrawing);
+    window.addEventListener('mousemove', (e) => { if (isDrawing) moveDrawing(e); });
+    window.addEventListener('mouseup', (e) => { if (isDrawing) stopDrawing(e); });
+  }
+
+  function clearPaintCanvas() {
+    if (paintCanvas && ctx) {
+      ctx.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
+    }
+    strokeCount = 0;
+    currentStrokeLength = 0;
+    totalDrawnLength = 0;
+  }
+
+  // Window resize listener to keep canvas in sync
+  window.addEventListener('resize', () => {
+    initWordTrainerCanvas();
+  });
+
+  // ----------------------------------------------------
+  // B. VALIDATION FEEDBACK BANNER CONTROLLER
+  // ----------------------------------------------------
+  function updateFeedback(status, message) {
+    if (!feedbackBanner || !feedbackText) return;
+    feedbackText.textContent = message;
+
+    // Reset styles
+    feedbackBanner.className = 'order-3 lg:order-3 w-full rounded-xl p-2.5 sm:p-3 border-2 transition-all font-mono text-xs font-bold shadow-xs flex items-center gap-2.5';
+
+    if (status === 'hanzi-error') {
+      feedbackBanner.classList.add('bg-amber-50', 'border-amber-500', 'text-amber-950');
+      if (feedbackIcon) {
+        feedbackIcon.className = 'material-symbols-outlined text-amber-600 text-lg shrink-0';
+        feedbackIcon.textContent = 'draw';
+      }
+    } else if (status === 'tone-error') {
+      feedbackBanner.classList.add('bg-rose-50', 'border-rose-500', 'text-rose-950');
+      if (feedbackIcon) {
+        feedbackIcon.className = 'material-symbols-outlined text-rose-600 text-lg shrink-0';
+        feedbackIcon.textContent = 'music_off';
+      }
+    } else if (status === 'both-error') {
+      feedbackBanner.classList.add('bg-rose-50', 'border-rose-600', 'text-rose-950');
+      if (feedbackIcon) {
+        feedbackIcon.className = 'material-symbols-outlined text-rose-600 text-lg shrink-0';
+        feedbackIcon.textContent = 'error';
+      }
+    } else if (status === 'correct') {
+      feedbackBanner.classList.add('bg-emerald-50', 'border-emerald-600', 'text-emerald-950');
+      if (feedbackIcon) {
+        feedbackIcon.className = 'material-symbols-outlined text-emerald-600 text-lg shrink-0';
+        feedbackIcon.textContent = 'check_circle';
+      }
+    } else {
+      feedbackBanner.classList.add('bg-white', 'border-black/20', 'text-black/70');
+      if (feedbackIcon) {
+        feedbackIcon.className = 'material-symbols-outlined text-black/50 text-lg shrink-0';
+        feedbackIcon.textContent = 'lightbulb';
+      }
+    }
+  }
+
+  function shakeElement(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('shake-error');
+    void el.offsetWidth; // Force CSS reflow to re-trigger keyframe
+    el.classList.add('shake-error');
+  }
+
+  function updateAttemptPips() {
+    if (!attemptPips) return;
+    if (attemptsLeft === 3) {
+      attemptPips.innerHTML = '<span class="pip text-[#D97706]">●</span><span class="pip text-[#D97706]">●</span><span class="pip text-[#D97706]">●</span>';
+    } else if (attemptsLeft === 2) {
+      attemptPips.innerHTML = '<span class="pip text-[#D97706]">●</span><span class="pip text-[#D97706]">●</span><span class="pip text-black/30">○</span>';
+    } else if (attemptsLeft === 1) {
+      attemptPips.innerHTML = '<span class="pip text-red-500 animate-pulse">●</span><span class="pip text-black/30">○</span><span class="pip text-black/30">○</span>';
+    } else {
+      attemptPips.innerHTML = '<span class="pip text-black/30">○</span><span class="pip text-black/30">○</span><span class="pip text-black/30">○</span>';
+    }
+  }
+
+  // ----------------------------------------------------
+  // C. PHASE STEPPER BUTTONS
+  // ----------------------------------------------------
+  const phaseMetadata = {
+    1: { title: 'Phase 1: Elemental Atoms', count: 55 },
+    2: { title: 'Phase 2: Compound Characters', count: 80 },
+    3: { title: 'Phase 3: Core Binary Compounds', count: 115 },
+    4: { title: 'Phase 4: Semantic Networks', count: 120 },
+    5: { title: 'Phase 5: Idiomatic & Poly-Syllabic', count: 127 },
+  };
+
+  phaseBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p = btn.getAttribute('data-phase');
+      phaseBtns.forEach(b => {
+        b.classList.remove('phase-active', 'bg-[#4C1D95]', 'text-white', 'shadow-hard-black');
+        b.classList.add('phase-available', 'bg-white', 'text-black', 'shadow-sm');
+      });
+      btn.classList.add('phase-active', 'bg-[#4C1D95]', 'text-white', 'shadow-hard-black');
+      btn.classList.remove('phase-available', 'bg-white', 'text-black', 'shadow-sm');
+
+      const meta = phaseMetadata[p] || phaseMetadata[1];
+      const titleEl = document.getElementById('phase-title');
+      const progressLabel = document.getElementById('overall-progress-label');
+      if (titleEl) titleEl.textContent = meta.title;
+      if (progressLabel) progressLabel.textContent = `Progress: 0 / ${meta.count} Words`;
+
+      if (window.WordTrainerEngine && typeof window.WordTrainerEngine.switchPhase === 'function') {
+        window.WordTrainerEngine.switchPhase(parseInt(p, 10));
+      }
+    });
+  });
+
+  // ----------------------------------------------------
+  // D. SCAFFOLDING GUIDE TOGGLE
+  // ----------------------------------------------------
+  if (scaffoldToggleBtn) {
+    scaffoldToggleBtn.addEventListener('click', () => {
+      isScaffoldOn = !isScaffoldOn;
+      if (isScaffoldOn) {
+        scaffoldToggleBtn.className = 'scaffold-on flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white border-2 border-black font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm active-collapse cursor-pointer transition-all';
+        scaffoldToggleBtn.innerHTML = '<span class="material-symbols-outlined text-base">visibility</span><span>GUIDE: ON</span>';
+        if (canvasGhostChar) {
+          canvasGhostChar.classList.remove('opacity-0');
+          canvasGhostChar.classList.add('opacity-100');
+        }
+      } else {
+        scaffoldToggleBtn.className = 'scaffold-off flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl bg-[#18181b] hover:bg-[#27272a] text-white/80 border-2 border-black font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm active-collapse cursor-pointer transition-all';
+        scaffoldToggleBtn.innerHTML = '<span class="material-symbols-outlined text-base">visibility_off</span><span>GUIDE: OFF</span>';
+        if (canvasGhostChar) {
+          canvasGhostChar.classList.remove('opacity-100');
+          canvasGhostChar.classList.add('opacity-0');
+        }
+      }
+      if (window.WordTrainerEngine && typeof window.WordTrainerEngine.toggleScaffolding === 'function') {
+        window.WordTrainerEngine.toggleScaffolding(isScaffoldOn);
+      }
+    });
+  }
+
+  // ----------------------------------------------------
+  // E. CLEAR CANVAS BUTTON
+  // ----------------------------------------------------
+  if (clearCanvasBtn) {
+    clearCanvasBtn.addEventListener('click', () => {
+      clearPaintCanvas();
+      const targetCanvas = document.getElementById('hanzi-target-canvas');
+      if (targetCanvas) {
+        targetCanvas.classList.add('opacity-30');
+        setTimeout(() => targetCanvas.classList.remove('opacity-30'), 150);
+      }
+      updateFeedback('neutral', 'Canvas cleared. Draw the character and select its tone.');
+      if (window.WordTrainerEngine && typeof window.WordTrainerEngine.clearCanvas === 'function') {
+        window.WordTrainerEngine.clearCanvas();
+      }
+    });
+  }
+
+  // ----------------------------------------------------
+  // F. TONE CHOICE BUTTONS
+  // ----------------------------------------------------
+  toneBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      toneBtns.forEach(b => b.classList.remove('tone-selected'));
+      btn.classList.add('tone-selected');
+      selectedTone = parseInt(btn.getAttribute('data-tone'), 10);
+      
+      const activeSlot = document.querySelector('.tone-slot.active .tone-slot-val');
+      if (activeSlot) {
+        activeSlot.textContent = `T${selectedTone}`;
+      }
+
+      // If feedback had tone error, soften to neutral
+      if (feedbackBanner && (feedbackBanner.classList.contains('border-rose-500') || feedbackBanner.classList.contains('border-rose-600'))) {
+        updateFeedback('neutral', `Tone ${selectedTone} selected. Submit to verify.`);
+      }
+
+      if (window.WordTrainerEngine && typeof window.WordTrainerEngine.handleToneSelection === 'function') {
+        window.WordTrainerEngine.handleToneSelection(selectedTone);
+      }
+    });
+  });
+
+  // ----------------------------------------------------
+  // G. SUBMIT & DUAL VERIFICATION PROMPT (HANZI VS TONE)
+  // ----------------------------------------------------
+  if (submitBtn) {
+    submitBtn.addEventListener('click', () => {
+      if (window.WordTrainerEngine && typeof window.WordTrainerEngine.validateSubmission === 'function') {
+        window.WordTrainerEngine.validateSubmission();
+        return;
+      }
+
+      // Evaluation criteria
+      const hasHanzi = (strokeCount >= 2 || totalDrawnLength > 50);
+      const hasTone = (selectedTone !== null);
+      const isToneCorrect = (selectedTone === targetTone);
+
+      // Scenario 1: Both Hanzi and Tone are missing/incomplete
+      if (!hasHanzi && !hasTone) {
+        updateFeedback('both-error', "⚠️ Incomplete: Draw the character '日' and select a tone before submitting.");
+        shakeElement('canvas-arena');
+        shakeElement('interaction-footer');
+        return;
+      }
+
+      // Scenario 2: Hanzi is missing or incomplete, but Tone was selected
+      if (!hasHanzi && hasTone) {
+        updateFeedback('hanzi-error', `⚠️ Hanzi Error: Tone ${selectedTone} chosen, but character strokes are incomplete! Draw '日' on the grid.`);
+        shakeElement('canvas-arena');
+        return;
+      }
+
+      // Scenario 3: Hanzi is drawn, but Tone is missing
+      if (hasHanzi && !hasTone) {
+        updateFeedback('tone-error', "⚠️ Tone Missing: Character drawing accepted! Please choose a tone (1st, 2nd, 3rd, 4th, or Neutral).");
+        shakeElement('interaction-footer');
+        return;
+      }
+
+      // Scenario 4: Hanzi is drawn, but Tone is INCORRECT
+      if (hasHanzi && !isToneCorrect) {
+        attemptsLeft = Math.max(0, attemptsLeft - 1);
+        updateAttemptPips();
+        shakeElement('interaction-footer');
+
+        if (attemptsLeft > 0) {
+          updateFeedback('tone-error', `❌ Tone Error: Hanzi strokes accepted, but Tone ${selectedTone} is incorrect for '日' (Expected: 4th Tone ˋ)! Tries left: ${attemptsLeft}`);
+        } else {
+          // Graceful reveal after 3 attempts exhausted
+          updateFeedback('tone-error', "❌ Attempts exhausted! Revealing full card solution for review.");
+          setTimeout(() => {
+            if (cardRevealModal) cardRevealModal.classList.remove('hidden');
+          }, 450);
+        }
+        return;
+      }
+
+      // Scenario 5: Both Hanzi and Tone are CORRECT!
+      updateFeedback('correct', "🎉 Correct! Character verified and Tone 4 (ˋ rì) confirmed.");
+      setTimeout(() => {
+        if (cardRevealModal) cardRevealModal.classList.remove('hidden');
+      }, 350);
+    });
+  }
+
+  // ----------------------------------------------------
+  // H. AUDIO REPLAY
+  // ----------------------------------------------------
+  const triggerAudioPlay = () => {
+    if (audioReplayBtn) {
+      audioReplayBtn.classList.add('brightness-125', 'scale-[1.02]');
+      setTimeout(() => audioReplayBtn.classList.remove('brightness-125', 'scale-[1.02]'), 600);
+    }
+    if (window.WordTrainerEngine && typeof window.WordTrainerEngine.playActiveWordAudio === 'function') {
+      window.WordTrainerEngine.playActiveWordAudio();
+    }
+  };
+  if (audioReplayBtn) audioReplayBtn.addEventListener('click', triggerAudioPlay);
+  if (modalReplayBtn) modalReplayBtn.addEventListener('click', triggerAudioPlay);
+
+  // ----------------------------------------------------
+  // I. MODALS ADVANCEMENT & QUEUE HOOKS
+  // ----------------------------------------------------
+  if (modalNextBtn) {
+    modalNextBtn.addEventListener('click', () => {
+      if (cardRevealModal) cardRevealModal.classList.add('hidden');
+      // Reset card state for next exercise
+      clearPaintCanvas();
+      selectedTone = null;
+      attemptsLeft = 3;
+      updateAttemptPips();
+      toneBtns.forEach(b => b.classList.remove('tone-selected'));
+      updateFeedback('neutral', 'Draw the character in the arena and select its tone to verify.');
+
+      if (window.WordTrainerEngine && typeof window.WordTrainerEngine.advanceToNextWord === 'function') {
+        window.WordTrainerEngine.advanceToNextWord();
+      }
+    });
+  }
+
+  if (advancePhaseBtn) {
+    advancePhaseBtn.addEventListener('click', () => {
+      if (phaseCompleteModal) phaseCompleteModal.classList.add('hidden');
+      if (window.WordTrainerEngine && typeof window.WordTrainerEngine.advanceToNextPhase === 'function') {
+        window.WordTrainerEngine.advanceToNextPhase();
+      }
+    });
+  }
+
+  if (stayPhaseBtn) {
+    stayPhaseBtn.addEventListener('click', () => {
+      if (phaseCompleteModal) phaseCompleteModal.classList.add('hidden');
+    });
+  }
+
+  // Export helper methods on window for tests and engines
+  window.WordTrainerDrawing = {
+    getStrokeCount: () => strokeCount,
+    getTotalLength: () => totalDrawnLength,
+    clear: clearPaintCanvas,
+    init: initWordTrainerCanvas
+  };
+}
+
 // Initialize the app
 setupButtons();
 setupMenu();
 setupEnginePlaceholders();
+setupWordTrainerUI();
 init();

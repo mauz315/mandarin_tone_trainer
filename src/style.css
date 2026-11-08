@@ -125,3 +125,52 @@
   justify-content: center !important;
   overflow: visible !important;
 }
+
+/* ======================================================== */
+/* WORD TRAINER MODULE: TACTILE STYLES & SHAKE ANIMATIONS    */
+/* ======================================================== */
+
+/* Error Shake Keyframes for Failed Attempts */
+@keyframes shake-error {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-7px); }
+  40%, 80% { transform: translateX(7px); }
+}
+.shake-error {
+  animation: shake-error 0.4s ease-in-out !important;
+}
+
+/* Phase Stepper Custom States - Option E: Pale Lavender Chalk & Solar Amber */
+.phase-btn.phase-active {
+  background-color: #4C1D95 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+  box-shadow: 3px 3px 0px #000000 !important;
+}
+.phase-btn.phase-completed {
+  background-color: #EDE9FE !important;
+  color: #4C1D95 !important;
+  border-color: #6D28D9 !important;
+}
+.phase-btn.phase-recommended {
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.5) !important;
+  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Tone Selector Keycaps Active State */
+.tone-choice-btn.tone-selected {
+  outline: 3px solid #000000 !important;
+  box-shadow: 3px 3px 0px #000000 !important;
+  transform: translate(1px, 1px) scale(0.98);
+  filter: brightness(1.08);
+}
+
+/* Scaffolding Guide Toggle States - Option E: Pale Lavender Chalk & Solar Amber */
+.scaffold-on {
+  background-color: #D97706 !important;
+  color: #ffffff !important;
+}
+.scaffold-off {
+  background-color: #18181b !important;
+  color: #DDD6FE !important;
+}

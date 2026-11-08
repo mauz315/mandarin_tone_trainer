@@ -12,8 +12,11 @@
 
     <!-- Material Symbols -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-    <script type="module" crossorigin src="/mandarin_tone_trainer/assets/index-DAmOianb.js"></script>
-    <link rel="stylesheet" crossorigin href="/mandarin_tone_trainer/assets/index-DX6Q_cVy.css">
+
+    <!-- HanziWriter CDN for Chinese Character Stroke & Drawing Engine -->
+    <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
+    <script type="module" crossorigin src="/mandarin_tone_trainer/assets/index-CU__h92p.js"></script>
+    <link rel="stylesheet" crossorigin href="/mandarin_tone_trainer/assets/index-BbVGXy44.css">
   </head>
   <body class="text-slate-900 font-grotesk min-h-[100dvh] antialiased selection:bg-badge-pink selection:text-white p-0 m-0 flex flex-col items-center justify-center overflow-x-hidden">
 
@@ -143,27 +146,32 @@
                 </button>
               </div>
 
-              <!-- 4. #start-words-btn: Industrial Dark Graphic Patch with Diagonal Stripes -->
-              <button id="start-words-btn" class="w-full text-left relative opacity-75 cursor-not-allowed rotate-[-0.5deg]" disabled>
-                <div class="bg-[#1c1d21] border-[3px] border-black rounded-2xl p-4 sm:p-5 shadow-hard-black relative overflow-hidden">
-                  <!-- Caution Stripe Horizon Indicator -->
-                  <div class="absolute top-0 right-0 w-36 h-full caution-stripe opacity-40"></div>
-                  <div class="flex items-center justify-between gap-4 relative z-10">
+              <!-- 4. #start-words-btn: Deep Byzantine Plum Workshop Ticket (Option 2) -->
+              <button id="start-words-btn" class="w-full text-left relative group rotate-[-0.8deg] hover:rotate-0 transition-transform duration-200 active-collapse cursor-pointer">
+                <div class="bg-[#4A0E4E] text-white border-[3px] border-black rounded-2xl p-4 sm:p-5 shadow-hard-black group-hover:bg-[#3D0B40] transition-colors relative overflow-hidden">
+                  <!-- Decorative Chinese Character Background Accent -->
+                  <div class="absolute -right-4 -bottom-6 opacity-20 pointer-events-none group-hover:opacity-30 transition-opacity font-chinese font-black text-8xl text-black">
+                    字
+                  </div>
+                  <div class="flex items-start justify-between gap-3 relative z-10">
                     <div class="space-y-1">
                       <div class="flex items-center gap-2">
-                        <span class="bg-badge-red text-white font-mono text-[10px] font-black px-2 py-0.5 rounded uppercase">
-                          LOCKED
+                        <span class="bg-black text-[#FEFCE8] font-mono text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded border border-black">
+                          03 // WORKSHOP
                         </span>
-                        <h3 class="font-speed font-black italic text-xl sm:text-2xl text-white/70 uppercase">
-                          Word Trainer
-                        </h3>
+                        <span class="bg-[#FEFCE8] text-[#104FE2] font-mono text-[10px] font-black px-2 py-0.5 rounded border border-black">
+                          5 PHASES • 497 WORDS
+                        </span>
                       </div>
-                      <p class="font-mono text-xs text-white/50 font-bold">
-                        Coming Soon
+                      <h3 class="font-speed font-black italic text-2xl sm:text-3xl text-white uppercase leading-tight pt-0.5">
+                        Word Trainer
+                      </h3>
+                      <p class="font-mono text-xs sm:text-sm text-white/90 font-bold max-w-md">
+                        Listen, draw with stroke guidance, identify tones &amp; master morphemes.
                       </p>
                     </div>
-                    <div class="w-10 h-10 rounded-xl bg-black/60 border border-white/20 flex items-center justify-center text-white/40">
-                      <span class="material-symbols-outlined text-xl">lock</span>
+                    <div class="w-12 h-12 rounded-xl bg-black text-[#FEFCE8] border-2 border-black flex items-center justify-center shrink-0 shadow-hard-black group-hover:scale-105 transition-transform">
+                      <span class="material-symbols-outlined text-2xl">draw</span>
                     </div>
                   </div>
                 </div>
@@ -810,6 +818,353 @@
               <span class="material-symbols-outlined text-lg sm:text-base">shuffle</span>
             </button>
           </footer>
+        </div>
+
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- [05] WORD TRAINER SCREEN (#word-trainer-screen)          -->
+      <!-- ======================================================== -->
+      <!-- [05] WORD TRAINER SCREEN (#word-trainer-screen)          -->
+      <!-- Option E: Pale Lavender Chalk & Solar Amber Palette | Lab -->
+      <!-- ======================================================== -->
+      <div id="word-trainer-screen" class="relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto min-h-[100dvh] lg:h-full max-h-[100dvh] p-3 sm:p-4 lg:px-8 lg:py-6 flex flex-col justify-between overflow-hidden bg-[#F5F3FF] bg-halftone-dots hidden">
+        <!-- Aesthetic Calligraphic Watermark Vector Accents -->
+        <div class="absolute top-14 left-4 pointer-events-none z-0 text-[#4C1D95]/[0.08] text-xs font-mono font-bold select-none">⌖ HANZI // CH 02</div>
+        <div class="absolute -bottom-8 -left-6 pointer-events-none z-0 font-chinese font-black text-[#4C1D95]/[0.05] text-9xl select-none">字</div>
+        <div class="absolute top-16 right-6 pointer-events-none z-0 font-chinese font-black text-[#4C1D95]/[0.06] text-8xl select-none">墨</div>
+        <div class="absolute bottom-16 right-4 pointer-events-none z-0 text-[#4C1D95]/[0.08] font-speed font-black text-2xl select-none">❯❯</div>
+
+        <!-- [1] Top Navigation Bar (Fixed) -->
+        <header class="w-full flex items-center justify-between shrink-0 mb-1.5 relative z-10">
+          <button id="back-from-words-btn" class="bg-black text-white hover:bg-[#4C1D95] px-3.5 py-1.5 rounded-full border-2 border-black font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-hard-black transition-colors active-collapse cursor-pointer">
+            <span class="material-symbols-outlined text-sm">arrow_back</span> MENU
+          </button>
+          <div class="bg-white border-2 border-black px-3 py-1 rounded-full font-mono text-xs font-bold shadow-hard-black flex items-center gap-2 uppercase">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#D97706] animate-pulse border border-black"></span>
+            <span>WORD TRAINER // CHARACTER &amp; TONE</span>
+          </div>
+          <div id="words-corpus-tag" class="font-mono text-xs font-black text-white bg-black border-2 border-black px-2.5 py-0.5 rounded-full shadow-sm hidden sm:inline-flex items-center gap-1">
+            <span class="text-[#A78BFA]">HSK 1+2</span> • 497 WORDS
+          </div>
+        </header>
+
+        <!-- ZONE 1: TOP PHASE STEPPER (#phase-stepper) -->
+        <nav id="phase-stepper" class="phase-stepper-bar w-full flex items-center justify-between gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-1 shrink-0 mb-2 border-b-2 border-black/10">
+          <button id="phase-btn-1" class="phase-btn phase-active flex-1 min-w-[70px] sm:min-w-[90px] py-1.5 px-2 bg-[#4C1D95] text-white border-2 border-black rounded-xl font-mono text-[10px] sm:text-xs font-black uppercase shadow-hard-black transition-all active-collapse cursor-pointer text-center" data-phase="1">
+            <span class="block text-[8px] text-[#FDE68A] font-bold">P1 • 55W</span>
+            <span>ATOMS</span>
+          </button>
+          <button id="phase-btn-2" class="phase-btn phase-available flex-1 min-w-[70px] sm:min-w-[90px] py-1.5 px-2 bg-white hover:bg-slate-50 text-black border-2 border-black rounded-xl font-mono text-[10px] sm:text-xs font-black uppercase shadow-sm transition-all active-collapse cursor-pointer text-center" data-phase="2">
+            <span class="block text-[8px] text-black/50 font-bold">P2 • 80W</span>
+            <span>COMPOUND</span>
+          </button>
+          <button id="phase-btn-3" class="phase-btn phase-available flex-1 min-w-[70px] sm:min-w-[90px] py-1.5 px-2 bg-white hover:bg-slate-50 text-black border-2 border-black rounded-xl font-mono text-[10px] sm:text-xs font-black uppercase shadow-sm transition-all active-collapse cursor-pointer text-center" data-phase="3">
+            <span class="block text-[8px] text-black/50 font-bold">P3 • 115W</span>
+            <span>BINARY</span>
+          </button>
+          <button id="phase-btn-4" class="phase-btn phase-available flex-1 min-w-[70px] sm:min-w-[90px] py-1.5 px-2 bg-white hover:bg-slate-50 text-black border-2 border-black rounded-xl font-mono text-[10px] sm:text-xs font-black uppercase shadow-sm transition-all active-collapse cursor-pointer text-center" data-phase="4">
+            <span class="block text-[8px] text-black/50 font-bold">P4 • 120W</span>
+            <span>NETWORKS</span>
+          </button>
+          <button id="phase-btn-5" class="phase-btn phase-available flex-1 min-w-[70px] sm:min-w-[90px] py-1.5 px-2 bg-white hover:bg-slate-50 text-black border-2 border-black rounded-xl font-mono text-[10px] sm:text-xs font-black uppercase shadow-sm transition-all active-collapse cursor-pointer text-center" data-phase="5">
+            <span class="block text-[8px] text-black/50 font-bold">P5 • 127W</span>
+            <span>IDIOMS</span>
+          </button>
+        </nav>
+
+        <!-- [2] Fluid Middle Content Area (Widescreen Technical Split on Desktop, Sequential on Mobile) -->
+        <div class="flex-1 overflow-y-auto no-scrollbar flex flex-col gap-2.5 pr-0.5 pb-1 lg:overflow-visible lg:grid lg:grid-cols-12 lg:gap-5 lg:items-start">
+          
+          <!-- DESKTOP LEFT COLUMN / MOBILE MID & BOTTOM: Drawing Arena + Batch Progress -->
+          <div class="contents lg:flex lg:flex-col lg:col-span-7 xl:col-span-7 lg:gap-2.5">
+            
+            <!-- 1. Drawing Canvas & Scaffolding Arena (#canvas-arena) -->
+            <!-- On Mobile: order-2 (Center of exercise, right under audio prompt) -->
+            <!-- On Desktop: Top of Left Column -->
+            <section id="canvas-arena" class="order-2 w-full bg-white border-[3px] border-black rounded-2xl p-3 sm:p-4 lg:p-5 shadow-hard-black flex flex-col items-center justify-between gap-2.5 sm:gap-3 relative">
+              <div class="w-full flex items-center justify-between gap-2 border-b-2 border-black/10 pb-1.5 sm:pb-2">
+                <div class="flex items-center gap-2">
+                  <span class="bg-[#4C1D95] text-white font-mono text-[9px] font-black px-2 py-0.5 rounded">
+                    DRAWING ARENA
+                  </span>
+                  <span class="font-mono text-[10px] font-bold text-black/60 uppercase">
+                    STROKE ORDER &amp; RADICAL WRITING
+                  </span>
+                </div>
+                <span class="font-chinese font-bold text-xs text-black/40">米字格</span>
+              </div>
+
+              <!-- Traditional Chinese Mi Zi Ge (米字格) Drawing Canvas Wrapper -->
+              <div id="drawing-canvas-wrapper" class="relative w-[280px] h-[280px] xs:w-[290px] xs:h-[290px] sm:w-[320px] sm:h-[320px] bg-[#fffdf9] border-[3px] border-black rounded-2xl shadow-hard-black flex items-center justify-center overflow-hidden my-0.5 sm:my-1 select-none">
+                <!-- Traditional 8-Quadrant Asterisk Grid (米字格) -->
+                <svg class="absolute inset-0 w-full h-full pointer-events-none stroke-[#4C1D95]/20 stroke-[1.5]" viewBox="0 0 100 100" preserveAspectRatio="none">
+                  <!-- Center Vertical Line -->
+                  <line x1="50" y1="0" x2="50" y2="100" stroke-dasharray="3,3" />
+                  <!-- Center Horizontal Line -->
+                  <line x1="0" y1="50" x2="100" y2="50" stroke-dasharray="3,3" />
+                  <!-- Diagonals -->
+                  <line x1="0" y1="0" x2="100" y2="100" stroke-dasharray="3,3" />
+                  <line x1="0" y1="100" x2="100" y2="0" stroke-dasharray="3,3" />
+                  <!-- Outer Inset Border -->
+                  <rect x="5" y="5" width="90" height="90" fill="none" class="stroke-[#4C1D95]/15 stroke-1" />
+                </svg>
+
+                <!-- Ghost Character Scaffold Guide (Toggled by GUIDE: ON / OFF) -->
+                <div id="canvas-ghost-char" class="absolute inset-0 flex items-center justify-center pointer-events-none select-none transition-opacity duration-200 opacity-100 z-10">
+                  <span class="font-chinese font-black text-8xl sm:text-9xl text-[#4C1D95]/15 select-none leading-none">日</span>
+                </div>
+
+                <!-- Interactive Hanzi Drawing Target Surface (Bound to HanziWriter) -->
+                <div id="hanzi-target-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-15"></div>
+
+                <!-- HTML5 Native Drawing Surface (High-Fidelity Ink Strokes, 60fps, Touch & Pointer) -->
+                <canvas id="hanzi-paint-canvas" width="320" height="320" class="absolute inset-0 w-full h-full z-20 cursor-crosshair touch-none select-none"></canvas>
+              </div>
+
+              <!-- Scaffolding & Canvas Reset Controls -->
+              <div class="w-full flex items-center justify-between gap-2.5 pt-0.5 sm:pt-1">
+                <!-- 1-Tap Scaffolding Guide Toggle Button (Solar Amber) -->
+                <button id="scaffold-toggle-btn" class="scaffold-on flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white border-2 border-black font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm active-collapse cursor-pointer transition-all">
+                  <span class="material-symbols-outlined text-base">visibility</span>
+                  <span>GUIDE: ON</span>
+                </button>
+
+                <!-- Clear Canvas Button -->
+                <button id="clear-canvas-btn" class="flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl bg-white hover:bg-slate-100 text-black border-2 border-black font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm active-collapse cursor-pointer transition-all">
+                  <span class="material-symbols-outlined text-base">restart_alt</span>
+                  <span>CLEAR CANVAS</span>
+                </button>
+              </div>
+            </section>
+
+            <!-- 2. Batch Progress Container (#batch-progress-container) -->
+            <!-- On Mobile: order-4 (At bottom of all containers) -->
+            <!-- On Desktop: Positioned directly below the canvas container in Left Column -->
+            <section id="batch-progress-container" class="order-4 w-full bg-white border-[3px] border-black rounded-2xl p-2.5 sm:p-3 shadow-hard-black shrink-0 flex flex-col gap-1.5 sm:gap-2">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-[#D97706] border border-black"></span>
+                  <h2 id="phase-title" class="font-speed font-black italic text-xs sm:text-sm text-black uppercase tracking-tight">
+                    Phase 1: Elemental Atoms
+                  </h2>
+                </div>
+                <span id="overall-progress-label" class="font-mono text-[10px] sm:text-xs font-bold text-black/70 bg-slate-100 border border-black/20 px-2 py-0.5 rounded">
+                  Progress: 0 / 55 Words
+                </span>
+              </div>
+
+              <!-- Linear Progress Bar -->
+              <div id="overall-progress-bar" class="w-full h-2.5 sm:h-3 bg-black/10 border-2 border-black rounded-full overflow-hidden relative">
+                <div id="progress-bar-fill" class="h-full bg-gradient-to-r from-[#D97706] to-[#F59E0B] rounded-full transition-all duration-300 w-[15%]"></div>
+              </div>
+
+              <div class="flex items-center justify-between gap-2 text-[10px] font-mono font-bold">
+                <span id="batch-indicator-label" class="text-black/80">
+                  Batch 1 of 11 • Word 1/5
+                </span>
+                <span id="pass-badge" class="px-2 py-0.5 rounded-full bg-[#4C1D95] text-[#FDE68A] border border-black uppercase font-black text-[9px] shadow-xs">
+                  Pass 1: Guided Imprint
+                </span>
+              </div>
+            </section>
+
+          </div>
+
+          <!-- DESKTOP RIGHT COLUMN / MOBILE TOP & SELECTION: Prompt Arena + Tone Selector -->
+          <div class="contents lg:flex lg:flex-col lg:col-span-5 xl:col-span-5 lg:gap-2.5">
+            
+            <!-- 1. ZONE 3: AUDIO & PROMPT ARENA (#prompt-arena) -->
+            <!-- On Mobile: order-1 (At the very top, compact play button + hint) -->
+            <!-- On Desktop: Top of Right Column -->
+            <section id="prompt-arena" class="order-1 w-full bg-white border-[3px] border-black rounded-2xl p-2.5 sm:p-3.5 shadow-hard-black shrink-0 flex flex-col gap-1.5 sm:gap-2 relative overflow-hidden">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5">
+                  <span class="font-mono text-[9px] font-black uppercase tracking-wider bg-[#4C1D95] text-white px-2 py-0.5 rounded">
+                    AUDIO PROMPT
+                  </span>
+                  <span class="font-mono text-[9px] font-bold text-black/60 hidden xs:inline">
+                    LISTEN &amp; DRAW
+                  </span>
+                </div>
+                <span class="font-mono text-[9px] font-bold text-black/50">HSK 1 • PASS 1</span>
+              </div>
+
+              <div class="flex items-center gap-2 py-0.5">
+                <!-- Compact on Mobile (py-2), Full on Desktop (sm:py-3) - Solar Amber -->
+                <button id="audio-replay-btn" class="flex-1 py-2 sm:py-3 px-3 sm:px-4 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white border-2 border-black font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-hard-black transition-all active-collapse cursor-pointer group" title="Replay Native Audio">
+                  <span class="material-symbols-outlined text-lg sm:text-xl group-hover:scale-110 transition-transform">volume_up</span>
+                  <span>PLAY AUDIO</span>
+                </button>
+              </div>
+
+              <!-- Semantic Disambiguation Hint Box -->
+              <div id="prompt-hint-box" class="bg-[#FAF5FF] border border-[#E9D5FF] rounded-xl px-2.5 py-1.5 sm:p-2.5 flex items-start gap-1.5">
+                <span class="material-symbols-outlined text-[#6D28D9] text-sm mt-0.5 shrink-0">info</span>
+                <p id="prompt-hint" class="font-mono text-[11px] sm:text-xs text-[#3B0764] font-bold leading-tight">
+                  Context Hint: "[noun] sun, day; daytime"
+                </p>
+              </div>
+            </section>
+
+            <!-- 2. ZONE 5: TONE SELECTOR & INTERACTION FOOTER (#interaction-footer) -->
+            <!-- On Mobile: order-3 (Under canvas arena) -->
+            <!-- On Desktop: Below audio prompt in Right Column -->
+            <section id="interaction-footer" class="order-3 w-full bg-white border-[3px] border-black rounded-2xl p-3 sm:p-3.5 shadow-hard-black shrink-0 flex flex-col gap-2.5">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="font-mono text-[9px] font-black uppercase tracking-wider bg-[#4C1D95] text-white px-2 py-0.5 rounded">
+                    IDENTIFY TONE
+                  </span>
+                  <span class="font-mono text-[10px] font-bold text-black/60">CHOOSE PITCH</span>
+                </div>
+                <!-- Attempts Dot Pips -->
+                <div id="attempt-indicator" class="flex items-center gap-1.5 bg-black/5 px-2 py-1 rounded-lg border border-black/15 font-mono text-[9px] font-bold">
+                  <span class="text-black/60 uppercase">TRIES:</span>
+                  <div id="attempt-pips" class="flex items-center gap-1 text-sm font-black text-[#D97706]">
+                    <span class="pip text-[#D97706]">●</span>
+                    <span class="pip text-[#D97706]">●</span>
+                    <span class="pip text-[#D97706]">●</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Multi-Character Tone Segment Slots (Shown for compound words) -->
+              <div id="tone-segment-slots" class="hidden flex items-center justify-center gap-2 p-1.5 bg-slate-50 border border-black/20 rounded-xl font-mono text-xs">
+                <span class="font-bold text-black/60 text-[10px] uppercase">SLOTS:</span>
+                <div class="tone-slot active px-3 py-1 rounded-lg border-2 border-black bg-white font-bold text-black shadow-xs" data-slot="0">
+                  Char 1: <span class="tone-slot-val font-black text-[#D97706]">_</span>
+                </div>
+                <div class="tone-slot px-3 py-1 rounded-lg border-2 border-black/30 bg-white/70 font-bold text-black/60" data-slot="1">
+                  Char 2: <span class="tone-slot-val font-black">_</span>
+                </div>
+              </div>
+
+              <!-- 5 Tone Keycaps Buttons -->
+              <div id="tone-selector-group" class="grid grid-cols-5 gap-1.5 sm:gap-2">
+                <button type="button" class="tone-choice-btn py-2 px-1 rounded-xl bg-badge-butter hover:bg-white text-black border-2 border-black font-speed font-black text-xs sm:text-sm shadow-sm flex flex-col items-center justify-center transition-all active-collapse cursor-pointer" data-tone="1">
+                  <span class="font-mono text-[9px] font-bold text-black/60 uppercase">1ST</span>
+                  <span class="text-base sm:text-lg leading-none mt-0.5">ˉ</span>
+                  <span class="font-mono text-[8px] text-black/50">55 High</span>
+                </button>
+                <button type="button" class="tone-choice-btn py-2 px-1 rounded-xl bg-badge-lavender hover:bg-white text-black border-2 border-black font-speed font-black text-xs sm:text-sm shadow-sm flex flex-col items-center justify-center transition-all active-collapse cursor-pointer" data-tone="2">
+                  <span class="font-mono text-[9px] font-bold text-black/60 uppercase">2ND</span>
+                  <span class="text-base sm:text-lg leading-none mt-0.5">ˊ</span>
+                  <span class="font-mono text-[8px] text-black/50">35 Rise</span>
+                </button>
+                <button type="button" class="tone-choice-btn py-2 px-1 rounded-xl bg-badge-pink text-white hover:bg-white hover:text-black border-2 border-black font-speed font-black text-xs sm:text-sm shadow-sm flex flex-col items-center justify-center transition-all active-collapse cursor-pointer" data-tone="3">
+                  <span class="font-mono text-[9px] font-bold text-white/80 uppercase">3RD</span>
+                  <span class="text-base sm:text-lg leading-none mt-0.5">ˇ</span>
+                  <span class="font-mono text-[8px] text-white/70">214 Dip</span>
+                </button>
+                <button type="button" class="tone-choice-btn py-2 px-1 rounded-xl bg-badge-cobalt text-white hover:bg-white hover:text-black border-2 border-black font-speed font-black text-xs sm:text-sm shadow-sm flex flex-col items-center justify-center transition-all active-collapse cursor-pointer" data-tone="4">
+                  <span class="font-mono text-[9px] font-bold text-white/80 uppercase">4TH</span>
+                  <span class="text-base sm:text-lg leading-none mt-0.5">ˋ</span>
+                  <span class="font-mono text-[8px] text-white/70">51 Fall</span>
+                </button>
+                <button type="button" class="tone-choice-btn py-2 px-1 rounded-xl bg-slate-100 hover:bg-white text-black border-2 border-black font-speed font-black text-xs sm:text-sm shadow-sm flex flex-col items-center justify-center transition-all active-collapse cursor-pointer" data-tone="5">
+                  <span class="font-mono text-[9px] font-bold text-black/60 uppercase">0</span>
+                  <span class="text-base sm:text-lg leading-none mt-0.5">•</span>
+                  <span class="font-mono text-[8px] text-black/50">Neutral</span>
+                </button>
+              </div>
+
+              <!-- Submit Button (Deep Midnight Violet) -->
+              <button id="submit-word-btn" class="w-full py-3.5 sm:py-4 px-4 bg-[#4C1D95] hover:bg-[#3B0764] text-white border-[3px] border-black rounded-2xl shadow-hard-black font-speed font-black italic text-base sm:text-lg uppercase tracking-wider flex items-center justify-center gap-2 active-collapse cursor-pointer transition-all mt-1">
+                <span>SUBMIT ANSWER</span>
+                <span class="material-symbols-outlined text-lg sm:text-xl">arrow_forward</span>
+              </button>
+            </section>
+
+          </div>
+
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- [MODALS] CARD REVEAL & PHASE COMPLETE                    -->
+        <!-- ======================================================== -->
+
+        <!-- [M1] CARD REVEAL MODAL (#card-reveal-modal) -->
+        <div id="card-reveal-modal" class="hidden fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">
+          <div class="bg-white border-[3.5px] border-black p-5 sm:p-6 rounded-3xl shadow-hard-black-lg max-w-md w-full flex flex-col items-center gap-3 relative overflow-hidden">
+            <!-- Seal Stamp Badge -->
+            <div class="w-full flex items-center justify-between border-b-2 border-black/10 pb-2">
+              <span id="reveal-modal-badge" class="font-mono text-xs font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-600 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                🎉 正确 (CORRECT!)
+              </span>
+              <span class="font-mono text-[10px] font-bold text-black/50">WORD MASTERY</span>
+            </div>
+
+            <!-- Master Hanzi Character Display -->
+            <div class="text-center my-1">
+              <h2 id="reveal-hanzi" class="font-chinese font-black text-6xl sm:text-7xl text-black leading-none">
+                日
+              </h2>
+              <div id="reveal-pinyin" class="font-speed font-black italic text-2xl sm:text-3xl text-[#4C1D95] mt-1">
+                rì (Tone 4)
+              </div>
+            </div>
+
+            <!-- Meaning & Radical Decomposition Box -->
+            <div class="w-full bg-slate-50 border-2 border-black rounded-2xl p-3 space-y-1.5 text-left font-mono">
+              <div class="flex items-baseline gap-2">
+                <span class="text-[10px] font-black uppercase text-black/60 shrink-0">MEANING:</span>
+                <span id="reveal-meaning" class="text-xs sm:text-sm font-bold text-black">sun, day; daytime</span>
+              </div>
+              <div class="flex items-baseline gap-2 pt-1 border-t border-black/10">
+                <span class="text-[10px] font-black uppercase text-black/60 shrink-0">RADICAL:</span>
+                <span id="reveal-decomposition" class="text-xs sm:text-sm font-bold text-black">日 (sun / day) [Indivisible Root]</span>
+              </div>
+            </div>
+
+            <!-- Context Sentence Box -->
+            <div class="w-full bg-[#FAF5FF] border-2 border-[#E9D5FF] rounded-2xl p-3 space-y-1 text-left">
+              <span class="font-mono text-[9px] font-black uppercase text-[#6D28D9] block">EXAMPLE SENTENCE:</span>
+              <p id="reveal-sentence-hanzi" class="font-chinese font-bold text-base sm:text-lg text-black leading-snug">
+                今天是一个晴朗的日子。
+              </p>
+              <p id="reveal-sentence-en" class="font-mono text-xs text-black/75 font-semibold">
+                "Today is a sunny day."
+              </p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="w-full flex items-center gap-2.5 pt-1">
+              <button id="modal-replay-btn" class="py-3 px-3.5 rounded-xl bg-[#D97706] text-white hover:bg-[#B45309] border-2 border-black font-mono text-xs font-black uppercase flex items-center justify-center gap-1.5 active-collapse cursor-pointer transition-all shadow-sm">
+                <span class="material-symbols-outlined text-base">volume_up</span>
+                <span class="hidden sm:inline">REPLAY</span>
+              </button>
+              <button id="modal-next-btn" class="flex-1 py-3 px-4 rounded-xl bg-[#4C1D95] hover:bg-[#3B0764] text-white border-2 border-black font-speed font-black italic text-sm sm:text-base uppercase tracking-wider flex items-center justify-center gap-2 active-collapse cursor-pointer transition-all shadow-hard-black">
+                <span>NEXT WORD</span>
+                <span class="material-symbols-outlined text-base sm:text-lg">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- [M2] END-OF-PHASE CELEBRATION MODAL (#phase-complete-modal) -->
+        <div id="phase-complete-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4">
+          <div class="bg-canvas-acid border-[3.5px] border-black p-6 sm:p-8 rounded-3xl shadow-hard-black-lg max-w-md w-full flex flex-col items-center text-center gap-3 relative">
+            <div class="w-16 h-16 rounded-full bg-black text-canvas-acid border-2 border-black flex items-center justify-center shadow-hard-black text-3xl mb-1">
+              🎉
+            </div>
+            <h2 id="phase-complete-title" class="font-speed font-black italic text-2xl sm:text-3xl text-black uppercase leading-tight">
+              Phase 1 Complete!
+            </h2>
+            <p id="phase-complete-summary" class="font-mono text-xs sm:text-sm text-black/80 font-bold max-w-xs leading-relaxed">
+              You have mastered all 55 elemental atoms in this phase with multisensory imprint.
+            </p>
+
+            <div class="w-full flex flex-col gap-2 pt-3">
+              <button id="advance-phase-btn" class="w-full py-3.5 px-4 rounded-2xl bg-black text-canvas-acid hover:bg-[#4C1D95] hover:text-white border-2 border-black font-speed font-black italic text-sm sm:text-base uppercase tracking-wider flex items-center justify-center gap-2 shadow-hard-black active-collapse cursor-pointer transition-all">
+                <span>Advance to Phase 2: Compound Characters</span>
+                <span class="material-symbols-outlined text-base">arrow_forward</span>
+              </button>
+              <button id="stay-phase-btn" class="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-slate-100 text-black border-2 border-black font-mono text-xs font-black uppercase active-collapse cursor-pointer transition-all shadow-sm">
+                Stay &amp; Practice Phase 1
+              </button>
+            </div>
+          </div>
         </div>
 
       </div>
