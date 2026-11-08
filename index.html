@@ -13,8 +13,13 @@
     <!-- Material Symbols -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
 
-    <!-- HanziWriter CDN for Chinese Character Stroke & Drawing Engine -->
-    <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
+    <!-- HanziWriter Canvas & Stroke Engine (Bundled Client-Side with CDN Fallback) -->
+    <script src="./hanzi-writer.min.js"></script>
+    <script>
+      if (typeof HanziWriter === 'undefined') {
+        document.write('<script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"><\/script>');
+      }
+    </script>
   </head>
   <body class="text-slate-900 font-grotesk min-h-[100dvh] antialiased selection:bg-badge-pink selection:text-white p-0 m-0 flex flex-col items-center justify-center overflow-x-hidden">
 
@@ -874,13 +879,13 @@
         <!-- [2] Fluid Middle Content Area (Widescreen Technical Split on Desktop, Sequential on Mobile) -->
         <div class="flex-1 overflow-y-auto no-scrollbar flex flex-col gap-2.5 pr-0.5 pb-1 lg:overflow-visible lg:grid lg:grid-cols-12 lg:gap-5 lg:items-start">
           
-          <!-- DESKTOP LEFT COLUMN / MOBILE MID & BOTTOM: Drawing Arena + Batch Progress -->
+          <!-- DESKTOP LEFT COLUMN: Drawing Arena (Enlarged) -->
           <div class="contents lg:flex lg:flex-col lg:col-span-7 xl:col-span-7 lg:gap-2.5">
             
             <!-- 1. Drawing Canvas & Scaffolding Arena (#canvas-arena) -->
             <!-- On Mobile: order-2 (Center of exercise, right under audio prompt) -->
-            <!-- On Desktop: Top of Left Column -->
-            <section id="canvas-arena" class="order-2 w-full bg-white border-[3px] border-black rounded-2xl p-3 sm:p-4 lg:p-5 shadow-hard-black flex flex-col items-center justify-between gap-2.5 sm:gap-3 relative">
+            <!-- On Desktop: Full Left Column with Enlarged Proportions -->
+            <section id="canvas-arena" class="order-2 w-full bg-white border-[3px] border-black rounded-2xl p-3 sm:p-5 lg:p-6 shadow-hard-black flex flex-col items-center justify-between gap-3 relative lg:min-h-[550px]">
               <div class="w-full flex items-center justify-between gap-2 border-b-2 border-black/10 pb-1.5 sm:pb-2">
                 <div class="flex items-center gap-2">
                   <span class="bg-[#4C1D95] text-white font-mono text-[9px] font-black px-2 py-0.5 rounded">
@@ -893,8 +898,8 @@
                 <span class="font-chinese font-bold text-xs text-black/40">米字格</span>
               </div>
 
-              <!-- Traditional Chinese Mi Zi Ge (米字格) Drawing Canvas Wrapper -->
-              <div id="drawing-canvas-wrapper" class="relative w-[280px] h-[280px] xs:w-[290px] xs:h-[290px] sm:w-[320px] sm:h-[320px] bg-[#fffdf9] border-[3px] border-black rounded-2xl shadow-hard-black flex items-center justify-center overflow-hidden my-0.5 sm:my-1 select-none">
+              <!-- Traditional Chinese Mi Zi Ge (米字格) Drawing Canvas Wrapper (Enlarged for Mobile & Desktop) -->
+              <div id="drawing-canvas-wrapper" class="relative w-[310px] h-[310px] xs:w-[330px] xs:h-[330px] sm:w-[360px] sm:h-[360px] lg:w-[410px] lg:h-[410px] xl:w-[440px] xl:h-[440px] bg-[#fffdf9] border-[3px] border-black rounded-2xl shadow-hard-black flex items-center justify-center overflow-hidden my-0.5 sm:my-1 select-none">
                 <!-- Traditional 8-Quadrant Asterisk Grid (米字格) -->
                 <svg class="absolute inset-0 w-full h-full pointer-events-none stroke-[#4C1D95]/20 stroke-[1.5]" viewBox="0 0 100 100" preserveAspectRatio="none">
                   <!-- Center Vertical Line -->
@@ -908,68 +913,44 @@
                   <rect x="5" y="5" width="90" height="90" fill="none" class="stroke-[#4C1D95]/15 stroke-1" />
                 </svg>
 
-                <!-- Ghost Character Scaffold Guide (Toggled by GUIDE: ON / OFF) -->
-                <div id="canvas-ghost-char" class="absolute inset-0 flex items-center justify-center pointer-events-none select-none transition-opacity duration-200 opacity-100 z-10">
-                  <span class="font-chinese font-black text-8xl sm:text-9xl text-[#4C1D95]/15 select-none leading-none">日</span>
-                </div>
+                <!-- Demo / Sequential Stroke Order Preview (Visible when Scaffolding Guide is ON) -->
+                <button id="canvas-demo-order-btn" type="button" class="hidden absolute top-2 left-2 z-30 flex items-center gap-1 font-mono text-[10px] font-bold bg-[#D97706] hover:bg-[#B45309] text-white border border-black px-2 py-0.5 rounded-full shadow-xs cursor-pointer select-none transition-all active:scale-95" title="Demonstrate canonical stroke order">
+                  <span class="material-symbols-outlined text-xs">play_arrow</span>
+                  <span>DEMO ORDER</span>
+                </button>
 
-                <!-- Interactive Hanzi Drawing Target Surface (Bound to HanziWriter) -->
+                <!-- Interactive Hanzi Drawing Target Surface (Bound to HanziWriter Stroke Outline) -->
                 <div id="hanzi-target-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-15"></div>
 
                 <!-- HTML5 Native Drawing Surface (High-Fidelity Ink Strokes, 60fps, Touch & Pointer) -->
-                <canvas id="hanzi-paint-canvas" width="320" height="320" class="absolute inset-0 w-full h-full z-20 cursor-crosshair touch-none select-none"></canvas>
+                <canvas id="hanzi-paint-canvas" width="440" height="440" class="absolute inset-0 w-full h-full z-20 cursor-crosshair touch-none select-none"></canvas>
               </div>
 
               <!-- Scaffolding & Canvas Reset Controls -->
-              <div class="w-full flex items-center justify-between gap-2.5 pt-0.5 sm:pt-1">
+              <div class="w-full flex items-center justify-between gap-2 sm:gap-2.5 pt-0.5 sm:pt-1">
                 <!-- 1-Tap Scaffolding Guide Toggle Button (Solar Amber) -->
-                <button id="scaffold-toggle-btn" class="scaffold-on flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white border-2 border-black font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm active-collapse cursor-pointer transition-all">
+                <button id="scaffold-toggle-btn" class="scaffold-on flex-1 py-2 sm:py-2.5 px-2.5 sm:px-3 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white border-2 border-black font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm active-collapse cursor-pointer transition-all">
                   <span class="material-symbols-outlined text-base">visibility</span>
                   <span>GUIDE: ON</span>
                 </button>
 
-                <!-- Clear Canvas Button -->
-                <button id="clear-canvas-btn" class="flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl bg-white hover:bg-slate-100 text-black border-2 border-black font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm active-collapse cursor-pointer transition-all">
-                  <span class="material-symbols-outlined text-base">restart_alt</span>
-                  <span>CLEAR CANVAS</span>
+                <!-- Undo Last Stroke Button (White, right next to clear canvas on the left) -->
+                <button id="undo-stroke-btn" type="button" class="flex-1 py-2 sm:py-2.5 px-2.5 sm:px-3 rounded-xl bg-white hover:bg-slate-100 text-black border-2 border-black font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm active-collapse cursor-pointer transition-all" title="Undo last drawn stroke">
+                  <span class="material-symbols-outlined text-base">undo</span>
+                  <span>UNDO</span>
                 </button>
-              </div>
-            </section>
 
-            <!-- 2. Batch Progress Container (#batch-progress-container) -->
-            <!-- On Mobile: order-4 (At bottom of all containers) -->
-            <!-- On Desktop: Positioned directly below the canvas container in Left Column -->
-            <section id="batch-progress-container" class="order-4 w-full bg-white border-[3px] border-black rounded-2xl p-2.5 sm:p-3 shadow-hard-black shrink-0 flex flex-col gap-1.5 sm:gap-2">
-              <div class="flex items-center justify-between gap-2">
-                <div class="flex items-center gap-2">
-                  <span class="w-2.5 h-2.5 rounded-full bg-[#D97706] border border-black"></span>
-                  <h2 id="phase-title" class="font-speed font-black italic text-xs sm:text-sm text-black uppercase tracking-tight">
-                    Phase 1: Elemental Atoms
-                  </h2>
-                </div>
-                <span id="overall-progress-label" class="font-mono text-[10px] sm:text-xs font-bold text-black/70 bg-slate-100 border border-black/20 px-2 py-0.5 rounded">
-                  Progress: 0 / 55 Words
-                </span>
-              </div>
-
-              <!-- Linear Progress Bar -->
-              <div id="overall-progress-bar" class="w-full h-2.5 sm:h-3 bg-black/10 border-2 border-black rounded-full overflow-hidden relative">
-                <div id="progress-bar-fill" class="h-full bg-gradient-to-r from-[#D97706] to-[#F59E0B] rounded-full transition-all duration-300 w-[15%]"></div>
-              </div>
-
-              <div class="flex items-center justify-between gap-2 text-[10px] font-mono font-bold">
-                <span id="batch-indicator-label" class="text-black/80">
-                  Batch 1 of 11 • Word 1/5
-                </span>
-                <span id="pass-badge" class="px-2 py-0.5 rounded-full bg-[#4C1D95] text-[#FDE68A] border border-black uppercase font-black text-[9px] shadow-xs">
-                  Pass 1: Guided Imprint
-                </span>
+                <!-- Clear Canvas Button (White) -->
+                <button id="clear-canvas-btn" type="button" class="flex-1 py-2 sm:py-2.5 px-2.5 sm:px-3 rounded-xl bg-white hover:bg-slate-100 text-black border-2 border-black font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm active-collapse cursor-pointer transition-all" title="Clear canvas and reset strokes">
+                  <span class="material-symbols-outlined text-base">restart_alt</span>
+                  <span>CLEAR</span>
+                </button>
               </div>
             </section>
 
           </div>
 
-          <!-- DESKTOP RIGHT COLUMN / MOBILE TOP & SELECTION: Prompt Arena + Tone Selector -->
+          <!-- DESKTOP RIGHT COLUMN: Prompt Arena, Tone Selector & Progress Bar Below Submit -->
           <div class="contents lg:flex lg:flex-col lg:col-span-5 xl:col-span-5 lg:gap-2.5">
             
             <!-- 1. ZONE 3: AUDIO & PROMPT ARENA (#prompt-arena) -->
@@ -1007,7 +988,7 @@
 
             <!-- 2. ZONE 5: TONE SELECTOR & INTERACTION FOOTER (#interaction-footer) -->
             <!-- On Mobile: order-3 (Under canvas arena) -->
-            <!-- On Desktop: Below audio prompt in Right Column -->
+            <!-- On Desktop: Middle of Right Column -->
             <section id="interaction-footer" class="order-3 w-full bg-white border-[3px] border-black rounded-2xl p-3 sm:p-3.5 shadow-hard-black shrink-0 flex flex-col gap-2.5">
               <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2">
@@ -1072,6 +1053,37 @@
                 <span>SUBMIT ANSWER</span>
                 <span class="material-symbols-outlined text-lg sm:text-xl">arrow_forward</span>
               </button>
+            </section>
+
+            <!-- 3. ZONE 2: BATCH PROGRESS CONTAINER (#batch-progress-container) -->
+            <!-- On Mobile: order-4 (At bottom of all containers) -->
+            <!-- On Desktop: Positioned directly BELOW the submit button container (#interaction-footer) -->
+            <section id="batch-progress-container" class="order-4 w-full bg-white border-[3px] border-black rounded-2xl p-2.5 sm:p-3 shadow-hard-black shrink-0 flex flex-col gap-1.5 sm:gap-2">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-[#D97706] border border-black"></span>
+                  <h2 id="phase-title" class="font-speed font-black italic text-xs sm:text-sm text-black uppercase tracking-tight">
+                    Phase 1: Elemental Atoms
+                  </h2>
+                </div>
+                <span id="overall-progress-label" class="font-mono text-[10px] sm:text-xs font-bold text-black/70 bg-slate-100 border border-black/20 px-2 py-0.5 rounded">
+                  Progress: 0 / 55 Words
+                </span>
+              </div>
+
+              <!-- Linear Progress Bar -->
+              <div id="overall-progress-bar" class="w-full h-2.5 sm:h-3 bg-black/10 border-2 border-black rounded-full overflow-hidden relative">
+                <div id="progress-bar-fill" class="h-full bg-gradient-to-r from-[#D97706] to-[#F59E0B] rounded-full transition-all duration-300 w-[15%]"></div>
+              </div>
+
+              <div class="flex items-center justify-between gap-2 text-[10px] font-mono font-bold">
+                <span id="batch-indicator-label" class="text-black/80">
+                  Batch 1 of 11 • Word 1/5
+                </span>
+                <span id="pass-badge" class="px-2 py-0.5 rounded-full bg-[#4C1D95] text-[#FDE68A] border border-black uppercase font-black text-[9px] shadow-xs">
+                  Pass 1: Guided Imprint
+                </span>
+              </div>
             </section>
 
           </div>

@@ -140,6 +140,22 @@
   animation: shake-error 0.4s ease-in-out !important;
 }
 
+/* Pulse Animation for Missing Strokes (Incomplete Submission Scaffolding Hint) */
+@keyframes pulse-missing-stroke {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.02);
+  }
+}
+.missing-stroke-flash {
+  animation: pulse-missing-stroke 0.85s ease-in-out infinite alternate !important;
+  transform-origin: center;
+}
+
 /* Phase Stepper Custom States - Option E: Pale Lavender Chalk & Solar Amber */
 .phase-btn.phase-active {
   background-color: #4C1D95 !important;

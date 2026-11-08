@@ -2,6 +2,7 @@ import './style.css';
 import 'keen-slider/keen-slider.min.css';
 import KS from 'keen-slider';
 import { AudioPipeline } from './audio/audioPipeline.js';
+import { WordTrainerEngine } from './wordTrainerEngine.js';
 
 const KeenSlider = KS.default || KS;
 
@@ -229,6 +230,9 @@ function setupMenu() {
       setAppBackground('bg-[#F5F3FF]');
       if (typeof window.initWordTrainerCanvas === 'function') {
         window.initWordTrainerCanvas();
+      }
+      if (window.WordTrainerEngine && typeof window.WordTrainerEngine.init === 'function') {
+        window.WordTrainerEngine.init();
       }
     });
   }
@@ -2305,7 +2309,6 @@ function setupWordTrainerUI() {
   const advancePhaseBtn = document.getElementById('advance-phase-btn');
   const stayPhaseBtn = document.getElementById('stay-phase-btn');
 
-  const canvasGhostChar = document.getElementById('canvas-ghost-char');
   const paintCanvas = document.getElementById('hanzi-paint-canvas');
   const feedbackBanner = document.getElementById('validation-feedback-banner');
   const feedbackIcon = document.getElementById('validation-feedback-icon');
@@ -2423,33 +2426,8 @@ function setupWordTrainerUI() {
     ctx.closePath();
   }
 
-  if (paintCanvas) {
-    // Pointer Events (Unified Mouse, Pen, Touch)
-    paintCanvas.addEventListener('pointerdown', (e) => {
-      try { paintCanvas.setPointerCapture(e.pointerId); } catch (_) {}
-      startDrawing(e);
-    });
-    paintCanvas.addEventListener('pointermove', moveDrawing);
-    paintCanvas.addEventListener('pointerup', (e) => {
-      stopDrawing(e);
-      try { paintCanvas.releasePointerCapture(e.pointerId); } catch (_) {}
-    });
-    paintCanvas.addEventListener('pointercancel', (e) => {
-      stopDrawing(e);
-      try { paintCanvas.releasePointerCapture(e.pointerId); } catch (_) {}
-    });
-
-    // Touch Event fallbacks to guarantee no mobile scrolling while drawing
-    paintCanvas.addEventListener('touchstart', startDrawing, { passive: false });
-    paintCanvas.addEventListener('touchmove', moveDrawing, { passive: false });
-    paintCanvas.addEventListener('touchend', stopDrawing);
-    paintCanvas.addEventListener('touchcancel', stopDrawing);
-
-    // Mouse Event fallbacks for legacy browsers
-    paintCanvas.addEventListener('mousedown', startDrawing);
-    window.addEventListener('mousemove', (e) => { if (isDrawing) moveDrawing(e); });
-    window.addEventListener('mouseup', (e) => { if (isDrawing) stopDrawing(e); });
-  }
+  // Canvas drawing events are managed exclusively by WordTrainerEngineController
+  // to support high-DPI retina rendering, order-agnostic vector matching, and full-character snap.
 
   function clearPaintCanvas() {
     if (paintCanvas && ctx) {
@@ -2571,17 +2549,9 @@ function setupWordTrainerUI() {
       if (isScaffoldOn) {
         scaffoldToggleBtn.className = 'scaffold-on flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white border-2 border-black font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm active-collapse cursor-pointer transition-all';
         scaffoldToggleBtn.innerHTML = '<span class="material-symbols-outlined text-base">visibility</span><span>GUIDE: ON</span>';
-        if (canvasGhostChar) {
-          canvasGhostChar.classList.remove('opacity-0');
-          canvasGhostChar.classList.add('opacity-100');
-        }
       } else {
         scaffoldToggleBtn.className = 'scaffold-off flex-1 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl bg-[#18181b] hover:bg-[#27272a] text-white/80 border-2 border-black font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm active-collapse cursor-pointer transition-all';
         scaffoldToggleBtn.innerHTML = '<span class="material-symbols-outlined text-base">visibility_off</span><span>GUIDE: OFF</span>';
-        if (canvasGhostChar) {
-          canvasGhostChar.classList.remove('opacity-100');
-          canvasGhostChar.classList.add('opacity-0');
-        }
       }
       if (window.WordTrainerEngine && typeof window.WordTrainerEngine.toggleScaffolding === 'function') {
         window.WordTrainerEngine.toggleScaffolding(isScaffoldOn);
@@ -2590,8 +2560,26 @@ function setupWordTrainerUI() {
   }
 
   // ----------------------------------------------------
-  // E. CLEAR CANVAS BUTTON
+  // E. UNDO STROKE & CLEAR CANVAS BUTTONS
   // ----------------------------------------------------
+  const undoStrokeBtn = document.getElementById('undo-stroke-btn');
+  if (undoStrokeBtn) {
+    undoStrokeBtn.addEventListener('click', () => {
+      if (window.WordTrainerEngine && typeof window.WordTrainerEngine.undoLastStroke === 'function') {
+        window.WordTrainerEngine.undoLastStroke();
+      }
+    });
+  }
+
+  const demoOrderBtn = document.getElementById('canvas-demo-order-btn');
+  if (demoOrderBtn) {
+    demoOrderBtn.addEventListener('click', () => {
+      if (window.WordTrainerEngine && typeof window.WordTrainerEngine.demoStrokeOrder === 'function') {
+        window.WordTrainerEngine.demoStrokeOrder();
+      }
+    });
+  }
+
   if (clearCanvasBtn) {
     clearCanvasBtn.addEventListener('click', () => {
       clearPaintCanvas();
@@ -2749,6 +2737,10 @@ function setupWordTrainerUI() {
   window.WordTrainerDrawing = {
     getStrokeCount: () => strokeCount,
     getTotalLength: () => totalDrawnLength,
+    setStrokeStats: (count, len) => {
+      strokeCount = count || 0;
+      totalDrawnLength = len || 0;
+    },
     clear: clearPaintCanvas,
     init: initWordTrainerCanvas
   };
