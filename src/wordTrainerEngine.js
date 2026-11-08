@@ -38,6 +38,7 @@ export class WordTrainerEngineController {
     this.charStrokes = []; // Stroke counts for each character slot
     this.charLengths = []; // Drawn lengths for each character slot
     this.charRecognized = []; // True character recognition flags per character
+    this.charSpatialDrift = []; // Spatial translation drift per character slot
     this.selectedTones = []; // Selected tones array (e.g. [1, 4])
     this.attemptsLeft = 3;
     this.isScaffoldOn = this.state.scaffoldDefault !== undefined ? this.state.scaffoldDefault : true;
@@ -605,29 +606,13 @@ export class WordTrainerEngineController {
 
       // Keep user's hand-drawn stroke on the canvas naturally!
       this.userDrawnStrokes.push([...strokePts]);
-
-      const matcher = this.charMatchers[this.activeCharIndex];
-      if (!matcher) return;
-
-      const result = matcher.matchUserStroke(strokePts);
-      if (result.matched) {
-        matcher.claimStroke(result.strokeIndex, {
-          diffAngle: result.diffAngle || 0,
-          isCompoundMerged: !!result.isCompoundMerged
-        });
-
-        // If Mode A Guide is ON, re-render badges so claimed badge disappears
-        this.renderCanvasLayers();
-
-        if (matcher.isComplete()) {
-          this.updateFeedback('correct', `✓ Drawing complete! Select tone and press Submit.`);
-        } else {
-          this.updateFeedback('neutral', `✓ Stroke recognized! (${matcher.claimedStrokes.length} of ${matcher.targetStrokes.length})`);
-        }
-      } else {
-        // Natural ink stays on canvas! Zero halo, zero animation fade!
-        this.updateFeedback('neutral', 'Stroke not recognized. Draw remaining strokes or press UNDO.');
+      if (this.charUserStrokes && this.charUserStrokes[this.activeCharIndex]) {
+        this.charUserStrokes[this.activeCharIndex] = [...this.userDrawnStrokes];
       }
+
+      // No intrusive error or premature feedback while drawing.
+      // Full evaluation with spatial normalization is performed upon submission.
+      this.updateFeedback('neutral', 'Draw the character and select its tone to verify.');
     };
 
     canvas.addEventListener('pointerdown', (e) => {
@@ -835,24 +820,23 @@ export class WordTrainerEngineController {
   }
 
   undoLastStroke() {
-    const matcher = this.charMatchers[this.activeCharIndex];
-    if (!matcher) return;
-
     if (this.userDrawnStrokes.length > 0) {
       this.userDrawnStrokes.pop();
     }
-    const res = matcher.undoLastStroke();
+    if (this.charUserStrokes && this.charUserStrokes[this.activeCharIndex]) {
+      this.charUserStrokes[this.activeCharIndex] = [...this.userDrawnStrokes];
+    }
     this.charRecognized[this.activeCharIndex] = false;
     this.flashingStrokeIndex = null;
 
+    const matcher = this.charMatchers[this.activeCharIndex];
+    if (matcher) {
+      matcher.reset();
+    }
+
     this.redrawUserStrokes();
     this.renderCanvasLayers();
-
-    if (res) {
-      this.updateFeedback('neutral', `Undid stroke ${res.undoneStrokeIndex + 1}.`);
-    } else {
-      this.updateFeedback('neutral', 'Undid stroke.');
-    }
+    this.updateFeedback('neutral', 'Undid stroke.');
   }
 
   // ----------------------------------------------------
@@ -971,6 +955,7 @@ export class WordTrainerEngineController {
     const charCount = chars.length;
     this.charMatchers = new Array(charCount).fill(null);
     this.charRecognized = new Array(charCount).fill(false);
+    this.charSpatialDrift = new Array(charCount).fill(null);
     this.selectedTones = new Array(charCount).fill(null);
     this.userDrawnStrokes = [];
     this.charUserStrokes = new Array(charCount).fill(null).map(() => []);
@@ -1341,14 +1326,25 @@ export class WordTrainerEngineController {
     const targetTones = this.activeWord.tones || [1];
     const chars = this.activeWord.characters || Array.from(this.activeWord.hanzi_simp || '');
 
-    // 1. Verify Character Completeness (Order-Agnostic Matching)
+    // 1. Full Character Evaluation with Virtual Spatial Normalization
+    const canvasSize = this.getCanvasSize();
     let incompleteCharIdx = -1;
+
     for (let i = 0; i < count; i++) {
       const matcher = this.charMatchers[i];
-      const isRecognized = this.charRecognized[i];
-      if (!isRecognized && (!matcher || !matcher.isComplete())) {
-        incompleteCharIdx = i;
-        break;
+      if (!matcher) continue;
+
+      const userStrokes = this.charUserStrokes[i] || [];
+      const evalRes = matcher.evaluateFullDrawing(userStrokes, canvasSize);
+
+      if (evalRes.isComplete) {
+        this.charRecognized[i] = true;
+        this.charSpatialDrift[i] = evalRes.spatialDrift;
+      } else {
+        this.charRecognized[i] = false;
+        if (incompleteCharIdx === -1) {
+          incompleteCharIdx = i;
+        }
       }
     }
 
@@ -1458,7 +1454,8 @@ export class WordTrainerEngineController {
     const targetTones = this.activeWord.tones || [1];
     const matcher = this.charMatchers[this.activeCharIndex] || this.charMatchers[0];
     const userStrokes = this.charUserStrokes[this.activeCharIndex] || this.userDrawnStrokes || [];
-    const classification = classifyDrawing(matcher, userStrokes);
+    const spatialDrift = (this.charSpatialDrift && this.charSpatialDrift[this.activeCharIndex]) || null;
+    const classification = classifyDrawing(matcher, userStrokes, spatialDrift);
 
     // 1. Populate Word Result Header
     if (this.dom.resultHanzi) this.dom.resultHanzi.textContent = this.activeWord.hanzi_simp;

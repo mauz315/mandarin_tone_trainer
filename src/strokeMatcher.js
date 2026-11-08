@@ -100,6 +100,91 @@ export function meanDistToPolyline(userPts, polyline) {
   return totalMinDist / userPts.length;
 }
 
+/**
+ * Computes the axis-aligned bounding box across multiple strokes or point lists.
+ * Supports both [x, y] tuples and {x, y} objects.
+ */
+export function computeBoundingBox(strokes) {
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  let hasPoints = false;
+
+  if (!strokes || strokes.length === 0) {
+    return { minX: 0, maxX: 0, minY: 0, maxY: 0, width: 0, height: 0, centerX: 0, centerY: 0 };
+  }
+
+  for (const stroke of strokes) {
+    if (!stroke) continue;
+    for (const pt of stroke) {
+      if (!pt) continue;
+      const x = pt[0] !== undefined ? pt[0] : pt.x;
+      const y = pt[1] !== undefined ? pt[1] : pt.y;
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+      hasPoints = true;
+    }
+  }
+
+  if (!hasPoints) {
+    return { minX: 0, maxX: 0, minY: 0, maxY: 0, width: 0, height: 0, centerX: 0, centerY: 0 };
+  }
+
+  return {
+    minX, maxX, minY, maxY,
+    width: maxX - minX,
+    height: maxY - minY,
+    centerX: (minX + maxX) / 2,
+    centerY: (minY + maxY) / 2
+  };
+}
+
+/**
+ * Virtually normalizes user strokes for evaluation without modifying the visual canvas.
+ * Computes bounding box center of all drawn strokes and translates them toward the target crosshair center.
+ * Translation is clamped to ±30% of canvas dimension to prevent extreme teleportation.
+ */
+export function getNormalizedEvaluationStrokes(rawUserStrokes, targetCenter, canvasSize = 320) {
+  if (!rawUserStrokes || rawUserStrokes.length === 0) {
+    return {
+      normalizedStrokes: [],
+      deltaX: 0,
+      deltaY: 0,
+      rawDeltaX: 0,
+      rawDeltaY: 0,
+      userBBox: computeBoundingBox([])
+    };
+  }
+
+  const userBBox = computeBoundingBox(rawUserStrokes);
+  const targetX = (targetCenter && targetCenter[0] !== undefined) ? targetCenter[0] : (canvasSize / 2);
+  const targetY = (targetCenter && targetCenter[1] !== undefined) ? targetCenter[1] : (canvasSize / 2);
+
+  const deltaX = targetX - userBBox.centerX;
+  const deltaY = targetY - userBBox.centerY;
+
+  // Max translation clamp: Allow drift up to 30% of canvas dimension (~96px on 320px)
+  const maxDrift = canvasSize * 0.30;
+  const clampedDeltaX = Math.max(-maxDrift, Math.min(maxDrift, deltaX));
+  const clampedDeltaY = Math.max(-maxDrift, Math.min(maxDrift, deltaY));
+
+  const normalizedStrokes = rawUserStrokes.map(stroke =>
+    stroke.map(pt => [
+      (pt[0] !== undefined ? pt[0] : pt.x) + clampedDeltaX,
+      (pt[1] !== undefined ? pt[1] : pt.y) + clampedDeltaY
+    ])
+  );
+
+  return {
+    normalizedStrokes,
+    deltaX: clampedDeltaX,
+    deltaY: clampedDeltaY,
+    rawDeltaX: deltaX,
+    rawDeltaY: deltaY,
+    userBBox
+  };
+}
+
 export function getHanziPositioner(width, height, padding) {
   if (typeof window !== 'undefined' && window.HanziWriter && typeof window.HanziWriter.getScalingTransform === 'function') {
     return window.HanziWriter.getScalingTransform(width, height, padding);
@@ -168,6 +253,7 @@ export class StrokeMatcher {
     };
 
     this.targetStrokes = [];
+    this.radStrokes = Array.isArray(charData.radStrokes) ? [...charData.radStrokes] : [];
     const strokes = charData.strokes || [];
     const medians = charData.medians || [];
 
@@ -185,6 +271,19 @@ export class StrokeMatcher {
         trunkAngle = computeAngle(trunkPts);
       }
 
+      const isRadical = this.radStrokes.includes(i);
+      const isHorizontal = Math.abs(angle) <= 30 || Math.abs(trunkAngle) <= 30;
+
+      // Compound stroke check: stroke contains an acute angular turn (折笔 >= 48°)
+      let maxTurn = 0;
+      for (let j = 1; j < screenMedian.length - 1; j++) {
+        const a1 = computeAngle([screenMedian[j - 1], screenMedian[j]]);
+        const a2 = computeAngle([screenMedian[j], screenMedian[j + 1]]);
+        const turn = angleDifference(a1, a2);
+        if (turn > maxTurn) maxTurn = turn;
+      }
+      const isCompound = maxTurn >= 48;
+
       this.targetStrokes.push({
         index: i,
         path: strokes[i],
@@ -194,7 +293,9 @@ export class StrokeMatcher {
         centroid: centroid,
         angle: angle,
         trunkAngle: trunkAngle,
-        isCompound: screenMedian.length > 5
+        isCompound: isCompound,
+        isRadical: isRadical,
+        isHorizontal: isHorizontal
       });
     }
 
@@ -211,27 +312,37 @@ export class StrokeMatcher {
     const userLen = computeLength(candidatePts);
     if (userLen < 12) return { isMatch: false, reason: 'too_short' };
 
-    // 1. Length Ratio Check
+    // 1. Length Ratio Check (Relaxed down to 0.40 for horizontal bars / compound stems)
+    const isHorizontalTarget = target.isHorizontal || Math.abs(target.angle) <= 30 || Math.abs(target.trunkAngle) <= 30;
+    const userAngle = computeAngle(candidatePts);
+    const diffNormal = angleDifference(userAngle, target.angle);
+    const diffTrunk = angleDifference(userAngle, target.trunkAngle);
+    const isUserHorizontal = (diffNormal <= 30 || diffTrunk <= 30) ||
+      (this.options.acceptBackwards && (Math.abs(180 - diffNormal) <= 30 || Math.abs(180 - diffTrunk) <= 30));
+
     const lenRatio = userLen / Math.max(1, target.length);
-    // Extra leniency for very short target strokes (e.g. dots 点 < 35px)
-    const minRatio = target.length < 35 ? 0.35 : this.options.lengthRatioMin;
+    const minRatio = target.length < 35 ? 0.35 : (isHorizontalTarget && isUserHorizontal ? 0.40 : this.options.lengthRatioMin);
     const maxRatio = target.length < 35 ? 2.50 : this.options.lengthRatioMax;
     if (lenRatio < minRatio || lenRatio > maxRatio) {
       return { isMatch: false, reason: 'length_mismatch', lenRatio };
     }
 
-    // 2. Centroid Offset Check
+    // 2. Centroid Offset Check (Y-Tier elevation matching for horizontal bars)
     const userCentroid = computeCentroid(candidatePts);
-    const centroidDist = Math.hypot(userCentroid[0] - target.centroid[0], userCentroid[1] - target.centroid[1]);
-    const maxCentroidDist = this.canvasSize * this.options.maxCentroidDriftPct;
+    const deltaX = Math.abs(userCentroid[0] - target.centroid[0]);
+    const deltaY = Math.abs(userCentroid[1] - target.centroid[1]);
+    const centroidDist = Math.hypot(deltaX, deltaY);
+
+    const isHorizontalTier = isHorizontalTarget && isUserHorizontal && (deltaY <= this.canvasSize * 0.14);
+    const maxCentroidDist = isHorizontalTier
+      ? this.canvasSize * 0.35
+      : this.canvasSize * this.options.maxCentroidDriftPct;
+
     if (centroidDist > maxCentroidDist) {
       return { isMatch: false, reason: 'centroid_drift', centroidDist };
     }
 
     // 3. Angular Tolerance Check (with Reverse Drawing support)
-    const userAngle = computeAngle(candidatePts);
-    const diffNormal = angleDifference(userAngle, target.angle);
-    const diffTrunk = angleDifference(userAngle, target.trunkAngle);
     const diffAngle = Math.min(diffNormal, diffTrunk);
 
     let angleAccepted = (diffAngle <= this.options.angularTolerance);
@@ -259,7 +370,9 @@ export class StrokeMatcher {
     // 4. Mean Distance to Target Median Polyline Check
     const resampledUser = resamplePoints(candidatePts, 12);
     const meanDist = meanDistToPolyline(resampledUser, target.screenMedian);
-    const maxMeanDist = this.canvasSize * this.options.maxMeanDistPct;
+    const maxMeanDist = isHorizontalTier
+      ? this.canvasSize * 0.28
+      : this.canvasSize * this.options.maxMeanDistPct;
 
     if (meanDist > maxMeanDist) {
       return { isMatch: false, reason: 'path_deviation', meanDist };
@@ -470,17 +583,192 @@ export class StrokeMatcher {
     const sorted = [...this.unclaimedStrokes].sort((a, b) => a - b);
     return this.targetStrokes[sorted[0]] || null;
   }
+
+  /**
+   * Evaluates the complete set of user strokes for the character upon submission.
+   * Tests raw alignment first. If incomplete, applies Virtual Spatial Normalization
+   * (bounding box shift toward canvas crosshair center) and re-evaluates.
+   *
+   * @param {Array<Array<[number, number]>>} rawUserStrokes - The drawn strokes.
+   * @param {number} canvasSize - Current canvas dimension.
+   * @returns {Object} { isComplete, spatialDrift, unclaimedCount }
+   */
+  evaluateFullDrawing(rawUserStrokes, canvasSize = this.canvasSize) {
+    if (!rawUserStrokes || rawUserStrokes.length === 0) {
+      this.reset();
+      return {
+        isComplete: false,
+        spatialDrift: { deltaX: 0, deltaY: 0, isShifted: false, wasNormalized: false },
+        unclaimedCount: this.targetStrokes.length
+      };
+    }
+
+    const targetCenterX = canvasSize / 2;
+    const targetCenterY = canvasSize / 2;
+    const driftThreshold = Math.max(35, canvasSize * 0.12);
+
+    // Pass 1: Try evaluating directly with raw coordinates
+    this.reset();
+    for (const stroke of rawUserStrokes) {
+      const match = this.matchUserStroke(stroke);
+      if (match.matched) {
+        this.claimStroke(match.strokeIndex, {
+          diffAngle: match.diffAngle || 0,
+          isCompoundMerged: !!match.isCompoundMerged
+        });
+      }
+    }
+
+    const userBBox = computeBoundingBox(rawUserStrokes);
+    const rawDeltaX = targetCenterX - userBBox.centerX;
+    const rawDeltaY = targetCenterY - userBBox.centerY;
+    const isShifted = Math.hypot(rawDeltaX, rawDeltaY) > driftThreshold;
+
+    if (this.isComplete()) {
+      return {
+        isComplete: true,
+        spatialDrift: { deltaX: rawDeltaX, deltaY: rawDeltaY, isShifted, wasNormalized: false },
+        unclaimedCount: 0
+      };
+    }
+
+    // Pass 2: Virtual Spatial Normalization Fallback
+    // If raw coordinates left unclaimed strokes, compute character bounding box offset
+    const { normalizedStrokes, deltaX, deltaY } =
+      getNormalizedEvaluationStrokes(rawUserStrokes, [targetCenterX, targetCenterY], canvasSize);
+
+    this.reset();
+    for (const stroke of normalizedStrokes) {
+      const match = this.matchUserStroke(stroke);
+      if (match.matched) {
+        this.claimStroke(match.strokeIndex, {
+          diffAngle: match.diffAngle || 0,
+          isCompoundMerged: !!match.isCompoundMerged
+        });
+      }
+    }
+
+    if (this.isComplete()) {
+      return {
+        isComplete: true,
+        spatialDrift: {
+          deltaX,
+          deltaY,
+          isShifted: Math.hypot(deltaX, deltaY) > driftThreshold,
+          wasNormalized: true,
+          wasComponentNormalized: false
+        },
+        unclaimedCount: 0
+      };
+    }
+
+    // Pass 3: Component-Level Virtual Spatial Normalization (Core Fix 3)
+    // If the character has a recognized radical decomposition (0 < radStrokes.length < totalStrokes),
+    // normalize the radical cluster and stem cluster independently to eliminate inter-radical kerning gaps.
+    if (this.radStrokes && this.radStrokes.length > 0 && this.radStrokes.length < this.targetStrokes.length) {
+      const radTargets = this.targetStrokes.filter(s => this.radStrokes.includes(s.index));
+      const stemTargets = this.targetStrokes.filter(s => !this.radStrokes.includes(s.index));
+
+      if (radTargets.length > 0 && stemTargets.length > 0) {
+        const radTargetBBox = computeBoundingBox(radTargets.map(s => s.screenMedian));
+        const stemTargetBBox = computeBoundingBox(stemTargets.map(s => s.screenMedian));
+
+        // Partition user strokes into radical cluster and stem cluster based on proximity to component centers
+        const userRadStrokes = [];
+        const userStemStrokes = [];
+
+        for (const stroke of rawUserStrokes) {
+          const c = computeCentroid(stroke);
+          const dRad = Math.hypot(c[0] - radTargetBBox.centerX, c[1] - radTargetBBox.centerY);
+          const dStem = Math.hypot(c[0] - stemTargetBBox.centerX, c[1] - stemTargetBBox.centerY);
+          if (dRad < dStem) {
+            userRadStrokes.push(stroke);
+          } else {
+            userStemStrokes.push(stroke);
+          }
+        }
+
+        // Apply independent component translations
+        const maxDrift = canvasSize * 0.30;
+        let radDeltaX = 0, radDeltaY = 0;
+        let stemDeltaX = 0, stemDeltaY = 0;
+
+        if (userRadStrokes.length > 0) {
+          const uRadBBox = computeBoundingBox(userRadStrokes);
+          radDeltaX = Math.max(-maxDrift, Math.min(maxDrift, radTargetBBox.centerX - uRadBBox.centerX));
+          radDeltaY = Math.max(-maxDrift, Math.min(maxDrift, radTargetBBox.centerY - uRadBBox.centerY));
+        }
+
+        if (userStemStrokes.length > 0) {
+          const uStemBBox = computeBoundingBox(userStemStrokes);
+          stemDeltaX = Math.max(-maxDrift, Math.min(maxDrift, stemTargetBBox.centerX - uStemBBox.centerX));
+          stemDeltaY = Math.max(-maxDrift, Math.min(maxDrift, stemTargetBBox.centerY - uStemBBox.centerY));
+        }
+
+        const componentNormalizedStrokes = rawUserStrokes.map(stroke => {
+          if (userRadStrokes.includes(stroke)) {
+            return stroke.map(pt => [
+              (pt[0] !== undefined ? pt[0] : pt.x) + radDeltaX,
+              (pt[1] !== undefined ? pt[1] : pt.y) + radDeltaY
+            ]);
+          } else {
+            return stroke.map(pt => [
+              (pt[0] !== undefined ? pt[0] : pt.x) + stemDeltaX,
+              (pt[1] !== undefined ? pt[1] : pt.y) + stemDeltaY
+            ]);
+          }
+        });
+
+        this.reset();
+        for (const stroke of componentNormalizedStrokes) {
+          const match = this.matchUserStroke(stroke);
+          if (match.matched) {
+            this.claimStroke(match.strokeIndex, {
+              diffAngle: match.diffAngle || 0,
+              isCompoundMerged: !!match.isCompoundMerged
+            });
+          }
+        }
+
+        if (this.isComplete()) {
+          return {
+            isComplete: true,
+            spatialDrift: {
+              deltaX: stemDeltaX,
+              deltaY: stemDeltaY,
+              isShifted: true,
+              wasNormalized: true,
+              wasComponentNormalized: true
+            },
+            unclaimedCount: 0
+          };
+        }
+      }
+    }
+
+    return {
+      isComplete: this.isComplete(),
+      spatialDrift: {
+        deltaX,
+        deltaY,
+        isShifted: Math.hypot(deltaX, deltaY) > driftThreshold,
+        wasNormalized: false,
+        wasComponentNormalized: false
+      },
+      unclaimedCount: this.unclaimedStrokes.length
+    };
+  }
 }
 
 /**
  * Three-Tier Diagnostic Classifier
- * Evaluates drawing against the Hanzi Drawing Feedback Engine Spec.
+ * Evaluates drawing against the Hanzi Drawing Feedback Engine Spec & Spatial Normalization Spec.
  *
  * Tier 1: Clean Pass (Native / Flawless)
- * Tier 2: Soft Pass (2A: Tolerance / 2B: Order drift + Pro-Tip)
+ * Tier 2: Soft Pass (Order drift [Priority] / Centering drift / Tolerance + Pro-Tip)
  * Tier 3: Diagnostic Failure (Missing stroke, wrong angle, extra stroke, unrecognized)
  */
-export function classifyDrawing(charMatcher, userDrawnStrokes = []) {
+export function classifyDrawing(charMatcher, userDrawnStrokes = [], spatialDrift = null) {
   if (!charMatcher || !charMatcher.targetStrokes) {
     return { tier: 'TIER_3_UNRECOGNIZED', badge: '❓ Unrecognized', detail: 'No character data available.', status: 'fail' };
   }
@@ -494,28 +782,49 @@ export function classifyDrawing(charMatcher, userDrawnStrokes = []) {
 
   // 1. Complete Pass (All target strokes claimed)
   if (unclaimed.length === 0 && extraneousCount === 0) {
-    if (maxAngleDev <= 15 && isStandardOrder) {
-      return {
-        tier: 'TIER_1_CLEAN_PASS',
-        badge: '🎯 Perfect Form!',
-        detail: 'Native execution with canonical stroke order and accurate angles.',
-        status: 'pass',
-        showOrderReplay: false
-      };
-    }
+    // Order drift has highest priority in Tier 2
     if (!isStandardOrder) {
       return {
         tier: 'TIER_2_SOFT_PASS_ORDER',
         badge: '✓ Recognized!',
-        detail: '💡 Pro Tip: Native stroke order goes top-to-bottom, left-to-right.',
+        detail: '💡 Pro Tip: Standard stroke order goes top-to-bottom, left-to-right.',
         status: 'pass',
         showOrderReplay: true
       };
     }
+    // Inter-radical spacing / component kerning leniency
+    if (spatialDrift && spatialDrift.wasComponentNormalized) {
+      return {
+        tier: 'TIER_2_SOFT_PASS_KERNING',
+        badge: '✓ Recognized!',
+        detail: '💡 Tip: In left-right characters (like 亻 + 主), keep the two parts closer together for a balanced look.',
+        status: 'pass',
+        showOrderReplay: false
+      };
+    }
+    // Spatial offset leniency (Centering drift)
+    if (spatialDrift && spatialDrift.isShifted) {
+      return {
+        tier: 'TIER_2_SOFT_PASS_CENTERING',
+        badge: '✓ Recognized!',
+        detail: '💡 Tip: Try centering the character inside the grid for better balance.',
+        status: 'pass',
+        showOrderReplay: false
+      };
+    }
+    if (maxAngleDev > 15 || (spatialDrift && spatialDrift.wasNormalized)) {
+      return {
+        tier: 'TIER_2_SOFT_PASS_TOLERANCE',
+        badge: '✓ Passed with Tolerance!',
+        detail: '💡 Tip: Keep strokes aligned and upright for balanced proportions.',
+        status: 'pass',
+        showOrderReplay: false
+      };
+    }
     return {
-      tier: 'TIER_2_SOFT_PASS_TOLERANCE',
-      badge: '✓ Passed with Tolerance!',
-      detail: '💡 Tip: Keep strokes aligned and upright for balanced proportions.',
+      tier: 'TIER_1_CLEAN_PASS',
+      badge: '🎯 Perfect Form!',
+      detail: 'Flawless execution with canonical stroke order and accurate angles.',
       status: 'pass',
       showOrderReplay: false
     };
