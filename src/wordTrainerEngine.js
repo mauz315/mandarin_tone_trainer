@@ -13,23 +13,35 @@
  */
 
 import { StrokeMatcher, getHanziPositioner, classifyDrawing } from './strokeMatcher.js';
+import { ComponentPlacementController } from './componentBuilderEngine.js';
 
-const STORAGE_KEY = 'mandarin_trainer_word_progress';
+const STORAGE_KEY_CALLIGRAPHY = 'mandarin_trainer_word_progress_calligraphy';
+const STORAGE_KEY_BUILDER = 'mandarin_trainer_word_progress_builder';
+const STORAGE_KEY_LEGACY = 'mandarin_trainer_word_progress';
 
 export class WordTrainerEngineController {
   constructor() {
     this.corpus = [];
+    this.decompositions = {};
+    this.componentBuilder = null;
     this.phaseWordsMap = { 1: [], 2: [], 3: [], 4: [], 5: [] };
     this.audioCache = new Map();
 
-    // Persistent state
+    // Mode-specific persistent state
     this.state = this.loadState();
+    this.isInitialized = false;
+    this.initPromise = null;
+    this.currentAudio = null;
 
-    // Queue state
+    // Anchor-Spaced Consolidation Queue (Option C)
     this.activePhase = this.state.activePhase || 1;
-    this.currentPass = 'PASS_1_INTRO'; // 'PASS_1_INTRO' | 'PASS_2_TEST'
-    this.pass1Index = 0; // 0 to 4 within current 5-word batch
-    this.activeTestingQueue = []; // Shuffled queue for Pass 2
+    this.anchorWord = null;              // Remembered initial random word
+    this.wordsSinceAnchor = 0;           // Number of completed words since anchor introduction
+    this.isReappearanceStage = false;    // True when anchor reappears for delayed recall (Guide OFF)
+    this.cycleWords = [];                // All words in current consolidation cycle
+    this.cycleIndex = 0;                 // Current index within cycleWords
+    this.reappearanceRetryQueue = [];    // Retry queue if learner fails delayed recall
+    this.hasRetriedAnchor = false;
 
     // Active word & multi-character state
     this.activeWord = null;
@@ -61,29 +73,43 @@ export class WordTrainerEngineController {
   }
 
   // ----------------------------------------------------
-  // 1. STATE PERSISTENCE (localStorage)
+  // 1. STATE PERSISTENCE & INDEPENDENT MODE STORAGE
   // ----------------------------------------------------
+  getStorageKey() {
+    const mode = this.getMode();
+    return (mode === 'builder') ? STORAGE_KEY_BUILDER : STORAGE_KEY_CALLIGRAPHY;
+  }
+
   getDefaultState() {
     return {
-      version: 1,
+      version: 2,
       activePhase: 1,
       scaffoldDefault: true,
       phases: {
-        1: { status: 'in_progress', currentBatchIndex: 1, completedWordIds: [] },
-        2: { status: 'not_started', currentBatchIndex: 1, completedWordIds: [] },
-        3: { status: 'not_started', currentBatchIndex: 1, completedWordIds: [] },
-        4: { status: 'not_started', currentBatchIndex: 1, completedWordIds: [] },
-        5: { status: 'not_started', currentBatchIndex: 1, completedWordIds: [] }
+        1: { status: 'in_progress', completedWordIds: [] },
+        2: { status: 'not_started', completedWordIds: [] },
+        3: { status: 'not_started', completedWordIds: [] },
+        4: { status: 'not_started', completedWordIds: [] },
+        5: { status: 'not_started', completedWordIds: [] }
       }
     };
   }
 
   loadState() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const key = this.getStorageKey();
+      let raw = localStorage.getItem(key);
+      // Migration: if calligraphy state is uninitialized, inherit from legacy key if present
+      if (!raw && this.getMode() !== 'builder') {
+        const legacy = localStorage.getItem(STORAGE_KEY_LEGACY);
+        if (legacy) {
+          raw = legacy;
+          localStorage.setItem(key, legacy);
+        }
+      }
       if (!raw) return this.getDefaultState();
       const parsed = JSON.parse(raw);
-      if (parsed && parsed.version === 1 && parsed.phases) {
+      if (parsed && parsed.phases) {
         return parsed;
       }
     } catch (e) {
@@ -96,7 +122,8 @@ export class WordTrainerEngineController {
     try {
       this.state.activePhase = this.activePhase;
       this.state.scaffoldDefault = this.isScaffoldOn;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
+      const key = this.getStorageKey();
+      localStorage.setItem(key, JSON.stringify(this.state));
     } catch (e) {
       console.warn('WordTrainerEngine: Failed to save state to localStorage', e);
     }
@@ -108,16 +135,106 @@ export class WordTrainerEngineController {
     this.switchPhase(1);
   }
 
+  getMode() {
+    try {
+      return localStorage.getItem('mandarin_trainer_selected_mode') || 'calligraphy';
+    } catch (_) {
+      return 'calligraphy';
+    }
+  }
+
+  switchMode(mode) {
+    try {
+      this.saveState();
+      localStorage.setItem('mandarin_trainer_selected_mode', mode);
+      if (!this.isInitialized) {
+        // Mode registered; init() will load batch once data is fully ready
+        return;
+      }
+      // Load independent progress state for the newly selected mode
+      this.state = this.loadState();
+      this.activePhase = this.state.activePhase || 1;
+      this.updatePhaseStepperUI();
+      this.updateProgressBar();
+      this.loadBatchForActivePhase();
+      if (mode === 'calligraphy') {
+        this.syncCanvasDimensions();
+      }
+    } catch (e) {
+      console.warn('WordTrainerEngine: switchMode error', e);
+    }
+  }
+
+  getIntervalForPhase(phaseNum) {
+    // Option C: Adaptive 5 words for Phase 1 & 2; 10 words for Phases 3, 4, 5
+    return (phaseNum <= 2) ? 5 : 10;
+  }
+
+  setGuideMode(isOn) {
+    this.isScaffoldOn = isOn;
+    this.toggleScaffolding(isOn);
+    if (this.componentBuilder) {
+      this.componentBuilder.toggleGhostHint(isOn);
+    }
+  }
+
   // ----------------------------------------------------
   // 2. INITIALIZATION & DATA LOADING
   // ----------------------------------------------------
   async init() {
-    this.cacheDomElements();
-    this.setupCarouselEvents();
-    this.setupCanvasDrawingEvents();
-    this.setupControlsEvents();
-    await this.loadCorpus();
-    this.switchPhase(this.state.activePhase || 1);
+    if (this.isInitialized) {
+      this.syncCanvasDimensions();
+      return;
+    }
+    if (this.initPromise) {
+      return this.initPromise;
+    }
+
+    this.initPromise = (async () => {
+      this.cacheDomElements();
+      this.setupCarouselEvents();
+      this.setupCanvasDrawingEvents();
+      this.setupControlsEvents();
+      await Promise.all([this.loadCorpus(), this.loadDecompositions()]);
+      if (!this.componentBuilder) {
+        this.componentBuilder = new ComponentPlacementController(this.decompositions);
+      } else {
+        this.componentBuilder.setDecompositions(this.decompositions);
+      }
+      this.componentBuilder.initDom();
+      this.isInitialized = true;
+      this.switchMode(this.getMode());
+    })();
+
+    return this.initPromise;
+  }
+
+  async loadDecompositions() {
+    const base = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL)
+      ? import.meta.env.BASE_URL
+      : './';
+    const cleanBase = base.endsWith('/') ? base : base + '/';
+
+    const urls = [
+      `${cleanBase}character_decompositions.json`,
+      './character_decompositions.json',
+      '/character_decompositions.json',
+      'character_decompositions.json'
+    ];
+
+    for (const url of urls) {
+      try {
+        const res = await fetch(url);
+        if (res.ok) {
+          this.decompositions = await res.json();
+          break;
+        }
+      } catch (_) {}
+    }
+
+    if (!this.decompositions || typeof this.decompositions !== 'object') {
+      this.decompositions = {};
+    }
   }
 
   cacheDomElements() {
@@ -223,14 +340,25 @@ export class WordTrainerEngineController {
       this.corpus = [];
     }
 
-    // Partition into phases
+    // Partition into phases and apply randomized order per phase
     this.phaseWordsMap = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+    const rawPhaseMap = { 1: [], 2: [], 3: [], 4: [], 5: [] };
     for (const item of this.corpus) {
       const p = item.phase || 1;
-      if (this.phaseWordsMap[p]) {
-        this.phaseWordsMap[p].push(item);
+      if (rawPhaseMap[p]) {
+        rawPhaseMap[p].push(item);
       }
     }
+
+    for (const p in rawPhaseMap) {
+      const phaseNum = parseInt(p, 10);
+      const rawWords = rawPhaseMap[phaseNum];
+      this.phaseWordsMap[phaseNum] = rawWords;
+      if (!this.state.phases[phaseNum]) {
+        this.state.phases[phaseNum] = { status: (phaseNum === 1 ? 'in_progress' : 'not_started'), completedWordIds: [] };
+      }
+    }
+    this.saveState();
   }
 
   setupCarouselEvents() {
@@ -530,6 +658,33 @@ export class WordTrainerEngineController {
     return Math.max(12, Math.round(size * 0.035));
   }
 
+  syncCanvasDimensions() {
+    const canvas = this.dom.paintCanvas;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = Math.round(rect.width);
+    const cssH = Math.round(rect.height);
+    const targetW = Math.round(cssW * dpr);
+    const targetH = Math.round(cssH * dpr);
+
+    if (canvas.width !== targetW || canvas.height !== targetH) {
+      canvas.width = targetW;
+      canvas.height = targetH;
+    }
+
+    // Always restore the DPR scale transform so stroke coordinates match 1:1 with CSS logical pixels
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+
+    this.redrawUserStrokes();
+  }
+
   setupCanvasDrawingEvents() {
     if (this.isDrawingEventsBound) return;
     const canvas = this.dom.paintCanvas;
@@ -539,20 +694,10 @@ export class WordTrainerEngineController {
 
     this.isDrawingEventsBound = true;
 
-    const setupDimensions = () => {
-      const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      const w = Math.round(rect.width) || 360;
-      const h = Math.round(rect.height) || 360;
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.scale(dpr, dpr);
-      this.redrawUserStrokes();
-    };
-
-    setupDimensions();
-    window.addEventListener('resize', setupDimensions);
+    this.syncCanvasDimensions();
+    window.addEventListener('resize', () => {
+      this.syncCanvasDimensions();
+    });
 
     const getCoords = (e) => {
       const rect = canvas.getBoundingClientRect();
@@ -615,6 +760,7 @@ export class WordTrainerEngineController {
       this.updateFeedback('neutral', 'Draw the character and select its tone to verify.');
     };
 
+    // Modern Pointer Events handle mouse, trackpad, pen, and touch with sub-pixel pointer capture
     canvas.addEventListener('pointerdown', (e) => {
       try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
       startDraw(e);
@@ -629,22 +775,24 @@ export class WordTrainerEngineController {
       try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
     });
 
-    // Mobile touch listeners with scroll suppression
-    canvas.addEventListener('touchstart', (e) => {
-      if (e.touches.length === 1) {
-        e.preventDefault();
-        startDraw(e);
-      }
-    }, { passive: false });
-    canvas.addEventListener('touchmove', (e) => {
-      if (e.touches.length === 1) {
-        e.preventDefault();
-        moveDraw(e);
-      }
-    }, { passive: false });
-    canvas.addEventListener('touchend', (e) => {
-      endDraw();
-    });
+    // Fallback only if PointerEvent is unsupported to avoid double-firing startDraw
+    if (typeof window !== 'undefined' && !window.PointerEvent) {
+      canvas.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          e.preventDefault();
+          startDraw(e);
+        }
+      }, { passive: false });
+      canvas.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 1) {
+          e.preventDefault();
+          moveDraw(e);
+        }
+      }, { passive: false });
+      canvas.addEventListener('touchend', () => {
+        endDraw();
+      });
+    }
   }
 
   redrawUserStrokes() {
@@ -652,8 +800,12 @@ export class WordTrainerEngineController {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    const rect = canvas.getBoundingClientRect();
-    ctx.clearRect(0, 0, rect.width, rect.height);
+
+    // Buffer-safe physical canvas clear
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
 
     if (this.charRecognized[this.activeCharIndex]) return;
 
@@ -908,24 +1060,40 @@ export class WordTrainerEngineController {
   loadBatchForActivePhase() {
     const pData = this.state.phases[this.activePhase];
     const words = this.phaseWordsMap[this.activePhase] || [];
-    const totalBatches = Math.max(1, Math.ceil(words.length / 5));
+    const completedSet = new Set(pData.completedWordIds || []);
+    const unmastered = words.filter(w => !completedSet.has(w.id));
 
-    let batchIdx = pData.currentBatchIndex || 1;
-    if (batchIdx > totalBatches) batchIdx = totalBatches;
+    if (unmastered.length === 0) {
+      pData.status = 'completed';
+      this.saveState();
+      this.updatePhaseStepperUI();
+      this.triggerPhaseCompleteModal();
+      return;
+    }
 
-    const startIdx = (batchIdx - 1) * 5;
-    const batchWords = words.slice(startIdx, startIdx + 5);
+    // Fisher-Yates shuffle unmastered words to guarantee varied selection
+    const shuffled = [...unmastered];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
 
-    // Pre-buffer TTS audio tracks for active batch
-    this.preBufferAudio(batchWords);
+    // Adaptive interval K: Phase 1 & 2 = 5 words; Phase 3, 4, 5 = 10 words
+    const targetInterval = this.getIntervalForPhase(this.activePhase);
+    const k = Math.min(targetInterval, shuffled.length);
 
-    // Start with Pass 1 (Guided Imprint)
-    this.currentPass = 'PASS_1_INTRO';
-    this.pass1Index = 0;
-    this.isScaffoldOn = true; // Scaffold default = ON for Pass 1
-    this.updateScaffoldBtnUI();
+    this.cycleWords = shuffled.slice(0, k);
+    this.anchorWord = this.cycleWords[0];
+    this.cycleIndex = 0;
+    this.wordsSinceAnchor = 0;
+    this.isReappearanceStage = false;
+    this.reappearanceRetryQueue = [];
+    this.hasRetriedAnchor = false;
 
-    this.loadWord(batchWords[0]);
+    // Pre-buffer TTS audio tracks for active cycle
+    this.preBufferAudio(this.cycleWords);
+
+    this.loadWord(this.anchorWord);
   }
 
   preBufferAudio(words) {
@@ -950,6 +1118,10 @@ export class WordTrainerEngineController {
     this.activeCharIndex = 0;
     this.attemptsLeft = 3;
     this.flashingStrokeIndex = null;
+
+    // Toggle guide mode: strictly forced ON on first introduction, strictly forced OFF on delayed reappearance
+    const shouldGuideBeOn = !this.isReappearanceStage;
+    this.setGuideMode(shouldGuideBeOn);
 
     const chars = word.characters || Array.from(word.hanzi_simp || '');
     const charCount = chars.length;
@@ -981,6 +1153,17 @@ export class WordTrainerEngineController {
     this.renderToneSlots();
     this.mountCharacter(0);
 
+    // Update Component Builder multi-character layout if active
+    if (typeof window.setupComponentBuilderCharacters === 'function') {
+      window.setupComponentBuilderCharacters(chars);
+    }
+
+    // Mount Component Builder if mode is 'builder'
+    if (this.getMode() === 'builder' && this.componentBuilder) {
+      this.componentBuilder.mountWord(word);
+      this.componentBuilder.toggleGhostHint(shouldGuideBeOn);
+    }
+
     // Context disambiguation hint
     if (this.dom.promptHint) {
       if (word.characterCount === 1) {
@@ -991,7 +1174,11 @@ export class WordTrainerEngineController {
       }
     }
 
-    this.updateFeedback('neutral', 'Draw the character and select its tone to verify.');
+    if (this.getMode() === 'builder') {
+      this.updateFeedback('neutral', 'Drag components to assemble the character, then select its tone.');
+    } else {
+      this.updateFeedback('neutral', 'Draw the character and select its tone to verify.');
+    }
 
     // Reset panels: Show exercise inputs, hide result panel
     if (this.dom.promptArena) this.dom.promptArena.classList.remove('hidden');
@@ -1011,27 +1198,17 @@ export class WordTrainerEngineController {
   updateBatchLabels() {
     const pData = this.state.phases[this.activePhase];
     const words = this.phaseWordsMap[this.activePhase] || [];
-    const totalBatches = Math.max(1, Math.ceil(words.length / 5));
-    const batchIdx = pData.currentBatchIndex || 1;
+    const completedCount = (pData && pData.completedWordIds) ? pData.completedWordIds.length : 0;
+    const totalWords = words.length || 55;
 
-    let wordPosInBatch = 1;
-    if (this.currentPass === 'PASS_1_INTRO') {
-      wordPosInBatch = this.pass1Index + 1;
-      if (this.dom.passBadge) {
-        this.dom.passBadge.className = 'px-2 py-0.5 rounded-full bg-[#4C1D95] text-[#FDE68A] border border-black uppercase font-black text-[9px] shadow-xs';
-        this.dom.passBadge.textContent = 'Pass 1: Guided Imprint';
-      }
-    } else {
-      const remainingInQueue = this.activeTestingQueue.length;
-      wordPosInBatch = 5 - remainingInQueue + 1;
-      if (this.dom.passBadge) {
-        this.dom.passBadge.className = 'px-2 py-0.5 rounded-full bg-[#D97706] text-white border border-black uppercase font-black text-[9px] shadow-xs';
-        this.dom.passBadge.textContent = 'Pass 2: Retrieval Test';
-      }
+    // Keep badge uniform with zero visual hint of test or reappearance
+    if (this.dom.passBadge) {
+      this.dom.passBadge.className = 'px-2 py-0.5 rounded-full bg-[#4C1D95] text-[#FDE68A] border border-black uppercase font-black text-[9px] shadow-xs';
+      this.dom.passBadge.textContent = 'Practice';
     }
 
     if (this.dom.batchIndicatorLabel) {
-      this.dom.batchIndicatorLabel.textContent = `Batch ${batchIdx} of ${totalBatches} • Word ${wordPosInBatch}/5`;
+      this.dom.batchIndicatorLabel.textContent = `Phase ${this.activePhase} • Mastered ${completedCount}/${totalWords} Words`;
     }
   }
 
@@ -1064,13 +1241,20 @@ export class WordTrainerEngineController {
     // Mount HanziWriter for background outline and animation
     this.mountHanziWriterQuiz(targetChar, index);
 
+    // Sync canvas sizing & DPR transform for current character
+    this.syncCanvasDimensions();
+
     // If character is already complete, show snapped calligraphy. Otherwise, redraw handwriting!
     if (this.charRecognized[index]) {
       const paintCanvas = this.dom.paintCanvas;
       if (paintCanvas) {
         const ctx = paintCanvas.getContext('2d');
-        const rect = paintCanvas.getBoundingClientRect();
-        if (ctx) ctx.clearRect(0, 0, rect.width, rect.height);
+        if (ctx) {
+          ctx.save();
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
+          ctx.restore();
+        }
       }
     } else {
       this.redrawUserStrokes();
@@ -1309,8 +1493,12 @@ export class WordTrainerEngineController {
     const paintCanvas = this.dom.paintCanvas;
     if (paintCanvas) {
       const ctx = paintCanvas.getContext('2d');
-      const rect = paintCanvas.getBoundingClientRect();
-      if (ctx) ctx.clearRect(0, 0, rect.width, rect.height);
+      if (ctx) {
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
+        ctx.restore();
+      }
     }
     this.renderCanvasLayers();
     this.updateFeedback('neutral', 'Canvas cleared. Draw strokes and select tone.');
@@ -1321,6 +1509,11 @@ export class WordTrainerEngineController {
   // ----------------------------------------------------
   validateSubmission() {
     if (!this.activeWord) return;
+
+    if (this.getMode() === 'builder') {
+      this.validateBuilderSubmission();
+      return;
+    }
 
     const count = this.activeWord.characterCount || this.activeWord.hanzi_simp.length;
     const targetTones = this.activeWord.tones || [1];
@@ -1371,8 +1564,11 @@ export class WordTrainerEngineController {
         this.updateFeedback('hanzi-error', '❌ Attempts exhausted! Revealing full card solution for review.');
         this.charRecognized[this.activeCharIndex] = true;
         this.snapCharacterToCalligraphy();
-        if (this.currentPass === 'PASS_2_TEST') {
-          this.activeTestingQueue.push(this.activeWord);
+        if (this.isReappearanceStage && this.anchorWord) {
+          if (!this.hasRetriedAnchor) {
+            this.hasRetriedAnchor = true;
+            this.reappearanceRetryQueue.push(this.anchorWord);
+          }
         }
         setTimeout(() => {
           this.showResultFeedbackPanel(false);
@@ -1419,8 +1615,11 @@ export class WordTrainerEngineController {
         this.updateFeedback('tone-error', '❌ Attempts exhausted! Revealing full card solution for review.');
         this.charRecognized[this.activeCharIndex] = true;
         this.snapCharacterToCalligraphy();
-        if (this.currentPass === 'PASS_2_TEST') {
-          this.activeTestingQueue.push(this.activeWord);
+        if (this.isReappearanceStage && this.anchorWord) {
+          if (!this.hasRetriedAnchor) {
+            this.hasRetriedAnchor = true;
+            this.reappearanceRetryQueue.push(this.anchorWord);
+          }
         }
         setTimeout(() => {
           this.showResultFeedbackPanel(false);
@@ -1434,10 +1633,10 @@ export class WordTrainerEngineController {
     this.charRecognized[this.activeCharIndex] = true;
     this.snapCharacterToCalligraphy();
 
-    if (this.currentPass === 'PASS_2_TEST') {
+    if (this.isReappearanceStage && this.anchorWord) {
       const pData = this.state.phases[this.activePhase];
-      if (!pData.completedWordIds.includes(this.activeWord.id)) {
-        pData.completedWordIds.push(this.activeWord.id);
+      if (!pData.completedWordIds.includes(this.anchorWord.id)) {
+        pData.completedWordIds.push(this.anchorWord.id);
         this.saveState();
         this.updateProgressBar();
       }
@@ -1446,6 +1645,120 @@ export class WordTrainerEngineController {
     setTimeout(() => {
       this.showResultFeedbackPanel(true);
     }, 350);
+  }
+
+  validateBuilderSubmission() {
+    if (!this.activeWord) return;
+
+    const count = this.activeWord.characterCount || this.activeWord.hanzi_simp.length;
+    const targetTones = this.activeWord.tones || [1];
+    const chars = this.activeWord.characters || Array.from(this.activeWord.hanzi_simp || '');
+
+    // 1. Evaluate Component Placement via Relative Spatial Topology
+    const evalResult = this.componentBuilder ? this.componentBuilder.evaluateActivePlacement() : { success: false, reason: 'ENGINE_NOT_READY' };
+
+    if (!evalResult.success) {
+      this.attemptsLeft = Math.max(0, this.attemptsLeft - 1);
+      this.updateAttemptPips();
+      this.shakeElement('open-placement-canvas');
+      this.playActiveWordAudio();
+
+      if (this.attemptsLeft > 0) {
+        if (evalResult.reason === 'NO_COMPONENTS') {
+          this.updateFeedback('hanzi-error', `⚠️ Place components on the canvas to build the character. Tries left: ${this.attemptsLeft}`);
+        } else if (evalResult.reason === 'WRONG_COMPONENTS') {
+          this.updateFeedback('hanzi-error', `⚠️ Check the components: select the correct parts needed for this word. Tries left: ${this.attemptsLeft}`);
+        } else if (evalResult.reason === 'MISPLACED_CHARACTERS') {
+          this.updateFeedback('hanzi-error', `⚠️ Character order: arrange the characters in reading order from left to right. Tries left: ${this.attemptsLeft}`);
+        } else {
+          this.updateFeedback('hanzi-error', `⚠️ Components misplaced: adjust their positions according to the character structure. Tries left: ${this.attemptsLeft}`);
+        }
+      } else {
+        // Attempts exhausted: Graceful Reveal & Re-queue word
+        this.updateFeedback('hanzi-error', '❌ Attempts exhausted! Revealing full card solution for review.');
+        if (this.isReappearanceStage && this.anchorWord) {
+          if (!this.hasRetriedAnchor) {
+            this.hasRetriedAnchor = true;
+            this.reappearanceRetryQueue.push(this.anchorWord);
+          }
+        }
+        setTimeout(() => {
+          this.showResultFeedbackPanel(false);
+        }, 400);
+      }
+      return;
+    }
+
+    // 2. Verify Tone selection for all characters
+    let missingToneIdx = -1;
+    for (let i = 0; i < count; i++) {
+      if (this.selectedTones[i] === null) {
+        missingToneIdx = i;
+        break;
+      }
+    }
+
+    if (missingToneIdx !== -1) {
+      this.updateFeedback('tone-error', `⚠️ Tone Missing: Select tone for character ${missingToneIdx + 1} (${chars[missingToneIdx] || ''}).`);
+      this.shakeElement('interaction-footer');
+      this.setCharIndex(missingToneIdx);
+      return;
+    }
+
+    // 3. Check Tone Correctness
+    let allTonesCorrect = true;
+    for (let i = 0; i < count; i++) {
+      if (this.selectedTones[i] !== targetTones[i]) {
+        allTonesCorrect = false;
+        break;
+      }
+    }
+
+    if (!allTonesCorrect) {
+      this.attemptsLeft = Math.max(0, this.attemptsLeft - 1);
+      this.updateAttemptPips();
+      this.shakeElement('interaction-footer');
+      this.playActiveWordAudio();
+
+      if (this.attemptsLeft > 0) {
+        this.updateFeedback('tone-error', `❌ Tone Mismatch: Components correctly assembled, but pitch contour is incorrect. Tries left: ${this.attemptsLeft}`);
+      } else {
+        // Attempts exhausted: Graceful Reveal & Re-queue word
+        this.updateFeedback('tone-error', '❌ Attempts exhausted! Revealing full card solution for review.');
+        if (this.isReappearanceStage && this.anchorWord) {
+          if (!this.hasRetriedAnchor) {
+            this.hasRetriedAnchor = true;
+            this.reappearanceRetryQueue.push(this.anchorWord);
+          }
+        }
+        setTimeout(() => {
+          this.showResultFeedbackPanel(false);
+        }, 400);
+      }
+      return;
+    }
+
+    // 4. MASTERED (Both Component Assembly and All Tones Correct!)
+    this.updateFeedback('correct', `🎉 Correct! Verified component assembly and confirmed tone (${targetTones.join(', ')}).`);
+
+    if (this.isReappearanceStage && this.anchorWord) {
+      const pData = this.state.phases[this.activePhase];
+      if (!pData.completedWordIds.includes(this.anchorWord.id)) {
+        pData.completedWordIds.push(this.anchorWord.id);
+        this.saveState();
+        this.updateProgressBar();
+      }
+    }
+
+    if (this.componentBuilder) {
+      this.componentBuilder.playCrystallizationAnimation(() => {
+        this.showResultFeedbackPanel(true);
+      });
+    } else {
+      setTimeout(() => {
+        this.showResultFeedbackPanel(true);
+      }, 350);
+    }
   }
 
   showResultFeedbackPanel(isMastered) {
@@ -1468,9 +1781,31 @@ export class WordTrainerEngineController {
       this.dom.resultDecomposition.textContent = this.activeWord.radical_decomposition || 'Indivisible root';
     }
 
-    // 2. Populate Drawing Feedback (FIRST)
+    // 2. Populate Drawing / Assembly Feedback (FIRST)
     if (this.dom.drawingTierBadge && this.dom.drawingFeedbackText && this.dom.feedbackDrawingCard) {
-      if (isMastered) {
+      if (this.getMode() === 'builder') {
+        if (isMastered) {
+          this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-600';
+          this.dom.drawingTierBadge.textContent = '🎯 Perfect Assembly!';
+          this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-emerald-50 border-emerald-500 text-emerald-950 flex flex-col gap-1.5';
+          if (this.dom.drawingFeedbackIcon) {
+            this.dom.drawingFeedbackIcon.className = 'material-symbols-outlined text-emerald-600 text-base';
+            this.dom.drawingFeedbackIcon.textContent = 'verified';
+          }
+          this.dom.drawingFeedbackText.textContent = 'All components placed in exact topological positions.';
+          if (this.dom.resultDemoOrderBtn) this.dom.resultDemoOrderBtn.classList.add('hidden');
+        } else {
+          this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-amber-100 text-amber-900 border border-amber-600';
+          this.dom.drawingTierBadge.textContent = '📖 Review Mode';
+          this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-amber-50 border-amber-500 text-amber-950 flex flex-col gap-1.5';
+          if (this.dom.drawingFeedbackIcon) {
+            this.dom.drawingFeedbackIcon.className = 'material-symbols-outlined text-amber-600 text-base';
+            this.dom.drawingFeedbackIcon.textContent = 'auto_stories';
+          }
+          this.dom.drawingFeedbackText.textContent = 'All 3 attempts used. Take note of the component structure shown above.';
+          if (this.dom.resultDemoOrderBtn) this.dom.resultDemoOrderBtn.classList.add('hidden');
+        }
+      } else if (isMastered) {
         if (classification.tier === 'TIER_1_CLEAN_PASS') {
           this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-600';
           this.dom.drawingTierBadge.textContent = '🎯 Perfect Form!';
@@ -1671,44 +2006,28 @@ export class WordTrainerEngineController {
   }
 
   advanceToNextWord() {
-    const pData = this.state.phases[this.activePhase];
-    const words = this.phaseWordsMap[this.activePhase] || [];
-    const batchIdx = pData.currentBatchIndex || 1;
-    const startIdx = (batchIdx - 1) * 5;
-    const batchWords = words.slice(startIdx, startIdx + 5);
-
-    if (this.currentPass === 'PASS_1_INTRO') {
-      this.pass1Index++;
-      if (this.pass1Index < batchWords.length) {
-        this.loadWord(batchWords[this.pass1Index]);
+    if (this.isReappearanceStage) {
+      // Reappearance stage completed
+      if (this.reappearanceRetryQueue && this.reappearanceRetryQueue.length > 0) {
+        const retryWord = this.reappearanceRetryQueue.shift();
+        this.anchorWord = retryWord;
+        this.isReappearanceStage = true;
+        this.loadWord(this.anchorWord);
       } else {
-        // Transition to Pass 2 (Retrieval Test)
-        this.currentPass = 'PASS_2_TEST';
-        this.activeTestingQueue = [...batchWords].sort(() => Math.random() - 0.5);
-        this.isScaffoldOn = false;
-        this.updateScaffoldBtnUI();
-
-        const firstTestWord = this.activeTestingQueue.shift();
-        this.loadWord(firstTestWord);
+        // Cemented anchor word! Begin next cycle
+        this.isReappearanceStage = false;
+        this.loadBatchForActivePhase();
       }
     } else {
-      if (this.activeTestingQueue.length > 0) {
-        const nextTestWord = this.activeTestingQueue.shift();
-        this.loadWord(nextTestWord);
+      // Introductory stage
+      this.wordsSinceAnchor++;
+      this.cycleIndex++;
+      if (this.cycleIndex < this.cycleWords.length) {
+        this.loadWord(this.cycleWords[this.cycleIndex]);
       } else {
-        // Batch Complete
-        pData.currentBatchIndex = batchIdx + 1;
-        const totalBatches = Math.max(1, Math.ceil(words.length / 5));
-
-        if (pData.currentBatchIndex > totalBatches) {
-          pData.status = 'completed';
-          this.saveState();
-          this.updatePhaseStepperUI();
-          this.triggerPhaseCompleteModal();
-        } else {
-          this.saveState();
-          this.loadBatchForActivePhase();
-        }
+        // Cycle introductory pass finished -> delayed reappearance of anchor word with Guide OFF
+        this.isReappearanceStage = true;
+        this.loadWord(this.anchorWord);
       }
     }
   }
@@ -1744,17 +2063,31 @@ export class WordTrainerEngineController {
   playActiveWordAudio() {
     if (!this.activeWord || !this.activeWord.audio) return;
     try {
+      // Cease any currently playing audio track before starting a new one
+      this.stopAudio();
+
       let audio = this.audioCache.get(this.activeWord.audio);
       if (!audio) {
         audio = new Audio(this.activeWord.audio);
         this.audioCache.set(this.activeWord.audio, audio);
       }
       audio.currentTime = 0;
+      this.currentAudio = audio;
       audio.play().catch(e => {
         console.warn('WordTrainerEngine: Audio playback notice', e);
       });
     } catch (e) {
       console.warn('WordTrainerEngine: Audio error', e);
+    }
+  }
+
+  stopAudio() {
+    if (this.currentAudio) {
+      try {
+        this.currentAudio.pause();
+        this.currentAudio.currentTime = 0;
+      } catch (_) {}
+      this.currentAudio = null;
     }
   }
 }

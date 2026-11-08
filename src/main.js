@@ -21,6 +21,86 @@ let parsedSpeed = parseFloat(localStorage.getItem('tone_trainer_human_speed') ||
 let humanPlaybackSpeed = (parsedSpeed === 0.8 || parsedSpeed === 0.65) ? 0.65 : 1.0; // 1.0 | 0.65 (0.8 migrated to 0.65)
 let lastProcessedResult = null; 
 
+// Pinyin Inventory Audio Source Toggle (Human Voice vs Neural TTS - Strategy 2 Lexical Filtering)
+let audioSourceMode = localStorage.getItem('tone_trainer_audio_source') || 'human'; // 'human' | 'tts'
+
+function getEligibleWords() {
+  if (audioSourceMode === 'tts') {
+    // Strategy 2: Lexical Filtering - only return syllables with genuine Chinese Hanzi
+    const lexical = words.filter(w => w.is_lexical !== false && w.audio_tts);
+    return lexical.length > 0 ? lexical : words;
+  }
+  return words;
+}
+
+function updateAudioSourceToggleUI() {
+  const isHuman = audioSourceMode === 'human';
+
+  const toggleHuman = document.getElementById('toggle-audio-human');
+  const toggleTTS = document.getElementById('toggle-audio-tts');
+  if (toggleHuman && toggleTTS) {
+    if (isHuman) {
+      toggleHuman.className = 'audio-toggle-btn px-2.5 sm:px-3 py-1 rounded-full font-mono text-[10px] sm:text-xs font-black uppercase transition-all bg-canvas-acid text-black';
+      toggleTTS.className = 'audio-toggle-btn px-2.5 sm:px-3 py-1 rounded-full font-mono text-[10px] sm:text-xs font-black uppercase transition-all text-white/70 hover:text-white';
+    } else {
+      toggleTTS.className = 'audio-toggle-btn px-2.5 sm:px-3 py-1 rounded-full font-mono text-[10px] sm:text-xs font-black uppercase transition-all bg-badge-pink text-white';
+      toggleHuman.className = 'audio-toggle-btn px-2.5 sm:px-3 py-1 rounded-full font-mono text-[10px] sm:text-xs font-black uppercase transition-all text-white/70 hover:text-white';
+    }
+  }
+
+  const libToggleHuman = document.getElementById('lib-toggle-audio-human');
+  const libToggleTTS = document.getElementById('lib-toggle-audio-tts');
+  if (libToggleHuman && libToggleTTS) {
+    if (isHuman) {
+      libToggleHuman.className = 'lib-audio-toggle-btn px-2.5 sm:px-3 py-1 rounded-full font-mono text-[10px] sm:text-xs font-black uppercase transition-all bg-canvas-acid text-black';
+      libToggleTTS.className = 'lib-audio-toggle-btn px-2.5 sm:px-3 py-1 rounded-full font-mono text-[10px] sm:text-xs font-black uppercase transition-all text-white/70 hover:text-white';
+    } else {
+      libToggleTTS.className = 'lib-audio-toggle-btn px-2.5 sm:px-3 py-1 rounded-full font-mono text-[10px] sm:text-xs font-black uppercase transition-all bg-badge-pink text-white';
+      libToggleHuman.className = 'lib-audio-toggle-btn px-2.5 sm:px-3 py-1 rounded-full font-mono text-[10px] sm:text-xs font-black uppercase transition-all text-white/70 hover:text-white';
+    }
+  }
+}
+
+function setAudioSourceMode(mode) {
+  audioSourceMode = mode === 'tts' ? 'tts' : 'human';
+  localStorage.setItem('tone_trainer_audio_source', audioSourceMode);
+  updateAudioSourceToggleUI();
+
+  // If in game screen and current item is non-lexical while in TTS mode, advance to lexical word
+  if (audioSourceMode === 'tts' && currentItem && currentItem.is_lexical === false) {
+    nextQuestion();
+  } else if (currentItem) {
+    // Preload next pending item with correct audio mode
+    const pool = getEligibleWords();
+    nextPendingItem = pool[Math.floor(Math.random() * pool.length)];
+    if (nextPendingItem) {
+      const p = (audioSourceMode === 'tts' && nextPendingItem.is_lexical && nextPendingItem.audio_tts)
+        ? `${import.meta.env.BASE_URL}${nextPendingItem.audio_tts}`
+        : `${import.meta.env.BASE_URL}${nextPendingItem.audio}`;
+      preloadAudio(p);
+    }
+  }
+
+  // Sync twin tumblers in Audio Library
+  if (window.syncAudioLibrarySelection) {
+    window.syncAudioLibrarySelection();
+  }
+}
+
+function setupAudioSourceToggles() {
+  const toggleHuman = document.getElementById('toggle-audio-human');
+  const toggleTTS = document.getElementById('toggle-audio-tts');
+  const libToggleHuman = document.getElementById('lib-toggle-audio-human');
+  const libToggleTTS = document.getElementById('lib-toggle-audio-tts');
+
+  if (toggleHuman) toggleHuman.addEventListener('click', () => setAudioSourceMode('human'));
+  if (toggleTTS) toggleTTS.addEventListener('click', () => setAudioSourceMode('tts'));
+  if (libToggleHuman) libToggleHuman.addEventListener('click', () => setAudioSourceMode('human'));
+  if (libToggleTTS) libToggleTTS.addEventListener('click', () => setAudioSourceMode('tts'));
+
+  updateAudioSourceToggleUI();
+} 
+
 // Resilient Web Audio & HTMLAudio pipeline for mobile browsers
 let audioCtx = null;
 let currentWebAudioSource = null;
@@ -191,8 +271,14 @@ function pinyin_to_tone(pinyin_with_number) {
 function setAppBackground(colorClass) {
   const app = document.getElementById('app');
   if (!app) return;
-  app.className = app.className.replace(/bg-canvas-\w+/g, '');
-  app.classList.add(colorClass);
+  // Remove all previous background color classes (named canvas tokens and arbitrary hex classes)
+  const bgClassesToRemove = Array.from(app.classList).filter(
+    c => c.startsWith('bg-canvas-') || c.startsWith('bg-[')
+  );
+  bgClassesToRemove.forEach(c => app.classList.remove(c));
+  if (colorClass) {
+    app.classList.add(colorClass);
+  }
 }
 
 function setupMenu() {
@@ -218,23 +304,95 @@ function setupMenu() {
   const backFromEngineBtn = document.getElementById('back-from-engine-btn');
 
   const startWordsBtn = document.getElementById('start-words-btn');
+  const modeSelectionScreen = document.getElementById('mode-selection-screen');
+  const modeSelectBackBtn = document.getElementById('mode-select-back-btn');
+  const startBuilderBtn = document.getElementById('start-builder-btn');
+  const startCalligraphyBtn = document.getElementById('start-calligraphy-btn');
   const wordTrainerScreen = document.getElementById('word-trainer-screen');
   const backFromWordsBtn = document.getElementById('back-from-words-btn');
+
+  function launchWordTrainerMode(mode) {
+    if (modeSelectionScreen) modeSelectionScreen.classList.add('hidden');
+    if (wordTrainerScreen) wordTrainerScreen.classList.remove('hidden');
+    localStorage.setItem('mandarin_trainer_selected_mode', mode);
+
+    const canvasArena = document.getElementById('canvas-arena');
+    const openPlacementArena = document.getElementById('open-placement-arena');
+    const modeTitle = document.getElementById('word-trainer-mode-title');
+    const modeDot = document.getElementById('word-trainer-mode-dot');
+
+    if (mode === 'builder') {
+      wordTrainerScreen.classList.remove('theme-calligraphy');
+      wordTrainerScreen.classList.add('theme-builder');
+      setAppBackground('bg-canvas-builder');
+
+      if (canvasArena) canvasArena.classList.add('hidden');
+      if (openPlacementArena) openPlacementArena.classList.remove('hidden');
+
+      if (modeTitle) modeTitle.textContent = 'WORD TRAINER // COMPONENT BUILDER';
+      if (modeDot) {
+        modeDot.className = 'w-2.5 h-2.5 rounded-full bg-[#065F46] animate-pulse border border-black';
+      }
+
+      if (typeof window.initComponentBuilderArena === 'function') {
+        window.initComponentBuilderArena();
+      }
+    } else {
+      wordTrainerScreen.classList.remove('theme-builder');
+      wordTrainerScreen.classList.add('theme-calligraphy');
+      setAppBackground('bg-canvas-calligraphy');
+
+      if (openPlacementArena) openPlacementArena.classList.add('hidden');
+      if (canvasArena) canvasArena.classList.remove('hidden');
+
+      if (modeTitle) modeTitle.textContent = 'WORD TRAINER // CALLIGRAPHY LAB';
+      if (modeDot) {
+        modeDot.className = 'w-2.5 h-2.5 rounded-full bg-[#D97706] animate-pulse border border-black';
+      }
+
+      if (typeof window.initWordTrainerCanvas === 'function') {
+        window.initWordTrainerCanvas();
+      }
+    }
+
+    if (window.WordTrainerEngine) {
+      if (!window.WordTrainerEngine.isInitialized) {
+        localStorage.setItem('mandarin_trainer_selected_mode', mode);
+        window.WordTrainerEngine.init();
+      } else {
+        window.WordTrainerEngine.switchMode(mode);
+      }
+      if (mode === 'calligraphy' && typeof window.WordTrainerEngine.syncCanvasDimensions === 'function') {
+        window.WordTrainerEngine.syncCanvasDimensions();
+      }
+    }
+  }
 
   if (startWordsBtn) {
     startWordsBtn.addEventListener('click', () => {
       menuScreen.classList.add('hidden');
       mainMenu.classList.remove('hidden');
       submenu.classList.add('hidden');
-      if (wordTrainerScreen) wordTrainerScreen.classList.remove('hidden');
-      setAppBackground('bg-[#F5F3FF]');
-      if (typeof window.initWordTrainerCanvas === 'function') {
-        window.initWordTrainerCanvas();
-      }
-      if (window.WordTrainerEngine && typeof window.WordTrainerEngine.init === 'function') {
-        window.WordTrainerEngine.init();
-      }
+      if (modeSelectionScreen) modeSelectionScreen.classList.remove('hidden');
+      setAppBackground('bg-canvas-celadon');
     });
+  }
+
+  if (modeSelectBackBtn) {
+    modeSelectBackBtn.addEventListener('click', () => {
+      if (modeSelectionScreen) modeSelectionScreen.classList.add('hidden');
+      menuScreen.classList.remove('hidden');
+      mainMenu.classList.remove('hidden');
+      setAppBackground('bg-canvas-acid');
+    });
+  }
+
+  if (startBuilderBtn) {
+    startBuilderBtn.addEventListener('click', () => launchWordTrainerMode('builder'));
+  }
+
+  if (startCalligraphyBtn) {
+    startCalligraphyBtn.addEventListener('click', () => launchWordTrainerMode('calligraphy'));
   }
 
   if (backFromWordsBtn) {
@@ -243,6 +401,9 @@ function setupMenu() {
       menuScreen.classList.remove('hidden');
       mainMenu.classList.remove('hidden');
       setAppBackground('bg-canvas-acid');
+      if (window.WordTrainerEngine && typeof window.WordTrainerEngine.stopAudio === 'function') {
+        window.WordTrainerEngine.stopAudio();
+      }
     });
   }
 
@@ -420,6 +581,7 @@ async function init() {
     }
 
     setupAudioLibrary();
+    setupAudioSourceToggles();
 
     setTimeout(() => {
       document.querySelectorAll('.tone-btn').forEach(btn => btn.classList.remove('pop-up'));
@@ -431,9 +593,24 @@ async function init() {
 
 async function playAudio(customPath) {
   ensureAudioUnlocked();
-  const audioPath = (typeof customPath === 'string' && customPath.trim().length > 0)
-    ? customPath.trim()
-    : (currentItem ? `${import.meta.env.BASE_URL}${currentItem.audio}` : null);
+  let rawPath = null;
+  if (typeof customPath === 'string' && customPath.trim().length > 0) {
+    rawPath = customPath.trim();
+  } else if (currentItem) {
+    if (audioSourceMode === 'tts' && currentItem.is_lexical && currentItem.audio_tts) {
+      rawPath = `${import.meta.env.BASE_URL}${currentItem.audio_tts}`;
+    } else {
+      rawPath = `${import.meta.env.BASE_URL}${currentItem.audio}`;
+    }
+  }
+
+  // Handle TTS route rewrite if a syllable audio path was passed
+  let audioPath = rawPath;
+  if (audioSourceMode === 'tts' && rawPath) {
+    if (rawPath.includes('audio/') && !rawPath.includes('audio/tts/') && !rawPath.includes('hsk_tts/')) {
+      audioPath = rawPath.replace('audio/', 'audio/tts/');
+    }
+  }
 
   console.log('[DEBUG] playAudio | customPath:', customPath, '| resolved:', audioPath, '| currentItem:', currentItem ? currentItem.audio : null);
 
@@ -580,9 +757,13 @@ function setupButtons() {
 
         } else {
             // Tone Trainer: Pre-select next item and preload audio immediately during user gesture!
-            nextPendingItem = words[Math.floor(Math.random() * words.length)];
-            if (nextPendingItem && nextPendingItem.audio) {
-              preloadAudio(`${import.meta.env.BASE_URL}${nextPendingItem.audio}`);
+            const pool = getEligibleWords();
+            nextPendingItem = pool[Math.floor(Math.random() * pool.length)];
+            if (nextPendingItem) {
+              const audioUrl = (audioSourceMode === 'tts' && nextPendingItem.is_lexical && nextPendingItem.audio_tts)
+                ? `${import.meta.env.BASE_URL}${nextPendingItem.audio_tts}`
+                : `${import.meta.env.BASE_URL}${nextPendingItem.audio}`;
+              preloadAudio(audioUrl);
             }
             if (nextQuestionTimer) {
               clearTimeout(nextQuestionTimer);
@@ -624,11 +805,12 @@ function nextQuestion() {
   document.getElementById('fab-container').classList.add('hidden');
   document.getElementById('explanation-box').classList.add('hidden');
 
-  if (nextPendingItem) {
+  const pool = getEligibleWords();
+  if (nextPendingItem && (audioSourceMode === 'human' || (nextPendingItem.is_lexical !== false && nextPendingItem.audio_tts))) {
     currentItem = nextPendingItem;
     nextPendingItem = null;
   } else {
-    currentItem = words[Math.floor(Math.random() * words.length)];
+    currentItem = pool[Math.floor(Math.random() * pool.length)] || words[0];
   }
   const display = document.getElementById('pinyin-display');
   const buttons = document.querySelectorAll('.tone-btn');
@@ -788,24 +970,32 @@ function setupAudioLibrary() {
 
         const initialKey = selectedInitial === '∅' ? '' : selectedInitial;
         const pinyinBase = initialKey + selectedFinal;
-        const matchingWords = words.filter(w => w.initial === initialKey && w.ending_base === selectedFinal);
+        const matchingWords = words.filter(w => {
+            if (w.initial !== initialKey || w.ending_base !== selectedFinal) return false;
+            if (audioSourceMode === 'tts') {
+                return w.is_lexical !== false && w.audio_tts;
+            }
+            return true;
+        });
 
         if (matchingWords.length > 0) {
             selectionDisplay.innerHTML = `
                 <span class="font-chinese font-black text-2xl sm:text-3xl text-black">${pinyinBase}</span>
                 <span class="ml-2 font-mono text-[11px] sm:text-xs uppercase tracking-wider font-bold bg-black text-canvas-acid px-2 py-0.5 rounded border border-black shadow-sm">
-                  ${matchingWords.length} TONE${matchingWords.length > 1 ? 'S' : ''}
+                  ${matchingWords.length} TONE${matchingWords.length > 1 ? 'S' : ''}${audioSourceMode === 'tts' ? ' (TTS)' : ''}
                 </span>
             `;
             mainPlayBtn.disabled = false;
         } else {
             selectionDisplay.innerHTML = `
                 <span class="font-chinese text-2xl font-bold text-black/30 line-through">${pinyinBase}</span>
-                <span class="ml-2 font-mono text-xs uppercase tracking-wider text-badge-red font-black">(No syllable)</span>
+                <span class="ml-2 font-mono text-xs uppercase tracking-wider text-badge-red font-black">${audioSourceMode === 'tts' ? '(No lexical TTS tone)' : '(No syllable)'}</span>
             `;
             mainPlayBtn.disabled = true;
         }
     }
+
+    window.syncAudioLibrarySelection = syncSelection;
 
     initialsSlider = new KeenSlider(initialsContainer, {
         vertical: true,
@@ -884,14 +1074,19 @@ function setupAudioLibrary() {
                 w.tone === tone
             );
 
-            if (word) {
+            // Under Strategy 2 Lexical Filtering: if audioSourceMode === 'tts', only enable if lexical
+            const isAvailable = word && (audioSourceMode === 'human' || (word.is_lexical !== false && word.audio_tts));
+
+            if (isAvailable) {
                 btn.disabled = false;
                 btn.classList.remove('opacity-30', 'cursor-not-allowed', 'pointer-events-none');
                 btn.classList.add('hover:bg-white', 'cursor-pointer');
+                btn.title = '';
             } else {
                 btn.disabled = true;
                 btn.classList.add('opacity-30', 'cursor-not-allowed', 'pointer-events-none');
                 btn.classList.remove('hover:bg-white', 'cursor-pointer');
+                btn.title = (word && !word.is_lexical) ? 'Non-lexical practice gap (Switch to Human to audition)' : '';
             }
         });
 
@@ -917,7 +1112,9 @@ function setupAudioLibrary() {
             );
 
             if (word) {
-                const audioPath = `${import.meta.env.BASE_URL}${word.audio}`;
+                const audioPath = (audioSourceMode === 'tts' && word.is_lexical && word.audio_tts)
+                    ? `${import.meta.env.BASE_URL}${word.audio_tts}`
+                    : `${import.meta.env.BASE_URL}${word.audio}`;
                 playAudio(audioPath);
             } else {
                 console.warn(`No audio found for ${initialKey}${selectedFinal}${tone}`);
@@ -2336,112 +2533,25 @@ function setupWordTrainerUI() {
   }
 
   function initWordTrainerCanvas() {
-    if (!paintCanvas || !ctx) return;
-    const rect = paintCanvas.getBoundingClientRect();
-    if (rect.width === 0 || rect.height === 0) return;
-    
-    const dpr = window.devicePixelRatio || 1;
-    const targetW = Math.round(rect.width * dpr);
-    const targetH = Math.round(rect.height * dpr);
-
-    if (paintCanvas.width !== targetW || paintCanvas.height !== targetH) {
-      let savedImg = null;
-      if (paintCanvas.width > 0 && paintCanvas.height > 0) {
-        try { savedImg = ctx.getImageData(0, 0, paintCanvas.width, paintCanvas.height); } catch (_) {}
-      }
-      paintCanvas.width = targetW;
-      paintCanvas.height = targetH;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.lineWidth = Math.max(10, Math.round(14 * dpr));
-      ctx.strokeStyle = '#1E1B2E';
-      if (savedImg) {
-        try { ctx.putImageData(savedImg, 0, 0); } catch (_) {}
-      }
+    if (window.WordTrainerEngine && typeof window.WordTrainerEngine.syncCanvasDimensions === 'function') {
+      window.WordTrainerEngine.syncCanvasDimensions();
     }
   }
   window.initWordTrainerCanvas = initWordTrainerCanvas;
 
-  function getCanvasCoords(e) {
-    if (!paintCanvas) return { x: 0, y: 0 };
-    const rect = paintCanvas.getBoundingClientRect();
-    const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
-    const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
-    const dpr = window.devicePixelRatio || 1;
-    return {
-      x: (clientX - rect.left) * dpr,
-      y: (clientY - rect.top) * dpr
-    };
-  }
-
-  function startDrawing(e) {
-    if (!paintCanvas || !ctx) return;
-    initWordTrainerCanvas();
-    if (e.cancelable && (e.type.startsWith('touch') || e.type.startsWith('pointer'))) {
-      e.preventDefault();
-    }
-    isDrawing = true;
-    const coords = getCanvasCoords(e);
-    lastX = coords.x;
-    lastY = coords.y;
-    currentStrokeLength = 0;
-
-    ctx.beginPath();
-    ctx.arc(lastX, lastY, ctx.lineWidth / 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = '#1E1B2E';
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-
-    // If feedback had error, reset to guidance
-    if (feedbackBanner && (feedbackBanner.classList.contains('border-rose-500') || feedbackBanner.classList.contains('border-rose-600') || feedbackBanner.classList.contains('border-amber-500'))) {
-      updateFeedback('neutral', 'Drawing strokes... Select tone and submit when ready.');
-    }
-  }
-
-  function moveDrawing(e) {
-    if (!isDrawing || !ctx) return;
-    if (e.cancelable && (e.type.startsWith('touch') || e.type.startsWith('pointer'))) {
-      e.preventDefault();
-    }
-    const coords = getCanvasCoords(e);
-    const dist = Math.hypot(coords.x - lastX, coords.y - lastY);
-    currentStrokeLength += dist;
-    totalDrawnLength += dist;
-
-    ctx.lineTo(coords.x, coords.y);
-    ctx.stroke();
-
-    lastX = coords.x;
-    lastY = coords.y;
-  }
-
-  function stopDrawing(e) {
-    if (!isDrawing || !ctx) return;
-    isDrawing = false;
-    if (currentStrokeLength > 8) {
-      strokeCount++;
-    }
-    ctx.closePath();
-  }
-
-  // Canvas drawing events are managed exclusively by WordTrainerEngineController
+  // Canvas drawing events & high-DPI scaling are managed exclusively by WordTrainerEngineController
   // to support high-DPI retina rendering, order-agnostic vector matching, and full-character snap.
 
   function clearPaintCanvas() {
-    if (paintCanvas && ctx) {
+    if (window.WordTrainerEngine && typeof window.WordTrainerEngine.clearCanvas === 'function') {
+      window.WordTrainerEngine.clearCanvas();
+    } else if (paintCanvas && ctx) {
       ctx.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
     }
     strokeCount = 0;
     currentStrokeLength = 0;
     totalDrawnLength = 0;
   }
-
-  // Window resize listener to keep canvas in sync
-  window.addEventListener('resize', () => {
-    initWordTrainerCanvas();
-  });
 
   // ----------------------------------------------------
   // B. VALIDATION FEEDBACK BANNER CONTROLLER
@@ -2508,7 +2618,40 @@ function setupWordTrainerUI() {
   }
 
   // ----------------------------------------------------
-  // C. CANVAS & ENGINE DELEGATION
+  // C. COMPONENT BUILDER ARENA & DRAG CONTROLLER
+  // ----------------------------------------------------
+  function initComponentBuilderArena() {
+    if (window.WordTrainerEngine && window.WordTrainerEngine.componentBuilder) {
+      window.WordTrainerEngine.componentBuilder.initDom();
+      if (window.WordTrainerEngine.activeWord) {
+        window.WordTrainerEngine.componentBuilder.mountWord(window.WordTrainerEngine.activeWord);
+      }
+    }
+  }
+
+  // ----------------------------------------------------
+  // D. MULTI-CHARACTER SINGLE CANVAS WATERMARK HELPER
+  // ----------------------------------------------------
+  function setupComponentBuilderCharacters(characters = []) {
+    const multiGrid = document.getElementById('multi-character-grid');
+    const watermark = document.getElementById('placement-ghost-watermark');
+
+    if (watermark && characters && characters.length > 0) {
+      watermark.textContent = characters.join('');
+    }
+
+    // Unified single canvas with zero visible divider lines
+    if (multiGrid) {
+      multiGrid.classList.add('hidden');
+      multiGrid.innerHTML = '';
+    }
+  }
+
+  window.initComponentBuilderArena = initComponentBuilderArena;
+  window.setupComponentBuilderCharacters = setupComponentBuilderCharacters;
+
+  // ----------------------------------------------------
+  // E. CANVAS & ENGINE DELEGATION
   // ----------------------------------------------------
   // All Word Trainer controls (scaffold guide toggle, undo stroke, clear canvas,
   // demo stroke order, tone selection, dual verification submit, and modals)
@@ -2530,6 +2673,7 @@ function setupWordTrainerUI() {
 // Initialize the app
 setupButtons();
 setupMenu();
+setupAudioSourceToggles();
 setupEnginePlaceholders();
 setupWordTrainerUI();
 init();

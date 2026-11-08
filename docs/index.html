@@ -8,7 +8,7 @@
     <!-- Google Fonts: Diverse Typographic Collision -->
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,700;0,800;1,800;1,900&family=Space+Grotesk:ital,wght@0,500;0,700;1,700&family=Space+Mono:ital,wght@0,400;0,700;1,700&family=Playfair+Display:ital,wght@0,700;1,700&family=Fredoka:wght@600;700&family=Noto+Sans+SC:wght@700;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,700;0,800;1,800;1,900&family=Space+Grotesk:ital,wght@0,500;0,700;1,700&family=Space+Mono:ital,wght@0,400;0,700;1,700&family=Playfair+Display:ital,wght@0,700;1,700&family=Fredoka:wght@600;700&family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap" rel="stylesheet" />
 
     <!-- Material Symbols -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -20,8 +20,8 @@
         document.write('<script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"><\/script>');
       }
     </script>
-    <script type="module" crossorigin src="/mandarin_tone_trainer/assets/index-3LGQew1V.js"></script>
-    <link rel="stylesheet" crossorigin href="/mandarin_tone_trainer/assets/index-Cv8_QQ7C.css">
+    <script type="module" crossorigin src="/mandarin_tone_trainer/assets/index-DRrtc7XF.js"></script>
+    <link rel="stylesheet" crossorigin href="/mandarin_tone_trainer/assets/index-N-QSMupu.css">
   </head>
   <body class="text-slate-900 font-grotesk min-h-[100dvh] antialiased selection:bg-badge-pink selection:text-white p-0 m-0 flex flex-col items-center justify-center overflow-x-hidden">
 
@@ -244,11 +244,22 @@
         <div class="absolute top-6 right-10 pointer-events-none z-0 text-black/[0.12] font-speed font-black text-2xl select-none tracking-tight">❯❯❯</div>
 
         <!-- Top Action Bar -->
-        <header class="w-full flex items-center justify-between shrink-0 mb-1 relative z-10">
-          <button id="back-to-menu-btn" class="bg-black text-white hover:bg-badge-pink px-3.5 py-1.5 rounded-full border-2 border-black font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-hard-black transition-colors active-collapse">
+        <header class="w-full flex items-center justify-between shrink-0 mb-1 relative z-10 gap-2">
+          <button id="back-to-menu-btn" class="bg-black text-white hover:bg-badge-pink px-3.5 py-1.5 rounded-full border-2 border-black font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-hard-black transition-colors active-collapse shrink-0">
             <span class="material-symbols-outlined text-sm">arrow_back</span> MENU
           </button>
-          <div id="game-mode-badge" class="bg-white border-2 border-black px-3 py-1 rounded-full font-mono text-xs font-bold shadow-hard-black uppercase">
+          
+          <!-- Audio Source Segmented Toggle (Human vs TTS) -->
+          <div class="flex items-center bg-black/90 p-0.5 rounded-full border-2 border-black shadow-hard-black" role="group" aria-label="Audio Source Toggle">
+            <button id="toggle-audio-human" class="audio-toggle-btn px-2.5 sm:px-3 py-1 rounded-full font-mono text-[10px] sm:text-xs font-black uppercase transition-all bg-canvas-acid text-black" data-source="human">
+              🎙️ HUMAN
+            </button>
+            <button id="toggle-audio-tts" class="audio-toggle-btn px-2.5 sm:px-3 py-1 rounded-full font-mono text-[10px] sm:text-xs font-black uppercase transition-all text-white/70 hover:text-white" data-source="tts">
+              🤖 TTS
+            </button>
+          </div>
+
+          <div id="game-mode-badge" class="bg-white border-2 border-black px-3 py-1 rounded-full font-mono text-xs font-bold shadow-hard-black uppercase truncate shrink-0">
             DRILL // TONE TRAINER
           </div>
         </header>
@@ -340,11 +351,22 @@
         <div class="absolute top-1/2 -left-2 -translate-y-1/2 pointer-events-none z-0 text-black/[0.12] font-mono font-black text-2xl select-none -rotate-90">///</div>
 
         <!-- Top Action Bar with Floating Return Control -->
-        <header class="w-full flex items-center justify-between shrink-0 mb-1 relative z-10">
-          <button id="back-to-main-menu-btn" class="bg-black text-white hover:bg-badge-pink px-3.5 py-1.5 rounded-full border-2 border-black font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-hard-black transition-colors active-collapse">
+        <header class="w-full flex items-center justify-between shrink-0 mb-1 relative z-10 gap-2">
+          <button id="back-to-main-menu-btn" class="bg-black text-white hover:bg-badge-pink px-3.5 py-1.5 rounded-full border-2 border-black font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-hard-black transition-colors active-collapse shrink-0">
             <span class="material-symbols-outlined text-sm">arrow_back</span> MENU
           </button>
-          <div class="bg-white border-2 border-black px-3 py-1 rounded-full font-mono text-xs font-bold shadow-hard-black flex items-center gap-1.5">
+
+          <!-- Audio Source Segmented Toggle (Human vs TTS) -->
+          <div class="flex items-center bg-black/90 p-0.5 rounded-full border-2 border-black shadow-hard-black" role="group" aria-label="Audio Source Toggle">
+            <button id="lib-toggle-audio-human" class="lib-audio-toggle-btn px-2.5 sm:px-3 py-1 rounded-full font-mono text-[10px] sm:text-xs font-black uppercase transition-all bg-canvas-acid text-black" data-source="human">
+              🎙️ HUMAN
+            </button>
+            <button id="lib-toggle-audio-tts" class="lib-audio-toggle-btn px-2.5 sm:px-3 py-1 rounded-full font-mono text-[10px] sm:text-xs font-black uppercase transition-all text-white/70 hover:text-white" data-source="tts">
+              🤖 TTS
+            </button>
+          </div>
+
+          <div class="bg-white border-2 border-black px-3 py-1 rounded-full font-mono text-xs font-bold shadow-hard-black flex items-center gap-1.5 truncate shrink-0">
             <span class="w-2 h-2 rounded-full bg-badge-cobalt"></span>
             <span>PINYIN COMBINATORIAL CHASSIS</span>
           </div>
@@ -828,12 +850,107 @@
       </div>
 
       <!-- ======================================================== -->
-      <!-- [05] WORD TRAINER SCREEN (#word-trainer-screen)          -->
+      <!-- [04.5] INTERMEDIATE MODE SELECTION SCREEN (#mode-selection-screen) -->
+      <!-- Option 3: Imperial Celadon & Plum Ink Gateway            -->
+      <!-- Layout mirrors the Initials & Endings intermediate submenu -->
+      <!-- ======================================================== -->
+      <div id="mode-selection-screen" class="mode-select-container relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto min-h-[100dvh] lg:h-full p-4 sm:p-7 lg:px-8 lg:py-6 flex flex-col justify-between overflow-hidden hidden select-none">
+        
+        <!-- Screen Aesthetic Vector Accents -->
+        <div class="absolute -bottom-6 -left-6 pointer-events-none z-0 font-chinese font-black text-white/[0.06] text-8xl sm:text-9xl select-none">格</div>
+        <div class="absolute top-4 right-6 pointer-events-none z-0 text-white/[0.12] font-mono font-black text-3xl select-none tracking-widest -rotate-12">///</div>
+        <div class="absolute bottom-16 right-1/2 pointer-events-none z-0 text-white/[0.15] text-2xl font-mono select-none">⌖</div>
+
+        <!-- Desktop Widescreen 2-Column Split matching Menu Screen -->
+        <div class="w-full my-auto flex-1 flex flex-col lg:grid lg:grid-cols-12 lg:gap-16 xl:gap-24 lg:items-center py-2 relative z-10">
+          
+          <!-- Left Brand Header Hub (Preserving the Mandarin Tone Trainer app title cluster) -->
+          <div class="w-full lg:col-span-5 flex flex-col justify-center py-2 max-w-md">
+            <section class="w-full pt-2 pb-2">
+              <div class="flex items-center mb-3">
+                <span class="bg-black text-[#6EE7B7] font-mono text-[10px] sm:text-xs font-black px-2.5 py-1 rounded border border-black uppercase tracking-wider">
+                  WORD TRAINER // GATEWAY
+                </span>
+              </div>
+
+              <!-- Master Typographic Headline Cluster -->
+              <div class="relative">
+                <h1 class="font-speed font-black italic tracking-tighter text-4xl sm:text-5xl md:text-6xl uppercase text-white leading-[0.88] select-none">
+                  MANDARIN<br />
+                  <span class="inline-block bg-[#022C22] text-[#6EE7B7] px-2 py-0.5 mt-1 -rotate-1 shadow-hard-black border-2 border-black whitespace-nowrap">TRAINER APP</span>
+                </h1>
+              </div>
+            </section>
+          </div>
+
+          <!-- Right Interactive Deck (Submenu Layout for Builder & Calligraphy) -->
+          <div class="w-full lg:col-span-7 flex flex-col justify-center">
+            <div class="w-full max-w-xl mx-auto lg:mx-0 flex flex-col gap-3 py-2">
+              
+              <!-- Return Control Strip -->
+              <div class="flex items-center justify-between mb-2">
+                <button id="mode-select-back-btn" class="bg-black text-white hover:bg-[#065F46] px-4 py-2 rounded-full border-2 border-black font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-hard-black transition-colors active-collapse cursor-pointer">
+                  <span class="material-symbols-outlined text-sm">arrow_back</span> BACK TO MENU
+                </button>
+                <span class="font-mono text-xs font-bold text-white/70 uppercase">CHOOSE PRACTICE STYLE</span>
+              </div>
+
+              <!-- Submenu Badges: 2-Column Grid (Builder & Calligraphy) -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 w-full">
+                
+                <!-- 1. Component Builder Sub-button -->
+                <button id="start-builder-btn" class="mode-card mode-builder text-left bg-[#DCFCE7] border-[3px] border-black rounded-2xl p-5 shadow-hard-black -rotate-1 hover:rotate-0 transition-transform active-collapse cursor-pointer flex flex-col justify-between">
+                  <div>
+                    <div class="flex justify-between items-start mb-3">
+                      <span class="font-chinese font-black text-2xl bg-black text-[#6EE7B7] px-2 py-1 rounded-lg">构</span>
+                      <span class="font-mono text-[10px] font-black bg-white text-[#064E3B] border border-black px-1.5 py-0.5 rounded uppercase">EASIER MODE</span>
+                    </div>
+                    <h2 class="mode-title font-speed font-black italic text-2xl text-[#064E3B] uppercase mb-1">Builder</h2>
+                    <p class="font-mono text-xs text-[#064E3B]/80 font-bold leading-snug">Assemble characters by placing radicals onto the grid.</p>
+                  </div>
+                  <div class="mt-3 pt-2 border-t-2 border-[#065F46]/20 flex items-center justify-between text-[11px] font-mono font-bold text-[#064E3B]">
+                    <span>START NOW ➔</span>
+                    <span class="font-chinese font-bold text-[#065F46]/60">米字格 • 拼字</span>
+                  </div>
+                </button>
+
+                <!-- 2. Calligraphy Lab Sub-button -->
+                <button id="start-calligraphy-btn" class="mode-card mode-calligraphy text-left bg-[#F3E8FF] border-[3px] border-black rounded-2xl p-5 shadow-hard-black rotate-1 hover:rotate-0 transition-transform active-collapse cursor-pointer flex flex-col justify-between">
+                  <div>
+                    <div class="flex justify-between items-start mb-3">
+                      <span class="font-chinese font-black text-2xl bg-black text-[#C4B5FD] px-2 py-1 rounded-lg">书</span>
+                      <span class="font-mono text-[10px] font-black bg-white text-[#4C1D95] border border-black px-1.5 py-0.5 rounded uppercase">ADVANCED</span>
+                    </div>
+                    <h2 class="mode-title font-speed font-black italic text-2xl text-[#4C1D95] uppercase mb-1">Calligraphy</h2>
+                    <p class="font-mono text-xs text-[#4C1D95]/80 font-bold leading-snug">Practice stroke order with freehand brush writing.</p>
+                  </div>
+                  <div class="mt-3 pt-2 border-t-2 border-[#4C1D95]/20 flex items-center justify-between text-[11px] font-mono font-bold text-[#4C1D95]">
+                    <span>START NOW ➔</span>
+                    <span class="font-chinese font-bold text-[#4C1D95]/60">笔顺 • 书法</span>
+                  </div>
+                </button>
+
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Bottom Footer Strip -->
+        <footer class="w-full pt-3 pb-1 flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] font-bold text-white/50 border-t-2 border-white/10">
+          <span>[WORD WORKSHOP // DUAL MODE]</span>
+          <span class="flex items-center gap-1 font-chinese text-white/70">
+            汉字与声调 ✦
+          </span>
+        </footer>
+      </div>
+
       <!-- ======================================================== -->
       <!-- [05] WORD TRAINER SCREEN (#word-trainer-screen)          -->
-      <!-- Option E: Pale Lavender Chalk & Solar Amber Palette | Lab -->
+      <!-- Option 3 Imperial Celadon (.theme-builder) / Plum (.theme-calligraphy) -->
       <!-- ======================================================== -->
-      <div id="word-trainer-screen" class="relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto min-h-[100dvh] lg:h-full max-h-[100dvh] p-3 sm:p-4 lg:px-8 lg:py-6 flex flex-col justify-between overflow-hidden bg-[#F5F3FF] bg-halftone-dots hidden">
+      <div id="word-trainer-screen" class="theme-calligraphy relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto min-h-[100dvh] lg:h-full max-h-[100dvh] p-3 sm:p-4 lg:px-8 lg:py-6 flex flex-col justify-between overflow-hidden bg-[#F5F3FF] bg-halftone-dots hidden">
         <!-- Aesthetic Calligraphic Watermark Vector Accents -->
         <div class="absolute top-14 left-4 pointer-events-none z-0 text-[#4C1D95]/[0.08] text-xs font-mono font-bold select-none">⌖ HANZI // CH 02</div>
         <div class="absolute -bottom-8 -left-6 pointer-events-none z-0 font-chinese font-black text-[#4C1D95]/[0.05] text-9xl select-none">字</div>
@@ -846,8 +963,8 @@
             <span class="material-symbols-outlined text-sm">arrow_back</span> MENU
           </button>
           <div class="bg-white border-2 border-black px-3 py-1 rounded-full font-mono text-xs font-bold shadow-hard-black flex items-center gap-2 uppercase">
-            <span class="w-2.5 h-2.5 rounded-full bg-[#D97706] animate-pulse border border-black"></span>
-            <span>WORD TRAINER // CHARACTER &amp; TONE</span>
+            <span id="word-trainer-mode-dot" class="w-2.5 h-2.5 rounded-full bg-[#D97706] animate-pulse border border-black"></span>
+            <span id="word-trainer-mode-title">WORD TRAINER // CHARACTER &amp; TONE</span>
           </div>
           <div id="words-corpus-tag" class="font-mono text-xs font-black text-white bg-black border-2 border-black px-2.5 py-0.5 rounded-full shadow-sm hidden sm:inline-flex items-center gap-1">
             <span class="text-[#A78BFA]">HSK 1+2</span> • 497 WORDS
@@ -947,6 +1064,114 @@
                   <span class="material-symbols-outlined text-base">restart_alt</span>
                   <span>CLEAR</span>
                 </button>
+              </div>
+            </section>
+
+            <!-- 2. Component Builder & Open Placement Arena (#open-placement-arena) -->
+            <!-- Option 3 Imperial Celadon & Jade Arena for Drag-and-Place Mode -->
+            <!-- Swapped in place of #canvas-arena when mode === 'builder' -->
+            <section id="open-placement-arena" class="order-2 w-full bg-white border-[3px] border-black rounded-2xl p-3 sm:p-5 lg:p-6 shadow-hard-black flex flex-col items-center justify-between gap-3 relative lg:min-h-[550px] hidden select-none">
+              <div class="w-full flex items-center justify-between gap-2 border-b-2 border-black/10 pb-1.5 sm:pb-2">
+                <div class="flex items-center gap-2">
+                  <span class="bg-[#065F46] text-white font-mono text-[9px] font-black px-2 py-0.5 rounded">
+                    COMPONENT ARENA
+                  </span>
+                  <span class="font-mono text-[10px] font-bold text-black/60 uppercase">
+                    OPEN SPATIAL ASSEMBLY • RADICAL BUILDER
+                  </span>
+                </div>
+                <span class="font-chinese font-bold text-xs text-black/40">米字格</span>
+              </div>
+
+              <!-- Open Placement Canvas Container (Supports Horizontal Resizing for Multi-Character Words) -->
+              <div id="open-placement-canvas-container" class="w-full flex items-center justify-center gap-2 sm:gap-3 my-0.5 sm:my-1 select-none overflow-x-auto no-scrollbar py-1">
+                
+                <!-- Open Placement Canvas Drop Target Surface (#open-placement-canvas) -->
+                <div id="open-placement-canvas" class="relative w-[310px] h-[310px] xs:w-[330px] xs:h-[330px] sm:w-[360px] sm:h-[360px] lg:w-[410px] lg:h-[410px] xl:w-[440px] xl:h-[440px] bg-[#fffdf9] border-[3px] border-black rounded-2xl shadow-hard-black flex items-center justify-center overflow-hidden select-none touch-none">
+                  <!-- Traditional 8-Quadrant Asterisk Grid (米字格) SVG with Celadon Jade Accent -->
+                  <svg id="placement-grid-svg" class="absolute inset-0 w-full h-full pointer-events-none stroke-[#065F46]/25 stroke-[1.5]" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <!-- Center Vertical Line -->
+                    <line x1="50" y1="0" x2="50" y2="100" stroke-dasharray="3,3" />
+                    <!-- Center Horizontal Line -->
+                    <line x1="0" y1="50" x2="100" y2="50" stroke-dasharray="3,3" />
+                    <!-- Diagonals -->
+                    <line x1="0" y1="0" x2="100" y2="100" stroke-dasharray="3,3" />
+                    <line x1="0" y1="100" x2="100" y2="0" stroke-dasharray="3,3" />
+                    <!-- Outer Inset Border -->
+                    <rect x="5" y="5" width="90" height="90" fill="none" class="stroke-[#065F46]/15 stroke-1" />
+                  </svg>
+
+                  <!-- Multi-Character Grid Cell Split (Dynamically Injected for 2+ Character Words) -->
+                  <div id="multi-character-grid" class="absolute inset-0 w-full h-full pointer-events-none hidden flex items-center justify-around p-1 z-10">
+                    <!-- Cell 1 -->
+                    <div class="char-cell relative flex-1 h-full border-r-2 border-dashed border-[#065F46]/30 flex flex-col items-center justify-between p-1">
+                      <span class="font-mono text-[9px] font-bold text-[#065F46]/50 uppercase">CHAR 1</span>
+                    </div>
+                    <!-- Cell 2 -->
+                    <div class="char-cell relative flex-1 h-full flex flex-col items-center justify-between p-1">
+                      <span class="font-mono text-[9px] font-bold text-[#065F46]/50 uppercase">CHAR 2</span>
+                    </div>
+                  </div>
+
+                  <!-- Faint Ghost Watermark Outline (Watermark guidance toggled via #placement-hint-btn) -->
+                  <div id="placement-ghost-watermark" class="absolute inset-0 flex items-center justify-center font-chinese font-semibold text-black/[0.12] text-[150px] xs:text-[170px] sm:text-[190px] lg:text-[215px] leading-none pointer-events-none select-none transition-opacity duration-200 opacity-0 z-10">
+                    问
+                  </div>
+
+                  <!-- Freeform Placed Components Layer (Interactive tiles dropped inside canvas) -->
+                  <div id="placed-components-layer" class="absolute inset-0 w-full h-full z-20 pointer-events-auto">
+                    <!-- Dynamically placed components reside here and can be repositioned -->
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Control Action Bar (#placement-controls) -->
+              <div id="placement-controls" class="w-full flex items-center justify-between gap-2 sm:gap-2.5 pt-0.5 sm:pt-1">
+                <!-- Hint Outline Button (Toggles ghost watermark) -->
+                <button id="placement-hint-btn" type="button" class="flex-1 py-2 sm:py-2.5 px-2.5 sm:px-3 rounded-xl bg-[#065F46] hover:bg-[#047857] text-white border-2 border-black font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm active-collapse cursor-pointer transition-all">
+                  <span class="material-symbols-outlined text-base">visibility</span>
+                  <span id="placement-hint-btn-text">HINT OUTLINE</span>
+                </button>
+
+                <!-- Clear / Reset Pieces Back to Dock Button -->
+                <button id="clear-placement-btn" type="button" class="flex-1 py-2 sm:py-2.5 px-2.5 sm:px-3 rounded-xl bg-white hover:bg-slate-100 text-black border-2 border-black font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm active-collapse cursor-pointer transition-all" title="Return all pieces to the dock">
+                  <span class="material-symbols-outlined text-base">restart_alt</span>
+                  <span>RESET PIECES</span>
+                </button>
+              </div>
+
+              <!-- Draggable Component Dock Tray (#component-dock) -->
+              <div class="w-full flex flex-col gap-1.5">
+                <div class="flex items-center justify-between px-1">
+                  <span class="font-mono text-[9px] font-black uppercase text-black/60 tracking-wider">
+                    COMPONENT DOCK • DRAG TILES TO CANVAS
+                  </span>
+                  <span id="dock-count-badge" class="font-mono text-[9px] font-bold text-[#065F46] bg-[#DCFCE7] px-2 py-0.5 rounded border border-[#065F46]/30">
+                    6 PIECES
+                  </span>
+                </div>
+                <div id="component-dock" class="w-full min-h-[64px] sm:min-h-[74px] p-2 bg-[#F0FDF4] border-2 border-black/30 rounded-2xl flex items-center justify-center gap-2 sm:gap-3 flex-wrap relative select-none">
+                  <!-- Dummy tactile draggable tiles for demonstration and testing -->
+                  <div class="draggable-component-tile w-12 h-12 sm:w-14 sm:h-14 bg-white border-2 border-black rounded-xl shadow-hard-black flex items-center justify-center font-chinese font-bold text-2xl sm:text-3xl text-black cursor-grab active:cursor-grabbing select-none transition-transform hover:scale-105 active:scale-95 touch-none" data-component-id="men" data-glyph="门" data-component-type="outer-frame" title="门 (gate/door)">
+                    门
+                  </div>
+                  <div class="draggable-component-tile w-12 h-12 sm:w-14 sm:h-14 bg-white border-2 border-black rounded-xl shadow-hard-black flex items-center justify-center font-chinese font-bold text-2xl sm:text-3xl text-black cursor-grab active:cursor-grabbing select-none transition-transform hover:scale-105 active:scale-95 touch-none" data-component-id="kou" data-glyph="口" data-component-type="inner-cavity" title="口 (mouth)">
+                    口
+                  </div>
+                  <div class="draggable-component-tile w-12 h-12 sm:w-14 sm:h-14 bg-white border-2 border-black rounded-xl shadow-hard-black flex items-center justify-center font-chinese font-bold text-2xl sm:text-3xl text-black cursor-grab active:cursor-grabbing select-none transition-transform hover:scale-105 active:scale-95 touch-none" data-component-id="ren_rad" data-glyph="亻" data-component-type="standard" title="亻 (person radical)">
+                    亻
+                  </div>
+                  <div class="draggable-component-tile w-12 h-12 sm:w-14 sm:h-14 bg-white border-2 border-black rounded-xl shadow-hard-black flex items-center justify-center font-chinese font-bold text-2xl sm:text-3xl text-black cursor-grab active:cursor-grabbing select-none transition-transform hover:scale-105 active:scale-95 touch-none" data-component-id="zhu_stem" data-glyph="主" data-component-type="standard" title="主 (master/host)">
+                    主
+                  </div>
+                  <div class="draggable-component-tile w-12 h-12 sm:w-14 sm:h-14 bg-white border-2 border-black rounded-xl shadow-hard-black flex items-center justify-center font-chinese font-bold text-2xl sm:text-3xl text-black cursor-grab active:cursor-grabbing select-none transition-transform hover:scale-105 active:scale-95 touch-none" data-component-id="ri" data-glyph="日" data-component-type="standard" title="日 (sun/day)">
+                    日
+                  </div>
+                  <div class="draggable-component-tile w-12 h-12 sm:w-14 sm:h-14 bg-white border-2 border-black rounded-xl shadow-hard-black flex items-center justify-center font-chinese font-bold text-2xl sm:text-3xl text-black cursor-grab active:cursor-grabbing select-none transition-transform hover:scale-105 active:scale-95 touch-none" data-component-id="mu" data-glyph="木" data-component-type="standard" title="木 (wood/tree)">
+                    木
+                  </div>
+                </div>
               </div>
             </section>
 

@@ -190,3 +190,162 @@
   background-color: #18181b !important;
   color: #DDD6FE !important;
 }
+
+/* ======================================================== */
+/* WORD TRAINER DUAL THEMING: OPTION 3 IMPERIAL CELADON & PLUM */
+/* ======================================================== */
+
+/* Component Builder Theme (.theme-builder) - Celadon & Jade */
+#word-trainer-screen.theme-builder {
+  background-color: #F0FDF4 !important;
+}
+.theme-builder .theme-primary-accent {
+  background-color: #065F46 !important;
+  color: #ffffff !important;
+}
+.theme-builder .phase-btn.phase-active {
+  background-color: #065F46 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+  box-shadow: 3px 3px 0px #000000 !important;
+}
+.theme-builder .phase-btn.phase-completed {
+  background-color: #DCFCE7 !important;
+  color: #065F46 !important;
+  border-color: #059669 !important;
+}
+.theme-builder #submit-word-btn {
+  background-color: #065F46 !important;
+}
+.theme-builder #submit-word-btn:hover {
+  background-color: #047857 !important;
+}
+.theme-builder #audio-replay-btn {
+  background-color: #065F46 !important;
+}
+.theme-builder #audio-replay-btn:hover {
+  background-color: #047857 !important;
+}
+.theme-builder #prompt-hint-box {
+  background-color: #ECFDF5 !important;
+  border-color: #A7F3D0 !important;
+}
+.theme-builder #prompt-hint-box span {
+  color: #059669 !important;
+}
+.theme-builder #prompt-hint {
+  color: #064E3B !important;
+}
+.theme-builder #pass-badge {
+  background-color: #065F46 !important;
+  color: #D1FAE5 !important;
+}
+.theme-builder .pip {
+  color: #065F46 !important;
+}
+
+/* Calligraphy Lab Theme (.theme-calligraphy) - Pale Lavender Chalk & Midnight Violet */
+#word-trainer-screen.theme-calligraphy {
+  background-color: #F5F3FF !important;
+}
+.theme-calligraphy .phase-btn.phase-active {
+  background-color: #4C1D95 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+  box-shadow: 3px 3px 0px #000000 !important;
+}
+.theme-calligraphy #submit-word-btn {
+  background-color: #4C1D95 !important;
+}
+.theme-calligraphy #submit-word-btn:hover {
+  background-color: #3B0764 !important;
+}
+.theme-calligraphy #audio-replay-btn {
+  background-color: #D97706 !important;
+}
+.theme-calligraphy #audio-replay-btn:hover {
+  background-color: #B45309 !important;
+}
+
+/* Draggable Component Tile States (Dock) */
+.draggable-component-tile {
+  touch-action: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+.draggable-component-tile.dragging-ghost {
+  opacity: 0.35;
+  transform: scale(0.95);
+}
+
+/* Placed Components on Canvas - PURE CALLIGRAPHIC STROKES ONLY */
+/* No tile background, no border, no shadow, allowing seamless crossing, overlap & nesting */
+.placed-component-glyph,
+.placed-component-tile {
+  touch-action: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  cursor: grab;
+  position: absolute;
+  z-index: 25;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: #1E1B2E !important;
+  font-family: "Noto Sans SC", sans-serif;
+  font-weight: 500;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+
+/* Optical stroke weight harmonization across component hierarchy:
+   1. Large outer frames (e.g. 门, 囗, 冂) are rendered in light weight (300) so their strokes
+      match the visual width of inner radicals without dominating the glyph.
+   2. Inner cavity radicals (e.g. 口, 丶) are rendered in bold weight (700) so smaller
+      strokes remain crisp, prominent, and proportional.
+   3. Standard radicals and stems (e.g. 亻, 主, 木, 日) use medium weight (500). */
+.placed-component-glyph[data-component-type="outer-frame"] {
+  font-weight: 300 !important;
+}
+
+.placed-component-glyph[data-component-type="inner-cavity"] {
+  font-weight: 700 !important;
+}
+
+.placed-component-glyph[data-component-type="standard"] {
+  font-weight: 500 !important;
+}
+
+.placed-component-glyph:hover,
+.placed-component-tile:hover {
+  filter: drop-shadow(0 0 2.5px rgba(6, 95, 70, 0.45));
+}
+.placed-component-glyph:active,
+.placed-component-tile:active {
+  cursor: grabbing;
+  filter: drop-shadow(0 0 5px rgba(6, 95, 70, 0.75));
+}
+
+/* Crystallization Animation on Verified Assembly */
+@keyframes crystallize-pulse {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(16, 185, 129, 0));
+  }
+  50% {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 16px rgba(16, 185, 129, 0.95));
+  }
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 4px rgba(6, 95, 70, 0.5));
+  }
+}
+.crystallize-pulse {
+  animation: crystallize-pulse 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
