@@ -141,6 +141,7 @@ export class StrokeMatcher {
     this.targetStrokes = [];
     this.unclaimedStrokes = [];
     this.claimedStrokes = [];
+    this.claimedStrokeDetails = [];
     this.recentUnmatchedStrokes = [];
   }
 
@@ -199,6 +200,7 @@ export class StrokeMatcher {
 
     this.unclaimedStrokes = this.targetStrokes.map(s => s.index);
     this.claimedStrokes = [];
+    this.claimedStrokeDetails = [];
     this.recentUnmatchedStrokes = [];
   }
 
@@ -312,7 +314,8 @@ export class StrokeMatcher {
         bestMatch = {
           strokeIndex: strokeIdx,
           target: target,
-          isCompoundMerged: false
+          isCompoundMerged: false,
+          diffAngle: result.diffAngle || 0
         };
       }
     }
@@ -323,7 +326,8 @@ export class StrokeMatcher {
         matched: true,
         strokeIndex: bestMatch.strokeIndex,
         strokePath: bestMatch.target.path,
-        isCompoundMerged: false
+        isCompoundMerged: false,
+        diffAngle: bestMatch.diffAngle
       };
     }
 
@@ -351,7 +355,8 @@ export class StrokeMatcher {
                 matched: true,
                 strokeIndex: strokeIdx,
                 strokePath: target.path,
-                isCompoundMerged: true
+                isCompoundMerged: true,
+                diffAngle: mergedResult.diffAngle || 0
               };
             }
           }
@@ -374,11 +379,16 @@ export class StrokeMatcher {
   /**
    * Claims a matching stroke and removes it from the unclaimed pool.
    */
-  claimStroke(strokeIndex) {
+  claimStroke(strokeIndex, meta = {}) {
     const idxInUnclaimed = this.unclaimedStrokes.indexOf(strokeIndex);
     if (idxInUnclaimed !== -1) {
       this.unclaimedStrokes.splice(idxInUnclaimed, 1);
       this.claimedStrokes.push(strokeIndex);
+      this.claimedStrokeDetails.push({
+        index: strokeIndex,
+        diffAngle: meta.diffAngle || 0,
+        isCompoundMerged: !!meta.isCompoundMerged
+      });
     }
     return {
       isComplete: this.unclaimedStrokes.length === 0,
@@ -393,6 +403,7 @@ export class StrokeMatcher {
   undoLastStroke() {
     if (this.claimedStrokes.length === 0) return null;
     const undoneIndex = this.claimedStrokes.pop();
+    this.claimedStrokeDetails.pop();
     if (!this.unclaimedStrokes.includes(undoneIndex)) {
       this.unclaimedStrokes.push(undoneIndex);
       this.unclaimedStrokes.sort((a, b) => a - b);
@@ -411,11 +422,28 @@ export class StrokeMatcher {
   reset() {
     this.unclaimedStrokes = this.targetStrokes.map(s => s.index);
     this.claimedStrokes = [];
+    this.claimedStrokeDetails = [];
     this.recentUnmatchedStrokes = [];
   }
 
   isComplete() {
     return this.targetStrokes.length > 0 && this.unclaimedStrokes.length === 0;
+  }
+
+  /**
+   * Returns maximum angular deviation among all claimed strokes.
+   */
+  getMaxAngleDeviation() {
+    if (!this.claimedStrokeDetails || this.claimedStrokeDetails.length === 0) return 0;
+    return Math.max(...this.claimedStrokeDetails.map(d => d.diffAngle || 0));
+  }
+
+  /**
+   * Checks if strokes were drawn in canonical traditional sequence (0, 1, 2, ...).
+   */
+  isCanonicalOrder() {
+    if (this.claimedStrokes.length === 0) return true;
+    return this.claimedStrokes.every((idx, pos) => idx === pos);
   }
 
   /**
@@ -442,4 +470,92 @@ export class StrokeMatcher {
     const sorted = [...this.unclaimedStrokes].sort((a, b) => a - b);
     return this.targetStrokes[sorted[0]] || null;
   }
+}
+
+/**
+ * Three-Tier Diagnostic Classifier
+ * Evaluates drawing against the Hanzi Drawing Feedback Engine Spec.
+ *
+ * Tier 1: Clean Pass (Native / Flawless)
+ * Tier 2: Soft Pass (2A: Tolerance / 2B: Order drift + Pro-Tip)
+ * Tier 3: Diagnostic Failure (Missing stroke, wrong angle, extra stroke, unrecognized)
+ */
+export function classifyDrawing(charMatcher, userDrawnStrokes = []) {
+  if (!charMatcher || !charMatcher.targetStrokes) {
+    return { tier: 'TIER_3_UNRECOGNIZED', badge: '❓ Unrecognized', detail: 'No character data available.', status: 'fail' };
+  }
+
+  const targetCount = charMatcher.targetStrokes.length;
+  const unclaimed = charMatcher.unclaimedStrokes;
+  const maxAngleDev = charMatcher.getMaxAngleDeviation();
+  const isStandardOrder = charMatcher.isCanonicalOrder();
+  const userStrokeCount = userDrawnStrokes.length;
+  const extraneousCount = Math.max(0, userStrokeCount - targetCount);
+
+  // 1. Complete Pass (All target strokes claimed)
+  if (unclaimed.length === 0 && extraneousCount === 0) {
+    if (maxAngleDev <= 15 && isStandardOrder) {
+      return {
+        tier: 'TIER_1_CLEAN_PASS',
+        badge: '🎯 Perfect Form!',
+        detail: 'Native execution with canonical stroke order and accurate angles.',
+        status: 'pass',
+        showOrderReplay: false
+      };
+    }
+    if (!isStandardOrder) {
+      return {
+        tier: 'TIER_2_SOFT_PASS_ORDER',
+        badge: '✓ Recognized!',
+        detail: '💡 Pro Tip: Native stroke order goes top-to-bottom, left-to-right.',
+        status: 'pass',
+        showOrderReplay: true
+      };
+    }
+    return {
+      tier: 'TIER_2_SOFT_PASS_TOLERANCE',
+      badge: '✓ Passed with Tolerance!',
+      detail: '💡 Tip: Keep strokes aligned and upright for balanced proportions.',
+      status: 'pass',
+      showOrderReplay: false
+    };
+  }
+
+  // 2. Diagnostic Failures
+  if (extraneousCount > 0 && unclaimed.length === 0) {
+    return {
+      tier: 'TIER_3_EXTRA_STROKE',
+      badge: '⚠️ Extra Stroke Detected',
+      detail: `Target has ${targetCount} strokes, but you drew ${userStrokeCount}.`,
+      status: 'fail',
+      extraCount: extraneousCount
+    };
+  }
+
+  if (unclaimed.length > 0 && userStrokeCount < targetCount) {
+    return {
+      tier: 'TIER_3_MISSING_STROKE',
+      badge: '⚠️ Almost There!',
+      detail: `${unclaimed.length} stroke${unclaimed.length > 1 ? 's are' : ' is'} missing (highlighted above).`,
+      status: 'fail',
+      missingIndex: unclaimed[0],
+      missingCount: unclaimed.length
+    };
+  }
+
+  if (maxAngleDev > 40) {
+    return {
+      tier: 'TIER_3_WRONG_ANGLE',
+      badge: '⚠️ Angle Alert',
+      detail: 'A stroke angle deviated significantly from the traditional trajectory.',
+      status: 'fail'
+    };
+  }
+
+  return {
+    tier: 'TIER_3_UNRECOGNIZED',
+    badge: '❓ Shape Unrecognized',
+    detail: 'Listen again, or tap [Guide: ON] to trace the reference strokes.',
+    status: 'fail'
+  };
 }

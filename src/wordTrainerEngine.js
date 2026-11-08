@@ -12,7 +12,7 @@
  * - High-Fidelity TTS Audio Database Integration
  */
 
-import { StrokeMatcher, getHanziPositioner } from './strokeMatcher.js';
+import { StrokeMatcher, getHanziPositioner, classifyDrawing } from './strokeMatcher.js';
 
 const STORAGE_KEY = 'mandarin_trainer_word_progress';
 
@@ -49,6 +49,8 @@ export class WordTrainerEngineController {
     this.charUserStrokes = []; // Handwriting strokes per character slot
     this.flashingStrokeIndex = null;
     this.isDrawingEventsBound = false;
+    this.isControlsBound = false;
+    this.isCarouselEventsBound = false;
 
     // Active HanziWriter instance for stroke-by-stroke grading
     this.activeWriter = null;
@@ -127,6 +129,7 @@ export class WordTrainerEngineController {
       progressBarFill: document.getElementById('progress-bar-fill'),
       batchIndicatorLabel: document.getElementById('batch-indicator-label'),
       passBadge: document.getElementById('pass-badge'),
+      promptArena: document.getElementById('prompt-arena'),
       audioReplayBtn: document.getElementById('audio-replay-btn'),
       promptHint: document.getElementById('prompt-hint'),
       promptHintBox: document.getElementById('prompt-hint-box'),
@@ -138,11 +141,35 @@ export class WordTrainerEngineController {
       undoStrokeBtn: document.getElementById('undo-stroke-btn'),
       clearCanvasBtn: document.getElementById('clear-canvas-btn'),
       demoOrderBtn: document.getElementById('canvas-demo-order-btn'),
+      interactionFooter: document.getElementById('interaction-footer'),
       toneSelectorGroup: document.getElementById('tone-selector-group'),
       toneBtns: document.querySelectorAll('.tone-choice-btn'),
       toneSegmentSlots: document.getElementById('tone-segment-slots'),
       attemptPips: document.getElementById('attempt-pips'),
       submitBtn: document.getElementById('submit-word-btn'),
+      resultFeedbackPanel: document.getElementById('result-feedback-panel'),
+      resultHanzi: document.getElementById('result-hanzi'),
+      resultPinyin: document.getElementById('result-pinyin'),
+      resultToneBadge: document.getElementById('result-tone-badge'),
+      resultMeaning: document.getElementById('result-meaning'),
+      resultDecomposition: document.getElementById('result-decomposition'),
+      resultAudioReplayBtn: document.getElementById('result-audio-replay-btn'),
+      feedbackDrawingCard: document.getElementById('feedback-drawing-card'),
+      drawingFeedbackIcon: document.getElementById('drawing-feedback-icon'),
+      drawingTierBadge: document.getElementById('drawing-tier-badge'),
+      drawingFeedbackText: document.getElementById('drawing-feedback-text'),
+      resultDemoOrderBtn: document.getElementById('result-demo-order-btn'),
+      feedbackToneCard: document.getElementById('feedback-tone-card'),
+      toneFeedbackIcon: document.getElementById('tone-feedback-icon'),
+      toneVerdictBadge: document.getElementById('tone-verdict-badge'),
+      toneFeedbackText: document.getElementById('tone-feedback-text'),
+      resultNextBtn: document.getElementById('result-next-btn'),
+      resultNextBtnText: document.getElementById('result-next-btn-text'),
+      batchProgressContainer: document.getElementById('batch-progress-container'),
+      openStrokeGuideBtn: document.getElementById('open-stroke-guide-btn'),
+      strokeGuideModal: document.getElementById('stroke-guide-modal'),
+      closeStrokeGuideBtn: document.getElementById('close-stroke-guide-btn'),
+      guideModalCloseBtn: document.getElementById('guide-modal-close-btn'),
       feedbackBanner: document.getElementById('validation-feedback-banner'),
       feedbackIcon: document.getElementById('validation-feedback-icon'),
       feedbackText: document.getElementById('validation-feedback-text'),
@@ -168,7 +195,13 @@ export class WordTrainerEngineController {
   }
 
   async loadCorpus() {
+    const base = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL)
+      ? import.meta.env.BASE_URL
+      : './';
+    const cleanBase = base.endsWith('/') ? base : base + '/';
+
     const urls = [
+      `${cleanBase}word_trainer_corpus.json`,
       './word_trainer_corpus.json',
       '/word_trainer_corpus.json',
       'word_trainer_corpus.json'
@@ -200,6 +233,9 @@ export class WordTrainerEngineController {
   }
 
   setupCarouselEvents() {
+    if (this.isCarouselEventsBound) return;
+    this.isCarouselEventsBound = true;
+
     const wrapper = this.dom.drawingCanvasWrapper;
     if (wrapper) {
       if (!this.dom.prevCharBtn) {
@@ -279,6 +315,9 @@ export class WordTrainerEngineController {
   }
 
   setupControlsEvents() {
+    if (this.isControlsBound) return;
+    this.isControlsBound = true;
+
     if (this.dom.undoStrokeBtn) {
       this.dom.undoStrokeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -306,6 +345,132 @@ export class WordTrainerEngineController {
         this.toggleScaffolding();
       });
     }
+
+    if (this.dom.submitBtn) {
+      this.dom.submitBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.validateSubmission();
+      });
+    }
+
+    if (this.dom.toneBtns) {
+      this.dom.toneBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const t = parseInt(btn.getAttribute('data-tone'), 10);
+          this.handleToneSelection(t);
+        });
+      });
+    }
+
+    if (this.dom.phaseBtns) {
+      this.dom.phaseBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const p = parseInt(btn.getAttribute('data-phase'), 10);
+          this.switchPhase(p);
+        });
+      });
+    }
+
+    if (this.dom.audioReplayBtn) {
+      this.dom.audioReplayBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.playActiveWordAudio();
+      });
+    }
+
+    if (this.dom.resultNextBtn) {
+      this.dom.resultNextBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.advanceToNextWord();
+      });
+    }
+
+    if (this.dom.resultAudioReplayBtn) {
+      this.dom.resultAudioReplayBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.playActiveWordAudio();
+      });
+    }
+
+    if (this.dom.resultDemoOrderBtn) {
+      this.dom.resultDemoOrderBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.demoStrokeOrder();
+      });
+    }
+
+    if (this.dom.openStrokeGuideBtn) {
+      this.dom.openStrokeGuideBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.openStrokeGuideModal();
+      });
+    }
+
+    if (this.dom.closeStrokeGuideBtn) {
+      this.dom.closeStrokeGuideBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.closeStrokeGuideModal();
+      });
+    }
+
+    if (this.dom.guideModalCloseBtn) {
+      this.dom.guideModalCloseBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.closeStrokeGuideModal();
+      });
+    }
+
+    if (this.dom.strokeGuideModal) {
+      this.dom.strokeGuideModal.addEventListener('click', (e) => {
+        if (e.target === this.dom.strokeGuideModal) {
+          this.closeStrokeGuideModal();
+        }
+      });
+    }
+
+    if (this.dom.modalNextBtn) {
+      this.dom.modalNextBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (this.dom.cardRevealModal) this.dom.cardRevealModal.classList.add('hidden');
+        this.advanceToNextWord();
+      });
+    }
+
+    if (this.dom.modalReplayBtn) {
+      this.dom.modalReplayBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.playActiveWordAudio();
+      });
+    }
+
+    if (this.dom.advancePhaseBtn) {
+      this.dom.advancePhaseBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (this.dom.phaseCompleteModal) this.dom.phaseCompleteModal.classList.add('hidden');
+        this.advanceToNextPhase();
+      });
+    }
+
+    if (this.dom.stayPhaseBtn) {
+      this.dom.stayPhaseBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (this.dom.phaseCompleteModal) this.dom.phaseCompleteModal.classList.add('hidden');
+      });
+    }
+  }
+
+  openStrokeGuideModal() {
+    if (this.dom.strokeGuideModal) {
+      this.dom.strokeGuideModal.classList.remove('hidden');
+    }
+  }
+
+  closeStrokeGuideModal() {
+    if (this.dom.strokeGuideModal) {
+      this.dom.strokeGuideModal.classList.add('hidden');
+    }
   }
 
   async fetchCharacterData(char) {
@@ -315,10 +480,20 @@ export class WordTrainerEngineController {
     }
 
     const enc = encodeURIComponent(char);
+    const base = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL)
+      ? import.meta.env.BASE_URL
+      : './';
+    const cleanBase = base.endsWith('/') ? base : base + '/';
+
     const urls = [
+      `${cleanBase}hanzi_data/${enc}.json`,
+      `${cleanBase}hanzi_data/${char}.json`,
       `./hanzi_data/${enc}.json`,
+      `./hanzi_data/${char}.json`,
       `/hanzi_data/${enc}.json`,
-      `hanzi_data/${enc}.json`
+      `/hanzi_data/${char}.json`,
+      `hanzi_data/${enc}.json`,
+      `hanzi_data/${char}.json`
     ];
 
     for (const url of urls) {
@@ -333,17 +508,25 @@ export class WordTrainerEngineController {
     }
 
     // Fallback to jsDelivr CDN
-    try {
-      const cdnUrl = `https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/${enc}.json`;
-      const res = await fetch(cdnUrl);
-      if (res.ok) {
-        const data = await res.json();
-        this.charDataCache.set(char, data);
-        return data;
-      }
-    } catch (_) {}
+    for (const target of [enc, char]) {
+      try {
+        const cdnUrl = `https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/${target}.json`;
+        const res = await fetch(cdnUrl);
+        if (res.ok) {
+          const data = await res.json();
+          this.charDataCache.set(char, data);
+          return data;
+        }
+      } catch (_) {}
+    }
 
     return null;
+  }
+
+  getUserStrokeWidth() {
+    const size = this.getCanvasSize();
+    // Proportional thickness: ~12px on mobile (310px-340px) up to ~15-16px on desktop (410px-440px)
+    return Math.max(12, Math.round(size * 0.035));
   }
 
   setupCanvasDrawingEvents() {
@@ -391,10 +574,16 @@ export class WordTrainerEngineController {
         this.renderCanvasLayers();
       }
 
+      const strokeWidth = this.getUserStrokeWidth();
+      ctx.beginPath();
+      ctx.fillStyle = '#1E1B2E';
+      ctx.arc(pt[0], pt[1], strokeWidth / 2, 0, Math.PI * 2);
+      ctx.fill();
+
       ctx.beginPath();
       ctx.moveTo(pt[0], pt[1]);
       ctx.strokeStyle = '#1E1B2E';
-      ctx.lineWidth = 6.5;
+      ctx.lineWidth = strokeWidth;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
     };
@@ -422,19 +611,17 @@ export class WordTrainerEngineController {
 
       const result = matcher.matchUserStroke(strokePts);
       if (result.matched) {
-        matcher.claimStroke(result.strokeIndex);
+        matcher.claimStroke(result.strokeIndex, {
+          diffAngle: result.diffAngle || 0,
+          isCompoundMerged: !!result.isCompoundMerged
+        });
 
-        const chars = this.activeWord.characters || Array.from(this.activeWord.hanzi_simp || '');
-        const targetChar = chars[this.activeCharIndex];
+        // If Mode A Guide is ON, re-render badges so claimed badge disappears
+        this.renderCanvasLayers();
 
-        // If all strokes claimed: trigger Full-Character Snap to Calligraphy!
         if (matcher.isComplete()) {
-          this.charRecognized[this.activeCharIndex] = true;
-          this.snapCharacterToCalligraphy();
-          this.updateFeedback('correct', `✓ Character '${targetChar}' correctly drawn! Select tone to submit.`);
+          this.updateFeedback('correct', `✓ Drawing complete! Select tone and press Submit.`);
         } else {
-          // If Mode A Guide is ON, re-render badges so claimed badge disappears
-          this.renderCanvasLayers();
           this.updateFeedback('neutral', `✓ Stroke recognized! (${matcher.claimedStrokes.length} of ${matcher.targetStrokes.length})`);
         }
       } else {
@@ -485,13 +672,21 @@ export class WordTrainerEngineController {
 
     if (this.charRecognized[this.activeCharIndex]) return;
 
+    const strokeWidth = this.getUserStrokeWidth();
     ctx.strokeStyle = '#1E1B2E';
-    ctx.lineWidth = 6.5;
+    ctx.fillStyle = '#1E1B2E';
+    ctx.lineWidth = strokeWidth;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
     for (const stroke of this.userDrawnStrokes) {
-      if (!stroke || stroke.length < 2) continue;
+      if (!stroke || stroke.length === 0) continue;
+      if (stroke.length === 1) {
+        ctx.beginPath();
+        ctx.arc(stroke[0][0], stroke[0][1], strokeWidth / 2, 0, Math.PI * 2);
+        ctx.fill();
+        continue;
+      }
       ctx.beginPath();
       ctx.moveTo(stroke[0][0], stroke[0][1]);
       for (let i = 1; i < stroke.length; i++) {
@@ -540,20 +735,25 @@ export class WordTrainerEngineController {
     if (!overlaySvg) {
       overlaySvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       overlaySvg.id = 'hanzi-custom-overlay-svg';
-      overlaySvg.setAttribute('class', 'absolute inset-0 w-full h-full pointer-events-none z-18');
       this.dom.drawingCanvasWrapper.appendChild(overlaySvg);
     }
+    overlaySvg.setAttribute('class', 'absolute inset-0 w-full h-full pointer-events-none z-[25]');
+    overlaySvg.style.zIndex = '25';
     overlaySvg.setAttribute('viewBox', `0 0 ${size} ${size}`);
     overlaySvg.innerHTML = '';
 
     if (!matcher || !matcher.charData) return;
 
+    if (matcher.canvasSize !== size || matcher.padding !== padding) {
+      matcher.setCharacter(matcher.charData, size, padding);
+    }
+
     // Use exact HanziWriter positioner transform matching the guide outline 100%
     const pos = getHanziPositioner(size, size, padding);
     const transformStr = pos.transform;
 
-    // 1. Group for Snapped Calligraphy (rendered in #1E1B2E once full character is complete!)
-    if (this.charRecognized[this.activeCharIndex] || matcher.isComplete()) {
+    // 1. Group for Snapped Calligraphy (rendered in #1E1B2E once answer is submitted and recognized!)
+    if (this.charRecognized[this.activeCharIndex]) {
       const snappedGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       snappedGroup.setAttribute('transform', transformStr);
 
@@ -600,20 +800,20 @@ export class WordTrainerEngineController {
           g.setAttribute('transform', `translate(${b.x}, ${b.y})`);
 
           const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          circle.setAttribute('r', '9');
+          circle.setAttribute('r', '10');
           circle.setAttribute('fill', '#D97706');
           circle.setAttribute('stroke', '#000000');
-          circle.setAttribute('stroke-width', '1.5');
+          circle.setAttribute('stroke-width', '2');
           g.appendChild(circle);
 
           const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
           text.setAttribute('text-anchor', 'middle');
-          text.setAttribute('dy', '3.5');
+          text.setAttribute('dominant-baseline', 'central');
           text.setAttribute('fill', '#ffffff');
-          text.setAttribute('font-family', 'monospace');
-          text.setAttribute('font-size', '9');
+          text.setAttribute('font-family', 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace');
+          text.setAttribute('font-size', '10');
           text.setAttribute('font-weight', '900');
-          text.textContent = b.badgeNumber;
+          text.textContent = String(b.badgeNumber);
           g.appendChild(text);
 
           badgesGroup.appendChild(g);
@@ -808,6 +1008,17 @@ export class WordTrainerEngineController {
 
     this.updateFeedback('neutral', 'Draw the character and select its tone to verify.');
 
+    // Reset panels: Show exercise inputs, hide result panel
+    if (this.dom.promptArena) this.dom.promptArena.classList.remove('hidden');
+    if (this.dom.interactionFooter) this.dom.interactionFooter.classList.remove('hidden');
+    if (this.dom.resultFeedbackPanel) this.dom.resultFeedbackPanel.classList.add('hidden');
+    if (this.dom.drawingCanvasWrapper) this.dom.drawingCanvasWrapper.style.boxShadow = '';
+
+    // Scroll back to top on mobile
+    if (window.innerWidth < 1024 && this.dom.screen) {
+      this.dom.screen.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     // Auto-play TTS native audio on initial load
     this.playActiveWordAudio();
   }
@@ -916,7 +1127,10 @@ export class WordTrainerEngineController {
     if (!window.HanziWriter || !this.dom.hanziTargetCanvas) return;
     const targetEl = this.dom.hanziTargetCanvas;
     targetEl.innerHTML = '';
-    targetEl.className = 'absolute inset-0 w-full h-full z-15 pointer-events-none';
+    targetEl.className = 'absolute inset-0 w-full h-full pointer-events-none transition-opacity duration-150 z-[15]';
+    targetEl.style.zIndex = '15';
+    targetEl.style.opacity = this.isScaffoldOn ? '1' : '0';
+    targetEl.style.visibility = this.isScaffoldOn ? 'visible' : 'hidden';
 
     const size = this.getCanvasSize();
     try {
@@ -1040,6 +1254,17 @@ export class WordTrainerEngineController {
       if (slotVal) slotVal.textContent = `T${toneIndex}`;
     }
 
+    if (this.dom.toneBtns) {
+      this.dom.toneBtns.forEach(b => {
+        const t = parseInt(b.getAttribute('data-tone'), 10);
+        if (t === toneIndex) {
+          b.classList.add('tone-selected');
+        } else {
+          b.classList.remove('tone-selected');
+        }
+      });
+    }
+
     const count = this.activeWord.characterCount || this.activeWord.hanzi_simp.length;
     if (count > 1 && this.activeCharIndex < count - 1) {
       setTimeout(() => {
@@ -1054,6 +1279,11 @@ export class WordTrainerEngineController {
   toggleScaffolding(forcedState) {
     this.isScaffoldOn = (forcedState !== undefined) ? forcedState : !this.isScaffoldOn;
     this.updateScaffoldBtnUI();
+
+    if (this.dom.hanziTargetCanvas) {
+      this.dom.hanziTargetCanvas.style.opacity = this.isScaffoldOn ? '1' : '0';
+      this.dom.hanziTargetCanvas.style.visibility = this.isScaffoldOn ? 'visible' : 'hidden';
+    }
 
     if (this.activeWriter) {
       if (this.isScaffoldOn) {
@@ -1143,12 +1373,14 @@ export class WordTrainerEngineController {
       } else {
         // Attempts exhausted: Graceful Reveal & Re-queue word
         this.updateFeedback('hanzi-error', '❌ Attempts exhausted! Revealing full card solution for review.');
+        this.charRecognized[this.activeCharIndex] = true;
+        this.snapCharacterToCalligraphy();
         if (this.currentPass === 'PASS_2_TEST') {
           this.activeTestingQueue.push(this.activeWord);
         }
         setTimeout(() => {
-          this.openRevealModal(false);
-        }, 500);
+          this.showResultFeedbackPanel(false);
+        }, 400);
       }
       return;
     }
@@ -1189,18 +1421,22 @@ export class WordTrainerEngineController {
       } else {
         // Attempts exhausted: Graceful Reveal & Re-queue word
         this.updateFeedback('tone-error', '❌ Attempts exhausted! Revealing full card solution for review.');
+        this.charRecognized[this.activeCharIndex] = true;
+        this.snapCharacterToCalligraphy();
         if (this.currentPass === 'PASS_2_TEST') {
           this.activeTestingQueue.push(this.activeWord);
         }
         setTimeout(() => {
-          this.openRevealModal(false);
-        }, 500);
+          this.showResultFeedbackPanel(false);
+        }, 400);
       }
       return;
     }
 
     // 4. MASTERED (Both Drawing Complete and All Tones Correct!)
     this.updateFeedback('correct', `🎉 Correct! Verified character strokes and confirmed tone (${targetTones.join(', ')}).`);
+    this.charRecognized[this.activeCharIndex] = true;
+    this.snapCharacterToCalligraphy();
 
     if (this.currentPass === 'PASS_2_TEST') {
       const pData = this.state.phases[this.activePhase];
@@ -1212,8 +1448,140 @@ export class WordTrainerEngineController {
     }
 
     setTimeout(() => {
-      this.openRevealModal(true);
-    }, 400);
+      this.showResultFeedbackPanel(true);
+    }, 350);
+  }
+
+  showResultFeedbackPanel(isMastered) {
+    if (!this.activeWord) return;
+
+    const targetTones = this.activeWord.tones || [1];
+    const matcher = this.charMatchers[this.activeCharIndex] || this.charMatchers[0];
+    const userStrokes = this.charUserStrokes[this.activeCharIndex] || this.userDrawnStrokes || [];
+    const classification = classifyDrawing(matcher, userStrokes);
+
+    // 1. Populate Word Result Header
+    if (this.dom.resultHanzi) this.dom.resultHanzi.textContent = this.activeWord.hanzi_simp;
+    if (this.dom.resultPinyin) this.dom.resultPinyin.textContent = this.activeWord.pinyin;
+    if (this.dom.resultToneBadge) {
+      this.dom.resultToneBadge.textContent = 'Tone ' + targetTones.join(', ');
+    }
+    if (this.dom.resultMeaning) this.dom.resultMeaning.textContent = this.activeWord.english;
+    if (this.dom.resultDecomposition) {
+      this.dom.resultDecomposition.textContent = this.activeWord.radical_decomposition || 'Indivisible root';
+    }
+
+    // 2. Populate Drawing Feedback (FIRST)
+    if (this.dom.drawingTierBadge && this.dom.drawingFeedbackText && this.dom.feedbackDrawingCard) {
+      if (isMastered) {
+        if (classification.tier === 'TIER_1_CLEAN_PASS') {
+          this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-600';
+          this.dom.drawingTierBadge.textContent = '🎯 Perfect Form!';
+          this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-emerald-50 border-emerald-500 text-emerald-950 flex flex-col gap-1.5';
+          if (this.dom.drawingFeedbackIcon) {
+            this.dom.drawingFeedbackIcon.className = 'material-symbols-outlined text-emerald-600 text-base';
+            this.dom.drawingFeedbackIcon.textContent = 'verified';
+          }
+          this.dom.drawingFeedbackText.textContent = classification.detail;
+          if (this.dom.resultDemoOrderBtn) this.dom.resultDemoOrderBtn.classList.add('hidden');
+
+          // Tier 1 Radiant green perimeter pulse
+          if (this.dom.drawingCanvasWrapper) {
+            this.dom.drawingCanvasWrapper.style.boxShadow = '0 0 16px rgba(34, 197, 94, 0.45)';
+            setTimeout(() => {
+              if (this.dom.drawingCanvasWrapper) this.dom.drawingCanvasWrapper.style.boxShadow = '';
+            }, 1800);
+          }
+        } else {
+          // Tier 2 Soft Pass (order drift or tolerance)
+          this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-blue-100 text-blue-800 border border-blue-500';
+          this.dom.drawingTierBadge.textContent = classification.badge;
+          this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-blue-50 border-blue-400 text-blue-950 flex flex-col gap-1.5';
+          if (this.dom.drawingFeedbackIcon) {
+            this.dom.drawingFeedbackIcon.className = 'material-symbols-outlined text-blue-600 text-base';
+            this.dom.drawingFeedbackIcon.textContent = 'lightbulb';
+          }
+          this.dom.drawingFeedbackText.textContent = classification.detail;
+          if (this.dom.resultDemoOrderBtn) {
+            if (classification.showOrderReplay) {
+              this.dom.resultDemoOrderBtn.classList.remove('hidden');
+            } else {
+              this.dom.resultDemoOrderBtn.classList.add('hidden');
+            }
+          }
+        }
+      } else {
+        // Failed / Attempts exhausted
+        this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-amber-100 text-amber-900 border border-amber-600';
+        this.dom.drawingTierBadge.textContent = '📖 Review Mode';
+        this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-amber-50 border-amber-500 text-amber-950 flex flex-col gap-1.5';
+        if (this.dom.drawingFeedbackIcon) {
+          this.dom.drawingFeedbackIcon.className = 'material-symbols-outlined text-amber-600 text-base';
+          this.dom.drawingFeedbackIcon.textContent = 'auto_stories';
+        }
+        this.dom.drawingFeedbackText.textContent = 'All 3 attempts used. Take note of the idealized stroke order shown above.';
+        if (this.dom.resultDemoOrderBtn) this.dom.resultDemoOrderBtn.classList.remove('hidden');
+      }
+    }
+
+    // 3. Populate Tone Feedback (BELOW DRAWING)
+    if (this.dom.toneVerdictBadge && this.dom.toneFeedbackText && this.dom.feedbackToneCard) {
+      const toneContours = {
+        1: '1st Tone (55 High Flat)',
+        2: '2nd Tone (35 Rising)',
+        3: '3rd Tone (214 Dipping)',
+        4: '4th Tone (51 Falling)',
+        5: 'Neutral Tone'
+      };
+
+      let toneMatched = true;
+      for (let i = 0; i < targetTones.length; i++) {
+        if (this.selectedTones[i] !== targetTones[i]) {
+          toneMatched = false;
+          break;
+        }
+      }
+
+      if (toneMatched) {
+        this.dom.toneVerdictBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-600';
+        this.dom.toneVerdictBadge.textContent = '✓ Tone Correct';
+        this.dom.feedbackToneCard.className = 'w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-emerald-50 border-emerald-500 text-emerald-950 flex flex-col gap-1.5';
+        if (this.dom.toneFeedbackIcon) {
+          this.dom.toneFeedbackIcon.className = 'material-symbols-outlined text-emerald-600 text-base';
+          this.dom.toneFeedbackIcon.textContent = 'check_circle';
+        }
+        const desc = targetTones.map(t => toneContours[t] || `Tone ${t}`).join(' • ');
+        this.dom.toneFeedbackText.textContent = `${desc} confirmed.`;
+      } else {
+        this.dom.toneVerdictBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-rose-100 text-rose-900 border border-rose-600';
+        this.dom.toneVerdictBadge.textContent = '✗ Tone Mismatch';
+        this.dom.feedbackToneCard.className = 'w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-rose-50 border-rose-500 text-rose-950 flex flex-col gap-1.5';
+        if (this.dom.toneFeedbackIcon) {
+          this.dom.toneFeedbackIcon.className = 'material-symbols-outlined text-rose-600 text-base';
+          this.dom.toneFeedbackIcon.textContent = 'error';
+        }
+        const userTones = this.selectedTones.map(t => t !== null ? `T${t}` : '?').join(', ');
+        const expTones = targetTones.map(t => `T${t} (${toneContours[t] || ''})`).join(', ');
+        this.dom.toneFeedbackText.textContent = `Selected: ${userTones} — Expected: ${expTones}`;
+      }
+    }
+
+    // 4. Update Next Word Button label
+    if (this.dom.resultNextBtnText) {
+      this.dom.resultNextBtnText.textContent = isMastered ? 'NEXT WORD' : 'NEXT WORD (REVIEW LATER)';
+    }
+
+    // 5. Hide Exercise Input Panels, Show Result Panel
+    if (this.dom.promptArena) this.dom.promptArena.classList.add('hidden');
+    if (this.dom.interactionFooter) this.dom.interactionFooter.classList.add('hidden');
+    if (this.dom.resultFeedbackPanel) this.dom.resultFeedbackPanel.classList.remove('hidden');
+
+    // 6. Mobile viewport auto-scroll: smoothly center/focus the feedback
+    if (window.innerWidth < 1024 && this.dom.resultFeedbackPanel) {
+      setTimeout(() => {
+        this.dom.resultFeedbackPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 60);
+    }
   }
 
   shakeElement(id) {
