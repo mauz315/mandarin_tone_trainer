@@ -6,7 +6,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta id="theme-color-meta" name="theme-color" content="#B8F526" />
     <title>Mandarin Tone Trainer - Neo-Sponsor Badge Collage</title>
     <style>
       html, body { background-color: #B8F526; }
@@ -28,10 +27,12 @@
       }
     </script>
   </head>
-  <body class="text-slate-900 font-grotesk h-full lg:min-h-[100dvh] antialiased selection:bg-badge-pink selection:text-white p-0 m-0 flex flex-col items-center justify-center overflow-hidden lg:overflow-x-hidden bg-canvas-acid transition-colors duration-500">
+  <body class="text-slate-900 font-grotesk h-full lg:min-h-[100dvh] antialiased selection:bg-badge-pink selection:text-white p-0 m-0 flex flex-col items-center justify-center overflow-hidden lg:overflow-x-hidden bg-canvas-acid">
 
     <!-- POSTER CANVAS CONTAINER (Full-bleed on both mobile and desktop) -->
-    <main id="app" class="app-safe-area w-full relative overflow-hidden h-full lg:h-screen lg:min-h-screen flex flex-col justify-between transition-colors duration-500 bg-canvas-acid">
+    <main id="app" class="app-safe-area w-full relative overflow-hidden h-full lg:h-screen lg:min-h-screen flex flex-col justify-between lg:transition-colors lg:duration-500 bg-canvas-acid">
+      <!-- Instant Top Safe-Area Backdrop for iOS Home Screen black-translucent Status Bar -->
+      <div id="status-bar-backdrop" class="lg:hidden" style="background-color: #B8F526;" aria-hidden="true"></div>
       <!-- Halftone Texture Background Layer -->
       <div class="absolute inset-0 bg-halftone-dots pointer-events-none z-0"></div>
 

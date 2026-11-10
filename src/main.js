@@ -305,6 +305,29 @@ function resolveCanvasColorHex(colorClass) {
   return hexMatch ? hexMatch[1] : '#B8F526';
 }
 
+function isIOSStandaloneApp() {
+  if (typeof window === 'undefined') return false;
+  const navStandalone = Boolean(window.navigator && window.navigator.standalone);
+  const mediaStandalone = Boolean(
+    window.matchMedia && window.matchMedia('(display-mode: standalone)').matches
+  );
+  const ua = (window.navigator && window.navigator.userAgent) || '';
+  const platform = (window.navigator && window.navigator.platform) || '';
+  const touchPoints = (window.navigator && window.navigator.maxTouchPoints) || 0;
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || (platform === 'MacIntel' && touchPoints > 1);
+  return isIOS && (navStandalone || mediaStandalone);
+}
+
+function replaceThemeColorMeta(hexColor) {
+  if (typeof document === 'undefined' || !document.head) return;
+  document.querySelectorAll('meta[name="theme-color"]').forEach(el => el.remove());
+  const meta = document.createElement('meta');
+  meta.id = 'theme-color-meta';
+  meta.name = 'theme-color';
+  meta.content = hexColor;
+  document.head.appendChild(meta);
+}
+
 function setAppBackground(colorClass) {
   const app = document.getElementById('app');
   if (!app) return;
@@ -330,9 +353,22 @@ function setAppBackground(colorClass) {
     document.body.style.backgroundColor = resolvedHex;
   }
 
-  const themeMeta = document.getElementById('theme-color-meta') || document.querySelector('meta[name="theme-color"]');
-  if (themeMeta) {
-    themeMeta.setAttribute('content', resolvedHex);
+  const statusBarBackdrop = document.getElementById('status-bar-backdrop');
+  if (statusBarBackdrop) {
+    statusBarBackdrop.style.backgroundColor = resolvedHex;
+    if (isIOSStandaloneApp()) {
+      void statusBarBackdrop.offsetHeight;
+    }
+  }
+
+  // Keep dynamic <meta name="theme-color"> for Safari tabs & Android Chrome via node replacement,
+  // while removing it inside iOS Home Screen standalone so it cannot override black-translucent.
+  if (isIOSStandaloneApp()) {
+    if (typeof document !== 'undefined') {
+      document.querySelectorAll('meta[name="theme-color"]').forEach(el => el.remove());
+    }
+  } else {
+    replaceThemeColorMeta(resolvedHex);
   }
 }
 
