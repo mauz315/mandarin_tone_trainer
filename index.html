@@ -40,29 +40,29 @@
       <!-- [01] MAIN MENU HUB (#menu-screen) -->
       <!-- Asymmetric Graphic Badge Collage, No Top Header -->
       <!-- ======================================================== -->
-      <div id="menu-screen" class="relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto h-full max-h-full p-4 sm:p-7 lg:px-8 lg:py-6 flex flex-col justify-between overflow-hidden">
+      <div id="menu-screen" class="relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto h-full max-h-full px-3.5 pt-1.5 pb-1 sm:p-6 lg:px-8 lg:py-6 flex flex-col justify-between overflow-hidden">
         
         <!-- Screen 1 Aesthetic Vector Accents (Options 1, 3, 5: Max 3 Accents) -->
         <div class="absolute -bottom-6 -left-6 pointer-events-none z-0 font-chinese font-black text-black/[0.08] text-8xl sm:text-9xl select-none">调</div>
         <div class="absolute top-4 right-6 pointer-events-none z-0 text-black/[0.12] font-mono font-black text-3xl select-none tracking-widest -rotate-12">///</div>
         <div class="absolute bottom-16 right-1/2 pointer-events-none z-0 text-black/[0.15] text-2xl font-mono select-none">⌖</div>
 
-        <!-- Desktop Widescreen 2-Column Split -->
-        <div class="w-full my-auto flex-1 flex flex-col lg:grid lg:grid-cols-12 lg:gap-16 xl:gap-24 lg:items-center py-2 relative z-10">
+        <!-- Desktop Widescreen 2-Column Split (Mimics Desktop Badge Collage Proportions on Mobile) -->
+        <div class="w-full flex-1 min-h-0 flex flex-col justify-evenly lg:grid lg:grid-cols-12 lg:gap-16 xl:gap-24 lg:items-center py-0.5 lg:py-2 relative z-10">
           
           <!-- Left Brand Header Hub -->
-          <div class="w-full lg:col-span-5 flex flex-col justify-center py-2 max-w-md">
+          <div class="w-full lg:col-span-5 flex flex-col justify-center py-0 lg:py-2 max-w-md shrink-0">
             <!-- Brand Identity Marquee Badge Area (Collage Anchor) -->
-            <section class="w-full pt-2 pb-2">
-              <div class="flex items-center mb-3">
-                <span class="bg-black text-canvas-acid font-mono text-[10px] sm:text-xs font-black px-2.5 py-1 rounded border border-black uppercase tracking-wider">
+            <section class="w-full pt-0.5 pb-1 lg:pt-2 lg:pb-2">
+              <div class="flex items-center mb-1.5 lg:mb-3">
+                <span class="bg-black text-canvas-acid font-mono text-[10px] sm:text-xs font-black px-2 py-0.5 sm:px-2.5 sm:py-1 rounded border border-black uppercase tracking-wider">
                   SYS // VER 2.4.0
                 </span>
               </div>
 
               <!-- Master Typographic Headline Cluster -->
               <div class="relative">
-                <h1 class="font-speed font-black italic tracking-tighter text-4xl sm:text-5xl md:text-6xl uppercase text-black leading-[0.88] select-none">
+                <h1 class="font-speed font-black italic tracking-tighter text-[30px] xs:text-4xl sm:text-5xl md:text-6xl uppercase text-black leading-[0.88] select-none">
                   MANDARIN<br />
                   <span class="inline-block bg-black text-canvas-acid px-2 py-0.5 mt-1 -rotate-1 shadow-hard-black whitespace-nowrap">TRAINER APP</span>
                 </h1>
@@ -73,10 +73,10 @@
           <!-- Right Interactive Deck (Badges / Submenu) -->
           <div class="w-full lg:col-span-7 flex flex-col justify-center">
             <!-- ASYMMETRIC BADGE COLLAGE MENU ITEMS (#main-menu) -->
-            <div id="main-menu" class="w-full max-w-xl mx-auto lg:mx-0 flex flex-col gap-3 py-2">
+            <div id="main-menu" class="w-full max-w-xl mx-auto lg:mx-0 flex flex-col gap-2.5 sm:gap-3 py-1 lg:py-2">
               <!-- 1. #start-tones-btn: The Heavy Speed Lozenge Ticket -->
               <button id="start-tones-btn" class="w-full text-left relative group -rotate-[1deg] hover:rotate-0 transition-transform duration-200 active-collapse">
-                <div class="bg-badge-butter border-[3px] border-black rounded-2xl p-4 sm:p-5 shadow-hard-black group-hover:bg-[#fffaab] transition-colors relative overflow-hidden">
+                <div class="bg-badge-butter border-[3px] border-black rounded-2xl p-3 sm:p-5 shadow-hard-black group-hover:bg-[#fffaab] transition-colors relative overflow-hidden">
                   <!-- Inline Graphic 3-Pill Slanted Lozenge Badge SVG -->
                   <div class="absolute -right-6 -bottom-6 opacity-20 pointer-events-none group-hover:opacity-30 transition-opacity">
                     <svg fill="none" height="100" viewBox="0 0 140 100" width="140">
@@ -85,73 +85,73 @@
                       <rect fill="#000" height="16" rx="8" transform="rotate(-25 75 20)" width="60" x="75" y="20"></rect>
                     </svg>
                   </div>
-                  <div class="flex items-start justify-between gap-3 relative z-10">
-                    <div class="space-y-1">
+                  <div class="flex items-start justify-between gap-2.5 sm:gap-3 relative z-10">
+                    <div class="space-y-0.5 sm:space-y-1 min-w-0">
                       <div class="flex items-center gap-2">
-                        <span class="bg-black text-badge-butter font-mono text-[11px] font-bold px-2 py-0.5 rounded">01</span>
-                        <span class="font-speed font-black italic tracking-tight text-2xl sm:text-3xl text-black uppercase">
+                        <span class="bg-black text-badge-butter font-mono text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded">01</span>
+                        <span class="font-speed font-black italic tracking-tight text-xl xs:text-2xl sm:text-3xl text-black uppercase leading-tight">
                           Tone Trainer
                         </span>
                       </div>
-                      <p class="font-mono text-xs sm:text-sm text-black/80 font-bold max-w-md pt-0.5">
+                      <p class="font-mono text-[11px] sm:text-sm text-black/80 font-bold leading-snug max-w-md pt-0.5">
                         Master the four tones of Mandarin through isolated audio drills.
                       </p>
                     </div>
-                    <div class="w-12 h-12 rounded-xl bg-black text-canvas-acid border-2 border-black flex items-center justify-center shrink-0 shadow-hard-black group-hover:scale-105 transition-transform">
-                      <span class="material-symbols-outlined text-2xl">graphic_eq</span>
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-black text-canvas-acid border-2 border-black flex items-center justify-center shrink-0 shadow-hard-black group-hover:scale-105 transition-transform">
+                      <span class="material-symbols-outlined text-xl sm:text-2xl">graphic_eq</span>
                     </div>
                   </div>
                 </div>
               </button>
 
-              <!-- Staggered Two-Column Row for Badges 2 and 3 -->
-              <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 w-full">
+              <!-- Staggered Two-Column Row for Badges 2 and 3 (Preserved 2-Col Side-by-Side on Mobile!) -->
+              <div class="grid grid-cols-2 sm:grid-cols-12 gap-2.5 sm:gap-3 w-full items-stretch">
                 <!-- 2. #open-submenu-btn: Retro Stadium Racetrack Oval Badge -->
-                <button id="open-submenu-btn" class="sm:col-span-6 text-left relative group rotate-[1.2deg] hover:rotate-0 transition-transform duration-200 active-collapse">
-                  <div class="bg-badge-lavender border-[3px] border-black rounded-3xl p-4 sm:p-5 shadow-hard-black group-hover:bg-[#afb6ff] transition-colors h-full flex flex-col justify-between">
+                <button id="open-submenu-btn" class="col-span-1 sm:col-span-6 w-full flex text-left relative group rotate-[1.2deg] hover:rotate-0 transition-transform duration-200 active-collapse">
+                  <div class="w-full bg-badge-lavender border-[3px] border-black rounded-2xl sm:rounded-3xl p-2.5 sm:p-5 shadow-hard-black group-hover:bg-[#afb6ff] transition-colors h-full flex flex-col justify-between">
                     <div>
-                      <div class="flex items-center justify-between mb-2">
-                        <span class="bg-badge-pink text-white font-mono text-[10px] font-black px-2 py-0.5 rounded-full border border-black">
+                      <div class="flex items-center justify-between gap-1 mb-1.5 sm:mb-2">
+                        <span class="bg-badge-pink text-white font-mono text-[8.5px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded-full border border-black truncate">
                           PHONOLOGY
                         </span>
-                        <span class="w-7 h-7 rounded-full bg-white border-2 border-black flex items-center justify-center font-chinese font-black text-xs">
+                        <span class="w-5 h-5 sm:w-7 sm:h-7 rounded-full bg-white border-[1.5px] sm:border-2 border-black flex items-center justify-center font-chinese font-black text-[10px] sm:text-xs shrink-0">
                           声
                         </span>
                       </div>
-                      <h3 class="font-speed font-black italic text-xl sm:text-2xl text-black uppercase leading-tight mb-1">
+                      <h3 class="font-speed font-black italic text-[15px] xs:text-base sm:text-2xl text-black uppercase leading-[1.05] mb-1">
                         Initials &amp; Endings
                       </h3>
-                      <p class="font-mono text-xs text-black/80 font-bold">
+                      <p class="font-mono text-[10px] sm:text-xs text-black/80 font-bold leading-tight">
                         Focus on Pinyin phonetic components.
                       </p>
                     </div>
-                    <div class="mt-3 pt-2 border-t-2 border-black/20 flex items-center justify-between text-[11px] font-mono font-bold text-black">
-                      <span>SUBMENU ➔</span>
-                      <span class="font-chinese font-bold text-black/60">声母 / 韵母</span>
+                    <div class="mt-2 sm:mt-3 pt-1.5 sm:pt-2 border-t-2 border-black/20 flex items-center justify-between gap-1 text-[9.5px] sm:text-[11px] font-mono font-bold text-black">
+                      <span class="whitespace-nowrap">SUBMENU ➔</span>
+                      <span class="font-chinese font-bold text-black/60 truncate">声母 / 韵母</span>
                     </div>
                   </div>
                 </button>
 
                 <!-- 3. #open-library-btn: Industrial Ticket / Sound Matrix Tag -->
-                <button id="open-library-btn" class="sm:col-span-6 text-left relative group -rotate-[1deg] hover:rotate-0 transition-transform duration-200 active-collapse">
-                  <div class="bg-badge-cobalt text-white border-[3px] border-black rounded-2xl p-4 sm:p-5 shadow-hard-black group-hover:bg-[#1f5bff] transition-colors h-full flex flex-col justify-between">
+                <button id="open-library-btn" class="col-span-1 sm:col-span-6 w-full flex text-left relative group -rotate-[1deg] hover:rotate-0 transition-transform duration-200 active-collapse">
+                  <div class="w-full bg-badge-cobalt text-white border-[3px] border-black rounded-2xl p-2.5 sm:p-5 shadow-hard-black group-hover:bg-[#1f5bff] transition-colors h-full flex flex-col justify-between">
                     <div>
-                      <div class="flex items-center justify-between mb-2">
-                        <span class="bg-canvas-acid text-black font-mono text-[10px] font-black px-2 py-0.5 rounded border border-black">
+                      <div class="flex items-center justify-between gap-1 mb-1.5 sm:mb-2">
+                        <span class="bg-canvas-acid text-black font-mono text-[8.5px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded border border-black truncate">
                           COMBINATORIAL
                         </span>
-                        <span class="material-symbols-outlined text-canvas-acid text-xl">dataset</span>
+                        <span class="material-symbols-outlined text-canvas-acid text-base sm:text-xl shrink-0">dataset</span>
                       </div>
-                      <h3 class="font-speed font-black italic text-xl sm:text-2xl text-white uppercase leading-tight mb-1">
+                      <h3 class="font-speed font-black italic text-[15px] xs:text-base sm:text-2xl text-white uppercase leading-[1.05] mb-1">
                         Audio Library
                       </h3>
-                      <p class="font-mono text-xs text-white/90 font-bold">
+                      <p class="font-mono text-[10px] sm:text-xs text-white/90 font-bold leading-tight">
                         Explore all Pinyin sound combinations.
                       </p>
                     </div>
-                    <div class="mt-3 pt-2 border-t-2 border-white/20 flex items-center justify-between text-[11px] font-mono font-bold text-canvas-acid">
-                      <span>OPEN MATRIX ✦</span>
-                      <span class="text-white/60">1,300+ SYLLABLES</span>
+                    <div class="mt-2 sm:mt-3 pt-1.5 sm:pt-2 border-t-2 border-white/20 flex items-center justify-between gap-1 text-[9.5px] sm:text-[11px] font-mono font-bold text-canvas-acid">
+                      <span class="whitespace-nowrap">OPEN MATRIX ✦</span>
+                      <span class="text-white/60 whitespace-nowrap"><span class="sm:hidden">1,300+</span><span class="hidden sm:inline">1,300+ SYLLABLES</span></span>
                     </div>
                   </div>
                 </button>
@@ -159,30 +159,30 @@
 
               <!-- 4. #start-words-btn: Deep Byzantine Plum Workshop Ticket (Option 2) -->
               <button id="start-words-btn" class="w-full text-left relative group rotate-[-0.8deg] hover:rotate-0 transition-transform duration-200 active-collapse cursor-pointer">
-                <div class="bg-[#4A0E4E] text-white border-[3px] border-black rounded-2xl p-4 sm:p-5 shadow-hard-black group-hover:bg-[#3D0B40] transition-colors relative overflow-hidden">
+                <div class="bg-[#4A0E4E] text-white border-[3px] border-black rounded-2xl p-3 sm:p-5 shadow-hard-black group-hover:bg-[#3D0B40] transition-colors relative overflow-hidden">
                   <!-- Decorative Chinese Character Background Accent -->
                   <div class="absolute -right-4 -bottom-6 opacity-20 pointer-events-none group-hover:opacity-30 transition-opacity font-chinese font-black text-8xl text-black">
                     字
                   </div>
-                  <div class="flex items-start justify-between gap-3 relative z-10">
-                    <div class="space-y-1">
-                      <div class="flex items-center gap-2">
-                        <span class="bg-black text-[#FEFCE8] font-mono text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded border border-black">
+                  <div class="flex items-start justify-between gap-2.5 sm:gap-3 relative z-10">
+                    <div class="space-y-0.5 sm:space-y-1 min-w-0">
+                      <div class="flex items-center flex-wrap gap-1.5 sm:gap-2">
+                        <span class="bg-black text-[#FEFCE8] font-mono text-[9.5px] sm:text-[11px] font-black px-1.5 sm:px-2 py-0.5 rounded border border-black">
                           03 // WORKSHOP
                         </span>
-                        <span class="bg-[#FEFCE8] text-[#104FE2] font-mono text-[10px] font-black px-2 py-0.5 rounded border border-black">
+                        <span class="bg-[#FEFCE8] text-[#104FE2] font-mono text-[9.5px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded border border-black">
                           5 PHASES • 497 WORDS
                         </span>
                       </div>
-                      <h3 class="font-speed font-black italic text-2xl sm:text-3xl text-white uppercase leading-tight pt-0.5">
+                      <h3 class="font-speed font-black italic text-xl xs:text-2xl sm:text-3xl text-white uppercase leading-tight pt-0.5">
                         Word Trainer
                       </h3>
-                      <p class="font-mono text-xs sm:text-sm text-white/90 font-bold max-w-md">
+                      <p class="font-mono text-[11px] sm:text-sm text-white/90 font-bold leading-snug max-w-md">
                         Listen, draw with stroke guidance, identify tones &amp; master morphemes.
                       </p>
                     </div>
-                    <div class="w-12 h-12 rounded-xl bg-black text-[#FEFCE8] border-2 border-black flex items-center justify-center shrink-0 shadow-hard-black group-hover:scale-105 transition-transform">
-                      <span class="material-symbols-outlined text-2xl">draw</span>
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-black text-[#FEFCE8] border-2 border-black flex items-center justify-center shrink-0 shadow-hard-black group-hover:scale-105 transition-transform">
+                      <span class="material-symbols-outlined text-xl sm:text-2xl">draw</span>
                     </div>
                   </div>
                 </div>
@@ -227,13 +227,14 @@
         </div>
 
         <!-- Bottom Graphic Footer Strip with Discreet Testing Button -->
-        <footer class="w-full pt-3 pb-1 flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] font-bold text-black/60 border-t-2 border-black/15">
-          <span>[TONE DRILLS &amp; PHONOLOGY]</span>
-          <button id="open-engine-btn" class="font-mono text-[10px] font-black uppercase tracking-wider bg-black text-canvas-acid hover:bg-badge-pink hover:text-white px-2.5 py-1 rounded-full border border-black shadow-hard-black flex items-center gap-1.5 transition-all active-collapse cursor-pointer" title="Developer / Product Testbed">
-            <span class="w-1.5 h-1.5 rounded-full bg-badge-pink animate-pulse"></span>
-            <span>LAB WORKS: PRONUNCIATION ENGINE [TEST] ➔</span>
+        <footer class="w-full shrink-0 pt-2 pb-0.5 sm:pt-3 sm:pb-1 flex items-center justify-between gap-2 font-mono text-[10px] sm:text-[11px] font-bold text-black/60 border-t-2 border-black/15 relative z-10">
+          <span class="hidden sm:inline">[TONE DRILLS &amp; PHONOLOGY]</span>
+          <button id="open-engine-btn" class="font-mono text-[9.5px] sm:text-[10px] font-black uppercase tracking-wide sm:tracking-wider bg-black text-canvas-acid hover:bg-badge-pink hover:text-white px-2.5 py-1 rounded-full border border-black shadow-hard-black flex items-center gap-1.5 transition-all active-collapse cursor-pointer min-w-0" title="Developer / Product Testbed">
+            <span class="w-1.5 h-1.5 rounded-full bg-badge-pink animate-pulse shrink-0"></span>
+            <span class="sm:hidden whitespace-nowrap">PRONUNCIATION LAB [TEST] ➔</span>
+            <span class="hidden sm:inline whitespace-nowrap">LAB WORKS: PRONUNCIATION ENGINE [TEST] ➔</span>
           </button>
-          <span class="flex items-center gap-1 font-chinese text-black">
+          <span class="flex items-center gap-1 font-chinese text-black shrink-0 whitespace-nowrap">
             声调训练器 ✦
           </span>
         </footer>

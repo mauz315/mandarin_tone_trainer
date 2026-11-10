@@ -463,13 +463,17 @@
     overscroll-behavior: none;
   }
 
+  #app.app-safe-area {
+    padding-bottom: max(0px, calc(env(safe-area-inset-bottom, 0px) * 0.35));
+  }
+
   #status-bar-backdrop {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     height: env(safe-area-inset-top, 0px);
-    z-index: 1;
+    z-index: 0;
     pointer-events: none;
   }
 
