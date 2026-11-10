@@ -1,3 +1,4 @@
+import defaultTheme from 'tailwindcss/defaultTheme'
 import forms from '@tailwindcss/forms'
 import containerQueries from '@tailwindcss/container-queries'
 
@@ -10,6 +11,10 @@ export default {
   ],
   darkMode: "class",
   theme: {
+    screens: {
+      xs: '390px',
+      ...defaultTheme.screens,
+    },
     extend: {
       colors: {
         'canvas-navy': '#202A36',

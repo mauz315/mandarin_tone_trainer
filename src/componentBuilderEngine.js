@@ -689,6 +689,8 @@ export class ComponentPlacementController {
     };
 
     this.isEventsBound = false;
+    this._resizeObserver = null;
+    this._resizeRafId = null;
   }
 
   setDecompositions(dict) {
@@ -736,6 +738,35 @@ export class ComponentPlacementController {
         }
       });
     }
+
+    // 3. Responsive Watermark Resizing (Decision C)
+    if (typeof ResizeObserver !== 'undefined' && this.dom.canvas && !this._resizeObserver) {
+      this._resizeObserver = new ResizeObserver(() => {
+        if (this._resizeRafId) cancelAnimationFrame(this._resizeRafId);
+        this._resizeRafId = requestAnimationFrame(() => {
+          this._resizeRafId = null;
+          this.updateWatermarkSizing();
+        });
+      });
+      this._resizeObserver.observe(this.dom.canvas);
+    }
+  }
+
+  updateWatermarkSizing() {
+    if (!this.dom.hintWatermark || !this.dom.canvas || !this.activeWord) return;
+    const canvasDim = this.dom.canvas.clientWidth || 0;
+    if (canvasDim <= 0) return;
+
+    const chars = this.activeWord.characters || Array.from(this.activeWord.hanzi_simp || '');
+    const count = Math.max(1, chars.length);
+
+    let ratio = 0.50;
+    if (count === 2) ratio = 0.36;
+    else if (count === 3) ratio = 0.25;
+    else if (count >= 4) ratio = 0.19;
+
+    const fontSize = Math.max(36, Math.round(canvasDim * ratio));
+    this.dom.hintWatermark.style.fontSize = `${fontSize}px`;
   }
 
   toggleGhostHint(forcedState) {
@@ -787,6 +818,10 @@ export class ComponentPlacementController {
         this.dom.hintWatermark.classList.add('opacity-25');
       } else {
         this.dom.hintWatermark.classList.add('opacity-0');
+      }
+      this.updateWatermarkSizing();
+      if (typeof requestAnimationFrame === 'function') {
+        requestAnimationFrame(() => this.updateWatermarkSizing());
       }
     }
 
@@ -895,7 +930,7 @@ export class ComponentPlacementController {
     this.dom.dock.innerHTML = '';
     dockItems.forEach(item => {
       const tile = document.createElement('div');
-      tile.className = 'draggable-component-tile w-12 h-12 sm:w-14 sm:h-14 bg-white border-2 border-black rounded-xl shadow-hard-black flex items-center justify-center font-chinese font-bold text-2xl sm:text-3xl text-black cursor-grab active:cursor-grabbing select-none transition-transform hover:scale-105 active:scale-95 touch-none';
+      tile.className = 'draggable-component-tile w-10 h-10 xs:w-11 xs:h-11 lg:w-14 lg:h-14 bg-white border-2 border-black rounded-xl shadow-hard-black flex items-center justify-center font-chinese font-bold text-xl xs:text-2xl lg:text-3xl text-black cursor-grab active:cursor-grabbing select-none transition-transform hover:scale-105 active:scale-95 touch-none';
       tile.dataset.componentId = item.id;
       tile.dataset.glyph = item.glyph;
       tile.dataset.componentType = getComponentType(item.glyph);

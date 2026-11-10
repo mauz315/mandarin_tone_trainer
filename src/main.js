@@ -333,7 +333,10 @@ function setupMenu() {
       window.WordTrainerEngine.stopAudio();
     }
     if (modeSelectionScreen) modeSelectionScreen.classList.add('hidden');
-    if (wordTrainerScreen) wordTrainerScreen.classList.remove('hidden');
+    if (wordTrainerScreen) {
+      wordTrainerScreen.classList.remove('mobile-result-active');
+      wordTrainerScreen.classList.remove('hidden');
+    }
     localStorage.setItem('mandarin_trainer_selected_mode', mode);
 
     const canvasArena = document.getElementById('canvas-arena');
@@ -351,7 +354,7 @@ function setupMenu() {
 
       if (modeTitle) modeTitle.textContent = 'WORD TRAINER // COMPONENT BUILDER';
       if (modeDot) {
-        modeDot.className = 'w-2.5 h-2.5 rounded-full bg-[#065F46] animate-pulse border border-black';
+        modeDot.className = 'w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#065F46] animate-pulse border border-black shrink-0';
       }
 
       if (typeof window.initComponentBuilderArena === 'function') {
@@ -367,7 +370,7 @@ function setupMenu() {
 
       if (modeTitle) modeTitle.textContent = 'WORD TRAINER // CALLIGRAPHY LAB';
       if (modeDot) {
-        modeDot.className = 'w-2.5 h-2.5 rounded-full bg-[#D97706] animate-pulse border border-black';
+        modeDot.className = 'w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#D97706] animate-pulse border border-black shrink-0';
       }
 
       if (typeof window.initWordTrainerCanvas === 'function') {
@@ -384,6 +387,9 @@ function setupMenu() {
       }
       if (mode === 'calligraphy' && typeof window.WordTrainerEngine.syncCanvasDimensions === 'function') {
         window.WordTrainerEngine.syncCanvasDimensions();
+        requestAnimationFrame(() => window.WordTrainerEngine.syncCanvasDimensions());
+      } else if (mode === 'builder' && window.WordTrainerEngine.componentBuilder) {
+        requestAnimationFrame(() => window.WordTrainerEngine.componentBuilder.updateWatermarkSizing());
       }
     }
   }
@@ -417,12 +423,20 @@ function setupMenu() {
 
   if (backFromWordsBtn) {
     backFromWordsBtn.addEventListener('click', () => {
-      if (wordTrainerScreen) wordTrainerScreen.classList.add('hidden');
+      if (wordTrainerScreen) {
+        wordTrainerScreen.classList.remove('mobile-result-active');
+        wordTrainerScreen.classList.add('hidden');
+      }
       menuScreen.classList.remove('hidden');
       mainMenu.classList.remove('hidden');
       setAppBackground('bg-canvas-acid');
-      if (window.WordTrainerEngine && typeof window.WordTrainerEngine.stopAudio === 'function') {
-        window.WordTrainerEngine.stopAudio();
+      if (window.WordTrainerEngine) {
+        if (typeof window.WordTrainerEngine.clearResultShowcase === 'function') {
+          window.WordTrainerEngine.clearResultShowcase();
+        }
+        if (typeof window.WordTrainerEngine.stopAudio === 'function') {
+          window.WordTrainerEngine.stopAudio();
+        }
       }
     });
   }

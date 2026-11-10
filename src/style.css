@@ -293,11 +293,33 @@
   background-color: #065F46 !important;
   color: #ffffff !important;
 }
-.theme-builder #next-word-btn {
+.theme-builder #result-next-btn {
   background-color: #065F46 !important;
 }
-.theme-builder #next-word-btn:hover {
+.theme-builder #result-next-btn:hover {
   background-color: #047857 !important;
+}
+.theme-builder #result-audio-replay-btn {
+  background-color: #065F46 !important;
+}
+.theme-builder #result-audio-replay-btn:hover {
+  background-color: #047857 !important;
+}
+.theme-builder #result-meaning-box {
+  background-color: #ECFDF5 !important;
+  border-color: #A7F3D0 !important;
+}
+.theme-builder #result-meaning-label {
+  color: #059669 !important;
+}
+.theme-builder #result-try-again-btn:hover {
+  background-color: #ECFDF5 !important;
+}
+.theme-builder #result-demo-order-btn {
+  color: #065F46 !important;
+}
+.theme-builder #mobile-stroke-guide-btn .material-symbols-outlined {
+  color: #065F46 !important;
 }
 .theme-builder #result-pinyin {
   color: #065F46 !important;
@@ -327,20 +349,58 @@
 .theme-calligraphy #submit-word-btn:hover {
   background-color: #3B0764 !important;
 }
-.theme-calligraphy #next-word-btn {
+.theme-calligraphy #result-next-btn {
   background-color: #4C1D95 !important;
 }
-.theme-calligraphy #next-word-btn:hover {
+.theme-calligraphy #result-next-btn:hover {
   background-color: #3B0764 !important;
+}
+.theme-calligraphy #result-try-again-btn:hover {
+  background-color: #FAF5FF !important;
+}
+.theme-calligraphy #result-demo-order-btn {
+  color: #4C1D95 !important;
 }
 .theme-calligraphy #result-pinyin {
   color: #4C1D95 !important;
 }
-.theme-calligraphy #audio-replay-btn {
+.theme-calligraphy #audio-replay-btn,
+.theme-calligraphy #result-audio-replay-btn {
   background-color: #D97706 !important;
 }
-.theme-calligraphy #audio-replay-btn:hover {
+.theme-calligraphy #audio-replay-btn:hover,
+.theme-calligraphy #result-audio-replay-btn:hover {
   background-color: #B45309 !important;
+}
+
+/* ======================================================== */
+/* MOBILE TWO-STATE LOCKED LAYOUT (< lg / < 1024px)         */
+/* Zero scrolling in View A (Active) & View B (Feedback)    */
+/* ======================================================== */
+@media (max-width: 1023px) {
+  #word-trainer-screen.mobile-result-active #prompt-arena,
+  #word-trainer-screen.mobile-result-active #canvas-arena,
+  #word-trainer-screen.mobile-result-active #open-placement-arena,
+  #word-trainer-screen.mobile-result-active #interaction-footer {
+    display: none !important;
+  }
+
+  #word-trainer-screen.mobile-result-active #result-feedback-panel {
+    display: flex !important;
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+  }
+
+  .canvas-fit-slot {
+    container-type: size;
+  }
+
+  .canvas-fit-square {
+    width: min(100cqw, 100cqh);
+    height: min(100cqw, 100cqh);
+    max-width: 440px;
+    max-height: 440px;
+  }
 }
 
 /* Draggable Component Tile States (Dock) */
@@ -362,7 +422,7 @@
   width: 100%;
   height: 100%;
   font-family: "Noto Serif SC", "Kaiti SC", "STKaiti", serif;
-  font-size: clamp(28px, 6vw, 42px);
+  font-size: 1.05em;
   line-height: 1;
   text-anchor: middle;
   dominant-baseline: central;

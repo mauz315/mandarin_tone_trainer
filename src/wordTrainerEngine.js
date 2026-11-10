@@ -67,6 +67,12 @@ export class WordTrainerEngineController {
 
     // Active HanziWriter instance for stroke-by-stroke grading
     this.activeWriter = null;
+    this.resultShowcaseWriters = [];
+    this._showcaseToken = 0;
+    this._lastWriterSize = 0;
+    this._lastCanvasCssSize = 0;
+    this._canvasResizeObserver = null;
+    this._resizeRafId = null;
 
     // DOM references cached on init
     this.dom = {};
@@ -153,6 +159,8 @@ export class WordTrainerEngineController {
         return;
       }
       // Load independent progress state for the newly selected mode
+      this.clearResultShowcase();
+      if (this.dom.screen) this.dom.screen.classList.remove('mobile-result-active');
       this.state = this.loadState();
       this.activePhase = this.state.activePhase || 1;
       const savedGuide = (typeof localStorage !== 'undefined') ? localStorage.getItem('mandarin_trainer_guide_mode') : null;
@@ -289,24 +297,29 @@ export class WordTrainerEngineController {
       attemptPips: document.getElementById('attempt-pips'),
       submitBtn: document.getElementById('submit-word-btn'),
       feedbackToast: document.getElementById('drawing-feedback-toast'),
+      toastFeedbackIcon: document.getElementById('toast-feedback-icon'),
+      toastFeedbackText: document.getElementById('toast-feedback-text'),
       promptTaskBadge: document.getElementById('prompt-task-badge'),
       interactionTaskBadge: document.getElementById('interaction-task-badge'),
       resultFeedbackPanel: document.getElementById('result-feedback-panel'),
+      resultShowcaseGrid: document.getElementById('result-showcase-grid'),
       resultHanzi: document.getElementById('result-hanzi'),
       resultPinyin: document.getElementById('result-pinyin'),
       resultMeaning: document.getElementById('result-meaning'),
       resultDecomposition: document.getElementById('result-decomposition'),
       resultAudioReplayBtn: document.getElementById('result-audio-replay-btn'),
       feedbackDrawingCard: document.getElementById('feedback-drawing-card'),
-      drawingFeedbackIcon: document.getElementById('drawing-feedback-icon'),
-      drawingFeedbackTitle: document.getElementById('drawing-feedback-title'),
+      resultFeedbackIcon: document.getElementById('result-feedback-icon'),
+      resultFeedbackTitle: document.getElementById('result-feedback-title'),
       drawingTierBadge: document.getElementById('drawing-tier-badge'),
-      drawingFeedbackText: document.getElementById('drawing-feedback-text'),
+      resultFeedbackText: document.getElementById('result-feedback-text'),
       resultDemoOrderBtn: document.getElementById('result-demo-order-btn'),
+      resultTryAgainBtn: document.getElementById('result-try-again-btn'),
       resultNextBtn: document.getElementById('result-next-btn'),
       resultNextBtnText: document.getElementById('result-next-btn-text'),
       batchProgressContainer: document.getElementById('batch-progress-container'),
       openStrokeGuideBtn: document.getElementById('open-stroke-guide-btn'),
+      strokeGuideTriggers: document.querySelectorAll('.open-stroke-guide-trigger'),
       strokeGuideModal: document.getElementById('stroke-guide-modal'),
       closeStrokeGuideBtn: document.getElementById('close-stroke-guide-btn'),
       guideModalCloseBtn: document.getElementById('guide-modal-close-btn'),
@@ -530,6 +543,13 @@ export class WordTrainerEngineController {
       });
     }
 
+    if (this.dom.resultTryAgainBtn) {
+      this.dom.resultTryAgainBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.retryCurrentWord();
+      });
+    }
+
     if (this.dom.resultAudioReplayBtn) {
       this.dom.resultAudioReplayBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -544,12 +564,15 @@ export class WordTrainerEngineController {
       });
     }
 
-    if (this.dom.openStrokeGuideBtn) {
-      this.dom.openStrokeGuideBtn.addEventListener('click', (e) => {
+    const guideBtns = (this.dom.strokeGuideTriggers && this.dom.strokeGuideTriggers.length > 0)
+      ? Array.from(this.dom.strokeGuideTriggers)
+      : (this.dom.openStrokeGuideBtn ? [this.dom.openStrokeGuideBtn] : []);
+    guideBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
         e.stopPropagation();
         this.openStrokeGuideModal();
       });
-    }
+    });
 
     if (this.dom.closeStrokeGuideBtn) {
       this.dom.closeStrokeGuideBtn.addEventListener('click', (e) => {
@@ -684,6 +707,25 @@ export class WordTrainerEngineController {
     const dpr = window.devicePixelRatio || 1;
     const cssW = Math.round(rect.width);
     const cssH = Math.round(rect.height);
+
+    // Rescale any live hand-drawn strokes proportionally if the responsive container changed size
+    if (this._lastCanvasCssSize > 0 && Math.abs(cssW - this._lastCanvasCssSize) > 2) {
+      const scale = cssW / this._lastCanvasCssSize;
+      if (Array.isArray(this.charUserStrokes)) {
+        this.charUserStrokes = this.charUserStrokes.map(charStrokes =>
+          Array.isArray(charStrokes)
+            ? charStrokes.map(stroke => stroke.map(([x, y]) => [x * scale, y * scale]))
+            : charStrokes
+        );
+      }
+      if (Array.isArray(this.userDrawnStrokes)) {
+        this.userDrawnStrokes = this.userDrawnStrokes.map(stroke =>
+          stroke.map(([x, y]) => [x * scale, y * scale])
+        );
+      }
+    }
+    this._lastCanvasCssSize = cssW;
+
     const targetW = Math.round(cssW * dpr);
     const targetH = Math.round(cssH * dpr);
 
@@ -708,10 +750,40 @@ export class WordTrainerEngineController {
 
     this.isDrawingEventsBound = true;
 
+    const handleCanvasResize = () => {
+      if (this._resizeRafId) cancelAnimationFrame(this._resizeRafId);
+      this._resizeRafId = requestAnimationFrame(() => {
+        this._resizeRafId = null;
+        const wrapper = this.dom.drawingCanvasWrapper;
+        if (!wrapper) return;
+        const rect = wrapper.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+
+        this.syncCanvasDimensions();
+        const newSize = Math.round(rect.width);
+        if (Math.abs(newSize - (this._lastWriterSize || 0)) > 2) {
+          this._lastWriterSize = newSize;
+          this.renderCanvasLayers();
+          if (this.activeWord && this.getMode() !== 'builder') {
+            const chars = this.activeWord.characters || Array.from(this.activeWord.hanzi_simp || '');
+            const targetChar = chars[this.activeCharIndex];
+            if (targetChar) {
+              this.mountHanziWriterQuiz(targetChar, this.activeCharIndex);
+            }
+          }
+        }
+      });
+    };
+
     this.syncCanvasDimensions();
-    window.addEventListener('resize', () => {
-      this.syncCanvasDimensions();
-    });
+    const initialWrapperRect = this.dom.drawingCanvasWrapper ? this.dom.drawingCanvasWrapper.getBoundingClientRect() : null;
+    this._lastWriterSize = (initialWrapperRect && initialWrapperRect.width > 0) ? Math.round(initialWrapperRect.width) : 0;
+
+    window.addEventListener('resize', handleCanvasResize);
+    if (typeof ResizeObserver !== 'undefined' && this.dom.drawingCanvasWrapper && !this._canvasResizeObserver) {
+      this._canvasResizeObserver = new ResizeObserver(handleCanvasResize);
+      this._canvasResizeObserver.observe(this.dom.drawingCanvasWrapper);
+    }
 
     const getCoords = (e) => {
       const rect = canvas.getBoundingClientRect();
@@ -984,7 +1056,128 @@ export class WordTrainerEngineController {
     }
   }
 
+  clearResultShowcase() {
+    this._showcaseToken++;
+    this.resultShowcaseWriters = [];
+    if (this.dom.resultShowcaseGrid) {
+      this.dom.resultShowcaseGrid.innerHTML = '';
+    }
+  }
+
+  renderResultShowcase(word, mode = 'calligraphy') {
+    this.clearResultShowcase();
+    const grid = this.dom.resultShowcaseGrid;
+    if (!grid || !word) return;
+
+    const chars = word.characters || Array.from(word.hanzi_simp || '');
+    if (chars.length === 0) return;
+
+    let boxSize = 90;
+    if (chars.length === 2) boxSize = 78;
+    else if (chars.length === 3) boxSize = 68;
+    else if (chars.length >= 4) boxSize = 58;
+
+    const padding = Math.max(4, Math.round(boxSize * 0.08));
+    const gridStrokeColor = (mode === 'builder') ? 'rgba(6, 95, 70, 0.22)' : 'rgba(76, 29, 149, 0.22)';
+    const innerRectColor = (mode === 'builder') ? 'rgba(6, 95, 70, 0.14)' : 'rgba(76, 29, 149, 0.14)';
+
+    chars.forEach((ch) => {
+      const box = document.createElement('button');
+      box.type = 'button';
+      box.className = 'result-showcase-box relative bg-[#fffdf9] border-2 border-black rounded-xl shadow-xs flex items-center justify-center overflow-hidden select-none cursor-pointer active:scale-95 transition-transform shrink-0';
+      box.style.width = `${boxSize}px`;
+      box.style.height = `${boxSize}px`;
+      box.title = `Tap to replay strokes for ${ch}`;
+      box.setAttribute('aria-label', `Replay strokes for ${ch}`);
+
+      const gridSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      gridSvg.setAttribute('class', 'absolute inset-0 w-full h-full pointer-events-none');
+      gridSvg.setAttribute('viewBox', '0 0 100 100');
+      gridSvg.setAttribute('preserveAspectRatio', 'none');
+      gridSvg.innerHTML = `
+        <line x1="50" y1="0" x2="50" y2="100" stroke="${gridStrokeColor}" stroke-width="1.5" stroke-dasharray="3,3" />
+        <line x1="0" y1="50" x2="100" y2="50" stroke="${gridStrokeColor}" stroke-width="1.5" stroke-dasharray="3,3" />
+        <line x1="0" y1="0" x2="100" y2="100" stroke="${gridStrokeColor}" stroke-width="1.5" stroke-dasharray="3,3" />
+        <line x1="0" y1="100" x2="100" y2="0" stroke="${gridStrokeColor}" stroke-width="1.5" stroke-dasharray="3,3" />
+        <rect x="5" y="5" width="90" height="90" fill="none" stroke="${innerRectColor}" stroke-width="1" />
+      `;
+      box.appendChild(gridSvg);
+
+      const fallback = document.createElement('span');
+      fallback.className = 'font-chinese font-bold text-[#1E1B2E] leading-none pointer-events-none relative z-[5]';
+      fallback.style.fontSize = `${Math.round(boxSize * 0.68)}px`;
+      fallback.textContent = ch;
+      box.appendChild(fallback);
+
+      const targetDiv = document.createElement('div');
+      targetDiv.className = 'absolute inset-0 w-full h-full pointer-events-none z-10';
+      box.appendChild(targetDiv);
+
+      grid.appendChild(box);
+
+      if (typeof window !== 'undefined' && window.HanziWriter) {
+        try {
+          const writer = window.HanziWriter.create(targetDiv, ch, {
+            width: boxSize,
+            height: boxSize,
+            padding,
+            showOutline: false,
+            showCharacter: true,
+            strokeAnimationSpeed: 1.5,
+            delayBetweenStrokes: 100,
+            strokeColor: '#1E1B2E',
+            radicalColor: (mode === 'builder') ? '#065F46' : '#4C1D95',
+            outlineColor: gridStrokeColor,
+            charDataLoader: (char, onComplete, onFail) => {
+              this.fetchCharacterData(char).then(data => {
+                if (data) {
+                  if (fallback.parentNode) fallback.style.display = 'none';
+                  onComplete(data);
+                } else if (onFail) {
+                  onFail(new Error('Character data missing'));
+                }
+              });
+            }
+          });
+          this.resultShowcaseWriters.push(writer);
+          box.addEventListener('click', (e) => {
+            e.stopPropagation();
+            try {
+              writer.animateCharacter();
+            } catch (_) {}
+          });
+        } catch (err) {
+          console.warn('WordTrainerEngine: Showcase HanziWriter notice', err);
+        }
+      }
+    });
+  }
+
   demoStrokeOrder() {
+    const isResultOpen = this.dom.resultFeedbackPanel && !this.dom.resultFeedbackPanel.classList.contains('hidden');
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+
+    if (isMobile && isResultOpen && this.resultShowcaseWriters && this.resultShowcaseWriters.length > 0) {
+      const token = ++this._showcaseToken;
+      const writers = this.resultShowcaseWriters;
+      const animateAt = (idx) => {
+        if (this._showcaseToken !== token || idx >= writers.length) return;
+        try {
+          writers[idx].animateCharacter({
+            onComplete: () => {
+              if (this._showcaseToken === token) {
+                setTimeout(() => animateAt(idx + 1), 160);
+              }
+            }
+          });
+        } catch (e) {
+          console.warn('WordTrainerEngine: showcase animate notice', e);
+        }
+      };
+      animateAt(0);
+      return;
+    }
+
     if (this.activeWriter) {
       try {
         this.activeWriter.animateCharacter();
@@ -1207,15 +1400,19 @@ export class WordTrainerEngineController {
       this.updateFeedback('neutral', 'Draw the character strokes on the grid to verify.');
     }
 
-    // Reset panels: Show exercise inputs, hide result panel
+    // Reset panels: Switch back to View A on mobile, show exercise inputs, hide result panel
+    this.clearResultShowcase();
+    if (this.dom.screen) this.dom.screen.classList.remove('mobile-result-active');
     if (this.dom.promptArena) this.dom.promptArena.classList.remove('hidden');
     if (this.dom.interactionFooter) this.dom.interactionFooter.classList.remove('hidden');
     if (this.dom.resultFeedbackPanel) this.dom.resultFeedbackPanel.classList.add('hidden');
+    if (this.dom.resultDemoOrderBtn) this.dom.resultDemoOrderBtn.classList.add('hidden');
     if (this.dom.drawingCanvasWrapper) this.dom.drawingCanvasWrapper.style.boxShadow = '';
+    const placementCanvas = (typeof document !== 'undefined') ? document.getElementById('open-placement-canvas') : null;
+    if (placementCanvas) placementCanvas.style.boxShadow = '';
 
-    // Scroll back to top on mobile
-    if (window.innerWidth < 1024 && this.dom.screen) {
-      this.dom.screen.scrollTo({ top: 0, behavior: 'smooth' });
+    if (this.getMode() !== 'builder' && typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(() => this.syncCanvasDimensions());
     }
 
     // Auto-play TTS native audio on initial load
@@ -1327,7 +1524,10 @@ export class WordTrainerEngineController {
     targetEl.style.opacity = this.isScaffoldOn ? '1' : '0';
     targetEl.style.visibility = this.isScaffoldOn ? 'visible' : 'hidden';
 
-    const size = this.getCanvasSize();
+    const rect = this.dom.drawingCanvasWrapper ? this.dom.drawingCanvasWrapper.getBoundingClientRect() : null;
+    const actualW = rect ? Math.round(rect.width) : 0;
+    const size = actualW > 0 ? actualW : 320;
+    this._lastWriterSize = actualW;
     try {
       this.activeWriter = window.HanziWriter.create(targetEl, targetChar, {
         width: size,
@@ -1413,11 +1613,11 @@ export class WordTrainerEngineController {
     const btn = this.dom.scaffoldToggleBtn;
     if (!btn) return;
     if (this.isScaffoldOn) {
-      btn.className = 'scaffold-on flex-1 py-2 sm:py-2.5 px-2.5 sm:px-3 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white border-2 border-black font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm active-collapse cursor-pointer transition-all';
-      btn.innerHTML = '<span class="material-symbols-outlined text-base">visibility</span><span>GUIDE: ON</span>';
+      btn.className = 'scaffold-on flex-1 py-1.5 lg:py-2.5 px-2 sm:px-3 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white border-2 border-black font-mono text-[10px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1 sm:gap-1.5 shadow-sm active-collapse cursor-pointer transition-all';
+      btn.innerHTML = '<span class="material-symbols-outlined text-sm sm:text-base">visibility</span><span>GUIDE: ON</span>';
     } else {
-      btn.className = 'scaffold-off flex-1 py-2 sm:py-2.5 px-2.5 sm:px-3 rounded-xl bg-[#18181b] hover:bg-[#27272a] text-white/80 border-2 border-black font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm active-collapse cursor-pointer transition-all';
-      btn.innerHTML = '<span class="material-symbols-outlined text-base">visibility_off</span><span>GUIDE: OFF</span>';
+      btn.className = 'scaffold-off flex-1 py-1.5 lg:py-2.5 px-2 sm:px-3 rounded-xl bg-[#18181b] hover:bg-[#27272a] text-white/80 border-2 border-black font-mono text-[10px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1 sm:gap-1.5 shadow-sm active-collapse cursor-pointer transition-all';
+      btn.innerHTML = '<span class="material-symbols-outlined text-sm sm:text-base">visibility_off</span><span>GUIDE: OFF</span>';
     }
   }
 
@@ -1543,6 +1743,9 @@ export class WordTrainerEngineController {
     // Cement progress if completed with Guide OFF (unassisted recall) or during delayed reappearance
     const wordToCement = (!this.isScaffoldOn) ? this.activeWord : (this.isReappearanceStage ? this.anchorWord : null);
     if (wordToCement) {
+      if (Array.isArray(this.reappearanceRetryQueue)) {
+        this.reappearanceRetryQueue = this.reappearanceRetryQueue.filter(w => w.id !== wordToCement.id);
+      }
       const pData = this.state.phases[this.activePhase];
       if (pData && !pData.completedWordIds.includes(wordToCement.id)) {
         pData.completedWordIds.push(wordToCement.id);
@@ -1611,6 +1814,9 @@ export class WordTrainerEngineController {
     // Cement progress if completed with Guide OFF (unassisted recall) or during delayed reappearance
     const wordToCement = (!this.isScaffoldOn) ? this.activeWord : (this.isReappearanceStage ? this.anchorWord : null);
     if (wordToCement) {
+      if (Array.isArray(this.reappearanceRetryQueue)) {
+        this.reappearanceRetryQueue = this.reappearanceRetryQueue.filter(w => w.id !== wordToCement.id);
+      }
       const pData = this.state.phases[this.activePhase];
       if (pData && !pData.completedWordIds.includes(wordToCement.id)) {
         pData.completedWordIds.push(wordToCement.id);
@@ -1640,13 +1846,16 @@ export class WordTrainerEngineController {
   showResultFeedbackPanel(isMastered, gradeResult = null) {
     if (!this.activeWord) return;
 
-    // 1. Populate Word Result Header (Character & Pinyin ONLY - no tone badge)
+    const mode = this.getMode();
+
+    // 1. Populate Word Result Header & Mobile Inline Mi Zi Ge Showcase (Decision B)
     if (this.dom.resultHanzi) this.dom.resultHanzi.textContent = this.activeWord.hanzi_simp;
     if (this.dom.resultPinyin) this.dom.resultPinyin.textContent = this.activeWord.pinyin;
     if (this.dom.resultMeaning) this.dom.resultMeaning.textContent = this.activeWord.english;
     if (this.dom.resultDecomposition) {
       this.dom.resultDecomposition.textContent = this.activeWord.radical_decomposition || 'Indivisible root';
     }
+    this.renderResultShowcase(this.activeWord, mode);
 
     // Defensive check: If not mastered, strictly prevent any success template leakage!
     let grade = gradeResult;
@@ -1669,7 +1878,6 @@ export class WordTrainerEngineController {
       }
     }
 
-    const mode = this.getMode();
     if (!grade) {
       grade = {
         status: 'CLEAN_PASS',
@@ -1683,30 +1891,29 @@ export class WordTrainerEngineController {
     }
 
     // 2. Populate Single Detailed Diagnostic Feedback Card
-    const titleEl = document.getElementById('drawing-feedback-title');
-    if (titleEl) {
-      titleEl.textContent = mode === 'builder' ? 'COMPONENT ASSEMBLY' : 'HANZI EVALUATION';
+    if (this.dom.resultFeedbackTitle) {
+      this.dom.resultFeedbackTitle.textContent = mode === 'builder' ? 'COMPONENT ASSEMBLY' : 'HANZI EVALUATION';
     }
 
-    if (this.dom.drawingTierBadge && this.dom.drawingFeedbackText && this.dom.feedbackDrawingCard) {
+    if (this.dom.drawingTierBadge && this.dom.resultFeedbackText && this.dom.feedbackDrawingCard) {
       this.dom.drawingTierBadge.textContent = grade.badge;
-      this.dom.drawingFeedbackText.textContent = grade.detail;
+      this.dom.resultFeedbackText.textContent = grade.detail;
 
       if (isMastered) {
         if (grade.tier === 1) {
           this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-600';
           this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-emerald-50 border-emerald-500 text-emerald-950 flex flex-col gap-1.5';
-          if (this.dom.drawingFeedbackIcon) {
-            this.dom.drawingFeedbackIcon.className = 'material-symbols-outlined text-emerald-600 text-base';
-            this.dom.drawingFeedbackIcon.textContent = 'verified';
+          if (this.dom.resultFeedbackIcon) {
+            this.dom.resultFeedbackIcon.className = 'material-symbols-outlined text-emerald-600 text-base';
+            this.dom.resultFeedbackIcon.textContent = 'verified';
           }
         } else {
           // Tier 2 Soft Pass
           this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-teal-100 text-teal-900 border border-teal-600';
           this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-teal-50 border-teal-500 text-teal-950 flex flex-col gap-1.5';
-          if (this.dom.drawingFeedbackIcon) {
-            this.dom.drawingFeedbackIcon.className = 'material-symbols-outlined text-teal-600 text-base';
-            this.dom.drawingFeedbackIcon.textContent = 'lightbulb';
+          if (this.dom.resultFeedbackIcon) {
+            this.dom.resultFeedbackIcon.className = 'material-symbols-outlined text-teal-600 text-base';
+            this.dom.resultFeedbackIcon.textContent = 'lightbulb';
           }
         }
         if (this.dom.resultDemoOrderBtn) {
@@ -1720,9 +1927,9 @@ export class WordTrainerEngineController {
         // Attempts exhausted / Review Mode
         this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-amber-100 text-amber-900 border border-amber-600';
         this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-amber-50 border-amber-500 text-amber-950 flex flex-col gap-1.5';
-        if (this.dom.drawingFeedbackIcon) {
-          this.dom.drawingFeedbackIcon.className = 'material-symbols-outlined text-amber-600 text-base';
-          this.dom.drawingFeedbackIcon.textContent = 'auto_stories';
+        if (this.dom.resultFeedbackIcon) {
+          this.dom.resultFeedbackIcon.className = 'material-symbols-outlined text-amber-600 text-base';
+          this.dom.resultFeedbackIcon.textContent = 'auto_stories';
         }
         if (this.dom.resultDemoOrderBtn) {
           if (mode !== 'builder') {
@@ -1734,21 +1941,66 @@ export class WordTrainerEngineController {
       }
     }
 
-    // 3. Update Next Word Button label
+    // 3. Update Next Word Button label (concise for dual button row on mobile)
     if (this.dom.resultNextBtnText) {
-      this.dom.resultNextBtnText.textContent = isMastered ? 'NEXT WORD' : 'NEXT WORD (REVIEW LATER)';
+      this.dom.resultNextBtnText.textContent = isMastered ? 'NEXT WORD' : 'REVIEW NEXT';
     }
 
-    // 4. In-Place Seamless Transition: Hide interaction footer, show result feedback panel
+    // 4. Switch to Feedback View: Hide interaction footer, show result feedback panel, lock View B on mobile
     if (this.dom.interactionFooter) this.dom.interactionFooter.classList.add('hidden');
     if (this.dom.resultFeedbackPanel) this.dom.resultFeedbackPanel.classList.remove('hidden');
+    if (this.dom.screen) this.dom.screen.classList.add('mobile-result-active');
+  }
 
-    // 5. Mobile auto-scroll
-    if (window.innerWidth < 1024 && this.dom.resultFeedbackPanel) {
-      setTimeout(() => {
-        this.dom.resultFeedbackPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }, 60);
+  retryCurrentWord() {
+    if (!this.activeWord) return;
+
+    this.clearResultShowcase();
+    this.attemptsLeft = 3;
+    this.flashingStrokeIndex = null;
+    this.updateAttemptPips();
+
+    // Return to View A on Mobile and restore Prompt + Canvas/Builder + Footer
+    if (this.dom.screen) this.dom.screen.classList.remove('mobile-result-active');
+    if (this.dom.promptArena) this.dom.promptArena.classList.remove('hidden');
+    if (this.dom.interactionFooter) this.dom.interactionFooter.classList.remove('hidden');
+    if (this.dom.resultFeedbackPanel) this.dom.resultFeedbackPanel.classList.add('hidden');
+    if (this.dom.resultDemoOrderBtn) this.dom.resultDemoOrderBtn.classList.add('hidden');
+    if (this.dom.drawingCanvasWrapper) this.dom.drawingCanvasWrapper.style.boxShadow = '';
+    const placementCanvas = (typeof document !== 'undefined') ? document.getElementById('open-placement-canvas') : null;
+    if (placementCanvas) placementCanvas.style.boxShadow = '';
+
+    const shouldGuideBeOn = this.isReappearanceStage ? false : this.isScaffoldOn;
+    const mode = this.getMode();
+
+    if (mode === 'builder') {
+      if (this.componentBuilder) {
+        this.componentBuilder.resetCanvas();
+        this.componentBuilder.toggleGhostHint(shouldGuideBeOn);
+        if (typeof requestAnimationFrame === 'function') {
+          requestAnimationFrame(() => this.componentBuilder.updateWatermarkSizing());
+        }
+      }
+      this.updateFeedback('neutral', 'Drag components from the dock to assemble the character.');
+    } else {
+      const chars = this.activeWord.characters || Array.from(this.activeWord.hanzi_simp || '');
+      const charCount = chars.length;
+      this.charRecognized = new Array(charCount).fill(false);
+      this.charSpatialDrift = new Array(charCount).fill(null);
+      this.charUserStrokes = new Array(charCount).fill(null).map(() => []);
+      this.userDrawnStrokes = [];
+      for (const m of this.charMatchers) {
+        if (m) m.reset();
+      }
+      this.activeCharIndex = 0;
+      this.mountCharacter(0);
+      if (typeof requestAnimationFrame === 'function') {
+        requestAnimationFrame(() => this.syncCanvasDimensions());
+      }
+      this.updateFeedback('neutral', 'Draw the character strokes on the grid to verify.');
     }
+
+    this.playActiveWordAudio();
   }
 
   shakeElement(id) {
@@ -1783,13 +2035,13 @@ export class WordTrainerEngineController {
   }
 
   updateFeedback(status, message) {
-    const banner = this.dom.feedbackToast || this.dom.feedbackBanner || document.getElementById('drawing-feedback-toast') || document.getElementById('validation-feedback-banner');
-    const text = this.dom.drawingFeedbackText || this.dom.feedbackText || document.getElementById('drawing-feedback-text') || document.getElementById('validation-feedback-text');
-    const icon = this.dom.drawingFeedbackIcon || this.dom.feedbackIcon || document.getElementById('drawing-feedback-icon') || document.getElementById('validation-feedback-icon');
+    const banner = this.dom.feedbackToast || document.getElementById('drawing-feedback-toast');
+    const text = this.dom.toastFeedbackText || document.getElementById('toast-feedback-text');
+    const icon = this.dom.toastFeedbackIcon || document.getElementById('toast-feedback-icon');
     if (!banner || !text) return;
 
     text.textContent = message;
-    banner.classList.remove('shake-subtle', 'bg-white', 'border-black/20', 'text-black/70',
+    banner.classList.remove('shake-subtle', 'bg-slate-50', 'bg-white', 'border-black/20', 'text-black/70', 'text-black/80',
       'bg-emerald-50', 'border-emerald-500', 'border-emerald-600', 'text-emerald-950',
       'bg-amber-50', 'border-amber-500', 'border-amber-600', 'text-amber-950',
       'bg-rose-50', 'border-rose-500', 'border-rose-600', 'text-rose-950');
@@ -1797,7 +2049,7 @@ export class WordTrainerEngineController {
     if (status === 'correct' || status === 'success') {
       banner.classList.add('bg-emerald-50', 'border-emerald-500', 'text-emerald-950');
       if (icon) {
-        icon.className = 'material-symbols-outlined text-emerald-600 text-base shrink-0';
+        icon.className = 'material-symbols-outlined text-emerald-600 text-base lg:text-lg shrink-0';
         icon.textContent = 'verified';
       }
     } else if (status === 'error' || status === 'hanzi-error' || status === 'tone-error' || status === 'both-error') {
@@ -1805,13 +2057,13 @@ export class WordTrainerEngineController {
       void banner.offsetWidth;
       banner.classList.add('shake-subtle');
       if (icon) {
-        icon.className = 'material-symbols-outlined text-amber-600 text-base shrink-0';
+        icon.className = 'material-symbols-outlined text-amber-600 text-base lg:text-lg shrink-0';
         icon.textContent = 'warning';
       }
     } else {
       banner.classList.add('bg-white', 'border-black/20', 'text-black/70');
       if (icon) {
-        icon.className = 'material-symbols-outlined text-black/50 text-base shrink-0';
+        icon.className = 'material-symbols-outlined text-black/50 text-base lg:text-lg shrink-0';
         icon.textContent = 'info';
       }
     }
