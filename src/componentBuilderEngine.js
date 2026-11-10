@@ -145,8 +145,8 @@ function getEnclosureMargins(outerGlyph) {
   } else if (['广', '厂', '户', '戶', '疒'].includes(outerGlyph)) {
     rightMargin = -0.06;
     bottomMargin = -0.06;
-    pocketFactorX = 0.56;
-    pocketFactorY = 0.58;
+    pocketFactorX = 0.60;
+    pocketFactorY = 0.61;
   } else if (['匚', '匸'].includes(outerGlyph)) {
     rightMargin = -0.06;
     pocketFactorX = 0.55;
@@ -614,7 +614,10 @@ const COMPONENT_GLOSSES = {
   '方': 'square / direction', '力': 'power', '刀': 'knife', '七': 'seven', '又': 'again / hand',
   '文': 'writing', '公': 'public', '去': 'go', '云': 'cloud', '肉': 'meat', '内': 'inside',
   '午': 'noon', '禾': 'grain', '未': 'not yet', '末': 'end', '犬': 'dog', '矢': 'arrow',
-  '失': 'lose', '父': 'father', '且': 'moreover', '此': 'this', '几': 'several / table'
+  '失': 'lose', '父': 'father', '且': 'moreover', '此': 'this', '几': 'several / table',
+  '厂': 'cliff', '斥': 'repel', '石': 'stone', '司': 'manage', '后': 'after / behind',
+  '同': 'same', '贵': 'expensive', '爱': 'love', '亮': 'bright', '商': 'commerce',
+  '场': 'field / venue', '妻': 'wife', '旁': 'side', '旅': 'travel', '望': 'hope'
 };
 
 function getWordMeaning(ch, corpus = []) {
@@ -770,7 +773,10 @@ export function gradeComponentBuilder(placedComponents, targetDecompositions, ca
             const candSorted = info.targetComponents.map(c => c.glyph).slice().sort().join('');
             if (candSorted === placedSorted) {
               const candMeaningRaw = getWordMeaning(candidateChar, corpus);
-              const candMeaning = candMeaningRaw ? ` (${candMeaningRaw})` : '';
+              const candMeaningConcise = candMeaningRaw && candMeaningRaw.length > 32
+                ? candMeaningRaw.split(/[;；]/)[0].trim()
+                : candMeaningRaw;
+              const candMeaning = candMeaningConcise ? ` (${candMeaningConcise})` : '';
               badge = '🔍 Radical Confusion';
               if (info.topology === 'ATOMIC') {
                 detail = `You selected '${candidateChar}'${candMeaning}. Check the audio prompt and try swapping '${extraGlyphs[0]}'.`;
@@ -787,7 +793,10 @@ export function gradeComponentBuilder(placedComponents, targetDecompositions, ca
         const extraStr = extraGlyphs.join(', ');
         const extraGloss = COMPONENT_GLOSSES[extraGlyphs[0]] || '';
         const targetWord = decomps.map(d => d.char).join('');
-        const targetMeaning = getWordMeaning(targetWord, corpus);
+        const targetMeaningRaw = getWordMeaning(targetWord, corpus);
+        const targetMeaning = targetMeaningRaw && targetMeaningRaw.length > 32
+          ? targetMeaningRaw.split(/[;；]/)[0].trim()
+          : targetMeaningRaw;
         badge = '🔍 Radical Confusion';
         detail = `'${extraStr}'${extraGloss ? ` (${extraGloss})` : ''} doesn't belong here${targetMeaning ? ` (this prompt means "${targetMeaning}")` : ''}. Try swapping it for another piece.`;
       }
