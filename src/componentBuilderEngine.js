@@ -14,45 +14,108 @@
  */
 
 // Optical Stroke Harmonization Glyph Lists (Matching UI Engineer's CSS)
-const OUTER_FRAME_GLYPHS = ['门', '門', '囗', '冂', '凵', '匚', '匸', '广', '厂', '户', '戶', '勹', '弋', '戈', '气', '辶', '⻌', '⻍', '廴'];
+const OUTER_FRAME_GLYPHS = ['门', '門', '囗', '冂', '凵', '匚', '匸', '广', '厂', '户', '戶', '勹', '弋', '戈', '气', '辶', '⻌', '⻍', '廴', '疒'];
+const ENCLOSURE_ONLY_OUTER_FRAMES = ['走', '丁'];
 const INNER_CAVITY_GLYPHS = ['口', '丶', '日', '月', '木', '寸', '子', '心', '人', '小', '十', '一', '土', '王'];
+const NARROW_SIDE_RADICALS = ['亻', '氵', '讠', '扌', '忄', '彳', '纟', '钅', '犭', '饣', '阝', '冫', '礻', '衤'];
+
+/**
+ * Determines whether a glyph acts as an enclosure outer frame in its current context.
+ * '走' and '丁' act as outer frames ONLY in ENCLOSURE context (preserving normal '丁' in 打, etc.).
+ */
+export function isOuterFrameGlyph(glyph, topology = null, role = null) {
+  if (role === 'outer') return true;
+  if (role === 'inner') return false;
+  if (OUTER_FRAME_GLYPHS.includes(glyph)) return true;
+  if (topology === 'ENCLOSURE' && ENCLOSURE_ONLY_OUTER_FRAMES.includes(glyph)) return true;
+  return false;
+}
 
 /**
  * Returns optical classification for radical weight harmonization.
  */
-export function getComponentType(glyph) {
-  if (OUTER_FRAME_GLYPHS.includes(glyph)) return 'outer-frame';
-  if (['口', '丶'].includes(glyph)) return 'inner-cavity';
+export function getComponentType(glyph, role = null, topology = null) {
+  if (isOuterFrameGlyph(glyph, topology, role)) return 'outer-frame';
+  if (role === 'inner' || topology === 'ENCLOSURE' || ['口', '丶'].includes(glyph)) {
+    return 'inner-cavity';
+  }
   return 'standard';
 }
 
 /**
- * Returns appropriate font-weight preserving typography balance.
+ * Anisotropic visual transform matrix (scaleX, scaleY, fontWeight) keyed strictly to
+ * (glyph, topology, roleHint) — zero-spoiler, zero-rotation.
  */
-export function getComponentFontWeight(glyph) {
-  const type = getComponentType(glyph);
+export function getComponentVisualTransform(glyph, topology = 'ATOMIC', roleHint = null) {
+  // 1. Vertical Stacks (TOP_BOTTOM / TOP_MID_BOTTOM)
+  if (topology === 'TOP_BOTTOM' || topology === 'TOP_MID_BOTTOM') {
+    const scaleFactorY = topology === 'TOP_MID_BOTTOM' ? 0.78 : 1.0;
+
+    // Flat twin/horizontal base bars: 二, 三, 一
+    if (['二', '三', '一'].includes(glyph)) {
+      return { scaleX: 1.10, scaleY: 0.44 * scaleFactorY, weight: '700' };
+    }
+    // Wide Canopy Roofs: 人, 八, 入
+    if (['人', '八', '入'].includes(glyph)) {
+      return { scaleX: 1.28, scaleY: 0.50 * scaleFactorY, weight: '600' };
+    }
+    // Broad Flat Bottoms / Tops: 心, 灬, 皿, 艹, ⺮, 宀
+    if (['心', '灬', '皿', '艹', '⺮', '宀'].includes(glyph)) {
+      return { scaleX: 1.06, scaleY: 0.50 * scaleFactorY, weight: '600' };
+    }
+    // Default vertically stacked halves / thirds
+    return { scaleX: 0.98, scaleY: 0.66 * scaleFactorY, weight: '500' };
+  }
+
+  // 2. Horizontal Pairs / Triples (LEFT_RIGHT / LEFT_MID_RIGHT)
+  if (topology === 'LEFT_RIGHT' || topology === 'LEFT_MID_RIGHT') {
+    const widthFactor = topology === 'LEFT_MID_RIGHT' ? 0.70 : 1.0;
+    if (NARROW_SIDE_RADICALS.includes(glyph)) {
+      return { scaleX: 0.56 * widthFactor, scaleY: 0.95, weight: '500' };
+    }
+    return { scaleX: 0.64 * widthFactor, scaleY: 0.92, weight: '500' };
+  }
+
+  // 3. ENCLOSURE inner glyphs & ATOMIC preserve 1:1 aspect ratio
+  if (topology === 'ENCLOSURE' && !isOuterFrameGlyph(glyph, topology, roleHint) && (roleHint === 'inner' || roleHint === null)) {
+    return { scaleX: 0.92, scaleY: 0.92, weight: ['口', '丶'].includes(glyph) ? '700' : '600' };
+  }
+
+  return { scaleX: 1.0, scaleY: 1.0, weight: null };
+}
+
+/**
+ * Returns appropriate font-weight preserving typography balance across structural roles.
+ */
+export function getComponentFontWeight(glyph, topology = 'ATOMIC', role = null) {
+  const visualTransform = getComponentVisualTransform(glyph, topology, role);
+  if (visualTransform && visualTransform.weight) {
+    return visualTransform.weight;
+  }
+  const type = getComponentType(glyph, role, topology);
   if (type === 'outer-frame') return '300';
   if (type === 'inner-cavity') return '700';
   return '500';
 }
 
 /**
- * Calculates responsive component font size based on canvas dimensions and character count.
+ * Calculates responsive component font size based on canvas dimensions, character count,
+ * structural role, and topology.
  */
-export function getComponentFontSize(glyph, canvasDim = 340, charCount = 1) {
+export function getComponentFontSize(glyph, canvasDim = 340, charCount = 1, role = null, topology = null) {
   let scale = 1.0;
   if (charCount === 2) scale = 0.58;
   if (charCount === 3) scale = 0.40;
   if (charCount >= 4) scale = 0.32;
 
-  if (glyph === '口') {
-    return Math.round(canvasDim * 0.28 * scale);
-  }
   if (glyph === '丶') {
-    return Math.round(canvasDim * 0.20 * scale);
+    return Math.round(canvasDim * 0.22 * scale);
   }
-  if (OUTER_FRAME_GLYPHS.includes(glyph)) {
-    return Math.round(canvasDim * 0.58 * scale);
+  if (isOuterFrameGlyph(glyph, topology, role)) {
+    return Math.round(canvasDim * 0.62 * scale);
+  }
+  if (role === 'inner' || (topology === 'ENCLOSURE' && !isOuterFrameGlyph(glyph, topology, role)) || glyph === '口') {
+    return Math.round(canvasDim * 0.30 * scale);
   }
   if (glyph === '亻' || glyph === '主') {
     return Math.round(canvasDim * 0.54 * scale);
@@ -64,15 +127,50 @@ export function getComponentFontSize(glyph, canvasDim = 340, charCount = 1) {
 // 1. RELATIVE SPATIAL TOPOLOGY (RST) EVALUATOR
 // ----------------------------------------------------
 
+function getEnclosureMargins(outerGlyph) {
+  // Default closed frames (囗, 门, 門, 冂, 凵) keep strict 0.08 inward bounds on all 4 sides
+  let leftMargin = 0.08;
+  let rightMargin = 0.08;
+  let topMargin = 0.08;
+  let bottomMargin = 0.08;
+  let pocketFactorX = 0.5;
+  let pocketFactorY = 0.5;
+
+  // Relax inward bounds slightly ONLY on open side(s) of directional semi-enclosures
+  if (['辶', '⻌', '⻍', '廴', '走'].includes(outerGlyph)) {
+    topMargin = -0.10;
+    rightMargin = -0.06;
+    pocketFactorX = 0.58;
+    pocketFactorY = 0.42;
+  } else if (['广', '厂', '户', '戶', '疒'].includes(outerGlyph)) {
+    rightMargin = -0.06;
+    bottomMargin = -0.06;
+    pocketFactorX = 0.56;
+    pocketFactorY = 0.58;
+  } else if (['匚', '匸'].includes(outerGlyph)) {
+    rightMargin = -0.06;
+    pocketFactorX = 0.55;
+    pocketFactorY = 0.50;
+  } else if (['勹', '丁', '戈', '弋', '气'].includes(outerGlyph)) {
+    leftMargin = -0.04;
+    bottomMargin = -0.06;
+    pocketFactorX = 0.45;
+    pocketFactorY = 0.55;
+  }
+
+  return { leftMargin, rightMargin, topMargin, bottomMargin, pocketFactorX, pocketFactorY };
+}
+
 /**
  * Evaluates a single character's placed components against its target decomposition.
  *
  * @param {Array} placedComponents - Array of placed objects: { glyph, x, y, width, height, centerX, centerY }
  * @param {Object} targetDecomposition - Decomposition schema { char, topology, targetComponents, distractors }
  * @param {number} canvasDim - Reference canvas dimension (default: 320)
- * @returns {Object} { success: boolean, reason: string }
+ * @param {Object|null} slotContext - Optional multi-character slot anchor { expectedCenterX, charCount }
+ * @returns {Object} { success: boolean, reason: string, driftRatio?: number, driftAxis?: string }
  */
-export function evaluateSingleCharacterPlacement(placedComponents, targetDecomposition, canvasDim = 320) {
+export function evaluateSingleCharacterPlacement(placedComponents, targetDecomposition, canvasDim = 320, slotContext = null) {
   if (!targetDecomposition || !targetDecomposition.targetComponents) {
     return { success: false, reason: 'INVALID_DECOMPOSITION' };
   }
@@ -97,17 +195,25 @@ export function evaluateSingleCharacterPlacement(placedComponents, targetDecompo
   const normalized = placedComponents.map(c => {
     const w = c.width || 60;
     const h = c.height || 60;
-    const cx = c.centerX !== undefined ? c.centerX : (c.x + w * 0.5);
-    const cy = c.centerY !== undefined ? c.centerY : (c.y + h * 0.5);
-    return { ...c, width: w, height: h, centerX: cx, centerY: cy };
+    const cx = c.centerX !== undefined ? c.centerX : ((c.x || 0) + w * 0.5);
+    const cy = c.centerY !== undefined ? c.centerY : ((c.y || 0) + h * 0.5);
+    const x = c.x !== undefined ? c.x : (cx - w * 0.5);
+    const y = c.y !== undefined ? c.y : (cy - h * 0.5);
+    return { ...c, x, y, width: w, height: h, centerX: cx, centerY: cy };
   });
 
   // 2. Evaluate topology
   switch (topology) {
     case 'ATOMIC': {
-      // Indivisible single-root character (e.g. 日, 月, 人, 木)
-      const driftRatio = Math.hypot(normalized[0].centerX - canvasDim * 0.5, normalized[0].centerY - canvasDim * 0.5) / canvasDim;
-      return { success: true, reason: 'OK', driftRatio };
+      // Indivisible single-root character (e.g. 日, 月, 人, 木) anchored to its horizontal reading slot
+      const expectedCenterX = (slotContext && slotContext.expectedCenterX !== undefined)
+        ? slotContext.expectedCenterX
+        : canvasDim * 0.5;
+      const expectedCenterY = canvasDim * 0.5;
+      const rawDrift = Math.hypot(normalized[0].centerX - expectedCenterX, normalized[0].centerY - expectedCenterY) / canvasDim;
+      // Scale so Tier-2 (> 0.15) triggers only when raw center drift exceeds 20% of canvasDim
+      const driftRatio = rawDrift * (0.15 / 0.20);
+      return { success: true, reason: 'OK', driftRatio, driftAxis: 'centering' };
     }
 
     case 'LEFT_RIGHT': {
@@ -132,12 +238,19 @@ export function evaluateSingleCharacterPlacement(placedComponents, targetDecompo
       const yDelta = Math.abs(leftComp.centerY - rightComp.centerY);
       const isAlignedY = yDelta <= canvasDim * 0.38; // Generous 38% vertical drift tolerance
 
-      const driftRatio = yDelta / canvasDim;
+      const leftRightEdge = leftComp.x + leftComp.width;
+      const rightLeftEdge = rightComp.x;
+      const edgeGap = Math.max(0, rightLeftEdge - leftRightEdge);
+      const gapThreshold = canvasDim * 0.24;
+      const gapDrift = edgeGap > gapThreshold ? (edgeGap - gapThreshold) / canvasDim : 0;
+
+      const driftRatio = Math.max(yDelta / canvasDim, gapDrift);
 
       return {
         success: isLeft && isAlignedY,
         reason: (isLeft && isAlignedY) ? 'OK' : 'MISPLACED_LEFT_RIGHT',
-        driftRatio
+        driftRatio,
+        driftAxis: 'horizontal'
       };
     }
 
@@ -163,12 +276,19 @@ export function evaluateSingleCharacterPlacement(placedComponents, targetDecompo
       const xDelta = Math.abs(topComp.centerX - bottomComp.centerX);
       const isAlignedX = xDelta <= canvasDim * 0.38;
 
-      const driftRatio = xDelta / canvasDim;
+      const topBottomEdge = topComp.y + topComp.height;
+      const bottomTopEdge = bottomComp.y;
+      const verticalGap = Math.max(0, bottomTopEdge - topBottomEdge);
+      const gapThreshold = canvasDim * 0.24;
+      const gapDrift = verticalGap > gapThreshold ? (verticalGap - gapThreshold) / canvasDim : 0;
+
+      const driftRatio = Math.max(xDelta / canvasDim, gapDrift);
 
       return {
         success: isTop && isAlignedX,
         reason: (isTop && isAlignedX) ? 'OK' : 'MISPLACED_TOP_BOTTOM',
-        driftRatio
+        driftRatio,
+        driftAxis: 'vertical'
       };
     }
 
@@ -195,7 +315,8 @@ export function evaluateSingleCharacterPlacement(placedComponents, targetDecompo
       return {
         success: isOrderCorrect && isAlignedX,
         reason: (isOrderCorrect && isAlignedX) ? 'OK' : 'MISPLACED_TOP_MID_BOTTOM',
-        driftRatio
+        driftRatio,
+        driftAxis: 'vertical'
       };
     }
 
@@ -231,7 +352,8 @@ export function evaluateSingleCharacterPlacement(placedComponents, targetDecompo
       return {
         success: isOrderCorrect && isAlignedY,
         reason: (isOrderCorrect && isAlignedY) ? 'OK' : 'MISPLACED_LEFT_MID_RIGHT',
-        driftRatio
+        driftRatio,
+        driftAxis: 'horizontal'
       };
     }
 
@@ -245,43 +367,59 @@ export function evaluateSingleCharacterPlacement(placedComponents, targetDecompo
 
       if (!outerComp || !innerComp) return { success: false, reason: 'WRONG_COMPONENTS' };
 
-      // Inner component sits within cavity of outer component with generous boundary margins
-      const isInsideX = (innerComp.centerX >= outerComp.x - 30) &&
-                        (innerComp.centerX <= outerComp.x + outerComp.width + 30);
-      const isInsideY = (innerComp.centerY >= outerComp.y - 15) &&
-                        (innerComp.centerY <= outerComp.y + outerComp.height + 40);
+      // Strict inward containment on closed sides; slightly relaxed only on open semi-enclosure sides
+      const margins = getEnclosureMargins(outerTarget.glyph);
+      const isInsideX = (innerComp.centerX >= outerComp.x + outerComp.width * margins.leftMargin) &&
+                        (innerComp.centerX <= outerComp.x + outerComp.width * (1 - margins.rightMargin));
+      const isInsideY = (innerComp.centerY >= outerComp.y + outerComp.height * margins.topMargin) &&
+                        (innerComp.centerY <= outerComp.y + outerComp.height * (1 - margins.bottomMargin));
 
-      const outerCenterX = outerComp.x + outerComp.width * 0.5;
-      const outerCenterY = outerComp.y + outerComp.height * 0.5;
-      const driftRatio = Math.hypot(innerComp.centerX - outerCenterX, innerComp.centerY - outerCenterY) / canvasDim;
+      const pocketCenterX = outerComp.x + outerComp.width * margins.pocketFactorX;
+      const pocketCenterY = outerComp.y + outerComp.height * margins.pocketFactorY;
+      const driftRatio = Math.hypot(innerComp.centerX - pocketCenterX, innerComp.centerY - pocketCenterY) / canvasDim;
 
       return {
         success: isInsideX && isInsideY,
         reason: (isInsideX && isInsideY) ? 'OK' : 'MISPLACED_ENCLOSURE',
-        driftRatio
+        driftRatio,
+        driftAxis: 'enclosure'
       };
     }
 
     case 'CROSSING': {
-      // Overlaid/marker compounds (e.g. 太 -> 大 + 丶, 本 -> 木 + 一, 天 -> 一 + 大)
+      // Overlaid/marker compounds with explicit signed polarity (e.g. 太 -> 大 + 丶 [marker_lower], 本 -> 木 + 一 [marker_lower])
       const baseTarget = targetComponents.find(t => t.role === 'base') || targetComponents[0];
-      const markerTarget = targetComponents.find(t => t.role === 'marker') || targetComponents[1];
+      const markerTarget = targetComponents.find(t => t.role && t.role.startsWith('marker')) || targetComponents[1];
 
       const baseComp = normalized.find(c => c.glyph === baseTarget.glyph);
       const markerComp = normalized.find(c => c.glyph === markerTarget.glyph);
 
       if (!baseComp || !markerComp) return { success: false, reason: 'WRONG_COMPONENTS' };
 
-      const isAlignedX = Math.abs(baseComp.centerX - markerComp.centerX) <= canvasDim * 0.40;
-      const isAlignedY = Math.abs(baseComp.centerY - markerComp.centerY) <= canvasDim * 0.45;
+      const idealOffsetY = markerTarget.role === 'marker_lower'
+        ? baseComp.height * 0.18
+        : markerTarget.role === 'marker_upper'
+          ? -baseComp.height * 0.22
+          : 0;
+      const dy = markerComp.centerY - baseComp.centerY;
+      const polarityOk = markerTarget.role === 'marker_lower'
+        ? dy > baseComp.height * 0.04
+        : markerTarget.role === 'marker_upper'
+          ? dy < -baseComp.height * 0.04
+          : Math.abs(dy) <= canvasDim * 0.35;
+      const isAlignedX = Math.abs(baseComp.centerX - markerComp.centerX) <= canvasDim * 0.32;
+      const isAlignedY = Math.abs(dy - idealOffsetY) <= canvasDim * 0.35;
 
-      const maxDelta = Math.max(Math.abs(baseComp.centerX - markerComp.centerX), Math.abs(baseComp.centerY - markerComp.centerY));
-      const driftRatio = maxDelta / canvasDim;
+      const driftRatio = Math.max(
+        Math.abs(baseComp.centerX - markerComp.centerX),
+        Math.abs(dy - idealOffsetY)
+      ) / canvasDim;
 
       return {
-        success: isAlignedX && isAlignedY,
-        reason: (isAlignedX && isAlignedY) ? 'OK' : 'MISPLACED_CROSSING',
-        driftRatio
+        success: polarityOk && isAlignedX && isAlignedY,
+        reason: (polarityOk && isAlignedX && isAlignedY) ? 'OK' : 'MISPLACED_CROSSING',
+        driftRatio,
+        driftAxis: 'marker'
       };
     }
 
@@ -298,7 +436,7 @@ export function evaluateSingleCharacterPlacement(placedComponents, targetDecompo
  * @param {Array} placedComponents - Array of placed objects
  * @param {Object|Array} targetDecompositions - Single decomposition or array of decompositions per character
  * @param {number} canvasDim - Canvas dimension in pixels
- * @returns {Object} { success: boolean, reason: string, details?: Array }
+ * @returns {Object} { success: boolean, reason: string, maxDriftRatio?: number, maxDriftAxis?: string }
  */
 export function evaluatePlacement(placedComponents, targetDecompositions, canvasDim = 320) {
   if (!placedComponents || placedComponents.length === 0) {
@@ -310,8 +448,15 @@ export function evaluatePlacement(placedComponents, targetDecompositions, canvas
 
   // Single-Character Fast Path
   if (charCount === 1) {
-    const r = evaluateSingleCharacterPlacement(placedComponents, decomps[0], canvasDim);
-    return { ...r, maxDriftRatio: r.driftRatio || 0 };
+    const r = evaluateSingleCharacterPlacement(placedComponents, decomps[0], canvasDim, {
+      expectedCenterX: canvasDim * 0.5,
+      charCount: 1
+    });
+    return {
+      ...r,
+      maxDriftRatio: r.driftRatio || 0,
+      maxDriftAxis: r.driftAxis || null
+    };
   }
 
   // Multi-Character Word on Single Canvas:
@@ -335,9 +480,11 @@ export function evaluatePlacement(placedComponents, targetDecompositions, canvas
   const normalized = placedComponents.map(c => {
     const w = c.width || 60;
     const h = c.height || 60;
-    const cx = c.centerX !== undefined ? c.centerX : (c.x + w * 0.5);
-    const cy = c.centerY !== undefined ? c.centerY : (c.y + h * 0.5);
-    return { ...c, width: w, height: h, centerX: cx, centerY: cy };
+    const cx = c.centerX !== undefined ? c.centerX : ((c.x || 0) + w * 0.5);
+    const cy = c.centerY !== undefined ? c.centerY : ((c.y || 0) + h * 0.5);
+    const x = c.x !== undefined ? c.x : (cx - w * 0.5);
+    const y = c.y !== undefined ? c.y : (cy - h * 0.5);
+    return { ...c, x, y, width: w, height: h, centerX: cx, centerY: cy };
   });
 
   // 4. Cluster placed components into K character groups along the X-axis
@@ -367,7 +514,6 @@ export function evaluatePlacement(placedComponents, targetDecompositions, canvas
 
   // If simple count split failed, attempt optimal set assignment based on target glyphs
   if (!partitionValid) {
-    // Attempt assignment where Char 1 targets are matched from leftmost candidates
     // Check if user inverted characters (e.g. placed Char 2 on left, Char 1 on right)
     const reversed = decomps.slice().reverse();
     let reversedMatch = true;
@@ -409,7 +555,6 @@ export function evaluatePlacement(placedComponents, targetDecompositions, canvas
       }
     }
 
-    // Use assigned buckets
     for (let k = 0; k < charCount; k++) {
       charBuckets[k] = assignedBuckets[k];
     }
@@ -424,10 +569,15 @@ export function evaluatePlacement(placedComponents, targetDecompositions, canvas
     }
   }
 
-  // 5. Independently evaluate each character's topology
+  // 5. Independently evaluate each character's topology against its horizontal reading slot
   let maxDrift = 0;
+  let maxDriftAxis = null;
   for (let k = 0; k < charCount; k++) {
-    const evalResult = evaluateSingleCharacterPlacement(charBuckets[k], decomps[k], canvasDim);
+    const slotCenterX = canvasDim * ((k + 0.5) / charCount);
+    const evalResult = evaluateSingleCharacterPlacement(charBuckets[k], decomps[k], canvasDim, {
+      expectedCenterX: slotCenterX,
+      charCount
+    });
     if (!evalResult.success) {
       return {
         success: false,
@@ -436,12 +586,78 @@ export function evaluatePlacement(placedComponents, targetDecompositions, canvas
         char: decomps[k].char
       };
     }
-    if ((evalResult.driftRatio || 0) > maxDrift) {
-      maxDrift = evalResult.driftRatio || 0;
+    const dRatio = evalResult.driftRatio || 0;
+    if (dRatio >= maxDrift) {
+      maxDrift = dRatio;
+      maxDriftAxis = evalResult.driftAxis || maxDriftAxis;
     }
   }
 
-  return { success: true, reason: 'OK', maxDriftRatio: maxDrift };
+  return { success: true, reason: 'OK', maxDriftRatio: maxDrift, maxDriftAxis };
+}
+
+const COMPONENT_GLOSSES = {
+  '一': 'one', '二': 'two', '三': 'three', '十': 'ten', '千': 'thousand', '百': 'hundred',
+  '万': 'ten thousand', '木': 'tree / wood', '干': 'dry / stem', '于': 'at / in',
+  '上': 'up / above', '下': 'down / below', '小': 'small', '少': 'few',
+  '大': 'big', '太': 'too / extreme', '天': 'sky / day', '夫': 'husband / person',
+  '土': 'earth', '士': 'scholar', '王': 'king', '玉': 'jade', '主': 'main / host',
+  '日': 'sun', '目': 'eye', '白': 'white', '自': 'self',
+  '口': 'mouth', '囗': 'enclosure', '冂': 'down-box', '田': 'field', '甘': 'sweet',
+  '申': 'extend', '由': 'from', '甲': 'armor', '回': 'return', '困': 'trapped / sleepy', '团': 'group',
+  '人': 'person', '亻': 'person', '八': 'eight', '入': 'enter', '个': 'individual',
+  '从': 'follow', '介': 'introduce', '工': 'work', '止': 'stop', '正': 'upright',
+  '卜': 'divination', '不': 'not', '西': 'west', '水': 'water', '火': 'fire',
+  '手': 'hand', '扌': 'hand', '氵': 'water', '讠': 'speech', '女': 'female',
+  '艹': 'grass / plant', '宀': 'roof', '⺮': 'bamboo', '月': 'moon', '心': 'heart', '忄': 'heart',
+  '子': 'child', '门': 'door', '辶': 'walk / movement', '广': 'shelter', '疒': 'illness',
+  '方': 'square / direction', '力': 'power', '刀': 'knife', '七': 'seven', '又': 'again / hand',
+  '文': 'writing', '公': 'public', '去': 'go', '云': 'cloud', '肉': 'meat', '内': 'inside',
+  '午': 'noon', '禾': 'grain', '未': 'not yet', '末': 'end', '犬': 'dog', '矢': 'arrow',
+  '失': 'lose', '父': 'father', '且': 'moreover', '此': 'this', '几': 'several / table'
+};
+
+function getWordMeaning(ch, corpus = []) {
+  if (Array.isArray(corpus) && ch) {
+    const exact = corpus.find(item => item.hanzi_simp === ch);
+    if (exact && exact.english) return exact.english;
+    const singleCharMatch = corpus.find(item => item.characters && item.characters.length === 1 && item.characters[0] === ch);
+    if (singleCharMatch && singleCharMatch.english) return singleCharMatch.english;
+  }
+  return COMPONENT_GLOSSES[ch] || '';
+}
+
+function getTier2CoachingTip(decomps, driftAxis) {
+  const charCount = decomps.length;
+  let effectiveTopology = charCount === 1 ? (decomps[0]?.topology || 'ATOMIC') : null;
+
+  if (!effectiveTopology) {
+    if (driftAxis === 'centering') effectiveTopology = 'ATOMIC';
+    else if (driftAxis === 'enclosure') effectiveTopology = 'ENCLOSURE';
+    else if (driftAxis === 'marker') effectiveTopology = 'CROSSING';
+    else if (driftAxis === 'vertical') effectiveTopology = 'TOP_BOTTOM';
+    else if (driftAxis === 'horizontal') effectiveTopology = 'LEFT_RIGHT';
+    else effectiveTopology = decomps.find(d => d && d.topology !== 'ATOMIC')?.topology || 'ATOMIC';
+  }
+
+  switch (effectiveTopology) {
+    case 'LEFT_RIGHT':
+    case 'LEFT_MID_RIGHT':
+      return '✓ Recognized! 💡 Tip: Keep the left and right components aligned and closer together.';
+    case 'TOP_BOTTOM':
+    case 'TOP_MID_BOTTOM':
+      return '✓ Recognized! 💡 Tip: Stack components directly above one another along the center vertical axis.';
+    case 'ENCLOSURE':
+      return '✓ Recognized! 💡 Tip: Tuck the inner piece cleanly inside the outer frame.';
+    case 'CROSSING':
+      return '✓ Recognized! 💡 Tip: Anchor the marker cleanly relative to the base character.';
+    case 'ATOMIC':
+    default:
+      if (charCount > 1) {
+        return '✓ Recognized! 💡 Tip: Space each character evenly from left to right across the grid.';
+      }
+      return '✓ Recognized! 💡 Tip: Place the character near the center crosshairs for balanced framing.';
+  }
 }
 
 /**
@@ -450,17 +666,28 @@ export function evaluatePlacement(placedComponents, targetDecompositions, canvas
  *
  * Tier 1: CLEAN_PASS - Exact components, canonical topology, tight alignment (drift <= 15%).
  * Tier 2: SOFT_PASS  - Correct components & ordering, moderate kerning/centering drift (15% - 38%). Passes word!
- * Tier 3: DIAGNOSTIC_FAIL - Radical confusion / missing pieces / order inversion / enclosure breach.
+ * Tier 3: DIAGNOSTIC_FAIL - Zero-spoiler radical confusion / missing pieces / order inversion / enclosure breach.
  *
  * @param {Array} placedComponents - Placed component objects
  * @param {Object|Array} targetDecompositions - Decomposition object(s)
  * @param {number} canvasDim - Canvas dimension in pixels
  * @param {Object} dictionary - Full character decompositions dictionary for semantic contrast
  * @param {Array} corpus - Full word corpus for semantic meanings
+ * @param {number} attemptsLeft - Remaining user attempts (0 triggers reveal-only fallback if failing)
  * @returns {Object} { status: 'CLEAN_PASS'|'SOFT_PASS'|'DIAGNOSTIC_FAIL', tier: 1|2|3, success: boolean, badge: string, detail: string, reason?: string }
  */
-export function gradeComponentBuilder(placedComponents, targetDecompositions, canvasDim = 320, dictionary = {}, corpus = []) {
+export function gradeComponentBuilder(placedComponents, targetDecompositions, canvasDim = 320, dictionary = {}, corpus = [], attemptsLeft = 3) {
   if (!placedComponents || placedComponents.length === 0) {
+    if (attemptsLeft <= 0) {
+      return {
+        status: 'DIAGNOSTIC_FAIL',
+        tier: 3,
+        success: false,
+        badge: '📖 Solution Revealed',
+        detail: 'All 3 attempts used. Study the canonical components above before continuing.',
+        isPass: false
+      };
+    }
     return {
       status: 'DIAGNOSTIC_FAIL',
       tier: 3,
@@ -481,8 +708,9 @@ export function gradeComponentBuilder(placedComponents, targetDecompositions, ca
         tier: 2,
         success: true,
         badge: '✨ Assembly Recognized!',
-        detail: '✓ Recognized! 💡 Tip: Keep the radical and stem closer together for optimal balance.',
-        maxDriftRatio: drift
+        detail: getTier2CoachingTip(decomps, evalResult.maxDriftAxis),
+        maxDriftRatio: drift,
+        maxDriftAxis: evalResult.maxDriftAxis || null
       };
     }
     return {
@@ -491,11 +719,24 @@ export function gradeComponentBuilder(placedComponents, targetDecompositions, ca
       success: true,
       badge: '🎯 Flawless Assembly!',
       detail: 'Flawless execution! Spatial assembly and radical positioning verified.',
-      maxDriftRatio: drift
+      maxDriftRatio: drift,
+      maxDriftAxis: evalResult.maxDriftAxis || null
     };
   }
 
-  // Diagnostic Failure (Tier 3)
+  if (attemptsLeft <= 0) {
+    return {
+      status: 'DIAGNOSTIC_FAIL',
+      tier: 3,
+      success: false,
+      badge: '📖 Solution Revealed',
+      detail: 'All 3 attempts used. Study the canonical components above before continuing.',
+      reason: evalResult.reason,
+      isPass: false
+    };
+  }
+
+  // Diagnostic Failure (Tier 3) — Zero-Spoiler Policy
   const reason = evalResult.reason;
   let badge = '⚠️ Alignment Error';
   let detail = 'Components are misplaced on the grid.';
@@ -515,17 +756,12 @@ export function gradeComponentBuilder(placedComponents, targetDecompositions, ca
       for (let i = 0; i < extraCount; i++) extraGlyphs.push(g);
     });
 
-    const missingGlyphs = [];
-    Object.keys(targetCounts).forEach(g => {
-      const missingCount = targetCounts[g] - (placedCounts[g] || 0);
-      for (let i = 0; i < missingCount; i++) missingGlyphs.push(g);
-    });
-
     if (allPlacedGlyphs.length < allTargetGlyphs.length && extraGlyphs.length === 0) {
+      const deficit = allTargetGlyphs.length - allPlacedGlyphs.length;
       badge = '⚠️ Missing Piece';
-      detail = `Missing component: ${missingGlyphs.join(', ')} is required to complete the character.`;
+      detail = `Almost! You need ${deficit} more component${deficit > 1 ? 's' : ''} on the grid to complete this word.`;
     } else if (extraGlyphs.length > 0) {
-      // Dynamic semantic contrastive lookup!
+      // Dynamic semantic contrastive lookup (ZERO spoiler: never disclose target glyph or missing pieces)
       let contrastFound = false;
       if (dictionary && Object.keys(dictionary).length > 0) {
         const placedSorted = allPlacedGlyphs.slice().sort().join('');
@@ -533,14 +769,14 @@ export function gradeComponentBuilder(placedComponents, targetDecompositions, ca
           if (info && info.targetComponents) {
             const candSorted = info.targetComponents.map(c => c.glyph).slice().sort().join('');
             if (candSorted === placedSorted) {
-              let candMeaning = '';
-              if (Array.isArray(corpus)) {
-                const w = corpus.find(item => item.hanzi_simp === candidateChar || (item.characters && item.characters.includes(candidateChar)));
-                if (w && w.english) candMeaning = ` (${w.english})`;
-              }
-              const targetChar = decomps.map(d => d.char).join('');
+              const candMeaningRaw = getWordMeaning(candidateChar, corpus);
+              const candMeaning = candMeaningRaw ? ` (${candMeaningRaw})` : '';
               badge = '🔍 Radical Confusion';
-              detail = `Attempted: ${candidateChar}${candMeaning} using ${extraGlyphs[0]}. Target ${targetChar} uses radical ${missingGlyphs[0] || 'different radical'}.`;
+              if (info.topology === 'ATOMIC') {
+                detail = `You selected '${candidateChar}'${candMeaning}. Check the audio prompt and try swapping '${extraGlyphs[0]}'.`;
+              } else {
+                detail = `You assembled '${candidateChar}'${candMeaning} with '${extraGlyphs[0]}'. Check the audio prompt and try swapping '${extraGlyphs[0]}'.`;
+              }
               contrastFound = true;
               break;
             }
@@ -548,8 +784,12 @@ export function gradeComponentBuilder(placedComponents, targetDecompositions, ca
         }
       }
       if (!contrastFound) {
+        const extraStr = extraGlyphs.join(', ');
+        const extraGloss = COMPONENT_GLOSSES[extraGlyphs[0]] || '';
+        const targetWord = decomps.map(d => d.char).join('');
+        const targetMeaning = getWordMeaning(targetWord, corpus);
         badge = '🔍 Radical Confusion';
-        detail = `Radical Confusion: Placed '${extraGlyphs.join(', ')}' instead of target radical '${missingGlyphs.join(', ')}'. Check the semantic radical.`;
+        detail = `'${extraStr}'${extraGloss ? ` (${extraGloss})` : ''} doesn't belong here${targetMeaning ? ` (this prompt means "${targetMeaning}")` : ''}. Try swapping it for another piece.`;
       }
     } else {
       badge = '⚠️ Wrong Pieces';
@@ -891,6 +1131,15 @@ export class ComponentPlacementController {
       });
     });
 
+    // Block visually ambiguous square pairs (囗 / 冂 vs 口) dynamically
+    if (usedGlyphs.has('囗') || usedGlyphs.has('冂')) {
+      usedGlyphs.add('口');
+    }
+    if (usedGlyphs.has('口')) {
+      usedGlyphs.add('囗');
+      usedGlyphs.add('冂');
+    }
+
     // Collect 2-3 distractors that do not clash with targets
     const distractorCandidates = [];
     this.activeDecompositions.forEach(decomp => {
@@ -928,12 +1177,16 @@ export class ComponentPlacementController {
 
     // Render tactile tiles in dock
     this.dom.dock.innerHTML = '';
+    const hasEnclosure = this._hasEnclosureInWord();
+    const dockTopology = (this.activeDecompositions && this.activeDecompositions.length === 1)
+      ? (this.activeDecompositions[0]?.topology || 'ATOMIC')
+      : (hasEnclosure ? 'ENCLOSURE' : 'ATOMIC');
     dockItems.forEach(item => {
       const tile = document.createElement('div');
       tile.className = 'draggable-component-tile w-10 h-10 xs:w-11 xs:h-11 lg:w-14 lg:h-14 bg-white border-2 border-black rounded-xl shadow-hard-black flex items-center justify-center font-chinese font-bold text-xl xs:text-2xl lg:text-3xl text-black cursor-grab active:cursor-grabbing select-none transition-transform hover:scale-105 active:scale-95 touch-none';
       tile.dataset.componentId = item.id;
       tile.dataset.glyph = item.glyph;
-      tile.dataset.componentType = getComponentType(item.glyph);
+      tile.dataset.componentType = getComponentType(item.glyph, null, dockTopology);
       tile.title = `${item.glyph}`;
       const glyphSpan = document.createElement('span');
       glyphSpan.className = 'component-tile-glyph';
@@ -945,6 +1198,110 @@ export class ComponentPlacementController {
     });
 
     this.updateDockCount();
+  }
+
+  _hasEnclosureInWord() {
+    return (this.activeDecompositions || []).some(d => d && d.topology === 'ENCLOSURE');
+  }
+
+  /**
+   * Resolves (topology, role, charCount) strictly from activeDecompositions and placed canvas geometry.
+   * ZERO-SPOILER RULE: never reads item.isTarget, ensuring target and distractor tiles morph identically.
+   */
+  _resolvePlacementContext(glyph, dropCenterX = null, dropCenterY = null, excludeEl = null) {
+    const charCount = Math.max(1, (this.activeDecompositions || []).length);
+    const hasEnclosure = this._hasEnclosureInWord();
+
+    if (charCount === 1) {
+      const contextTopology = this.activeDecompositions[0]?.topology || 'ATOMIC';
+      let contextRole = null;
+      if (contextTopology === 'ENCLOSURE') {
+        contextRole = isOuterFrameGlyph(glyph, 'ENCLOSURE') ? 'outer' : 'inner';
+      }
+      return { topology: contextTopology, role: contextRole, charCount };
+    }
+
+    // Multi-character word: recognize outer frames if word contains an ENCLOSURE character
+    if (isOuterFrameGlyph(glyph, hasEnclosure ? 'ENCLOSURE' : null)) {
+      return { topology: 'ENCLOSURE', role: 'outer', charCount };
+    }
+
+    if (dropCenterX !== null && dropCenterY !== null && this.dom.placedLayer && this.dom.canvas) {
+      const canvasRect = this.dom.canvas.getBoundingClientRect();
+      const placedEls = this.dom.placedLayer.querySelectorAll('.placed-component-glyph');
+      for (const el of placedEls) {
+        if (el === excludeEl) continue;
+        const elGlyph = el.dataset.glyph || el.textContent.trim();
+        if (!isOuterFrameGlyph(elGlyph, hasEnclosure ? 'ENCLOSURE' : null)) continue;
+        const elRect = el.getBoundingClientRect();
+        const ex = elRect.left - canvasRect.left;
+        const ey = elRect.top - canvasRect.top;
+        const ew = elRect.width || parseFloat(el.style.fontSize) || 60;
+        const eh = elRect.height || parseFloat(el.style.fontSize) || 60;
+        const padX = ew * 0.12;
+        const padY = eh * 0.12;
+        if (dropCenterX >= ex - padX && dropCenterX <= ex + ew + padX &&
+            dropCenterY >= ey - padY && dropCenterY <= ey + eh + padY) {
+          return { topology: 'ENCLOSURE', role: 'inner', charCount };
+        }
+      }
+    }
+
+    return { topology: 'ATOMIC', role: null, charCount };
+  }
+
+  /**
+   * Auto-rescales pieces on multi-character canvases whenever an outer frame or inner glyph
+   * is dropped, repositioned, or removed. Keeps piece center pinned when size changes.
+   */
+  refreshMultiCharEnclosureStyles() {
+    if (!this.dom.placedLayer || !this.dom.canvas) return;
+    const charCount = Math.max(1, (this.activeDecompositions || []).length);
+    if (charCount < 2) return;
+
+    const canvasRect = this.dom.canvas.getBoundingClientRect();
+    const canvasDim = canvasRect.width || 340;
+    const placedEls = Array.from(this.dom.placedLayer.querySelectorAll('.placed-component-glyph'));
+
+    const snapshots = placedEls.map(el => {
+      const rect = el.getBoundingClientRect();
+      const oldSize = parseFloat(el.style.fontSize) || rect.height || 60;
+      const cx = rect.width > 0
+        ? (rect.left - canvasRect.left + rect.width * 0.5)
+        : ((parseFloat(el.style.left) || 0) + oldSize * 0.5);
+      const cy = rect.height > 0
+        ? (rect.top - canvasRect.top + rect.height * 0.5)
+        : ((parseFloat(el.style.top) || 0) + oldSize * 0.5);
+      return {
+        el,
+        glyph: el.dataset.glyph || el.textContent.trim(),
+        oldSize,
+        cx,
+        cy
+      };
+    });
+
+    for (const snap of snapshots) {
+      const ctx = this._resolvePlacementContext(snap.glyph, snap.cx, snap.cy, snap.el);
+      const newSize = getComponentFontSize(snap.glyph, canvasDim, charCount, ctx.role, ctx.topology);
+      const newWeight = getComponentFontWeight(snap.glyph, ctx.topology, ctx.role);
+      const compType = getComponentType(snap.glyph, ctx.role, ctx.topology);
+      const vt = getComponentVisualTransform(snap.glyph, ctx.topology, ctx.role);
+
+      snap.el.dataset.componentType = compType;
+      snap.el.style.fontSize = `${newSize}px`;
+      snap.el.style.fontWeight = newWeight;
+      snap.el.style.setProperty('--sx', String(vt.scaleX));
+      snap.el.style.setProperty('--sy', String(vt.scaleY));
+
+      if (Math.abs(newSize - snap.oldSize) > 0.5) {
+        const oldLeft = parseFloat(snap.el.style.left) || 0;
+        const oldTop = parseFloat(snap.el.style.top) || 0;
+        const deltaHalf = (snap.oldSize - newSize) * 0.5;
+        snap.el.style.left = `${Math.round(oldLeft + deltaHalf)}px`;
+        snap.el.style.top = `${Math.round(oldTop + deltaHalf)}px`;
+      }
+    }
   }
 
   updateDockCount() {
@@ -965,18 +1322,23 @@ export class ComponentPlacementController {
 
       const glyph = item.glyph;
       const compId = item.id;
-      const compType = getComponentType(glyph);
       const canvasRect = this.dom.canvas.getBoundingClientRect();
-      const charCount = this.activeDecompositions.length;
-      const targetFontSize = getComponentFontSize(glyph, canvasRect.width || 340, charCount);
-      const targetFontWeight = getComponentFontWeight(glyph);
+      const canvasDim = canvasRect.width || 340;
+      const dragCtx = this._resolvePlacementContext(glyph, null, null, null);
+      const compType = getComponentType(glyph, dragCtx.role, dragCtx.topology);
+      const targetFontSize = getComponentFontSize(glyph, canvasDim, dragCtx.charCount, dragCtx.role, dragCtx.topology);
+      const targetFontWeight = getComponentFontWeight(glyph, dragCtx.topology, dragCtx.role);
+      const visualTransform = getComponentVisualTransform(glyph, dragCtx.topology, dragCtx.role);
 
-      // Create floating drag avatar showing pure stroke font
+      // Create floating drag avatar showing pure stroke font with anisotropic proportions
       const avatar = document.createElement('div');
       avatar.className = 'fixed z-[9999] pointer-events-none font-chinese text-[#1E1B2E] leading-none flex items-center justify-center select-none';
       avatar.dataset.componentType = compType;
       avatar.style.fontSize = `${targetFontSize}px`;
       avatar.style.fontWeight = targetFontWeight;
+      avatar.style.lineHeight = '0.88';
+      avatar.style.transformOrigin = 'center center';
+      avatar.style.transform = `scale(${visualTransform.scaleX}, ${visualTransform.scaleY})`;
       avatar.style.filter = 'drop-shadow(0 4px 8px rgba(0,0,0,0.35))';
       avatar.textContent = glyph;
       document.body.appendChild(avatar);
@@ -1015,12 +1377,22 @@ export class ComponentPlacementController {
           tile.classList.add('hidden');
           this.updateDockCount();
 
-          const relX = Math.round(dropX - cRect.left - targetFontSize * 0.5);
-          const relY = Math.round(dropY - cRect.top - targetFontSize * 0.5);
-          const clampedX = Math.max(-Math.round(targetFontSize * 0.15), Math.min(cRect.width - Math.round(targetFontSize * 0.7), relX));
-          const clampedY = Math.max(-Math.round(targetFontSize * 0.15), Math.min(cRect.height - Math.round(targetFontSize * 0.7), relY));
+          const dropRelCenterX = dropX - cRect.left;
+          const dropRelCenterY = dropY - cRect.top;
+          const dropCtx = this._resolvePlacementContext(glyph, dropRelCenterX, dropRelCenterY, null);
+          const dropCanvasDim = cRect.width || 340;
+          const dropFontSize = getComponentFontSize(glyph, dropCanvasDim, dropCtx.charCount, dropCtx.role, dropCtx.topology);
+          const dropFontWeight = getComponentFontWeight(glyph, dropCtx.topology, dropCtx.role);
+          const dropCompType = getComponentType(glyph, dropCtx.role, dropCtx.topology);
+          const dropTransform = getComponentVisualTransform(glyph, dropCtx.topology, dropCtx.role);
 
-          this.createPlacedGlyph(glyph, compId, clampedX, clampedY, targetFontSize, targetFontWeight, compType, tile);
+          const relX = Math.round(dropRelCenterX - dropFontSize * 0.5);
+          const relY = Math.round(dropRelCenterY - dropFontSize * 0.5);
+          const clampedX = Math.max(-Math.round(dropFontSize * 0.15), Math.min(cRect.width - Math.round(dropFontSize * 0.7), relX));
+          const clampedY = Math.max(-Math.round(dropFontSize * 0.15), Math.min(cRect.height - Math.round(dropFontSize * 0.7), relY));
+
+          this.createPlacedGlyph(glyph, compId, clampedX, clampedY, dropFontSize, dropFontWeight, dropCompType, tile, dropTransform);
+          this.refreshMultiCharEnclosureStyles();
         }
       };
 
@@ -1032,9 +1404,10 @@ export class ComponentPlacementController {
   /**
    * Creates a pure typography glyph element on the canvas drop surface.
    */
-  createPlacedGlyph(glyph, compId, x, y, fontSize, fontWeight, compType, sourceTile) {
+  createPlacedGlyph(glyph, compId, x, y, fontSize, fontWeight, compType, sourceTile, visualTransform = null) {
     if (!this.dom.placedLayer) return;
 
+    const vt = visualTransform || { scaleX: 1, scaleY: 1 };
     const placed = document.createElement('div');
     placed.className = 'placed-component-glyph';
     placed.dataset.componentType = compType;
@@ -1042,6 +1415,8 @@ export class ComponentPlacementController {
     placed.style.top = `${y}px`;
     placed.style.fontSize = `${fontSize}px`;
     placed.style.fontWeight = fontWeight;
+    placed.style.setProperty('--sx', String(vt.scaleX));
+    placed.style.setProperty('--sy', String(vt.scaleY));
     placed.dataset.componentId = compId;
     placed.dataset.glyph = glyph;
     placed.textContent = glyph;
@@ -1054,6 +1429,7 @@ export class ComponentPlacementController {
       try { placed.setPointerCapture(e.pointerId); } catch (_) {}
 
       hasMoved = false;
+      const activeFontSize = parseFloat(placed.style.fontSize) || fontSize;
       const startLeft = parseFloat(placed.style.left) || 0;
       const startTop = parseFloat(placed.style.top) || 0;
       const startPointerX = e.clientX;
@@ -1067,8 +1443,8 @@ export class ComponentPlacementController {
         }
 
         const currentRect = this.dom.canvas.getBoundingClientRect();
-        const newX = Math.max(-Math.round(fontSize * 0.2), Math.min(currentRect.width - Math.round(fontSize * 0.6), startLeft + dx));
-        const newY = Math.max(-Math.round(fontSize * 0.2), Math.min(currentRect.height - Math.round(fontSize * 0.6), startTop + dy));
+        const newX = Math.max(-Math.round(activeFontSize * 0.2), Math.min(currentRect.width - Math.round(activeFontSize * 0.6), startLeft + dx));
+        const newY = Math.max(-Math.round(activeFontSize * 0.2), Math.min(currentRect.height - Math.round(activeFontSize * 0.6), startTop + dy));
         placed.style.left = `${newX}px`;
         placed.style.top = `${newY}px`;
       };
@@ -1084,6 +1460,8 @@ export class ComponentPlacementController {
 
         if (!hasMoved || isOutside) {
           this.returnGlyphToDock(placed, sourceTile);
+        } else {
+          this.refreshMultiCharEnclosureStyles();
         }
       };
 
@@ -1105,6 +1483,7 @@ export class ComponentPlacementController {
       sourceTile.classList.remove('hidden');
     }
     this.updateDockCount();
+    this.refreshMultiCharEnclosureStyles();
   }
 
   /**
@@ -1156,15 +1535,16 @@ export class ComponentPlacementController {
   /**
    * Runs the RST evaluation on the current canvas state.
    */
-  evaluateActivePlacement(dictionary = null, corpus = null) {
+  evaluateActivePlacement(dictionary = null, corpus = null, attemptsLeft = 3) {
     const placed = this.getPlacedComponents();
     const canvasWidth = this.dom.canvas ? this.dom.canvas.clientWidth : 340;
     const dict = dictionary || this.decompositions || {};
-    return gradeComponentBuilder(placed, this.activeDecompositions, canvasWidth, dict, corpus || []);
+    return gradeComponentBuilder(placed, this.activeDecompositions, canvasWidth, dict, corpus || [], attemptsLeft);
   }
 
   /**
-   * Plays the crystallization animation upon successful assembly.
+   * Plays the crystallization animation upon successful assembly, morphing loose tiles into
+   * the canonical unified character string for orthographic reinforcement.
    */
   playCrystallizationAnimation(onComplete) {
     if (!this.dom.placedLayer) {
@@ -1175,12 +1555,32 @@ export class ComponentPlacementController {
     const glyphs = this.dom.placedLayer.querySelectorAll('.placed-component-glyph');
     glyphs.forEach(g => {
       g.classList.add('crystallize-pulse');
+      g.style.transition = 'opacity 0.28s ease-out, filter 0.15s ease';
+      g.style.opacity = '0.2';
       g.style.filter = 'drop-shadow(0 0 14px #10B981)';
     });
+
+    if (this.activeWord && this.activeWord.hanzi_simp) {
+      const charLen = Math.max(1, Array.from(this.activeWord.hanzi_simp).length);
+      const canvasWidth = this.dom.canvas ? (this.dom.canvas.clientWidth || 340) : 340;
+      let overlayRatio = 0.52;
+      if (charLen === 2) overlayRatio = 0.38;
+      else if (charLen === 3) overlayRatio = 0.26;
+      else if (charLen >= 4) overlayRatio = 0.20;
+
+      const overlay = document.createElement('div');
+      overlay.className = 'crystallized-word-overlay crystallize-pulse';
+      overlay.style.setProperty('--sx', '1');
+      overlay.style.setProperty('--sy', '1');
+      overlay.style.fontSize = `${Math.round(canvasWidth * overlayRatio)}px`;
+      overlay.textContent = this.activeWord.hanzi_simp;
+      this.dom.placedLayer.appendChild(overlay);
+    }
 
     setTimeout(() => {
       glyphs.forEach(g => {
         g.style.filter = '';
+        g.style.opacity = '0';
       });
       if (onComplete) onComplete();
     }, 450);

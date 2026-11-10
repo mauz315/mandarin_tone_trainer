@@ -409,9 +409,11 @@ function setupMenu() {
     }
     if (modeSelectionScreen) modeSelectionScreen.classList.add('hidden');
     if (wordTrainerScreen) {
-      wordTrainerScreen.classList.remove('mobile-result-active');
+      wordTrainerScreen.classList.remove('mobile-result-active', 'mobile-phase-open');
       wordTrainerScreen.classList.remove('hidden');
     }
+    const mobilePhaseTriggerEl = document.getElementById('mobile-phase-trigger');
+    if (mobilePhaseTriggerEl) mobilePhaseTriggerEl.setAttribute('aria-expanded', 'false');
     localStorage.setItem('mandarin_trainer_selected_mode', mode);
 
     const canvasArena = document.getElementById('canvas-arena');
@@ -499,13 +501,16 @@ function setupMenu() {
   if (backFromWordsBtn) {
     backFromWordsBtn.addEventListener('click', () => {
       if (wordTrainerScreen) {
-        wordTrainerScreen.classList.remove('mobile-result-active');
+        wordTrainerScreen.classList.remove('mobile-result-active', 'mobile-phase-open');
         wordTrainerScreen.classList.add('hidden');
       }
       menuScreen.classList.remove('hidden');
       mainMenu.classList.remove('hidden');
       setAppBackground('bg-canvas-acid');
       if (window.WordTrainerEngine) {
+        if (typeof window.WordTrainerEngine.closeMobilePhaseBar === 'function') {
+          window.WordTrainerEngine.closeMobilePhaseBar();
+        }
         if (typeof window.WordTrainerEngine.clearResultShowcase === 'function') {
           window.WordTrainerEngine.clearResultShowcase();
         }

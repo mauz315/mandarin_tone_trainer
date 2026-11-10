@@ -38,17 +38,12 @@
   "万": {
     "char": "万",
     "strokeCount": 3,
-    "topology": "TOP_BOTTOM",
+    "topology": "ATOMIC",
     "targetComponents": [
       {
-        "id": "comp_yi",
-        "glyph": "一",
-        "role": "top"
-      },
-      {
-        "id": "comp_bao",
-        "glyph": "勹",
-        "role": "bottom"
+        "id": "comp_wan",
+        "glyph": "万",
+        "role": "base"
       }
     ],
     "distractorComponents": [
@@ -61,17 +56,12 @@
   "丈": {
     "char": "丈",
     "strokeCount": 3,
-    "topology": "CROSSING",
+    "topology": "ATOMIC",
     "targetComponents": [
       {
-        "id": "comp_yi",
-        "glyph": "一",
+        "id": "comp_zhang",
+        "glyph": "丈",
         "role": "base"
-      },
-      {
-        "id": "comp_you",
-        "glyph": "乂",
-        "role": "marker"
       }
     ],
     "distractorComponents": [
@@ -102,17 +92,12 @@
   "上": {
     "char": "上",
     "strokeCount": 3,
-    "topology": "CROSSING",
+    "topology": "ATOMIC",
     "targetComponents": [
       {
-        "id": "comp_yi",
-        "glyph": "一",
+        "id": "comp_shang",
+        "glyph": "上",
         "role": "base"
-      },
-      {
-        "id": "comp_bu",
-        "glyph": "卜",
-        "role": "marker"
       }
     ],
     "distractorComponents": [
@@ -125,24 +110,19 @@
   "下": {
     "char": "下",
     "strokeCount": 3,
-    "topology": "CROSSING",
+    "topology": "ATOMIC",
     "targetComponents": [
       {
-        "id": "comp_yi",
-        "glyph": "一",
+        "id": "comp_xia",
+        "glyph": "下",
         "role": "base"
-      },
-      {
-        "id": "comp_bu_d",
-        "glyph": "卜",
-        "role": "marker"
       }
     ],
     "distractorComponents": [
       "上",
       "不",
-      "个",
-      "木"
+      "卜",
+      "个"
     ]
   },
   "不": {
@@ -202,46 +182,36 @@
   "个": {
     "char": "个",
     "strokeCount": 3,
-    "topology": "TOP_BOTTOM",
+    "topology": "ATOMIC",
     "targetComponents": [
       {
-        "id": "comp_ren",
-        "glyph": "人",
-        "role": "top"
-      },
-      {
-        "id": "comp_shu",
-        "glyph": "丨",
-        "role": "bottom"
+        "id": "comp_ge_ge",
+        "glyph": "个",
+        "role": "base"
       }
     ],
     "distractorComponents": [
+      "人",
       "十",
       "介",
-      "从",
-      "木"
+      "从"
     ]
   },
   "中": {
     "char": "中",
     "strokeCount": 4,
-    "topology": "CROSSING",
+    "topology": "ATOMIC",
     "targetComponents": [
       {
-        "id": "comp_kou",
-        "glyph": "口",
+        "id": "comp_zhong",
+        "glyph": "中",
         "role": "base"
-      },
-      {
-        "id": "comp_shu",
-        "glyph": "丨",
-        "role": "marker"
       }
     ],
     "distractorComponents": [
-      "日",
-      "目",
       "申",
+      "由",
+      "甲",
       "田"
     ]
   },
@@ -266,24 +236,19 @@
   "么": {
     "char": "么",
     "strokeCount": 3,
-    "topology": "TOP_BOTTOM",
+    "topology": "ATOMIC",
     "targetComponents": [
       {
-        "id": "comp_pie",
-        "glyph": "丿",
-        "role": "top"
-      },
-      {
-        "id": "comp_si",
-        "glyph": "厶",
-        "role": "bottom"
+        "id": "comp_me",
+        "glyph": "么",
+        "role": "base"
       }
     ],
     "distractorComponents": [
+      "厶",
       "公",
       "去",
-      "云",
-      "木"
+      "云"
     ]
   },
   "乐": {
@@ -1158,24 +1123,19 @@
   "再": {
     "char": "再",
     "strokeCount": 6,
-    "topology": "TOP_BOTTOM",
+    "topology": "ATOMIC",
     "targetComponents": [
       {
-        "id": "comp_yi",
-        "glyph": "一",
-        "role": "top"
-      },
-      {
-        "id": "comp_ran",
-        "glyph": "冉",
-        "role": "bottom"
+        "id": "comp_zai_again",
+        "glyph": "再",
+        "role": "base"
       }
     ],
     "distractorComponents": [
+      "冉",
       "肉",
       "内",
-      "丙",
-      "木"
+      "丙"
     ]
   },
   "写": {
@@ -1465,24 +1425,19 @@
   "千": {
     "char": "千",
     "strokeCount": 3,
-    "topology": "CROSSING",
+    "topology": "ATOMIC",
     "targetComponents": [
       {
-        "id": "comp_shi",
-        "glyph": "十",
+        "id": "comp_qian",
+        "glyph": "千",
         "role": "base"
-      },
-      {
-        "id": "comp_pie",
-        "glyph": "丿",
-        "role": "marker"
       }
     ],
     "distractorComponents": [
       "干",
       "于",
-      "木",
-      "日"
+      "十",
+      "午"
     ]
   },
   "午": {
@@ -1600,7 +1555,7 @@
       "日",
       "目",
       "田",
-      "囗"
+      "甘"
     ]
   },
   "只": {
@@ -2212,24 +2167,19 @@
   "四": {
     "char": "四",
     "strokeCount": 5,
-    "topology": "ENCLOSURE",
+    "topology": "ATOMIC",
     "targetComponents": [
       {
-        "id": "comp_wei",
-        "glyph": "囗",
-        "role": "outer"
-      },
-      {
-        "id": "comp_er",
-        "glyph": "儿",
-        "role": "inner"
+        "id": "comp_si_4",
+        "glyph": "四",
+        "role": "base"
       }
     ],
     "distractorComponents": [
-      "口",
       "西",
+      "回",
       "日",
-      "月"
+      "目"
     ]
   },
   "回": {
@@ -2272,7 +2222,7 @@
       }
     ],
     "distractorComponents": [
-      "口",
+      "天",
       "困",
       "团",
       "木"
@@ -2296,9 +2246,9 @@
     ],
     "distractorComponents": [
       "日",
-      "口",
       "王",
-      "主"
+      "主",
+      "田"
     ]
   },
   "在": {
@@ -2391,24 +2341,24 @@
   "坐": {
     "char": "坐",
     "strokeCount": 7,
-    "topology": "CROSSING",
+    "topology": "TOP_BOTTOM",
     "targetComponents": [
-      {
-        "id": "comp_tu",
-        "glyph": "土",
-        "role": "base"
-      },
       {
         "id": "comp_cong",
         "glyph": "从",
-        "role": "marker"
+        "role": "top"
+      },
+      {
+        "id": "comp_tu",
+        "glyph": "土",
+        "role": "bottom"
       }
     ],
     "distractorComponents": [
       "人",
+      "大",
       "木",
-      "工",
-      "日"
+      "工"
     ]
   },
   "块": {
@@ -2437,17 +2387,12 @@
   "士": {
     "char": "士",
     "strokeCount": 3,
-    "topology": "CROSSING",
+    "topology": "ATOMIC",
     "targetComponents": [
       {
-        "id": "comp_shi",
-        "glyph": "十",
+        "id": "comp_shi_scholar",
+        "glyph": "士",
         "role": "base"
-      },
-      {
-        "id": "comp_yi",
-        "glyph": "一",
-        "role": "marker"
       }
     ],
     "distractorComponents": [
@@ -2547,24 +2492,19 @@
   "天": {
     "char": "天",
     "strokeCount": 4,
-    "topology": "CROSSING",
+    "topology": "ATOMIC",
     "targetComponents": [
       {
-        "id": "comp_yi",
-        "glyph": "一",
+        "id": "comp_tian",
+        "glyph": "天",
         "role": "base"
-      },
-      {
-        "id": "comp_da",
-        "glyph": "大",
-        "role": "marker"
       }
     ],
     "distractorComponents": [
       "夫",
-      "矢",
-      "开",
-      "木"
+      "大",
+      "太",
+      "矢"
     ]
   },
   "太": {
@@ -2580,7 +2520,7 @@
       {
         "id": "comp_dian",
         "glyph": "丶",
-        "role": "marker"
+        "role": "marker_lower"
       }
     ],
     "distractorComponents": [
@@ -2593,24 +2533,19 @@
   "夫": {
     "char": "夫",
     "strokeCount": 4,
-    "topology": "CROSSING",
+    "topology": "ATOMIC",
     "targetComponents": [
       {
-        "id": "comp_yi",
-        "glyph": "一",
+        "id": "comp_fu",
+        "glyph": "夫",
         "role": "base"
-      },
-      {
-        "id": "comp_da",
-        "glyph": "大",
-        "role": "marker"
       }
     ],
     "distractorComponents": [
       "天",
+      "大",
       "太",
-      "失",
-      "木"
+      "失"
     ]
   },
   "头": {
@@ -3120,24 +3055,19 @@
   "少": {
     "char": "少",
     "strokeCount": 4,
-    "topology": "CROSSING",
+    "topology": "ATOMIC",
     "targetComponents": [
       {
-        "id": "comp_xiao",
-        "glyph": "小",
+        "id": "comp_shao",
+        "glyph": "少",
         "role": "base"
-      },
-      {
-        "id": "comp_pie",
-        "glyph": "丿",
-        "role": "marker"
       }
     ],
     "distractorComponents": [
-      "不",
+      "小",
       "水",
-      "木",
-      "日"
+      "不",
+      "木"
     ]
   },
   "就": {
@@ -3189,17 +3119,12 @@
   "工": {
     "char": "工",
     "strokeCount": 3,
-    "topology": "CROSSING",
+    "topology": "ATOMIC",
     "targetComponents": [
       {
-        "id": "comp_er",
-        "glyph": "二",
+        "id": "comp_gong",
+        "glyph": "工",
         "role": "base"
-      },
-      {
-        "id": "comp_shu",
-        "glyph": "丨",
-        "role": "marker"
       }
     ],
     "distractorComponents": [
@@ -4469,14 +4394,14 @@
       {
         "id": "comp_yi",
         "glyph": "一",
-        "role": "marker"
+        "role": "marker_lower"
       }
     ],
     "distractorComponents": [
       "禾",
       "未",
       "末",
-      "日"
+      "大"
     ]
   },
   "机": {
@@ -4782,24 +4707,19 @@
   "正": {
     "char": "正",
     "strokeCount": 5,
-    "topology": "TOP_BOTTOM",
+    "topology": "ATOMIC",
     "targetComponents": [
       {
-        "id": "comp_yi",
-        "glyph": "一",
-        "role": "top"
-      },
-      {
-        "id": "comp_zhi",
-        "glyph": "止",
-        "role": "bottom"
+        "id": "comp_zheng",
+        "glyph": "正",
+        "role": "base"
       }
     ],
     "distractorComponents": [
+      "止",
       "上",
       "立",
-      "主",
-      "木"
+      "主"
     ]
   },
   "步": {
@@ -5484,47 +5404,37 @@
   "白": {
     "char": "白",
     "strokeCount": 5,
-    "topology": "TOP_BOTTOM",
+    "topology": "ATOMIC",
     "targetComponents": [
       {
-        "id": "comp_pie",
-        "glyph": "丿",
-        "role": "top"
-      },
-      {
-        "id": "comp_ri",
-        "glyph": "日",
-        "role": "bottom"
+        "id": "comp_bai",
+        "glyph": "白",
+        "role": "base"
       }
     ],
     "distractorComponents": [
+      "日",
       "自",
       "目",
-      "田",
-      "木"
+      "田"
     ]
   },
   "百": {
     "char": "百",
     "strokeCount": 6,
-    "topology": "TOP_BOTTOM",
+    "topology": "ATOMIC",
     "targetComponents": [
       {
-        "id": "comp_yi",
-        "glyph": "一",
-        "role": "top"
-      },
-      {
-        "id": "comp_bai",
-        "glyph": "白",
-        "role": "bottom"
+        "id": "comp_bai_100",
+        "glyph": "百",
+        "role": "base"
       }
     ],
     "distractorComponents": [
+      "白",
       "日",
-      "目",
       "自",
-      "田"
+      "目"
     ]
   },
   "的": {
@@ -5963,24 +5873,19 @@
   "系": {
     "char": "系",
     "strokeCount": 7,
-    "topology": "TOP_BOTTOM",
+    "topology": "ATOMIC",
     "targetComponents": [
       {
-        "id": "comp_pie",
-        "glyph": "丿",
-        "role": "top"
-      },
-      {
-        "id": "comp_si",
-        "glyph": "糸",
-        "role": "bottom"
+        "id": "comp_xi_tie",
+        "glyph": "系",
+        "role": "base"
       }
     ],
     "distractorComponents": [
+      "糸",
       "累",
       "索",
-      "紧",
-      "木"
+      "紧"
     ]
   },
   "累": {
@@ -6247,24 +6152,19 @@
   "自": {
     "char": "自",
     "strokeCount": 6,
-    "topology": "TOP_BOTTOM",
+    "topology": "ATOMIC",
     "targetComponents": [
       {
-        "id": "comp_pie",
-        "glyph": "丿",
-        "role": "top"
-      },
-      {
-        "id": "comp_mu",
-        "glyph": "目",
-        "role": "bottom"
+        "id": "comp_zi_self",
+        "glyph": "自",
+        "role": "base"
       }
     ],
     "distractorComponents": [
+      "目",
       "日",
       "白",
-      "且",
-      "木"
+      "且"
     ]
   },
   "舒": {

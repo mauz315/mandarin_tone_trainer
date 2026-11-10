@@ -982,29 +982,63 @@
           </div>
         </header>
 
-        <!-- ZONE 1: TOP PHASE STEPPER (#phase-stepper) -->
-        <nav id="phase-stepper" class="phase-stepper-bar w-full flex items-center justify-between gap-1 sm:gap-2 overflow-x-auto no-scrollbar py-0.5 lg:py-1 shrink-0 mb-1 lg:mb-2 border-b-2 border-black/10">
-          <button id="phase-btn-1" class="phase-btn phase-active flex-1 min-w-[62px] sm:min-w-[90px] py-1 lg:py-1.5 px-1.5 sm:px-2 bg-[#4C1D95] text-white border-2 border-black rounded-xl font-mono text-[10px] sm:text-xs font-black uppercase shadow-hard-black transition-all active-collapse cursor-pointer text-center" data-phase="1">
-            <span class="block text-[8px] text-[#FDE68A] font-bold leading-tight">P1 • 55W</span>
-            <span class="block leading-tight">ATOMS</span>
-          </button>
-          <button id="phase-btn-2" class="phase-btn phase-available flex-1 min-w-[62px] sm:min-w-[90px] py-1 lg:py-1.5 px-1.5 sm:px-2 bg-white hover:bg-slate-50 text-black border-2 border-black rounded-xl font-mono text-[10px] sm:text-xs font-black uppercase shadow-sm transition-all active-collapse cursor-pointer text-center" data-phase="2">
-            <span class="block text-[8px] text-black/50 font-bold leading-tight">P2 • 80W</span>
-            <span class="block leading-tight">COMPOUND</span>
-          </button>
-          <button id="phase-btn-3" class="phase-btn phase-available flex-1 min-w-[62px] sm:min-w-[90px] py-1 lg:py-1.5 px-1.5 sm:px-2 bg-white hover:bg-slate-50 text-black border-2 border-black rounded-xl font-mono text-[10px] sm:text-xs font-black uppercase shadow-sm transition-all active-collapse cursor-pointer text-center" data-phase="3">
-            <span class="block text-[8px] text-black/50 font-bold leading-tight">P3 • 115W</span>
-            <span class="block leading-tight">BINARY</span>
-          </button>
-          <button id="phase-btn-4" class="phase-btn phase-available flex-1 min-w-[62px] sm:min-w-[90px] py-1 lg:py-1.5 px-1.5 sm:px-2 bg-white hover:bg-slate-50 text-black border-2 border-black rounded-xl font-mono text-[10px] sm:text-xs font-black uppercase shadow-sm transition-all active-collapse cursor-pointer text-center" data-phase="4">
-            <span class="block text-[8px] text-black/50 font-bold leading-tight">P4 • 120W</span>
-            <span class="block leading-tight">NETWORKS</span>
-          </button>
-          <button id="phase-btn-5" class="phase-btn phase-available flex-1 min-w-[62px] sm:min-w-[90px] py-1 lg:py-1.5 px-1.5 sm:px-2 bg-white hover:bg-slate-50 text-black border-2 border-black rounded-xl font-mono text-[10px] sm:text-xs font-black uppercase shadow-sm transition-all active-collapse cursor-pointer text-center" data-phase="5">
-            <span class="block text-[8px] text-black/50 font-bold leading-tight">P5 • 127W</span>
-            <span class="block leading-tight">IDIOMS</span>
-          </button>
-        </nav>
+        <!-- ZONE 1: CONSOLIDATED MOBILE PHASE+PROGRESS ROW (< lg) + PHASE STEPPER (#phase-stepper) -->
+        <div id="phase-dock-wrapper" class="relative z-40 shrink-0 mb-1.5 lg:mb-2">
+          <!-- Click-away Backdrop Scrim for Mobile Floating Phase Bar -->
+          <div id="mobile-phase-scrim" class="hidden lg:hidden fixed inset-0 bg-black/25 z-10" aria-hidden="true"></div>
+
+          <!-- Compact Single-Row Mobile Phase Selector Trigger + Progress Card (< lg only) -->
+          <div id="mobile-phase-progress-row" class="lg:hidden relative z-20 flex items-stretch gap-1.5 w-full">
+            <button id="mobile-phase-trigger" type="button" aria-expanded="false" aria-controls="phase-stepper" class="shrink-0 bg-[#4C1D95] text-white border-2 border-black rounded-xl px-2.5 py-1.5 font-mono uppercase shadow-[3px_3px_0px_#000000] transition-all active-collapse cursor-pointer flex items-center justify-between gap-1.5 text-left min-w-[104px] sm:min-w-[124px]">
+              <span class="min-w-0 flex flex-col">
+                <span id="mobile-phase-trigger-sub" class="mobile-phase-sub block text-[8px] sm:text-[9px] text-[#FDE68A] font-bold leading-tight whitespace-nowrap">P1 • 55W</span>
+                <span id="mobile-phase-trigger-name" class="block text-[10px] sm:text-xs font-black leading-tight whitespace-nowrap tracking-tight">ATOMS</span>
+              </span>
+              <span id="mobile-phase-chevron" class="material-symbols-outlined text-base sm:text-lg leading-none shrink-0 transition-transform duration-150">expand_more</span>
+            </button>
+
+            <div id="mobile-progress-card" class="flex-1 min-w-0 bg-white border-2 border-black rounded-xl px-2.5 py-1.5 shadow-sm flex flex-col justify-between gap-1">
+              <div class="flex items-center justify-between gap-1.5 min-w-0">
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <span id="mobile-progress-dot" class="w-2 h-2 rounded-full bg-[#D97706] border border-black shrink-0"></span>
+                  <span id="mobile-phase-title" class="font-speed font-black italic text-[11px] sm:text-xs text-black uppercase tracking-tight truncate leading-none">
+                    Elemental Atoms
+                  </span>
+                </div>
+                <span id="mobile-progress-label" class="font-mono text-[9px] sm:text-[10px] font-bold text-black/75 bg-slate-100 border border-black/20 px-1.5 py-0.5 rounded leading-none tabular-nums shrink-0">
+                  0 / 55
+                </span>
+              </div>
+              <div id="mobile-progress-bar" class="w-full h-1.5 sm:h-2 bg-black/10 border border-black rounded-full overflow-hidden relative">
+                <div id="mobile-progress-fill" class="h-full bg-gradient-to-r from-[#D97706] to-[#F59E0B] rounded-full transition-all duration-300" style="width: 0%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TOP PHASE STEPPER (#phase-stepper): Floating 5-Column Strip on Mobile (< lg), Docked Horizontal Bar on Desktop (lg+) -->
+          <nav id="phase-stepper" aria-label="Phase Selection" class="phase-stepper-bar hidden lg:flex w-full items-center justify-between gap-1 lg:gap-2 overflow-x-auto no-scrollbar py-0.5 lg:py-1 shrink-0 border-b-2 border-black/10">
+            <button id="phase-btn-1" class="phase-btn phase-active flex-1 min-w-0 lg:min-w-[90px] py-1.5 px-0.5 xs:px-1 sm:px-2 bg-[#4C1D95] text-white border-2 border-black rounded-xl font-mono text-[9px] xs:text-[9.5px] sm:text-[11px] lg:text-xs font-black uppercase shadow-hard-black transition-all active-collapse cursor-pointer text-center" data-phase="1">
+              <span class="phase-btn-sub block text-[7.5px] xs:text-[8px] font-bold leading-tight whitespace-nowrap">P1 • 55W</span>
+              <span class="block leading-tight truncate">ATOMS</span>
+            </button>
+            <button id="phase-btn-2" class="phase-btn phase-available flex-1 min-w-0 lg:min-w-[90px] py-1.5 px-0.5 xs:px-1 sm:px-2 bg-white hover:bg-slate-50 text-black border-2 border-black rounded-xl font-mono text-[9px] xs:text-[9.5px] sm:text-[11px] lg:text-xs font-black uppercase shadow-sm transition-all active-collapse cursor-pointer text-center" data-phase="2">
+              <span class="phase-btn-sub block text-[7.5px] xs:text-[8px] font-bold leading-tight whitespace-nowrap">P2 • 80W</span>
+              <span class="block leading-tight truncate">COMPOUND</span>
+            </button>
+            <button id="phase-btn-3" class="phase-btn phase-available flex-1 min-w-0 lg:min-w-[90px] py-1.5 px-0.5 xs:px-1 sm:px-2 bg-white hover:bg-slate-50 text-black border-2 border-black rounded-xl font-mono text-[9px] xs:text-[9.5px] sm:text-[11px] lg:text-xs font-black uppercase shadow-sm transition-all active-collapse cursor-pointer text-center" data-phase="3">
+              <span class="phase-btn-sub block text-[7.5px] xs:text-[8px] font-bold leading-tight whitespace-nowrap">P3 • 115W</span>
+              <span class="block leading-tight truncate">BINARY</span>
+            </button>
+            <button id="phase-btn-4" class="phase-btn phase-available flex-1 min-w-0 lg:min-w-[90px] py-1.5 px-0.5 xs:px-1 sm:px-2 bg-white hover:bg-slate-50 text-black border-2 border-black rounded-xl font-mono text-[9px] xs:text-[9.5px] sm:text-[11px] lg:text-xs font-black uppercase shadow-sm transition-all active-collapse cursor-pointer text-center" data-phase="4">
+              <span class="phase-btn-sub block text-[7.5px] xs:text-[8px] font-bold leading-tight whitespace-nowrap">P4 • 120W</span>
+              <span class="block leading-tight truncate">NETWORKS</span>
+            </button>
+            <button id="phase-btn-5" class="phase-btn phase-available flex-1 min-w-0 lg:min-w-[90px] py-1.5 px-0.5 xs:px-1 sm:px-2 bg-white hover:bg-slate-50 text-black border-2 border-black rounded-xl font-mono text-[9px] xs:text-[9.5px] sm:text-[11px] lg:text-xs font-black uppercase shadow-sm transition-all active-collapse cursor-pointer text-center" data-phase="5">
+              <span class="phase-btn-sub block text-[7.5px] xs:text-[8px] font-bold leading-tight whitespace-nowrap">P5 • 127W</span>
+              <span class="block leading-tight truncate">IDIOMS</span>
+            </button>
+          </nav>
+        </div>
 
         <!-- [2] Fluid Middle Workspace (Locked non-scrollable 100dvh flex on mobile, 2-Column split on Desktop) -->
         <div id="word-trainer-workspace" class="flex-1 min-h-0 overflow-hidden flex flex-col gap-1.5 sm:gap-2 lg:overflow-visible lg:grid lg:grid-cols-12 lg:gap-5 lg:items-start">
@@ -1336,9 +1370,9 @@
             </section>
 
             <!-- 3. ZONE 2: BATCH PROGRESS CONTAINER (#batch-progress-container) -->
-            <!-- Mobile: order-1 (Slim top progress bar right below Phase Stepper) -->
+            <!-- Mobile: Hidden (consolidated cleanly into #mobile-progress-card beside #mobile-phase-trigger) -->
             <!-- Desktop: order-3 (Full Progress Card directly below Submit/Feedback Panel) -->
-            <section id="batch-progress-container" class="order-1 lg:order-3 w-full bg-white border-2 lg:border-[3px] border-black rounded-xl lg:rounded-2xl px-2.5 py-1.5 lg:p-3 shadow-sm lg:shadow-hard-black shrink-0 flex flex-col gap-1 lg:gap-2">
+            <section id="batch-progress-container" class="order-1 lg:order-3 w-full bg-white border-2 lg:border-[3px] border-black rounded-xl lg:rounded-2xl px-2.5 py-1.5 lg:p-3 shadow-sm lg:shadow-hard-black shrink-0 hidden lg:flex flex-col gap-1 lg:gap-2">
               <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-1.5 lg:gap-2 min-w-0">
                   <span class="w-2 h-2 lg:w-2.5 lg:h-2.5 rounded-full bg-[#D97706] border border-black shrink-0"></span>

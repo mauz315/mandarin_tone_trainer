@@ -159,6 +159,7 @@ export class WordTrainerEngineController {
         return;
       }
       // Load independent progress state for the newly selected mode
+      this.closeMobilePhaseBar();
       this.clearResultShowcase();
       if (this.dom.screen) this.dom.screen.classList.remove('mobile-result-active');
       this.state = this.loadState();
@@ -274,6 +275,16 @@ export class WordTrainerEngineController {
   cacheDomElements() {
     this.dom = {
       screen: document.getElementById('word-trainer-screen'),
+      phaseDockWrapper: document.getElementById('phase-dock-wrapper'),
+      phaseStepper: document.getElementById('phase-stepper'),
+      mobilePhaseScrim: document.getElementById('mobile-phase-scrim'),
+      mobilePhaseTrigger: document.getElementById('mobile-phase-trigger'),
+      mobilePhaseTriggerSub: document.getElementById('mobile-phase-trigger-sub'),
+      mobilePhaseTriggerName: document.getElementById('mobile-phase-trigger-name'),
+      mobilePhaseChevron: document.getElementById('mobile-phase-chevron'),
+      mobilePhaseTitle: document.getElementById('mobile-phase-title'),
+      mobileProgressLabel: document.getElementById('mobile-progress-label'),
+      mobileProgressFill: document.getElementById('mobile-progress-fill'),
       phaseBtns: document.querySelectorAll('.phase-btn'),
       phaseTitle: document.getElementById('phase-title'),
       overallProgressLabel: document.getElementById('overall-progress-label'),
@@ -519,11 +530,56 @@ export class WordTrainerEngineController {
 
 
 
+    if (this.dom.mobilePhaseTrigger) {
+      this.dom.mobilePhaseTrigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleMobilePhaseBar();
+      });
+    }
+
+    if (this.dom.mobilePhaseScrim) {
+      this.dom.mobilePhaseScrim.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.closeMobilePhaseBar();
+      });
+    }
+
+    if (typeof document !== 'undefined') {
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          this.closeMobilePhaseBar();
+        }
+      });
+      document.addEventListener('click', (e) => {
+        const screen = this.dom && this.dom.screen;
+        if (!screen || !screen.classList || !screen.classList.contains('mobile-phase-open')) return;
+        const target = e.target;
+        const clickedTrigger = this.dom.mobilePhaseTrigger && typeof this.dom.mobilePhaseTrigger.contains === 'function'
+          ? this.dom.mobilePhaseTrigger.contains(target)
+          : false;
+        const clickedStepper = this.dom.phaseStepper && typeof this.dom.phaseStepper.contains === 'function'
+          ? this.dom.phaseStepper.contains(target)
+          : false;
+        if (!clickedTrigger && !clickedStepper) {
+          this.closeMobilePhaseBar();
+        }
+      });
+    }
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', () => {
+        if (window.innerWidth >= 1024) {
+          this.closeMobilePhaseBar();
+        }
+      });
+    }
+
     if (this.dom.phaseBtns) {
       this.dom.phaseBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           const p = parseInt(btn.getAttribute('data-phase'), 10);
+          this.closeMobilePhaseBar();
           this.switchPhase(p);
         });
       });
@@ -627,7 +683,30 @@ export class WordTrainerEngineController {
     }
   }
 
+  setMobilePhaseBarOpen(isOpen) {
+    const screen = this.dom && this.dom.screen;
+    const nextOpen = Boolean(isOpen);
+    if (screen && screen.classList) {
+      screen.classList.toggle('mobile-phase-open', nextOpen);
+    }
+    if (this.dom && this.dom.mobilePhaseTrigger && typeof this.dom.mobilePhaseTrigger.setAttribute === 'function') {
+      this.dom.mobilePhaseTrigger.setAttribute('aria-expanded', nextOpen ? 'true' : 'false');
+    }
+  }
+
+  toggleMobilePhaseBar(forcedState) {
+    const screen = this.dom && this.dom.screen;
+    const currentlyOpen = Boolean(screen && screen.classList && screen.classList.contains('mobile-phase-open'));
+    const nextState = (forcedState !== undefined) ? Boolean(forcedState) : !currentlyOpen;
+    this.setMobilePhaseBarOpen(nextState);
+  }
+
+  closeMobilePhaseBar() {
+    this.setMobilePhaseBarOpen(false);
+  }
+
   openStrokeGuideModal() {
+    this.closeMobilePhaseBar();
     if (this.dom.strokeGuideModal) {
       this.dom.strokeGuideModal.classList.remove('hidden');
     }
@@ -1247,15 +1326,23 @@ export class WordTrainerEngineController {
       }
     });
 
-    const phaseMeta = {
-      1: { title: 'Phase 1: Elemental Atoms', count: 55 },
-      2: { title: 'Phase 2: Compound Characters', count: 80 },
-      3: { title: 'Phase 3: Core Binary Compounds', count: 115 },
-      4: { title: 'Phase 4: Semantic Networks', count: 120 },
-      5: { title: 'Phase 5: Idiomatic & Poly-Syllabic', count: 127 },
-    }[this.activePhase] || { title: 'Phase 1: Elemental Atoms', count: 55 };
+    const phaseMetaMap = {
+      1: { title: 'Phase 1: Elemental Atoms', mobileTitle: 'Elemental Atoms', short: 'ATOMS', count: 55 },
+      2: { title: 'Phase 2: Compound Characters', mobileTitle: 'Compound Characters', short: 'COMPOUND', count: 80 },
+      3: { title: 'Phase 3: Core Binary Compounds', mobileTitle: 'Binary Compounds', short: 'BINARY', count: 115 },
+      4: { title: 'Phase 4: Semantic Networks', mobileTitle: 'Semantic Networks', short: 'NETWORKS', count: 120 },
+      5: { title: 'Phase 5: Idiomatic & Poly-Syllabic', mobileTitle: 'Idiomatic Phrases', short: 'IDIOMS', count: 127 },
+    };
+    const phaseMeta = phaseMetaMap[this.activePhase] || phaseMetaMap[1];
+    const mappedTotal = (this.phaseWordsMap && this.phaseWordsMap[this.activePhase])
+      ? this.phaseWordsMap[this.activePhase].length
+      : 0;
+    const displayTotal = mappedTotal > 0 ? mappedTotal : phaseMeta.count;
 
     if (this.dom.phaseTitle) this.dom.phaseTitle.textContent = phaseMeta.title;
+    if (this.dom.mobilePhaseTitle) this.dom.mobilePhaseTitle.textContent = phaseMeta.mobileTitle;
+    if (this.dom.mobilePhaseTriggerSub) this.dom.mobilePhaseTriggerSub.textContent = `P${this.activePhase} • ${displayTotal}W`;
+    if (this.dom.mobilePhaseTriggerName) this.dom.mobilePhaseTriggerName.textContent = phaseMeta.short;
     this.updateProgressBar();
   }
 
@@ -1267,10 +1354,16 @@ export class WordTrainerEngineController {
     if (this.dom.overallProgressLabel) {
       this.dom.overallProgressLabel.textContent = `Progress: ${completedCount} / ${totalWords} Words`;
     }
+    if (this.dom.mobileProgressLabel) {
+      this.dom.mobileProgressLabel.textContent = `${completedCount} / ${totalWords}`;
+    }
 
     const pct = Math.min(100, Math.round((completedCount / totalWords) * 100));
     if (this.dom.progressBarFill) {
       this.dom.progressBarFill.style.width = `${pct}%`;
+    }
+    if (this.dom.mobileProgressFill) {
+      this.dom.mobileProgressFill.style.width = `${pct}%`;
     }
   }
 
@@ -1400,7 +1493,8 @@ export class WordTrainerEngineController {
       this.updateFeedback('neutral', 'Draw the character strokes on the grid to verify.');
     }
 
-    // Reset panels: Switch back to View A on mobile, show exercise inputs, hide result panel
+    // Reset panels: Switch back to View A on mobile, close phase tray, show exercise inputs, hide result panel
+    this.closeMobilePhaseBar();
     this.clearResultShowcase();
     if (this.dom.screen) this.dom.screen.classList.remove('mobile-result-active');
     if (this.dom.promptArena) this.dom.promptArena.classList.remove('hidden');
@@ -1771,7 +1865,7 @@ export class WordTrainerEngineController {
 
     // 1. Evaluate Component Placement via 3-Tier RST Grading Engine
     const gradeResult = this.componentBuilder
-      ? this.componentBuilder.evaluateActivePlacement(this.decompositions, this.corpus)
+      ? this.componentBuilder.evaluateActivePlacement(this.decompositions, this.corpus, this.attemptsLeft)
       : { status: 'DIAGNOSTIC_FAIL', tier: 3, success: false, badge: '⚠️ Not Ready', detail: 'Component builder not ready.' };
 
     if (!gradeResult.success) {
@@ -1781,9 +1875,9 @@ export class WordTrainerEngineController {
       this.flashElement('open-placement-canvas', 'error');
       this.playActiveWordAudio();
 
-      this.updateFeedback('error', `${gradeResult.detail} Tries left: ${this.attemptsLeft}`);
-
       if (this.attemptsLeft === 0) {
+        this.updateFeedback('error', '📖 All 3 attempts used. Study the canonical components above before continuing.');
+
         // Attempts exhausted: graceful reveal & re-queue word
         if (this.componentBuilder && typeof this.componentBuilder.revealCanonicalSolution === 'function') {
           this.componentBuilder.revealCanonicalSolution();
@@ -1803,6 +1897,8 @@ export class WordTrainerEngineController {
             isPass: false
           });
         }, 400);
+      } else {
+        this.updateFeedback('error', `${gradeResult.detail} Tries left: ${this.attemptsLeft}`);
       }
       return;
     }
@@ -1946,7 +2042,8 @@ export class WordTrainerEngineController {
       this.dom.resultNextBtnText.textContent = isMastered ? 'NEXT WORD' : 'REVIEW NEXT';
     }
 
-    // 4. Switch to Feedback View: Hide interaction footer, show result feedback panel, lock View B on mobile
+    // 4. Switch to Feedback View: Close phase tray, hide interaction footer, show result feedback panel, lock View B on mobile
+    this.closeMobilePhaseBar();
     if (this.dom.interactionFooter) this.dom.interactionFooter.classList.add('hidden');
     if (this.dom.resultFeedbackPanel) this.dom.resultFeedbackPanel.classList.remove('hidden');
     if (this.dom.screen) this.dom.screen.classList.add('mobile-result-active');
@@ -1955,6 +2052,7 @@ export class WordTrainerEngineController {
   retryCurrentWord() {
     if (!this.activeWord) return;
 
+    this.closeMobilePhaseBar();
     this.clearResultShowcase();
     this.attemptsLeft = 3;
     this.flashingStrokeIndex = null;
@@ -2073,6 +2171,7 @@ export class WordTrainerEngineController {
   // 8. MODAL CONTROLLERS & QUEUE ADVANCEMENT
   // ----------------------------------------------------
   openRevealModal(isMastered) {
+    this.closeMobilePhaseBar();
     const modal = this.dom.cardRevealModal;
     const word = this.activeWord;
     if (!modal || !word) return;
@@ -2143,6 +2242,7 @@ export class WordTrainerEngineController {
   }
 
   triggerPhaseCompleteModal() {
+    this.closeMobilePhaseBar();
     const modal = this.dom.phaseCompleteModal;
     if (!modal) return;
 

@@ -105,7 +105,7 @@
     "characters": [
       "四"
     ],
-    "radical_decomposition": "囗 (enclosure) + 儿"
+    "radical_decomposition": "四 (four) [Indivisible Root]"
   },
   {
     "id": "word-005",
@@ -132,7 +132,7 @@
     "characters": [
       "五"
     ],
-    "radical_decomposition": "二 (two) + 乂"
+    "radical_decomposition": "五 (five) [Indivisible Root]"
   },
   {
     "id": "word-006",
@@ -186,7 +186,7 @@
     "characters": [
       "七"
     ],
-    "radical_decomposition": "一 (one) + 乚"
+    "radical_decomposition": "七 (seven) [Indivisible Root]"
   },
   {
     "id": "word-008",
@@ -240,7 +240,7 @@
     "characters": [
       "九"
     ],
-    "radical_decomposition": "丿 (slash) + 乙"
+    "radical_decomposition": "九 (nine) [Indivisible Root]"
   },
   {
     "id": "word-010",
@@ -294,7 +294,7 @@
     "characters": [
       "百"
     ],
-    "radical_decomposition": "白 (white) + 一"
+    "radical_decomposition": "百 (hundred) [Indivisible Root]"
   },
   {
     "id": "word-012",
@@ -321,7 +321,7 @@
     "characters": [
       "千"
     ],
-    "radical_decomposition": "十 (ten) + 丿"
+    "radical_decomposition": "千 (thousand) [Indivisible Root]"
   },
   {
     "id": "word-013",
@@ -348,7 +348,7 @@
     "characters": [
       "万"
     ],
-    "radical_decomposition": "一 (one) + 勹 (wrap)"
+    "radical_decomposition": "万 (ten thousand) [Indivisible Root]"
   },
   {
     "id": "word-014",
@@ -456,7 +456,7 @@
     "characters": [
       "少"
     ],
-    "radical_decomposition": "小 (small) + 丿"
+    "radical_decomposition": "少 (few) [Indivisible Root]"
   },
   {
     "id": "word-018",
@@ -483,7 +483,7 @@
     "characters": [
       "上"
     ],
-    "radical_decomposition": "一 (ground) + 卜 (indicator)"
+    "radical_decomposition": "上 (up / above) [Indivisible Root]"
   },
   {
     "id": "word-019",
@@ -510,7 +510,7 @@
     "characters": [
       "下"
     ],
-    "radical_decomposition": "一 (ground) + 卜 (downward)"
+    "radical_decomposition": "下 (down / below) [Indivisible Root]"
   },
   {
     "id": "word-020",
@@ -537,7 +537,7 @@
     "characters": [
       "左"
     ],
-    "radical_decomposition": "𠂇 (hand) + 工 (work)"
+    "radical_decomposition": "左 (left) [Indivisible Root]"
   },
   {
     "id": "word-021",
@@ -564,7 +564,7 @@
     "characters": [
       "右"
     ],
-    "radical_decomposition": "𠂇 (hand) + 口 (mouth)"
+    "radical_decomposition": "右 (right) [Indivisible Root]"
   },
   {
     "id": "word-022",
@@ -645,7 +645,7 @@
     "characters": [
       "年"
     ],
-    "radical_decomposition": "禾 (grain) + 千"
+    "radical_decomposition": "年 (year) [Indivisible Root]"
   },
   {
     "id": "word-025",
@@ -672,7 +672,7 @@
     "characters": [
       "天"
     ],
-    "radical_decomposition": "一 (sky) + 大 (person)"
+    "radical_decomposition": "天 (sky / day) [Indivisible Root]"
   },
   {
     "id": "word-026",
@@ -861,7 +861,7 @@
     "characters": [
       "见"
     ],
-    "radical_decomposition": "目 (eye) + 儿 (legs)"
+    "radical_decomposition": "见 (see) [Indivisible Root]"
   },
   {
     "id": "word-033",
@@ -969,7 +969,7 @@
     "characters": [
       "正"
     ],
-    "radical_decomposition": "一 (stop) + 止 (foot)"
+    "radical_decomposition": "正 (upright / correct) [Indivisible Root]"
   },
   {
     "id": "word-037",
@@ -1050,7 +1050,7 @@
     "characters": [
       "半"
     ],
-    "radical_decomposition": "八 (divide) + 牛 (ox)"
+    "radical_decomposition": "半 (half) [Indivisible Root]"
   },
   {
     "id": "word-040",
@@ -1131,7 +1131,7 @@
     "characters": [
       "不"
     ],
-    "radical_decomposition": "一 (sky) + 𠃑 (bird falling)"
+    "radical_decomposition": "不 (not) [Indivisible Root]"
   },
   {
     "id": "word-043",
@@ -1212,7 +1212,7 @@
     "characters": [
       "个"
     ],
-    "radical_decomposition": "亻 (person) + 丨 (bamboo slip)"
+    "radical_decomposition": "个 (individual / measure word) [Indivisible Root]"
   },
   {
     "id": "word-046",
@@ -1239,7 +1239,7 @@
     "characters": [
       "元"
     ],
-    "radical_decomposition": "一 (head) + 兀 (human)"
+    "radical_decomposition": "二 (two) + 儿 (legs)"
   },
   {
     "id": "word-047",
@@ -1266,7 +1266,7 @@
     "characters": [
       "开"
     ],
-    "radical_decomposition": "井 (two hands open)"
+    "radical_decomposition": "开 (open) [Indivisible Root]"
   },
   {
     "id": "word-048",
@@ -1320,7 +1320,7 @@
     "characters": [
       "后"
     ],
-    "radical_decomposition": "后 [Foundational Radical]"
+    "radical_decomposition": "厂 (cliff) + 口 (mouth)"
   },
   {
     "id": "word-050",
@@ -1374,7 +1374,7 @@
     "characters": [
       "书"
     ],
-    "radical_decomposition": "乛 + 𠃑 + 丨 + 丶"
+    "radical_decomposition": "书 (book) [Indivisible Root]"
   },
   {
     "id": "word-052",
@@ -1401,7 +1401,7 @@
     "characters": [
       "买"
     ],
-    "radical_decomposition": "乛 + 头"
+    "radical_decomposition": "买 (buy) [Indivisible Root]"
   },
   {
     "id": "word-053",
@@ -1455,7 +1455,7 @@
     "characters": [
       "些"
     ],
-    "radical_decomposition": "些 [Foundational Radical]"
+    "radical_decomposition": "此 (this) + 二 (two)"
   },
   {
     "id": "word-055",
@@ -1644,7 +1644,7 @@
     "characters": [
       "做"
     ],
-    "radical_decomposition": "亻 (person) + 故 (cause)"
+    "radical_decomposition": "亻 (person) + 古 + 攵"
   },
   {
     "id": "word-062",
@@ -2886,7 +2886,7 @@
     "characters": [
       "来"
     ],
-    "radical_decomposition": "木 (tree) + 米"
+    "radical_decomposition": "来 (come) [Indivisible Root]"
   },
   {
     "id": "word-108",
@@ -3345,7 +3345,7 @@
     "characters": [
       "能"
     ],
-    "radical_decomposition": "厶 + 月 + 匕 + 匕"
+    "radical_decomposition": "能 (able / can) [Indivisible Root]"
   },
   {
     "id": "word-125",
@@ -3671,7 +3671,7 @@
       "一",
       "下"
     ],
-    "radical_decomposition": "一 (一 (one)) + 下 (一 (ground))"
+    "radical_decomposition": "一 (一 (one)) + 下 (下 (down / below))"
   },
   {
     "id": "word-137",
@@ -3700,7 +3700,7 @@
       "一",
       "些"
     ],
-    "radical_decomposition": "一 (一 (one)) + 些 (些)"
+    "radical_decomposition": "一 (一 (one)) + 些 (此 (this))"
   },
   {
     "id": "word-138",
@@ -3729,7 +3729,7 @@
       "一",
       "半"
     ],
-    "radical_decomposition": "一 (一 (one)) + 半 (八 (divide))"
+    "radical_decomposition": "一 (一 (one)) + 半 (半 (half))"
   },
   {
     "id": "word-139",
@@ -3758,7 +3758,7 @@
       "上",
       "午"
     ],
-    "radical_decomposition": "上 (一 (ground)) + 午 (十 (ten))"
+    "radical_decomposition": "上 (上 (up / above)) + 午 (午 (noon))"
   },
   {
     "id": "word-140",
@@ -3787,7 +3787,7 @@
       "上",
       "学"
     ],
-    "radical_decomposition": "上 (一 (ground)) + 学 (学)"
+    "radical_decomposition": "上 (上 (up / above)) + 学 (学)"
   },
   {
     "id": "word-141",
@@ -3816,7 +3816,7 @@
       "上",
       "班"
     ],
-    "radical_decomposition": "上 (一 (ground)) + 班 (班)"
+    "radical_decomposition": "上 (上 (up / above)) + 班 (班)"
   },
   {
     "id": "word-142",
@@ -3845,7 +3845,7 @@
       "上",
       "课"
     ],
-    "radical_decomposition": "上 (一 (ground)) + 课 (课)"
+    "radical_decomposition": "上 (上 (up / above)) + 课 (课)"
   },
   {
     "id": "word-143",
@@ -3874,7 +3874,7 @@
       "下",
       "午"
     ],
-    "radical_decomposition": "下 (一 (ground)) + 午 (十 (ten))"
+    "radical_decomposition": "下 (下 (down / below)) + 午 (午 (noon))"
   },
   {
     "id": "word-144",
@@ -3903,7 +3903,7 @@
       "下",
       "班"
     ],
-    "radical_decomposition": "下 (一 (ground)) + 班 (班)"
+    "radical_decomposition": "下 (下 (down / below)) + 班 (班)"
   },
   {
     "id": "word-145",
@@ -3932,7 +3932,7 @@
       "下",
       "课"
     ],
-    "radical_decomposition": "下 (一 (ground)) + 课 (课)"
+    "radical_decomposition": "下 (下 (down / below)) + 课 (课)"
   },
   {
     "id": "word-146",
@@ -3961,7 +3961,7 @@
       "下",
       "雨"
     ],
-    "radical_decomposition": "下 (一 (ground)) + 雨 (雨 (rain))"
+    "radical_decomposition": "下 (下 (down / below)) + 雨 (雨 (rain))"
   },
   {
     "id": "word-147",
@@ -3990,7 +3990,7 @@
       "不",
       "要"
     ],
-    "radical_decomposition": "不 (一 (sky)) + 要 (覀)"
+    "radical_decomposition": "不 (不 (not)) + 要 (覀)"
   },
   {
     "id": "word-148",
@@ -4019,7 +4019,7 @@
       "东",
       "西"
     ],
-    "radical_decomposition": "东 (木 (tree)) + 西 (西 (west))"
+    "radical_decomposition": "东 (东 (east)) + 西 (西 (west))"
   },
   {
     "id": "word-149",
@@ -4048,7 +4048,7 @@
       "中",
       "午"
     ],
-    "radical_decomposition": "中 (丨 (vertical line)) + 午 (十 (ten))"
+    "radical_decomposition": "中 (中 (center / middle)) + 午 (午 (noon))"
   },
   {
     "id": "word-150",
@@ -4077,7 +4077,7 @@
       "中",
       "国"
     ],
-    "radical_decomposition": "中 (丨 (vertical line)) + 国 (国)"
+    "radical_decomposition": "中 (中 (center / middle)) + 国 (国)"
   },
   {
     "id": "word-151",
@@ -4106,7 +4106,7 @@
       "中",
       "学"
     ],
-    "radical_decomposition": "中 (丨 (vertical line)) + 学 (学)"
+    "radical_decomposition": "中 (中 (center / middle)) + 学 (学)"
   },
   {
     "id": "word-152",
@@ -4135,7 +4135,7 @@
       "中",
       "文"
     ],
-    "radical_decomposition": "中 (丨 (vertical line)) + 文 (文)"
+    "radical_decomposition": "中 (中 (center / middle)) + 文 (文)"
   },
   {
     "id": "word-153",
@@ -4164,7 +4164,7 @@
       "书",
       "店"
     ],
-    "radical_decomposition": "书 (乛) + 店 (广 (shelter))"
+    "radical_decomposition": "书 (书 (book)) + 店 (广 (shelter))"
   },
   {
     "id": "word-154",
@@ -4222,7 +4222,7 @@
       "今",
       "天"
     ],
-    "radical_decomposition": "今 (今) + 天 (一 (sky))"
+    "radical_decomposition": "今 (今) + 天 (天 (sky / day))"
   },
   {
     "id": "word-156",
@@ -4251,7 +4251,7 @@
       "今",
       "年"
     ],
-    "radical_decomposition": "今 (今) + 年 (禾 (grain))"
+    "radical_decomposition": "今 (今) + 年 (年 (year))"
   },
   {
     "id": "word-157",
@@ -4541,7 +4541,7 @@
       "再",
       "见"
     ],
-    "radical_decomposition": "再 (再) + 见 (目 (eye))"
+    "radical_decomposition": "再 (再) + 见 (见 (see))"
   },
   {
     "id": "word-167",
@@ -4686,7 +4686,7 @@
       "午",
       "饭"
     ],
-    "radical_decomposition": "午 (十 (ten)) + 饭 (饣 (food))"
+    "radical_decomposition": "午 (午 (noon)) + 饭 (饣 (food))"
   },
   {
     "id": "word-172",
@@ -4715,7 +4715,7 @@
       "去",
       "年"
     ],
-    "radical_decomposition": "去 (土 (earth)) + 年 (禾 (grain))"
+    "radical_decomposition": "去 (土 (earth)) + 年 (年 (year))"
   },
   {
     "id": "word-173",
@@ -4831,7 +4831,7 @@
       "听",
       "见"
     ],
-    "radical_decomposition": "听 (口 (mouth)) + 见 (目 (eye))"
+    "radical_decomposition": "听 (口 (mouth)) + 见 (见 (see))"
   },
   {
     "id": "word-177",
@@ -4889,7 +4889,7 @@
       "哪",
       "个"
     ],
-    "radical_decomposition": "哪 (哪) + 个 (亻 (person))"
+    "radical_decomposition": "哪 (哪) + 个 (个 (individual / measure word))"
   },
   {
     "id": "word-179",
@@ -4918,7 +4918,7 @@
       "哪",
       "些"
     ],
-    "radical_decomposition": "哪 (哪) + 些 (些)"
+    "radical_decomposition": "哪 (哪) + 些 (此 (this))"
   },
   {
     "id": "word-180",
@@ -5092,7 +5092,7 @@
       "多",
       "少"
     ],
-    "radical_decomposition": "多 (夕 (evening)) + 少 (小 (small))"
+    "radical_decomposition": "多 (夕 (evening)) + 少 (少 (few))"
   },
   {
     "id": "word-186",
@@ -5179,7 +5179,7 @@
       "天",
       "气"
     ],
-    "radical_decomposition": "天 (一 (sky)) + 气 (气 (steam / breath))"
+    "radical_decomposition": "天 (天 (sky / day)) + 气 (气 (steam / breath))"
   },
   {
     "id": "word-189",
@@ -5730,7 +5730,7 @@
       "开",
       "车"
     ],
-    "radical_decomposition": "开 (井 (two hands open)) + 车 (车 (cart / vehicle))"
+    "radical_decomposition": "开 (开 (open)) + 车 (车 (cart / vehicle))"
   },
   {
     "id": "word-208",
@@ -5904,7 +5904,7 @@
       "早",
       "上"
     ],
-    "radical_decomposition": "早 (早) + 上 (一 (ground))"
+    "radical_decomposition": "早 (早) + 上 (上 (up / above))"
   },
   {
     "id": "word-214",
@@ -6020,7 +6020,7 @@
       "明",
       "天"
     ],
-    "radical_decomposition": "明 (日 (sun)) + 天 (一 (sky))"
+    "radical_decomposition": "明 (日 (sun)) + 天 (天 (sky / day))"
   },
   {
     "id": "word-218",
@@ -6049,7 +6049,7 @@
       "明",
       "年"
     ],
-    "radical_decomposition": "明 (日 (sun)) + 年 (禾 (grain))"
+    "radical_decomposition": "明 (日 (sun)) + 年 (年 (year))"
   },
   {
     "id": "word-219",
@@ -6107,7 +6107,7 @@
       "昨",
       "天"
     ],
-    "radical_decomposition": "昨 (日 (sun)) + 天 (一 (sky))"
+    "radical_decomposition": "昨 (日 (sun)) + 天 (天 (sky / day))"
   },
   {
     "id": "word-221",
@@ -6136,7 +6136,7 @@
       "晚",
       "上"
     ],
-    "radical_decomposition": "晚 (晚) + 上 (一 (ground))"
+    "radical_decomposition": "晚 (晚) + 上 (上 (up / above))"
   },
   {
     "id": "word-222",
@@ -6194,7 +6194,7 @@
       "有",
       "些"
     ],
-    "radical_decomposition": "有 (有) + 些 (些)"
+    "radical_decomposition": "有 (有) + 些 (此 (this))"
   },
   {
     "id": "word-224",
@@ -6252,7 +6252,7 @@
       "朋",
       "友"
     ],
-    "radical_decomposition": "朋 (朋) + 友 (𠂇 (hand))"
+    "radical_decomposition": "朋 (朋) + 友 (友 (friend))"
   },
   {
     "id": "word-226",
@@ -6368,7 +6368,7 @@
       "正",
       "在"
     ],
-    "radical_decomposition": "正 (一 (stop)) + 在 (在)"
+    "radical_decomposition": "正 (正 (upright / correct)) + 在 (在)"
   },
   {
     "id": "word-230",
@@ -6716,7 +6716,7 @@
       "电",
       "影"
     ],
-    "radical_decomposition": "电 (日 (sun)) + 影 (影)"
+    "radical_decomposition": "电 (电 (electricity)) + 影 (影)"
   },
   {
     "id": "word-242",
@@ -6745,7 +6745,7 @@
       "电",
       "脑"
     ],
-    "radical_decomposition": "电 (日 (sun)) + 脑 (脑)"
+    "radical_decomposition": "电 (电 (electricity)) + 脑 (脑)"
   },
   {
     "id": "word-243",
@@ -6774,7 +6774,7 @@
       "电",
       "视"
     ],
-    "radical_decomposition": "电 (日 (sun)) + 视 (视)"
+    "radical_decomposition": "电 (电 (electricity)) + 视 (视)"
   },
   {
     "id": "word-244",
@@ -6803,7 +6803,7 @@
       "电",
       "话"
     ],
-    "radical_decomposition": "电 (日 (sun)) + 话 (讠 (speech))"
+    "radical_decomposition": "电 (电 (electricity)) + 话 (讠 (speech))"
   },
   {
     "id": "word-245",
@@ -6832,7 +6832,7 @@
       "白",
       "天"
     ],
-    "radical_decomposition": "白 (白 (white)) + 天 (一 (sky))"
+    "radical_decomposition": "白 (白 (white)) + 天 (天 (sky / day))"
   },
   {
     "id": "word-246",
@@ -6890,7 +6890,7 @@
       "看",
       "见"
     ],
-    "radical_decomposition": "看 (手 (hand) over 目 (eye)) + 见 (目 (eye))"
+    "radical_decomposition": "看 (手 (hand) over 目 (eye)) + 见 (见 (see))"
   },
   {
     "id": "word-248",
@@ -7767,7 +7767,7 @@
       "读",
       "书"
     ],
-    "radical_decomposition": "读 (讠 (speech)) + 书 (乛)"
+    "radical_decomposition": "读 (讠 (speech)) + 书 (书 (book))"
   },
   {
     "id": "word-277",
@@ -7883,7 +7883,7 @@
       "这",
       "个"
     ],
-    "radical_decomposition": "这 (这) + 个 (亻 (person))"
+    "radical_decomposition": "这 (这) + 个 (个 (individual / measure word))"
   },
   {
     "id": "word-281",
@@ -7912,7 +7912,7 @@
       "这",
       "些"
     ],
-    "radical_decomposition": "这 (这) + 些 (些)"
+    "radical_decomposition": "这 (这) + 些 (此 (this))"
   },
   {
     "id": "word-282",
@@ -8028,7 +8028,7 @@
       "那",
       "个"
     ],
-    "radical_decomposition": "那 (那) + 个 (亻 (person))"
+    "radical_decomposition": "那 (那) + 个 (个 (individual / measure word))"
   },
   {
     "id": "word-286",
@@ -8057,7 +8057,7 @@
       "那",
       "些"
     ],
-    "radical_decomposition": "那 (那) + 些 (些)"
+    "radical_decomposition": "那 (那) + 些 (此 (this))"
   },
   {
     "id": "word-287",
@@ -8525,7 +8525,7 @@
       "上",
       "去"
     ],
-    "radical_decomposition": "上 (一 (ground)) + 去 (土 (earth))"
+    "radical_decomposition": "上 (上 (up / above)) + 去 (土 (earth))"
   },
   {
     "id": "word-303",
@@ -8554,7 +8554,7 @@
       "上",
       "来"
     ],
-    "radical_decomposition": "上 (一 (ground)) + 来 (木 (tree))"
+    "radical_decomposition": "上 (上 (up / above)) + 来 (来 (come))"
   },
   {
     "id": "word-304",
@@ -8583,7 +8583,7 @@
       "上",
       "网"
     ],
-    "radical_decomposition": "上 (一 (ground)) + 网 (网)"
+    "radical_decomposition": "上 (上 (up / above)) + 网 (网)"
   },
   {
     "id": "word-305",
@@ -8612,7 +8612,7 @@
       "上",
       "面"
     ],
-    "radical_decomposition": "上 (一 (ground)) + 面 (面)"
+    "radical_decomposition": "上 (上 (up / above)) + 面 (面)"
   },
   {
     "id": "word-306",
@@ -8641,7 +8641,7 @@
       "下",
       "去"
     ],
-    "radical_decomposition": "下 (一 (ground)) + 去 (土 (earth))"
+    "radical_decomposition": "下 (下 (down / below)) + 去 (土 (earth))"
   },
   {
     "id": "word-307",
@@ -8670,7 +8670,7 @@
       "下",
       "来"
     ],
-    "radical_decomposition": "下 (一 (ground)) + 来 (木 (tree))"
+    "radical_decomposition": "下 (下 (down / below)) + 来 (来 (come))"
   },
   {
     "id": "word-308",
@@ -8699,7 +8699,7 @@
       "下",
       "面"
     ],
-    "radical_decomposition": "下 (一 (ground)) + 面 (面)"
+    "radical_decomposition": "下 (下 (down / below)) + 面 (面)"
   },
   {
     "id": "word-309",
@@ -8761,7 +8761,7 @@
       "不",
       "错"
     ],
-    "radical_decomposition": "不 (一 (sky)) + 错 (错)"
+    "radical_decomposition": "不 (不 (not)) + 错 (错)"
   },
   {
     "id": "word-311",
@@ -8790,7 +8790,7 @@
       "个",
       "子"
     ],
-    "radical_decomposition": "个 (亻 (person)) + 子 (子 (child))"
+    "radical_decomposition": "个 (个 (individual / measure word)) + 子 (子 (child))"
   },
   {
     "id": "word-312",
@@ -8850,7 +8850,7 @@
       "书",
       "包"
     ],
-    "radical_decomposition": "书 (乛) + 包 (包)"
+    "radical_decomposition": "书 (书 (book)) + 包 (包)"
   },
   {
     "id": "word-314",
@@ -9113,7 +9113,7 @@
       "出",
       "来"
     ],
-    "radical_decomposition": "出 (出) + 来 (木 (tree))"
+    "radical_decomposition": "出 (出) + 来 (来 (come))"
   },
   {
     "id": "word-323",
@@ -9200,7 +9200,7 @@
       "可",
       "能"
     ],
-    "radical_decomposition": "可 (可) + 能 (厶)"
+    "radical_decomposition": "可 (可) + 能 (能 (able / can))"
   },
   {
     "id": "word-326",
@@ -9229,7 +9229,7 @@
       "右",
       "边"
     ],
-    "radical_decomposition": "右 (𠂇 (hand)) + 边 (边)"
+    "radical_decomposition": "右 (右 (right)) + 边 (边)"
   },
   {
     "id": "word-327",
@@ -9258,7 +9258,7 @@
       "后",
       "面"
     ],
-    "radical_decomposition": "后 (后) + 面 (面)"
+    "radical_decomposition": "后 (厂 (cliff)) + 面 (面)"
   },
   {
     "id": "word-328",
@@ -9403,7 +9403,7 @@
       "回",
       "来"
     ],
-    "radical_decomposition": "回 (囗 (enclosure)) + 来 (木 (tree))"
+    "radical_decomposition": "回 (囗 (enclosure)) + 来 (来 (come))"
   },
   {
     "id": "word-333",
@@ -9757,7 +9757,7 @@
       "左",
       "边"
     ],
-    "radical_decomposition": "左 (𠂇 (hand)) + 边 (边)"
+    "radical_decomposition": "左 (左 (left)) + 边 (边)"
   },
   {
     "id": "word-345",
@@ -9873,7 +9873,7 @@
       "开",
       "始"
     ],
-    "radical_decomposition": "开 (井 (two hands open)) + 始 (始)"
+    "radical_decomposition": "开 (开 (open)) + 始 (始)"
   },
   {
     "id": "word-349",
@@ -9902,7 +9902,7 @@
       "开",
       "学"
     ],
-    "radical_decomposition": "开 (井 (two hands open)) + 学 (学)"
+    "radical_decomposition": "开 (开 (open)) + 学 (学)"
   },
   {
     "id": "word-350",
@@ -10076,7 +10076,7 @@
       "打",
       "开"
     ],
-    "radical_decomposition": "打 (打) + 开 (井 (two hands open))"
+    "radical_decomposition": "打 (打) + 开 (开 (open))"
   },
   {
     "id": "word-356",
@@ -12147,7 +12147,7 @@
       "篮",
       "球"
     ],
-    "radical_decomposition": "篮 (篮) + 球 (球)"
+    "radical_decomposition": "篮 (⺮ (bamboo)) + 球 (球)"
   },
   {
     "id": "word-431",
@@ -12348,7 +12348,7 @@
       "网",
       "上"
     ],
-    "radical_decomposition": "网 (网) + 上 (一 (ground))"
+    "radical_decomposition": "网 (网) + 上 (上 (up / above))"
   },
   {
     "id": "word-438",
@@ -12460,7 +12460,7 @@
       "自",
       "己"
     ],
-    "radical_decomposition": "自 (自) + 己 (己)"
+    "radical_decomposition": "自 (自 (self)) + 己 (己)"
   },
   {
     "id": "word-442",
@@ -12798,7 +12798,7 @@
       "起",
       "来"
     ],
-    "radical_decomposition": "起 (起) + 来 (木 (tree))"
+    "radical_decomposition": "起 (起) + 来 (来 (come))"
   },
   {
     "id": "word-454",
@@ -12966,7 +12966,7 @@
       "路",
       "上"
     ],
-    "radical_decomposition": "路 (足 (foot)) + 上 (一 (ground))"
+    "radical_decomposition": "路 (足 (foot)) + 上 (上 (up / above))"
   },
   {
     "id": "word-460",
@@ -13165,7 +13165,7 @@
       "过",
       "年"
     ],
-    "radical_decomposition": "过 (过) + 年 (禾 (grain))"
+    "radical_decomposition": "过 (过) + 年 (年 (year))"
   },
   {
     "id": "word-467",
@@ -13194,7 +13194,7 @@
       "过",
       "来"
     ],
-    "radical_decomposition": "过 (过) + 来 (木 (tree))"
+    "radical_decomposition": "过 (过) + 来 (来 (come))"
   },
   {
     "id": "word-468",
@@ -13422,7 +13422,7 @@
       "进",
       "来"
     ],
-    "radical_decomposition": "进 (进) + 来 (木 (tree))"
+    "radical_decomposition": "进 (进) + 来 (来 (come))"
   },
   {
     "id": "word-476",
@@ -13953,7 +13953,7 @@
       "高",
       "中"
     ],
-    "radical_decomposition": "高 (高 (tall / high)) + 中 (丨 (vertical line))"
+    "radical_decomposition": "高 (高 (tall / high)) + 中 (中 (center / middle))"
   },
   {
     "id": "word-495",

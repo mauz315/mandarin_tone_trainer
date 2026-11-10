@@ -318,10 +318,11 @@ export class StrokeMatcher {
       const centroid = computeCentroid(screenMedian);
       const angle = computeAngle(screenMedian);
 
-      // Micro-hook forgiveness: compute trunk angle for hooked strokes (last 20% omitted)
+      // Micro-hook forgiveness: compute trunk angle along first 80% of arc length
+      // (avoids slicing sparse Makemeahanzi entry serif points on 4-point strokes like 年's spine)
       let trunkAngle = angle;
-      if (screenMedian.length >= 4) {
-        const trunkPts = screenMedian.slice(0, Math.max(2, Math.floor(screenMedian.length * 0.8)));
+      if (screenMedian.length >= 2 && len > 0) {
+        const trunkPts = resamplePoints(screenMedian, 10).slice(0, 8);
         trunkAngle = computeAngle(trunkPts);
       }
 
@@ -357,6 +358,7 @@ export class StrokeMatcher {
     this.claimedStrokes = [];
     this.claimedStrokeDetails = [];
     this.recentUnmatchedStrokes = [];
+    this.lastUnmatchedUserStrokes = null;
   }
 
   /**
@@ -523,6 +525,7 @@ export class StrokeMatcher {
                 strokeIndex: strokeIdx,
                 strokePath: target.path,
                 isCompoundMerged: true,
+                mergedSourceIndex: prev.sourceIndex !== undefined ? prev.sourceIndex : null,
                 diffAngle: mergedResult.diffAngle || 0
               };
             }
@@ -534,7 +537,8 @@ export class StrokeMatcher {
     // Record this stroke as recent unmatched stroke for potential compound merging
     this.recentUnmatchedStrokes.push({
       pts: userPoints,
-      time: now
+      time: now,
+      sourceIndex: this._activeSourceIndex
     });
 
     return {
@@ -591,6 +595,7 @@ export class StrokeMatcher {
     this.claimedStrokes = [];
     this.claimedStrokeDetails = [];
     this.recentUnmatchedStrokes = [];
+    this.lastUnmatchedUserStrokes = null;
   }
 
   isComplete() {
@@ -638,10 +643,131 @@ export class StrokeMatcher {
     return this.targetStrokes[sorted[0]] || null;
   }
 
+  _runTaggedPass(taggedStrokes) {
+    this.reset();
+    const matchedIndices = new Set();
+    for (let i = 0; i < taggedStrokes.length; i++) {
+      const item = taggedStrokes[i];
+      this._activeSourceIndex = item.sourceIndex;
+      const match = this.matchUserStroke(item.pts);
+      this._activeSourceIndex = undefined;
+      if (match.matched) {
+        this.claimStroke(match.strokeIndex, {
+          diffAngle: match.diffAngle || 0,
+          isCompoundMerged: !!match.isCompoundMerged
+        });
+        matchedIndices.add(i);
+        if (match.isCompoundMerged && match.mergedSourceIndex !== null && match.mergedSourceIndex !== undefined) {
+          for (let j = 0; j < taggedStrokes.length; j++) {
+            if (taggedStrokes[j].sourceIndex === match.mergedSourceIndex) {
+              matchedIndices.add(j);
+            }
+          }
+        }
+      }
+    }
+    const unmatchedUserStrokes = taggedStrokes
+      .filter((_, idx) => !matchedIndices.has(idx))
+      .map(item => item.pts);
+    this.lastUnmatchedUserStrokes = unmatchedUserStrokes;
+    return {
+      claimedStrokes: [...this.claimedStrokes],
+      unclaimedStrokes: [...this.unclaimedStrokes],
+      claimedStrokeDetails: this.claimedStrokeDetails.map(d => ({ ...d })),
+      unmatchedUserStrokes
+    };
+  }
+
+  _restorePassSnapshot(snapshot) {
+    if (!snapshot) return;
+    this.claimedStrokes = [...snapshot.claimedStrokes];
+    this.unclaimedStrokes = [...snapshot.unclaimedStrokes];
+    this.claimedStrokeDetails = snapshot.claimedStrokeDetails.map(d => ({ ...d }));
+    this.lastUnmatchedUserStrokes = snapshot.unmatchedUserStrokes;
+  }
+
+  /**
+   * Checks whether any unmatched user stroke coincides spatially (within <= 35% of canvasSize)
+   * with an unclaimed target stroke, is plausible in length, and failed specifically due to
+   * angular trajectory deviation (> angularTolerance).
+   */
+  detectWrongAngleUnclaimed(userDrawnStrokes = []) {
+    if (!this.unclaimedStrokes || this.unclaimedStrokes.length === 0) {
+      return { found: false };
+    }
+
+    let candidatePool = this.lastUnmatchedUserStrokes;
+    if (!candidatePool) {
+      // Fallback for callers that invoked claimStroke() manually without evaluateFullDrawing()
+      const pool = [...(userDrawnStrokes || [])];
+      for (const cIdx of this.claimedStrokes) {
+        const target = this.targetStrokes[cIdx];
+        if (!target || pool.length === 0) continue;
+        let removeIdx = -1;
+        let bestScore = -Infinity;
+        for (let i = 0; i < pool.length; i++) {
+          const ev = this.evaluateCandidate(pool[i], target);
+          if (ev.isMatch && ev.score > bestScore) {
+            bestScore = ev.score;
+            removeIdx = i;
+          }
+        }
+        if (removeIdx !== -1) {
+          pool.splice(removeIdx, 1);
+        }
+      }
+      candidatePool = pool;
+    }
+
+    const maxRadius = this.canvasSize * 0.35;
+
+    for (const strokeIdx of this.unclaimedStrokes) {
+      const target = this.targetStrokes[strokeIdx];
+      if (!target) continue;
+
+      for (const uStroke of candidatePool) {
+        const userLen = computeLength(uStroke);
+        if (userLen < 12) continue;
+
+        const lenRatio = userLen / Math.max(1, target.length);
+        const minRatio = target.length < 35 ? 0.35 : 0.40;
+        const maxRatio = target.length < 35 ? 2.50 : this.options.lengthRatioMax;
+        if (lenRatio < minRatio || lenRatio > maxRatio) continue;
+
+        const uCentroid = computeCentroid(uStroke);
+        const centroidDist = Math.hypot(uCentroid[0] - target.centroid[0], uCentroid[1] - target.centroid[1]);
+        if (centroidDist > maxRadius) continue;
+
+        const userAngle = computeAngle(uStroke);
+        const diffNormal = angleDifference(userAngle, target.angle);
+        const diffTrunk = angleDifference(userAngle, target.trunkAngle);
+        const diffAngle = Math.min(diffNormal, diffTrunk);
+
+        let angleAccepted = diffAngle <= this.options.angularTolerance;
+        if (!angleAccepted && this.options.acceptBackwards) {
+          const diffRev = Math.min(Math.abs(180 - diffNormal), Math.abs(180 - diffTrunk));
+          if (diffRev <= this.options.angularTolerance) {
+            angleAccepted = true;
+          }
+        }
+        if (!angleAccepted && (target.length < 40 || target.isCompound) && diffAngle <= 55) {
+          angleAccepted = true;
+        }
+
+        if (!angleAccepted) {
+          return { found: true, strokeIndex: strokeIdx, diffAngle };
+        }
+      }
+    }
+
+    return { found: false };
+  }
+
   /**
    * Evaluates the complete set of user strokes for the character upon submission.
    * Tests raw alignment first. If incomplete, applies Virtual Spatial Normalization
-   * (bounding box shift toward canvas crosshair center) and re-evaluates.
+   * (bounding box shift toward canvas crosshair center), cursive deconstruction, and
+   * component normalization. Preserves the highest-matching pass for Tier-3 diagnostics.
    *
    * @param {Array<Array<[number, number]>>} rawUserStrokes - The drawn strokes.
    * @param {number} canvasSize - Current canvas dimension.
@@ -661,22 +787,13 @@ export class StrokeMatcher {
     const targetCenterY = canvasSize / 2;
     const driftThreshold = Math.max(35, canvasSize * 0.12);
 
-    // Pass 1: Try evaluating directly with raw coordinates
-    this.reset();
-    for (const stroke of rawUserStrokes) {
-      const match = this.matchUserStroke(stroke);
-      if (match.matched) {
-        this.claimStroke(match.strokeIndex, {
-          diffAngle: match.diffAngle || 0,
-          isCompoundMerged: !!match.isCompoundMerged
-        });
-      }
-    }
-
     const userBBox = computeBoundingBox(rawUserStrokes);
     const rawDeltaX = targetCenterX - userBBox.centerX;
     const rawDeltaY = targetCenterY - userBBox.centerY;
     const isShifted = Math.hypot(rawDeltaX, rawDeltaY) > driftThreshold;
+
+    // Pass 1: Try evaluating directly with raw coordinates
+    let bestSnapshot = this._runTaggedPass(rawUserStrokes.map((pts, i) => ({ pts, sourceIndex: i })));
 
     if (this.isComplete()) {
       return {
@@ -691,15 +808,9 @@ export class StrokeMatcher {
     const { normalizedStrokes, deltaX, deltaY } =
       getNormalizedEvaluationStrokes(rawUserStrokes, [targetCenterX, targetCenterY], canvasSize);
 
-    this.reset();
-    for (const stroke of normalizedStrokes) {
-      const match = this.matchUserStroke(stroke);
-      if (match.matched) {
-        this.claimStroke(match.strokeIndex, {
-          diffAngle: match.diffAngle || 0,
-          isCompoundMerged: !!match.isCompoundMerged
-        });
-      }
+    const pass2Snapshot = this._runTaggedPass(normalizedStrokes.map((pts, i) => ({ pts, sourceIndex: i })));
+    if (pass2Snapshot.claimedStrokes.length > bestSnapshot.claimedStrokes.length) {
+      bestSnapshot = pass2Snapshot;
     }
 
     if (this.isComplete()) {
@@ -719,29 +830,23 @@ export class StrokeMatcher {
     // Pass 3: Cursive Compound Deconstruction (Core Fix: Deconstruct acute turns >= 55 deg)
     // When cursive handwriting connects orthogonal strokes (e.g. 横 + 竖 in 年 as 横折),
     // deconstruct the sharp turn into orthogonal sub-strokes.
-    const deconstructedStrokes = [];
+    const taggedDeconstructed = [];
     let didDeconstruct = false;
-    for (const s of rawUserStrokes) {
-      const parts = deconstructCompoundStroke(s);
+    for (let i = 0; i < rawUserStrokes.length; i++) {
+      const parts = deconstructCompoundStroke(rawUserStrokes[i]);
       if (parts.length > 1) {
         didDeconstruct = true;
-        deconstructedStrokes.push(...parts);
+        parts.forEach(p => taggedDeconstructed.push({ pts: p, sourceIndex: i }));
       } else {
-        deconstructedStrokes.push(s);
+        taggedDeconstructed.push({ pts: rawUserStrokes[i], sourceIndex: i });
       }
     }
 
     if (didDeconstruct) {
       // 3A. Try raw deconstructed strokes
-      this.reset();
-      for (const stroke of deconstructedStrokes) {
-        const match = this.matchUserStroke(stroke);
-        if (match.matched) {
-          this.claimStroke(match.strokeIndex, {
-            diffAngle: match.diffAngle || 0,
-            isCompoundMerged: !!match.isCompoundMerged
-          });
-        }
+      const pass3ASnapshot = this._runTaggedPass(taggedDeconstructed);
+      if (pass3ASnapshot.claimedStrokes.length > bestSnapshot.claimedStrokes.length) {
+        bestSnapshot = pass3ASnapshot;
       }
       if (this.isComplete()) {
         return {
@@ -760,16 +865,12 @@ export class StrokeMatcher {
 
       // 3B. Try normalized deconstructed strokes
       const { normalizedStrokes: normDecon, deltaX: dDeconX, deltaY: dDeconY } =
-        getNormalizedEvaluationStrokes(deconstructedStrokes, [targetCenterX, targetCenterY], canvasSize);
-      this.reset();
-      for (const stroke of normDecon) {
-        const match = this.matchUserStroke(stroke);
-        if (match.matched) {
-          this.claimStroke(match.strokeIndex, {
-            diffAngle: match.diffAngle || 0,
-            isCompoundMerged: !!match.isCompoundMerged
-          });
-        }
+        getNormalizedEvaluationStrokes(taggedDeconstructed.map(t => t.pts), [targetCenterX, targetCenterY], canvasSize);
+      const pass3BSnapshot = this._runTaggedPass(
+        normDecon.map((pts, idx) => ({ pts, sourceIndex: taggedDeconstructed[idx].sourceIndex }))
+      );
+      if (pass3BSnapshot.claimedStrokes.length > bestSnapshot.claimedStrokes.length) {
+        bestSnapshot = pass3BSnapshot;
       }
       if (this.isComplete()) {
         return {
@@ -844,15 +945,11 @@ export class StrokeMatcher {
           }
         });
 
-        this.reset();
-        for (const stroke of componentNormalizedStrokes) {
-          const match = this.matchUserStroke(stroke);
-          if (match.matched) {
-            this.claimStroke(match.strokeIndex, {
-              diffAngle: match.diffAngle || 0,
-              isCompoundMerged: !!match.isCompoundMerged
-            });
-          }
+        const pass4Snapshot = this._runTaggedPass(
+          componentNormalizedStrokes.map((pts, i) => ({ pts, sourceIndex: i }))
+        );
+        if (pass4Snapshot.claimedStrokes.length > bestSnapshot.claimedStrokes.length) {
+          bestSnapshot = pass4Snapshot;
         }
 
         if (this.isComplete()) {
@@ -870,6 +967,9 @@ export class StrokeMatcher {
         }
       }
     }
+
+    // Restore highest-matching pass so Tier-3 diagnostics analyze the best coordinate alignment
+    this._restorePassSnapshot(bestSnapshot);
 
     return {
       isComplete: this.isComplete(),
@@ -977,6 +1077,19 @@ export function classifyDrawing(charMatcher, userDrawnStrokes = [], spatialDrift
   }
 
   if (unclaimed.length > 0) {
+    if (userStrokeCount >= targetCount) {
+      const wrongAngleMatch = charMatcher.detectWrongAngleUnclaimed(userDrawnStrokes);
+      if (wrongAngleMatch && wrongAngleMatch.found) {
+        return {
+          tier: 'TIER_3_WRONG_ANGLE',
+          badge: '⚠️ Stroke Trajectory',
+          detail: 'All strokes drawn, but a stroke direction/angle is inverted or far off traditional trajectory.',
+          status: 'fail',
+          wrongAngleIndex: wrongAngleMatch.strokeIndex
+        };
+      }
+    }
+
     const missingStk = charMatcher.getFirstUnclaimedStroke();
     const strokeName = missingStk ? getStrokeTypeName(missingStk) : '';
     const trueMissingCount = Math.min(unclaimed.length, Math.max(1, targetCount - userStrokeCount));
@@ -984,8 +1097,8 @@ export function classifyDrawing(charMatcher, userDrawnStrokes = [], spatialDrift
     return {
       tier: 'TIER_3_MISSING_STROKE',
       badge: '⚠️ Almost There!',
-      detail: trueMissingCount === 1 
-        ? (strokeName 
+      detail: trueMissingCount === 1
+        ? (strokeName
             ? `1 stroke (${strokeName}) is missing (highlighted in orange above).`
             : `1 stroke is missing (highlighted in orange above).`)
         : `${trueMissingCount} strokes are missing (highlighted above).`,
@@ -998,7 +1111,7 @@ export function classifyDrawing(charMatcher, userDrawnStrokes = [], spatialDrift
   if (maxAngleDev > 40) {
     return {
       tier: 'TIER_3_WRONG_ANGLE',
-      badge: '⚠️ Angle Alert',
+      badge: '⚠️ Stroke Trajectory',
       detail: 'A stroke angle deviated significantly from the traditional trajectory.',
       status: 'fail'
     };
