@@ -1072,10 +1072,10 @@ export class WordTrainerEngineController {
     const chars = word.characters || Array.from(word.hanzi_simp || '');
     if (chars.length === 0) return;
 
-    let boxSize = 90;
-    if (chars.length === 2) boxSize = 78;
-    else if (chars.length === 3) boxSize = 68;
-    else if (chars.length >= 4) boxSize = 58;
+    let boxSize = 84;
+    if (chars.length === 2) boxSize = 74;
+    else if (chars.length === 3) boxSize = 64;
+    else if (chars.length >= 4) boxSize = 54;
 
     const padding = Math.max(4, Math.round(boxSize * 0.08));
     const gridStrokeColor = (mode === 'builder') ? 'rgba(6, 95, 70, 0.22)' : 'rgba(76, 29, 149, 0.22)';
@@ -1902,7 +1902,7 @@ export class WordTrainerEngineController {
       if (isMastered) {
         if (grade.tier === 1) {
           this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-600';
-          this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-emerald-50 border-emerald-500 text-emerald-950 flex flex-col gap-1.5';
+          this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-2.5 sm:p-3 border-2 transition-all font-mono text-xs shadow-xs bg-emerald-50 border-emerald-500 text-emerald-950 flex flex-col gap-1.5';
           if (this.dom.resultFeedbackIcon) {
             this.dom.resultFeedbackIcon.className = 'material-symbols-outlined text-emerald-600 text-base';
             this.dom.resultFeedbackIcon.textContent = 'verified';
@@ -1910,7 +1910,7 @@ export class WordTrainerEngineController {
         } else {
           // Tier 2 Soft Pass
           this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-teal-100 text-teal-900 border border-teal-600';
-          this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-teal-50 border-teal-500 text-teal-950 flex flex-col gap-1.5';
+          this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-2.5 sm:p-3 border-2 transition-all font-mono text-xs shadow-xs bg-teal-50 border-teal-500 text-teal-950 flex flex-col gap-1.5';
           if (this.dom.resultFeedbackIcon) {
             this.dom.resultFeedbackIcon.className = 'material-symbols-outlined text-teal-600 text-base';
             this.dom.resultFeedbackIcon.textContent = 'lightbulb';
@@ -1926,7 +1926,7 @@ export class WordTrainerEngineController {
       } else {
         // Attempts exhausted / Review Mode
         this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-amber-100 text-amber-900 border border-amber-600';
-        this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-amber-50 border-amber-500 text-amber-950 flex flex-col gap-1.5';
+        this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-2.5 sm:p-3 border-2 transition-all font-mono text-xs shadow-xs bg-amber-50 border-amber-500 text-amber-950 flex flex-col gap-1.5';
         if (this.dom.resultFeedbackIcon) {
           this.dom.resultFeedbackIcon.className = 'material-symbols-outlined text-amber-600 text-base';
           this.dom.resultFeedbackIcon.textContent = 'auto_stories';

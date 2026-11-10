@@ -2,8 +2,15 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta id="theme-color-meta" name="theme-color" content="#B8F526" />
     <title>Mandarin Tone Trainer - Neo-Sponsor Badge Collage</title>
+    <style>
+      html, body { background-color: #B8F526; }
+    </style>
 
     <!-- Google Fonts: Diverse Typographic Collision -->
     <link href="https://fonts.googleapis.com" rel="preconnect" />
@@ -21,10 +28,10 @@
       }
     </script>
   </head>
-  <body class="text-slate-900 font-grotesk min-h-[100dvh] antialiased selection:bg-badge-pink selection:text-white p-0 m-0 flex flex-col items-center justify-center overflow-x-hidden">
+  <body class="text-slate-900 font-grotesk h-full lg:min-h-[100dvh] antialiased selection:bg-badge-pink selection:text-white p-0 m-0 flex flex-col items-center justify-center overflow-hidden lg:overflow-x-hidden bg-canvas-acid transition-colors duration-500">
 
     <!-- POSTER CANVAS CONTAINER (Full-bleed on both mobile and desktop) -->
-    <main id="app" class="w-full relative overflow-hidden min-h-[100dvh] lg:h-screen lg:min-h-screen flex flex-col justify-between transition-colors duration-500 bg-canvas-acid">
+    <main id="app" class="app-safe-area w-full relative overflow-hidden h-full lg:h-screen lg:min-h-screen flex flex-col justify-between transition-colors duration-500 bg-canvas-acid">
       <!-- Halftone Texture Background Layer -->
       <div class="absolute inset-0 bg-halftone-dots pointer-events-none z-0"></div>
 
@@ -32,7 +39,7 @@
       <!-- [01] MAIN MENU HUB (#menu-screen) -->
       <!-- Asymmetric Graphic Badge Collage, No Top Header -->
       <!-- ======================================================== -->
-      <div id="menu-screen" class="relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto min-h-[100dvh] lg:h-full p-4 sm:p-7 lg:px-8 lg:py-6 flex flex-col justify-between overflow-hidden">
+      <div id="menu-screen" class="relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto h-full max-h-full p-4 sm:p-7 lg:px-8 lg:py-6 flex flex-col justify-between overflow-hidden">
         
         <!-- Screen 1 Aesthetic Vector Accents (Options 1, 3, 5: Max 3 Accents) -->
         <div class="absolute -bottom-6 -left-6 pointer-events-none z-0 font-chinese font-black text-black/[0.08] text-8xl sm:text-9xl select-none">调</div>
@@ -235,7 +242,7 @@
       <!-- [02] TONE TRAINER GAME SCREEN (#game-screen) -->
       <!-- Zero scroll, 3-pill slanted hero button, tactile keycaps -->
       <!-- ======================================================== -->
-      <div id="game-screen" class="relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto min-h-[100dvh] lg:h-full p-4 sm:p-6 lg:px-8 lg:py-6 flex flex-col justify-between overflow-hidden hidden">
+      <div id="game-screen" class="relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto h-full max-h-full p-4 sm:p-6 lg:px-8 lg:py-6 flex flex-col justify-between overflow-hidden hidden">
         <!-- Screen 2 Aesthetic Vector Accents (Options 1, 3, 5: Max 3 Accents) -->
         <div class="absolute top-16 left-6 pointer-events-none z-0 text-black/[0.15] text-sm font-mono select-none">⌖ CAL // 01</div>
         <div class="absolute -bottom-8 -right-4 pointer-events-none z-0 font-chinese font-black text-black/[0.08] text-9xl select-none">声</div>
@@ -342,7 +349,7 @@
       <!-- [03] AUDIO LIBRARY SCREEN (#audio-library-screen) -->
       <!-- Twin vertical tumbler columns in a technical dual-column chassis -->
       <!-- ======================================================== -->
-      <div id="audio-library-screen" class="relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto min-h-[100dvh] lg:h-full p-4 sm:p-6 lg:px-8 lg:py-6 flex flex-col justify-between overflow-hidden hidden">
+      <div id="audio-library-screen" class="relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto h-full max-h-full p-4 sm:p-6 lg:px-8 lg:py-6 flex flex-col justify-between overflow-hidden hidden">
         <!-- Screen 3 Aesthetic Vector Accents (Options 1, 3, 5: Max 3 Accents) -->
         <div class="absolute -top-6 -right-6 pointer-events-none z-0 font-chinese font-black text-black/[0.08] text-9xl select-none">韵</div>
         <div class="absolute bottom-6 left-6 pointer-events-none z-0 text-black/[0.15] text-sm font-mono select-none">⌖ 400HZ</div>
@@ -495,7 +502,7 @@
       <!-- [04] ACOUSTIC PRONUNCIATION ENGINE SCREEN (#engine-screen) -->
       <!-- Aero Sky Ice & Racing Tangerine Palette | Fixed Bottom Scroller & Dock -->
       <!-- ======================================================== -->
-      <div id="engine-screen" class="relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto h-[100dvh] lg:h-full max-h-[100dvh] p-3 sm:p-4 lg:px-8 lg:py-6 flex flex-col justify-between overflow-hidden bg-canvas-ice bg-halftone-dots hidden">
+      <div id="engine-screen" class="relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto h-full max-h-full p-3 sm:p-4 lg:px-8 lg:py-6 flex flex-col justify-between overflow-hidden hidden">
         <!-- Screen 4 Aesthetic Vector Accents (Options 1, 3, 5: Max 3 Accents) -->
         <div class="absolute top-14 left-4 pointer-events-none z-0 text-black/[0.15] text-xs font-mono font-bold select-none">⌖ AUDIO CH 01</div>
         <div class="absolute -bottom-8 -left-6 pointer-events-none z-0 font-chinese font-black text-black/[0.07] text-9xl select-none">音</div>
@@ -545,7 +552,7 @@
         </div>
 
         <!-- [2] Fluid Middle Content Area (Widescreen Technical Cockpit Split) -->
-        <div class="flex-1 overflow-y-auto no-scrollbar space-y-2 pr-0.5 pb-1 lg:overflow-visible lg:grid lg:grid-cols-12 lg:gap-4 lg:space-y-0">
+        <div class="flex-1 min-h-0 overflow-hidden space-y-2 pr-0.5 pb-1 lg:overflow-visible lg:grid lg:grid-cols-12 lg:gap-4 lg:space-y-0">
           
           <!-- 1. Header Context Card: Target Word & Sandhi Indicator (Row 1 Left, Equal Height on Desktop, Auto on Mobile) -->
           <section class="w-full bg-white border-[3px] border-black rounded-2xl p-3 sm:p-3.5 shadow-hard-black shrink-0 flex flex-col lg:justify-between gap-2.5 relative overflow-hidden lg:col-span-5 lg:row-start-1 lg:h-full">
@@ -852,7 +859,7 @@
       <!-- Option 3: Imperial Celadon & Plum Ink Gateway            -->
       <!-- Layout mirrors the Initials & Endings intermediate submenu -->
       <!-- ======================================================== -->
-      <div id="mode-selection-screen" class="mode-select-container relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto min-h-[100dvh] lg:h-full p-4 sm:p-7 lg:px-8 lg:py-6 flex flex-col justify-between overflow-hidden hidden select-none">
+      <div id="mode-selection-screen" class="mode-select-container relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto h-full max-h-full p-4 sm:p-7 lg:px-8 lg:py-6 flex flex-col justify-between overflow-hidden hidden select-none">
         
         <!-- Screen Aesthetic Vector Accents -->
         <div class="absolute -bottom-6 -left-6 pointer-events-none z-0 font-chinese font-black text-white/[0.06] text-8xl sm:text-9xl select-none">格</div>
@@ -948,7 +955,7 @@
       <!-- [05] WORD TRAINER SCREEN (#word-trainer-screen)          -->
       <!-- Option 3 Imperial Celadon (.theme-builder) / Plum (.theme-calligraphy) -->
       <!-- ======================================================== -->
-      <div id="word-trainer-screen" class="theme-calligraphy relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto h-[100dvh] max-h-[100dvh] lg:h-full lg:max-h-none p-2 sm:p-3 lg:px-8 lg:py-5 flex flex-col justify-between overflow-hidden lg:overflow-y-auto bg-[#F5F3FF] bg-halftone-dots hidden">
+      <div id="word-trainer-screen" class="theme-calligraphy relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto h-full max-h-full lg:h-full lg:max-h-none p-2 sm:p-3 lg:px-8 lg:py-5 flex flex-col justify-between overflow-hidden lg:overflow-y-auto hidden">
         <!-- Aesthetic Calligraphic Watermark Vector Accents -->
         <div class="absolute top-14 left-4 pointer-events-none z-0 text-[#4C1D95]/[0.08] text-xs font-mono font-bold select-none">⌖ HANZI // CH 02</div>
         <div class="absolute -bottom-8 -left-6 pointer-events-none z-0 font-chinese font-black text-[#4C1D95]/[0.05] text-9xl select-none">字</div>
@@ -1251,16 +1258,16 @@
             </section>
 
             <!-- 3. ZONE 6: IN-PLACE RESULT & THREE-TIER FEEDBACK PANEL (#result-feedback-panel) -->
-            <!-- Mobile View B: Replaces Canvas/Prompt/Footer inside full leftover flex height (no scroll) -->
+            <!-- Mobile View B: Contained compact card centered in leftover space (no vertical over-expansion, no scroll) -->
             <!-- Desktop: Replaces #interaction-footer in Right Column -->
-            <section id="result-feedback-panel" class="order-3 lg:order-2 w-full flex-1 min-h-0 lg:flex-none bg-white border-[3px] border-black rounded-2xl p-3 sm:p-4 shadow-hard-black shrink-0 flex flex-col justify-between gap-2.5 lg:gap-3 relative hidden overflow-hidden">
+            <section id="result-feedback-panel" class="order-3 lg:order-2 w-full flex-none bg-white border-[3px] border-black rounded-2xl p-3 sm:p-4 shadow-hard-black shrink flex flex-col justify-start lg:justify-between gap-2 lg:gap-3 relative hidden overflow-hidden my-auto lg:my-0">
               
               <!-- A. Word Result Header & Mobile Inline Mi Zi Ge Showcase (Decision B) -->
-              <div id="result-word-header" class="flex flex-col gap-2 pb-2 lg:pb-2.5 border-b-2 border-black/10 shrink-0">
+              <div id="result-word-header" class="flex flex-col gap-1.5 sm:gap-2 pb-2 border-b-2 border-black/10 shrink-0">
                 <div class="flex items-center justify-between gap-2.5">
                   <div class="flex items-baseline gap-2.5 min-w-0 flex-wrap">
                     <span id="result-hanzi" class="hidden lg:inline font-chinese font-black text-3xl sm:text-4xl text-[#1E1B2E] tracking-tight">日</span>
-                    <span id="result-pinyin" class="font-speed font-black italic text-2xl lg:text-xl text-[#4C1D95] truncate">rì</span>
+                    <span id="result-pinyin" class="font-speed font-black italic text-xl sm:text-2xl lg:text-xl text-[#4C1D95] truncate">rì</span>
                   </div>
                   <!-- Tactile Audio Replay Button -->
                   <button id="result-audio-replay-btn" type="button" class="py-1.5 sm:py-2 px-3 sm:px-3.5 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white border-2 border-black font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-sm active-collapse cursor-pointer transition-all shrink-0" title="Replay native audio">
@@ -1273,25 +1280,25 @@
                 <div id="result-showcase-grid" class="flex lg:hidden items-center justify-center gap-2 py-0.5 shrink-0"></div>
 
                 <!-- English Meaning Box -->
-                <div id="result-meaning-box" class="w-full bg-[#FAF5FF] border border-[#E9D5FF] rounded-xl px-3 py-2 flex items-start justify-between gap-2">
+                <div id="result-meaning-box" class="w-full bg-[#FAF5FF] border border-[#E9D5FF] rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 flex items-start justify-between gap-2">
                   <div class="flex-1 min-w-0">
                     <span id="result-meaning-label" class="font-mono text-[9px] font-black uppercase text-[#6D28D9] block">ENGLISH MEANING:</span>
-                    <p id="result-meaning" class="font-mono text-xs sm:text-sm text-[#1E1B2E] font-bold leading-tight">
+                    <p id="result-meaning" class="font-mono text-xs sm:text-sm text-[#1E1B2E] font-bold leading-snug">
                       sun, day; daytime
                     </p>
                   </div>
-                  <div id="result-radical-tag" class="text-right shrink-0">
+                  <div id="result-radical-tag" class="text-right shrink-0 max-w-[45%]">
                     <span class="font-mono text-[9px] font-black uppercase text-black/50 block">RADICAL:</span>
-                    <span id="result-decomposition" class="font-chinese text-xs font-bold text-black/80">日 (sun)</span>
+                    <span id="result-decomposition" class="font-chinese text-xs font-bold text-black/80 leading-snug block break-words">日 (sun)</span>
                   </div>
                 </div>
               </div>
 
               <!-- B. Detailed Diagnostic Feedback Card -->
-              <div id="result-feedback-group" class="flex-1 min-h-0 flex flex-col justify-center gap-2">
+              <div id="result-feedback-group" class="shrink min-h-0 flex flex-col gap-1.5 sm:gap-2">
                 
                 <!-- Drawing / Assembly Diagnostic Feedback Card -->
-                <div id="feedback-drawing-card" class="w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-emerald-50 border-emerald-500 text-emerald-950 flex flex-col gap-1.5">
+                <div id="feedback-drawing-card" class="w-full rounded-xl p-2.5 sm:p-3 border-2 transition-all font-mono text-xs shadow-xs bg-emerald-50 border-emerald-500 text-emerald-950 flex flex-col gap-1.5">
                   <div class="flex items-center justify-between gap-2 border-b border-black/10 pb-1">
                     <div class="flex items-center gap-1.5">
                       <span class="material-symbols-outlined text-emerald-600 text-base" id="result-feedback-icon">verified</span>
@@ -1301,7 +1308,7 @@
                       🎯 Perfect Form!
                     </span>
                   </div>
-                  <p id="result-feedback-text" class="text-xs sm:text-sm lg:text-xs font-bold leading-relaxed text-black/90">
+                  <p id="result-feedback-text" class="text-xs sm:text-sm lg:text-xs font-bold leading-snug text-black/90">
                     Flawless execution with canonical stroke order and accurate angles.
                   </p>
                   <!-- Optional "See Stroke Order" Button (Animates Inline Mi Zi Ge Showcase on Mobile & Canvas on Desktop) -->
@@ -1315,11 +1322,11 @@
 
               <!-- C. Dual Action Row (Try Again + Next Word - Mobile & Desktop) -->
               <div class="w-full flex items-center gap-2 sm:gap-2.5 pt-0.5 shrink-0">
-                <button id="result-try-again-btn" type="button" class="py-3 lg:py-3.5 px-3.5 sm:px-4 bg-white hover:bg-slate-100 text-black border-[2.5px] lg:border-[3px] border-black rounded-xl lg:rounded-2xl shadow-hard-black font-speed font-black italic text-sm sm:text-base uppercase tracking-wider flex items-center justify-center gap-1.5 active-collapse cursor-pointer transition-all shrink-0" title="Clear and practice this same word again">
+                <button id="result-try-again-btn" type="button" class="py-2.5 sm:py-3 lg:py-3.5 px-3.5 sm:px-4 bg-white hover:bg-slate-100 text-black border-[2.5px] lg:border-[3px] border-black rounded-xl lg:rounded-2xl shadow-hard-black font-speed font-black italic text-sm sm:text-base uppercase tracking-wider flex items-center justify-center gap-1.5 active-collapse cursor-pointer transition-all shrink-0" title="Clear and practice this same word again">
                   <span class="material-symbols-outlined text-base sm:text-lg">replay</span>
                   <span>TRY AGAIN</span>
                 </button>
-                <button id="result-next-btn" type="button" class="flex-1 py-3 lg:py-3.5 px-4 bg-[#4C1D95] hover:bg-[#3B0764] text-white border-[2.5px] lg:border-[3px] border-black rounded-xl lg:rounded-2xl shadow-hard-black font-speed font-black italic text-sm sm:text-base uppercase tracking-wider flex items-center justify-center gap-1.5 active-collapse cursor-pointer transition-all min-w-0">
+                <button id="result-next-btn" type="button" class="flex-1 py-2.5 sm:py-3 lg:py-3.5 px-4 bg-[#4C1D95] hover:bg-[#3B0764] text-white border-[2.5px] lg:border-[3px] border-black rounded-xl lg:rounded-2xl shadow-hard-black font-speed font-black italic text-sm sm:text-base uppercase tracking-wider flex items-center justify-center gap-1.5 active-collapse cursor-pointer transition-all min-w-0">
                   <span id="result-next-btn-text" class="truncate">NEXT WORD</span>
                   <span class="material-symbols-outlined text-base sm:text-lg shrink-0">arrow_forward</span>
                 </button>
@@ -1482,7 +1489,7 @@
             </div>
 
             <!-- Modal Scrollable Content -->
-            <div class="p-4 sm:p-6 overflow-y-auto space-y-6 text-left">
+            <div class="p-4 sm:p-6 overflow-y-auto overscroll-contain space-y-6 text-left">
               
               <!-- 1. The 8 Foundational Strokes -->
               <section class="space-y-3">

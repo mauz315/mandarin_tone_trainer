@@ -284,16 +284,55 @@ function pinyin_to_tone(pinyin_with_number) {
     return base_clean;
 }
 
+const CANVAS_COLOR_HEX = {
+  'bg-canvas-navy': '#202A36',
+  'bg-canvas-acid': '#B8F526',
+  'bg-canvas-ice': '#B4D7E8',
+  'bg-canvas-graphite': '#282A2E',
+  'bg-canvas-lavender': '#9CA4FC',
+  'bg-canvas-butter': '#FDF197',
+  'bg-canvas-pink': '#FF8DB8',
+  'bg-canvas-mint': '#8EF48A',
+  'bg-canvas-celadon': '#064E3B',
+  'bg-canvas-builder': '#F0FDF4',
+  'bg-canvas-calligraphy': '#F5F3FF'
+};
+
+function resolveCanvasColorHex(colorClass) {
+  if (!colorClass) return '#B8F526';
+  if (CANVAS_COLOR_HEX[colorClass]) return CANVAS_COLOR_HEX[colorClass];
+  const hexMatch = colorClass.match(/^bg-\[(#[0-9a-fA-F]{3,8})\]$/);
+  return hexMatch ? hexMatch[1] : '#B8F526';
+}
+
 function setAppBackground(colorClass) {
   const app = document.getElementById('app');
   if (!app) return;
-  // Remove all previous background color classes (named canvas tokens and arbitrary hex classes)
-  const bgClassesToRemove = Array.from(app.classList).filter(
-    c => c.startsWith('bg-canvas-') || c.startsWith('bg-[')
-  );
-  bgClassesToRemove.forEach(c => app.classList.remove(c));
-  if (colorClass) {
-    app.classList.add(colorClass);
+
+  const resolvedHex = resolveCanvasColorHex(colorClass);
+  const targets = [app, document.body];
+  targets.forEach(el => {
+    if (!el) return;
+    // Remove all previous background color classes (named canvas tokens and arbitrary hex classes)
+    const bgClassesToRemove = Array.from(el.classList).filter(
+      c => c.startsWith('bg-canvas-') || c.startsWith('bg-[')
+    );
+    bgClassesToRemove.forEach(c => el.classList.remove(c));
+    if (colorClass) {
+      el.classList.add(colorClass);
+    }
+  });
+
+  if (document.documentElement) {
+    document.documentElement.style.backgroundColor = resolvedHex;
+  }
+  if (document.body) {
+    document.body.style.backgroundColor = resolvedHex;
+  }
+
+  const themeMeta = document.getElementById('theme-color-meta') || document.querySelector('meta[name="theme-color"]');
+  if (themeMeta) {
+    themeMeta.setAttribute('content', resolvedHex);
   }
 }
 
@@ -2705,6 +2744,7 @@ function setupWordTrainerUI() {
 }
 
 // Initialize the app
+setAppBackground('bg-canvas-acid');
 setupButtons();
 setupMenu();
 setupAudioSourceToggles();
