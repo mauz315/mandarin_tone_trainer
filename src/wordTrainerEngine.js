@@ -12,8 +12,8 @@
  * - High-Fidelity TTS Audio Database Integration
  */
 
-import { StrokeMatcher, getHanziPositioner, classifyDrawing } from './strokeMatcher.js';
-import { ComponentPlacementController } from './componentBuilderEngine.js';
+import { StrokeMatcher, getHanziPositioner, classifyDrawing, gradeCalligraphyDrawing } from './strokeMatcher.js';
+import { ComponentPlacementController, gradeComponentBuilder } from './componentBuilderEngine.js';
 
 const STORAGE_KEY_CALLIGRAPHY = 'mandarin_trainer_word_progress_calligraphy';
 const STORAGE_KEY_BUILDER = 'mandarin_trainer_word_progress_builder';
@@ -51,9 +51,9 @@ export class WordTrainerEngineController {
     this.charLengths = []; // Drawn lengths for each character slot
     this.charRecognized = []; // True character recognition flags per character
     this.charSpatialDrift = []; // Spatial translation drift per character slot
-    this.selectedTones = []; // Selected tones array (e.g. [1, 4])
     this.attemptsLeft = 3;
-    this.isScaffoldOn = this.state.scaffoldDefault !== undefined ? this.state.scaffoldDefault : true;
+    const savedGuide = (typeof localStorage !== 'undefined') ? localStorage.getItem('mandarin_trainer_guide_mode') : null;
+    this.isScaffoldOn = (savedGuide !== null) ? (savedGuide === 'on') : (this.state.scaffoldDefault !== undefined ? this.state.scaffoldDefault : true);
 
     // Order-Agnostic Geometric Stroke Matchers & Handwriting Persistence
     this.charMatchers = [];
@@ -124,6 +124,7 @@ export class WordTrainerEngineController {
       this.state.scaffoldDefault = this.isScaffoldOn;
       const key = this.getStorageKey();
       localStorage.setItem(key, JSON.stringify(this.state));
+      localStorage.setItem('mandarin_trainer_guide_mode', this.isScaffoldOn ? 'on' : 'off');
     } catch (e) {
       console.warn('WordTrainerEngine: Failed to save state to localStorage', e);
     }
@@ -154,6 +155,9 @@ export class WordTrainerEngineController {
       // Load independent progress state for the newly selected mode
       this.state = this.loadState();
       this.activePhase = this.state.activePhase || 1;
+      const savedGuide = (typeof localStorage !== 'undefined') ? localStorage.getItem('mandarin_trainer_guide_mode') : null;
+      this.isScaffoldOn = (savedGuide !== null) ? (savedGuide === 'on') : (this.state.scaffoldDefault !== undefined ? this.state.scaffoldDefault : true);
+      this.setGuideMode(this.isScaffoldOn);
       this.updatePhaseStepperUI();
       this.updateProgressBar();
       this.loadBatchForActivePhase();
@@ -170,12 +174,31 @@ export class WordTrainerEngineController {
     return (phaseNum <= 2) ? 5 : 10;
   }
 
-  setGuideMode(isOn) {
-    this.isScaffoldOn = isOn;
-    this.toggleScaffolding(isOn);
+  setGuideMode(isOn, persistState = true) {
+    if (persistState) {
+      this.isScaffoldOn = isOn;
+      try {
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('mandarin_trainer_guide_mode', isOn ? 'on' : 'off');
+        }
+      } catch (_) {}
+    }
+    this.updateScaffoldBtnUI();
+    if (this.dom.hanziTargetCanvas) {
+      this.dom.hanziTargetCanvas.style.opacity = isOn ? '1' : '0';
+      this.dom.hanziTargetCanvas.style.visibility = isOn ? 'visible' : 'hidden';
+    }
+    if (this.activeWriter) {
+      if (isOn) {
+        try { this.activeWriter.showOutline(); } catch (_) {}
+      } else {
+        try { this.activeWriter.hideOutline(); } catch (_) {}
+      }
+    }
     if (this.componentBuilder) {
       this.componentBuilder.toggleGhostHint(isOn);
     }
+    this.renderCanvasLayers();
   }
 
   // ----------------------------------------------------
@@ -201,6 +224,9 @@ export class WordTrainerEngineController {
       } else {
         this.componentBuilder.setDecompositions(this.decompositions);
       }
+      this.componentBuilder.onHintToggle = (isActive) => {
+        this.toggleScaffolding(isActive);
+      };
       this.componentBuilder.initDom();
       this.isInitialized = true;
       this.switchMode(this.getMode());
@@ -260,27 +286,23 @@ export class WordTrainerEngineController {
       clearCanvasBtn: document.getElementById('clear-canvas-btn'),
       demoOrderBtn: document.getElementById('canvas-demo-order-btn'),
       interactionFooter: document.getElementById('interaction-footer'),
-      toneSelectorGroup: document.getElementById('tone-selector-group'),
-      toneBtns: document.querySelectorAll('.tone-choice-btn'),
-      toneSegmentSlots: document.getElementById('tone-segment-slots'),
       attemptPips: document.getElementById('attempt-pips'),
       submitBtn: document.getElementById('submit-word-btn'),
+      feedbackToast: document.getElementById('drawing-feedback-toast'),
+      promptTaskBadge: document.getElementById('prompt-task-badge'),
+      interactionTaskBadge: document.getElementById('interaction-task-badge'),
       resultFeedbackPanel: document.getElementById('result-feedback-panel'),
       resultHanzi: document.getElementById('result-hanzi'),
       resultPinyin: document.getElementById('result-pinyin'),
-      resultToneBadge: document.getElementById('result-tone-badge'),
       resultMeaning: document.getElementById('result-meaning'),
       resultDecomposition: document.getElementById('result-decomposition'),
       resultAudioReplayBtn: document.getElementById('result-audio-replay-btn'),
       feedbackDrawingCard: document.getElementById('feedback-drawing-card'),
       drawingFeedbackIcon: document.getElementById('drawing-feedback-icon'),
+      drawingFeedbackTitle: document.getElementById('drawing-feedback-title'),
       drawingTierBadge: document.getElementById('drawing-tier-badge'),
       drawingFeedbackText: document.getElementById('drawing-feedback-text'),
       resultDemoOrderBtn: document.getElementById('result-demo-order-btn'),
-      feedbackToneCard: document.getElementById('feedback-tone-card'),
-      toneFeedbackIcon: document.getElementById('tone-feedback-icon'),
-      toneVerdictBadge: document.getElementById('tone-verdict-badge'),
-      toneFeedbackText: document.getElementById('tone-feedback-text'),
       resultNextBtn: document.getElementById('result-next-btn'),
       resultNextBtnText: document.getElementById('result-next-btn-text'),
       batchProgressContainer: document.getElementById('batch-progress-container'),
@@ -482,15 +504,7 @@ export class WordTrainerEngineController {
       });
     }
 
-    if (this.dom.toneBtns) {
-      this.dom.toneBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const t = parseInt(btn.getAttribute('data-tone'), 10);
-          this.handleToneSelection(t);
-        });
-      });
-    }
+
 
     if (this.dom.phaseBtns) {
       this.dom.phaseBtns.forEach(btn => {
@@ -703,7 +717,12 @@ export class WordTrainerEngineController {
       const rect = canvas.getBoundingClientRect();
       const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
       const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
-      return [clientX - rect.left, clientY - rect.top];
+      const rawX = clientX - rect.left;
+      const rawY = clientY - rect.top;
+      const dpr = window.devicePixelRatio || 1;
+      const scaleX = rect.width > 0 ? (canvas.width / dpr) / rect.width : 1;
+      const scaleY = rect.height > 0 ? (canvas.height / dpr) / rect.height : 1;
+      return [rawX * scaleX, rawY * scaleY];
     };
 
     let isDrawing = false;
@@ -711,6 +730,11 @@ export class WordTrainerEngineController {
 
     const startDraw = (e) => {
       if (e.target !== canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      if (canvas.width !== Math.round(rect.width * dpr) || canvas.height !== Math.round(rect.height * dpr)) {
+        this.syncCanvasDimensions();
+      }
       isDrawing = true;
       const pt = getCoords(e);
       strokePts = [pt];
@@ -1119,9 +1143,13 @@ export class WordTrainerEngineController {
     this.attemptsLeft = 3;
     this.flashingStrokeIndex = null;
 
-    // Toggle guide mode: strictly forced ON on first introduction, strictly forced OFF on delayed reappearance
-    const shouldGuideBeOn = !this.isReappearanceStage;
-    this.setGuideMode(shouldGuideBeOn);
+    // Toggle guide mode: strictly forced OFF on delayed reappearance; otherwise honor user's persistent preference
+    const savedGuide = (typeof localStorage !== 'undefined') ? localStorage.getItem('mandarin_trainer_guide_mode') : null;
+    if (savedGuide !== null) {
+      this.isScaffoldOn = (savedGuide === 'on');
+    }
+    const shouldGuideBeOn = this.isReappearanceStage ? false : this.isScaffoldOn;
+    this.setGuideMode(shouldGuideBeOn, !this.isReappearanceStage);
 
     const chars = word.characters || Array.from(word.hanzi_simp || '');
     const charCount = chars.length;
@@ -1150,7 +1178,6 @@ export class WordTrainerEngineController {
     // Update Header labels
     this.updateBatchLabels();
     this.updateAttemptPips();
-    this.renderToneSlots();
     this.mountCharacter(0);
 
     // Update Component Builder multi-character layout if active
@@ -1175,9 +1202,9 @@ export class WordTrainerEngineController {
     }
 
     if (this.getMode() === 'builder') {
-      this.updateFeedback('neutral', 'Drag components to assemble the character, then select its tone.');
+      this.updateFeedback('neutral', 'Drag components from the dock to assemble the character.');
     } else {
-      this.updateFeedback('neutral', 'Draw the character and select its tone to verify.');
+      this.updateFeedback('neutral', 'Draw the character strokes on the grid to verify.');
     }
 
     // Reset panels: Show exercise inputs, hide result panel
@@ -1289,7 +1316,6 @@ export class WordTrainerEngineController {
     }
 
     // 6. Update Tone selector slot active state
-    this.updateActiveToneSlotUI();
   }
 
   mountHanziWriterQuiz(targetChar, index) {
@@ -1350,103 +1376,16 @@ export class WordTrainerEngineController {
   }
 
   // ----------------------------------------------------
-  // 5. TONE SELECTION & DYNAMIC SLOTS
-  // ----------------------------------------------------
-  renderToneSlots() {
-    const container = this.dom.toneSegmentSlots;
-    if (!container || !this.activeWord) return;
-
-    const count = this.activeWord.characterCount || this.activeWord.hanzi_simp.length;
-    if (count <= 1) {
-      container.classList.add('hidden');
-      return;
-    }
-
-    container.classList.remove('hidden');
-    container.innerHTML = '<span class="font-bold text-black/60 text-[10px] uppercase">SLOTS:</span>';
-
-    const chars = this.activeWord.characters || Array.from(this.activeWord.hanzi_simp || '');
-    chars.forEach((ch, idx) => {
-      const slotEl = document.createElement('div');
-      slotEl.className = `tone-slot px-3 py-1 rounded-lg border-2 font-bold cursor-pointer transition-all ${
-        idx === this.activeCharIndex ? 'border-black bg-white text-black shadow-xs active' : 'border-black/30 bg-white/70 text-black/60'
-      }`;
-      slotEl.setAttribute('data-slot', idx);
-      const val = this.selectedTones[idx] !== null ? `T${this.selectedTones[idx]}` : '_';
-      slotEl.innerHTML = `${ch} (${idx + 1}): <span class="tone-slot-val font-black ${
-        idx === this.activeCharIndex ? 'text-[#D97706]' : 'text-black'
-      }">${val}</span>`;
-
-      slotEl.addEventListener('click', () => {
-        this.setCharIndex(idx);
-      });
-      container.appendChild(slotEl);
-    });
-  }
-
-  updateActiveToneSlotUI() {
-    const container = this.dom.toneSegmentSlots;
-    if (!container || !this.activeWord) return;
-
-    const slots = container.querySelectorAll('.tone-slot');
-    slots.forEach((s, idx) => {
-      const isCur = (idx === this.activeCharIndex);
-      s.className = `tone-slot px-3 py-1 rounded-lg border-2 font-bold cursor-pointer transition-all ${
-        isCur ? 'border-black bg-white text-black shadow-xs active' : 'border-black/30 bg-white/70 text-black/60'
-      }`;
-      const valEl = s.querySelector('.tone-slot-val');
-      if (valEl) {
-        valEl.className = `tone-slot-val font-black ${isCur ? 'text-[#D97706]' : 'text-black'}`;
-      }
-    });
-
-    const curTone = this.selectedTones[this.activeCharIndex];
-    if (this.dom.toneBtns) {
-      this.dom.toneBtns.forEach(b => {
-        const t = parseInt(b.getAttribute('data-tone'), 10);
-        if (curTone !== null && t === curTone) {
-          b.classList.add('tone-selected');
-        } else {
-          b.classList.remove('tone-selected');
-        }
-      });
-    }
-  }
-
-  handleToneSelection(toneIndex) {
-    if (!this.activeWord) return;
-    this.selectedTones[this.activeCharIndex] = toneIndex;
-
-    const container = this.dom.toneSegmentSlots;
-    if (container) {
-      const slotVal = container.querySelector(`.tone-slot[data-slot="${this.activeCharIndex}"] .tone-slot-val`);
-      if (slotVal) slotVal.textContent = `T${toneIndex}`;
-    }
-
-    if (this.dom.toneBtns) {
-      this.dom.toneBtns.forEach(b => {
-        const t = parseInt(b.getAttribute('data-tone'), 10);
-        if (t === toneIndex) {
-          b.classList.add('tone-selected');
-        } else {
-          b.classList.remove('tone-selected');
-        }
-      });
-    }
-
-    const count = this.activeWord.characterCount || this.activeWord.hanzi_simp.length;
-    if (count > 1 && this.activeCharIndex < count - 1) {
-      setTimeout(() => {
-        this.nextChar();
-      }, 220);
-    }
-  }
-
-  // ----------------------------------------------------
   // 6. SCAFFOLDING & CANVAS CONTROLS
   // ----------------------------------------------------
   toggleScaffolding(forcedState) {
     this.isScaffoldOn = (forcedState !== undefined) ? forcedState : !this.isScaffoldOn;
+    this.state.scaffoldDefault = this.isScaffoldOn;
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('mandarin_trainer_guide_mode', this.isScaffoldOn ? 'on' : 'off');
+      }
+    } catch (_) {}
     this.updateScaffoldBtnUI();
 
     if (this.dom.hanziTargetCanvas) {
@@ -1460,6 +1399,10 @@ export class WordTrainerEngineController {
       } else {
         try { this.activeWriter.hideOutline(); } catch (_) {}
       }
+    }
+
+    if (this.componentBuilder) {
+      this.componentBuilder.toggleGhostHint(this.isScaffoldOn);
     }
 
     this.renderCanvasLayers();
@@ -1501,414 +1444,306 @@ export class WordTrainerEngineController {
       }
     }
     this.renderCanvasLayers();
-    this.updateFeedback('neutral', 'Canvas cleared. Draw strokes and select tone.');
+    this.updateFeedback('neutral', 'Canvas cleared. Draw strokes to verify.');
   }
 
   // ----------------------------------------------------
-  // 7. 3-ATTEMPT SHIELD & SUBMISSION VALIDATION
+  // 7. 3-ATTEMPT SHIELD & THREE-TIER SUBMISSION VALIDATION
   // ----------------------------------------------------
   validateSubmission() {
     if (!this.activeWord) return;
-
     if (this.getMode() === 'builder') {
       this.validateBuilderSubmission();
-      return;
+    } else {
+      this.validateCalligraphySubmission();
     }
+  }
+
+  validateCalligraphySubmission() {
+    if (!this.activeWord) return;
 
     const count = this.activeWord.characterCount || this.activeWord.hanzi_simp.length;
-    const targetTones = this.activeWord.tones || [1];
     const chars = this.activeWord.characters || Array.from(this.activeWord.hanzi_simp || '');
 
-    // 1. Full Character Evaluation with Virtual Spatial Normalization
-    const canvasSize = this.getCanvasSize();
-    let incompleteCharIdx = -1;
+    // Grade each character using gradeCalligraphyDrawing
+    let allPassed = true;
+    let worstGrade = null;
+    let firstIncompleteIdx = -1;
 
     for (let i = 0; i < count; i++) {
       const matcher = this.charMatchers[i];
-      if (!matcher) continue;
+      const userStrokes = this.charUserStrokes[i] || (i === this.activeCharIndex ? this.userDrawnStrokes : []);
+      const spatialDrift = (this.charSpatialDrift && this.charSpatialDrift[i]) || null;
+      const grade = gradeCalligraphyDrawing(matcher, userStrokes, spatialDrift, this.getCanvasSize());
 
-      const userStrokes = this.charUserStrokes[i] || [];
-      const evalRes = matcher.evaluateFullDrawing(userStrokes, canvasSize);
-
-      if (evalRes.isComplete) {
-        this.charRecognized[i] = true;
-        this.charSpatialDrift[i] = evalRes.spatialDrift;
-      } else {
-        this.charRecognized[i] = false;
-        if (incompleteCharIdx === -1) {
-          incompleteCharIdx = i;
+      if (!grade.success) {
+        allPassed = false;
+        if (firstIncompleteIdx === -1) {
+          firstIncompleteIdx = i;
+          worstGrade = grade;
         }
+      } else if (!worstGrade || (grade.tier > worstGrade.tier)) {
+        worstGrade = grade;
       }
     }
 
-    if (incompleteCharIdx !== -1) {
-      // Incomplete Drawing Protocol (Spec §4)
-      if (incompleteCharIdx !== this.activeCharIndex) {
-        this.setCharIndex(incompleteCharIdx);
+    if (!allPassed) {
+      this.attemptsLeft = Math.max(0, this.attemptsLeft - 1);
+      this.updateAttemptPips();
+
+      // Flashes & Shakes
+      this.shakeElement('drawing-canvas-wrapper');
+      this.flashElement('drawing-canvas-wrapper', 'error');
+
+      // Highlight missing stroke if applicable
+      if (firstIncompleteIdx !== -1 && firstIncompleteIdx !== this.activeCharIndex) {
+        this.mountCharacter(firstIncompleteIdx);
       }
-      const matcher = this.charMatchers[incompleteCharIdx];
+      const matcher = this.charMatchers[this.activeCharIndex];
       const missingStroke = matcher ? matcher.getFirstUnclaimedStroke() : null;
       this.flashingStrokeIndex = missingStroke ? missingStroke.index : null;
       this.renderCanvasLayers();
       this.redrawUserStrokes();
 
-      this.attemptsLeft = Math.max(0, this.attemptsLeft - 1);
-      this.updateAttemptPips();
-      this.shakeElement('drawing-canvas-wrapper');
+      // Actionable feedback & audio replay
       this.playActiveWordAudio();
+      const failDetail = worstGrade ? worstGrade.detail : 'Character drawing is incomplete.';
+      this.updateFeedback('error', `${failDetail} Tries left: ${this.attemptsLeft}`);
 
-      if (this.attemptsLeft > 0) {
-        this.updateFeedback('hanzi-error', `⚠️ Incomplete Drawing: Missing strokes for '${chars[incompleteCharIdx]}'. Draw the highlighted stroke to complete. Tries left: ${this.attemptsLeft}`);
-      } else {
-        // Attempts exhausted: Graceful Reveal & Re-queue word
-        this.updateFeedback('hanzi-error', '❌ Attempts exhausted! Revealing full card solution for review.');
+      if (this.attemptsLeft === 0) {
+        // Attempts exhausted: graceful reveal & re-queue to retry queue
         this.charRecognized[this.activeCharIndex] = true;
         this.snapCharacterToCalligraphy();
-        if (this.isReappearanceStage && this.anchorWord) {
-          if (!this.hasRetriedAnchor) {
-            this.hasRetriedAnchor = true;
-            this.reappearanceRetryQueue.push(this.anchorWord);
+        const failedWord = this.isReappearanceStage ? this.anchorWord : this.activeWord;
+        if ((!this.isScaffoldOn || this.isReappearanceStage) && failedWord) {
+          if (!this.reappearanceRetryQueue.some(w => w.id === failedWord.id)) {
+            this.reappearanceRetryQueue.push(failedWord);
           }
         }
         setTimeout(() => {
-          this.showResultFeedbackPanel(false);
+          this.showResultFeedbackPanel(false, worstGrade || {
+            status: 'DIAGNOSTIC_FAIL',
+            tier: 3,
+            badge: '📖 Solution Revealed',
+            detail: 'All 3 attempts used. Study the canonical strokes above before continuing.',
+            isPass: false
+          });
         }, 400);
       }
       return;
     }
 
-    // 2. Verify Tone selection for all characters
-    let missingToneIdx = -1;
-    for (let i = 0; i < count; i++) {
-      if (this.selectedTones[i] === null) {
-        missingToneIdx = i;
-        break;
-      }
-    }
-
-    if (missingToneIdx !== -1) {
-      this.updateFeedback('tone-error', `⚠️ Tone Missing: Select tone for character ${missingToneIdx + 1} (${chars[missingToneIdx] || ''}).`);
-      this.shakeElement('interaction-footer');
-      this.setCharIndex(missingToneIdx);
-      return;
-    }
-
-    // 3. Check Tone Correctness
-    let allTonesCorrect = true;
-    for (let i = 0; i < count; i++) {
-      if (this.selectedTones[i] !== targetTones[i]) {
-        allTonesCorrect = false;
-        break;
-      }
-    }
-
-    if (!allTonesCorrect) {
-      this.attemptsLeft = Math.max(0, this.attemptsLeft - 1);
-      this.updateAttemptPips();
-      this.shakeElement('interaction-footer');
-      this.playActiveWordAudio();
-
-      if (this.attemptsLeft > 0) {
-        this.updateFeedback('tone-error', `❌ Tone Mismatch: Hanzi drawing accepted, but pitch contour is incorrect. Tries left: ${this.attemptsLeft}`);
-      } else {
-        // Attempts exhausted: Graceful Reveal & Re-queue word
-        this.updateFeedback('tone-error', '❌ Attempts exhausted! Revealing full card solution for review.');
-        this.charRecognized[this.activeCharIndex] = true;
-        this.snapCharacterToCalligraphy();
-        if (this.isReappearanceStage && this.anchorWord) {
-          if (!this.hasRetriedAnchor) {
-            this.hasRetriedAnchor = true;
-            this.reappearanceRetryQueue.push(this.anchorWord);
-          }
-        }
-        setTimeout(() => {
-          this.showResultFeedbackPanel(false);
-        }, 400);
-      }
-      return;
-    }
-
-    // 4. MASTERED (Both Drawing Complete and All Tones Correct!)
-    this.updateFeedback('correct', `🎉 Correct! Verified character strokes and confirmed tone (${targetTones.join(', ')}).`);
+    // Pass! (Tier 1 Clean Pass or Tier 2 Soft Pass)
+    const passGrade = worstGrade || { tier: 1, badge: '🎯 Perfect Form!', detail: 'Canonical stroke order and accurate angles confirmed.' };
     this.charRecognized[this.activeCharIndex] = true;
     this.snapCharacterToCalligraphy();
+    this.flashElement('drawing-canvas-wrapper', 'success');
+    this.updateFeedback('success', passGrade.detail);
 
-    if (this.isReappearanceStage && this.anchorWord) {
+    // Cement progress if completed with Guide OFF (unassisted recall) or during delayed reappearance
+    const wordToCement = (!this.isScaffoldOn) ? this.activeWord : (this.isReappearanceStage ? this.anchorWord : null);
+    if (wordToCement) {
       const pData = this.state.phases[this.activePhase];
-      if (!pData.completedWordIds.includes(this.anchorWord.id)) {
-        pData.completedWordIds.push(this.anchorWord.id);
+      if (pData && !pData.completedWordIds.includes(wordToCement.id)) {
+        pData.completedWordIds.push(wordToCement.id);
         this.saveState();
         this.updateProgressBar();
+        const totalPhaseWords = (this.phaseWordsMap[this.activePhase] || []).length;
+        if (pData.completedWordIds.length >= totalPhaseWords && totalPhaseWords > 0) {
+          pData.status = 'completed';
+          this.saveState();
+          this.updatePhaseStepperUI();
+          this.triggerPhaseCompleteModal();
+        }
       }
     }
 
     setTimeout(() => {
-      this.showResultFeedbackPanel(true);
-    }, 350);
+      this.showResultFeedbackPanel(true, passGrade);
+    }, 400);
   }
 
   validateBuilderSubmission() {
     if (!this.activeWord) return;
 
-    const count = this.activeWord.characterCount || this.activeWord.hanzi_simp.length;
-    const targetTones = this.activeWord.tones || [1];
-    const chars = this.activeWord.characters || Array.from(this.activeWord.hanzi_simp || '');
+    // 1. Evaluate Component Placement via 3-Tier RST Grading Engine
+    const gradeResult = this.componentBuilder
+      ? this.componentBuilder.evaluateActivePlacement(this.decompositions, this.corpus)
+      : { status: 'DIAGNOSTIC_FAIL', tier: 3, success: false, badge: '⚠️ Not Ready', detail: 'Component builder not ready.' };
 
-    // 1. Evaluate Component Placement via Relative Spatial Topology
-    const evalResult = this.componentBuilder ? this.componentBuilder.evaluateActivePlacement() : { success: false, reason: 'ENGINE_NOT_READY' };
-
-    if (!evalResult.success) {
+    if (!gradeResult.success) {
       this.attemptsLeft = Math.max(0, this.attemptsLeft - 1);
       this.updateAttemptPips();
       this.shakeElement('open-placement-canvas');
+      this.flashElement('open-placement-canvas', 'error');
       this.playActiveWordAudio();
 
-      if (this.attemptsLeft > 0) {
-        if (evalResult.reason === 'NO_COMPONENTS') {
-          this.updateFeedback('hanzi-error', `⚠️ Place components on the canvas to build the character. Tries left: ${this.attemptsLeft}`);
-        } else if (evalResult.reason === 'WRONG_COMPONENTS') {
-          this.updateFeedback('hanzi-error', `⚠️ Check the components: select the correct parts needed for this word. Tries left: ${this.attemptsLeft}`);
-        } else if (evalResult.reason === 'MISPLACED_CHARACTERS') {
-          this.updateFeedback('hanzi-error', `⚠️ Character order: arrange the characters in reading order from left to right. Tries left: ${this.attemptsLeft}`);
-        } else {
-          this.updateFeedback('hanzi-error', `⚠️ Components misplaced: adjust their positions according to the character structure. Tries left: ${this.attemptsLeft}`);
+      this.updateFeedback('error', `${gradeResult.detail} Tries left: ${this.attemptsLeft}`);
+
+      if (this.attemptsLeft === 0) {
+        // Attempts exhausted: graceful reveal & re-queue word
+        if (this.componentBuilder && typeof this.componentBuilder.revealCanonicalSolution === 'function') {
+          this.componentBuilder.revealCanonicalSolution();
         }
-      } else {
-        // Attempts exhausted: Graceful Reveal & Re-queue word
-        this.updateFeedback('hanzi-error', '❌ Attempts exhausted! Revealing full card solution for review.');
-        if (this.isReappearanceStage && this.anchorWord) {
-          if (!this.hasRetriedAnchor) {
-            this.hasRetriedAnchor = true;
-            this.reappearanceRetryQueue.push(this.anchorWord);
+        const failedWord = this.isReappearanceStage ? this.anchorWord : this.activeWord;
+        if ((!this.isScaffoldOn || this.isReappearanceStage) && failedWord) {
+          if (!this.reappearanceRetryQueue.some(w => w.id === failedWord.id)) {
+            this.reappearanceRetryQueue.push(failedWord);
           }
         }
         setTimeout(() => {
-          this.showResultFeedbackPanel(false);
+          this.showResultFeedbackPanel(false, {
+            status: 'DIAGNOSTIC_FAIL',
+            tier: 3,
+            badge: '📖 Solution Revealed',
+            detail: 'All 3 attempts used. Study the canonical components above before continuing.',
+            isPass: false
+          });
         }, 400);
       }
       return;
     }
 
-    // 2. Verify Tone selection for all characters
-    let missingToneIdx = -1;
-    for (let i = 0; i < count; i++) {
-      if (this.selectedTones[i] === null) {
-        missingToneIdx = i;
-        break;
-      }
-    }
+    // Pass! (Tier 1 Clean Pass or Tier 2 Soft Pass)
+    this.flashElement('open-placement-canvas', 'success');
+    this.updateFeedback('success', gradeResult.detail);
 
-    if (missingToneIdx !== -1) {
-      this.updateFeedback('tone-error', `⚠️ Tone Missing: Select tone for character ${missingToneIdx + 1} (${chars[missingToneIdx] || ''}).`);
-      this.shakeElement('interaction-footer');
-      this.setCharIndex(missingToneIdx);
-      return;
-    }
-
-    // 3. Check Tone Correctness
-    let allTonesCorrect = true;
-    for (let i = 0; i < count; i++) {
-      if (this.selectedTones[i] !== targetTones[i]) {
-        allTonesCorrect = false;
-        break;
-      }
-    }
-
-    if (!allTonesCorrect) {
-      this.attemptsLeft = Math.max(0, this.attemptsLeft - 1);
-      this.updateAttemptPips();
-      this.shakeElement('interaction-footer');
-      this.playActiveWordAudio();
-
-      if (this.attemptsLeft > 0) {
-        this.updateFeedback('tone-error', `❌ Tone Mismatch: Components correctly assembled, but pitch contour is incorrect. Tries left: ${this.attemptsLeft}`);
-      } else {
-        // Attempts exhausted: Graceful Reveal & Re-queue word
-        this.updateFeedback('tone-error', '❌ Attempts exhausted! Revealing full card solution for review.');
-        if (this.isReappearanceStage && this.anchorWord) {
-          if (!this.hasRetriedAnchor) {
-            this.hasRetriedAnchor = true;
-            this.reappearanceRetryQueue.push(this.anchorWord);
-          }
-        }
-        setTimeout(() => {
-          this.showResultFeedbackPanel(false);
-        }, 400);
-      }
-      return;
-    }
-
-    // 4. MASTERED (Both Component Assembly and All Tones Correct!)
-    this.updateFeedback('correct', `🎉 Correct! Verified component assembly and confirmed tone (${targetTones.join(', ')}).`);
-
-    if (this.isReappearanceStage && this.anchorWord) {
+    // Cement progress if completed with Guide OFF (unassisted recall) or during delayed reappearance
+    const wordToCement = (!this.isScaffoldOn) ? this.activeWord : (this.isReappearanceStage ? this.anchorWord : null);
+    if (wordToCement) {
       const pData = this.state.phases[this.activePhase];
-      if (!pData.completedWordIds.includes(this.anchorWord.id)) {
-        pData.completedWordIds.push(this.anchorWord.id);
+      if (pData && !pData.completedWordIds.includes(wordToCement.id)) {
+        pData.completedWordIds.push(wordToCement.id);
         this.saveState();
         this.updateProgressBar();
+        const totalPhaseWords = (this.phaseWordsMap[this.activePhase] || []).length;
+        if (pData.completedWordIds.length >= totalPhaseWords && totalPhaseWords > 0) {
+          pData.status = 'completed';
+          this.saveState();
+          this.updatePhaseStepperUI();
+          this.triggerPhaseCompleteModal();
+        }
       }
     }
 
     if (this.componentBuilder) {
       this.componentBuilder.playCrystallizationAnimation(() => {
-        this.showResultFeedbackPanel(true);
+        this.showResultFeedbackPanel(true, gradeResult);
       });
     } else {
       setTimeout(() => {
-        this.showResultFeedbackPanel(true);
-      }, 350);
+        this.showResultFeedbackPanel(true, gradeResult);
+      }, 400);
     }
   }
 
-  showResultFeedbackPanel(isMastered) {
+  showResultFeedbackPanel(isMastered, gradeResult = null) {
     if (!this.activeWord) return;
 
-    const targetTones = this.activeWord.tones || [1];
-    const matcher = this.charMatchers[this.activeCharIndex] || this.charMatchers[0];
-    const userStrokes = this.charUserStrokes[this.activeCharIndex] || this.userDrawnStrokes || [];
-    const spatialDrift = (this.charSpatialDrift && this.charSpatialDrift[this.activeCharIndex]) || null;
-    const classification = classifyDrawing(matcher, userStrokes, spatialDrift);
-
-    // 1. Populate Word Result Header
+    // 1. Populate Word Result Header (Character & Pinyin ONLY - no tone badge)
     if (this.dom.resultHanzi) this.dom.resultHanzi.textContent = this.activeWord.hanzi_simp;
     if (this.dom.resultPinyin) this.dom.resultPinyin.textContent = this.activeWord.pinyin;
-    if (this.dom.resultToneBadge) {
-      this.dom.resultToneBadge.textContent = 'Tone ' + targetTones.join(', ');
-    }
     if (this.dom.resultMeaning) this.dom.resultMeaning.textContent = this.activeWord.english;
     if (this.dom.resultDecomposition) {
       this.dom.resultDecomposition.textContent = this.activeWord.radical_decomposition || 'Indivisible root';
     }
 
-    // 2. Populate Drawing / Assembly Feedback (FIRST)
-    if (this.dom.drawingTierBadge && this.dom.drawingFeedbackText && this.dom.feedbackDrawingCard) {
-      if (this.getMode() === 'builder') {
-        if (isMastered) {
-          this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-600';
-          this.dom.drawingTierBadge.textContent = '🎯 Perfect Assembly!';
-          this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-emerald-50 border-emerald-500 text-emerald-950 flex flex-col gap-1.5';
-          if (this.dom.drawingFeedbackIcon) {
-            this.dom.drawingFeedbackIcon.className = 'material-symbols-outlined text-emerald-600 text-base';
-            this.dom.drawingFeedbackIcon.textContent = 'verified';
-          }
-          this.dom.drawingFeedbackText.textContent = 'All components placed in exact topological positions.';
-          if (this.dom.resultDemoOrderBtn) this.dom.resultDemoOrderBtn.classList.add('hidden');
-        } else {
-          this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-amber-100 text-amber-900 border border-amber-600';
-          this.dom.drawingTierBadge.textContent = '📖 Review Mode';
-          this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-amber-50 border-amber-500 text-amber-950 flex flex-col gap-1.5';
-          if (this.dom.drawingFeedbackIcon) {
-            this.dom.drawingFeedbackIcon.className = 'material-symbols-outlined text-amber-600 text-base';
-            this.dom.drawingFeedbackIcon.textContent = 'auto_stories';
-          }
-          this.dom.drawingFeedbackText.textContent = 'All 3 attempts used. Take note of the component structure shown above.';
-          if (this.dom.resultDemoOrderBtn) this.dom.resultDemoOrderBtn.classList.add('hidden');
-        }
-      } else if (isMastered) {
-        if (classification.tier === 'TIER_1_CLEAN_PASS') {
-          this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-600';
-          this.dom.drawingTierBadge.textContent = '🎯 Perfect Form!';
-          this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-emerald-50 border-emerald-500 text-emerald-950 flex flex-col gap-1.5';
-          if (this.dom.drawingFeedbackIcon) {
-            this.dom.drawingFeedbackIcon.className = 'material-symbols-outlined text-emerald-600 text-base';
-            this.dom.drawingFeedbackIcon.textContent = 'verified';
-          }
-          this.dom.drawingFeedbackText.textContent = classification.detail;
-          if (this.dom.resultDemoOrderBtn) this.dom.resultDemoOrderBtn.classList.add('hidden');
+    // Defensive check: If not mastered, strictly prevent any success template leakage!
+    let grade = gradeResult;
+    if (!isMastered) {
+      if (!grade || grade.tier < 3 || grade.success) {
+        grade = {
+          status: 'DIAGNOSTIC_FAIL',
+          tier: 3,
+          badge: '📖 Solution Revealed',
+          detail: 'All 3 attempts used. Study the canonical form above before continuing.',
+          isPass: false
+        };
+      } else {
+        grade = {
+          ...grade,
+          tier: 3,
+          badge: grade.badge || '📖 Solution Revealed',
+          detail: grade.detail || 'All 3 attempts used. Study the canonical form above before continuing.'
+        };
+      }
+    }
 
-          // Tier 1 Radiant green perimeter pulse
-          if (this.dom.drawingCanvasWrapper) {
-            this.dom.drawingCanvasWrapper.style.boxShadow = '0 0 16px rgba(34, 197, 94, 0.45)';
-            setTimeout(() => {
-              if (this.dom.drawingCanvasWrapper) this.dom.drawingCanvasWrapper.style.boxShadow = '';
-            }, 1800);
+    const mode = this.getMode();
+    if (!grade) {
+      grade = {
+        status: 'CLEAN_PASS',
+        tier: 1,
+        badge: mode === 'builder' ? '🎯 Flawless Assembly!' : '🎯 Perfect Form!',
+        detail: mode === 'builder'
+          ? 'Flawless execution! Spatial assembly and radical positioning verified.'
+          : 'Canonical stroke order and accurate angles confirmed.',
+        isPass: true
+      };
+    }
+
+    // 2. Populate Single Detailed Diagnostic Feedback Card
+    const titleEl = document.getElementById('drawing-feedback-title');
+    if (titleEl) {
+      titleEl.textContent = mode === 'builder' ? 'COMPONENT ASSEMBLY' : 'HANZI EVALUATION';
+    }
+
+    if (this.dom.drawingTierBadge && this.dom.drawingFeedbackText && this.dom.feedbackDrawingCard) {
+      this.dom.drawingTierBadge.textContent = grade.badge;
+      this.dom.drawingFeedbackText.textContent = grade.detail;
+
+      if (isMastered) {
+        if (grade.tier === 1) {
+          this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-600';
+          this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-emerald-50 border-emerald-500 text-emerald-950 flex flex-col gap-1.5';
+          if (this.dom.drawingFeedbackIcon) {
+            this.dom.drawingFeedbackIcon.className = 'material-symbols-outlined text-emerald-600 text-base';
+            this.dom.drawingFeedbackIcon.textContent = 'verified';
           }
         } else {
-          // Tier 2 Soft Pass (order drift or tolerance)
-          this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-blue-100 text-blue-800 border border-blue-500';
-          this.dom.drawingTierBadge.textContent = classification.badge;
-          this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-blue-50 border-blue-400 text-blue-950 flex flex-col gap-1.5';
+          // Tier 2 Soft Pass
+          this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-teal-100 text-teal-900 border border-teal-600';
+          this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-teal-50 border-teal-500 text-teal-950 flex flex-col gap-1.5';
           if (this.dom.drawingFeedbackIcon) {
-            this.dom.drawingFeedbackIcon.className = 'material-symbols-outlined text-blue-600 text-base';
+            this.dom.drawingFeedbackIcon.className = 'material-symbols-outlined text-teal-600 text-base';
             this.dom.drawingFeedbackIcon.textContent = 'lightbulb';
           }
-          this.dom.drawingFeedbackText.textContent = classification.detail;
-          if (this.dom.resultDemoOrderBtn) {
-            if (classification.showOrderReplay) {
-              this.dom.resultDemoOrderBtn.classList.remove('hidden');
-            } else {
-              this.dom.resultDemoOrderBtn.classList.add('hidden');
-            }
+        }
+        if (this.dom.resultDemoOrderBtn) {
+          if (mode !== 'builder' && grade.showOrderReplay) {
+            this.dom.resultDemoOrderBtn.classList.remove('hidden');
+          } else {
+            this.dom.resultDemoOrderBtn.classList.add('hidden');
           }
         }
       } else {
-        // Failed / Attempts exhausted
+        // Attempts exhausted / Review Mode
         this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-amber-100 text-amber-900 border border-amber-600';
-        this.dom.drawingTierBadge.textContent = '📖 Review Mode';
         this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-amber-50 border-amber-500 text-amber-950 flex flex-col gap-1.5';
         if (this.dom.drawingFeedbackIcon) {
           this.dom.drawingFeedbackIcon.className = 'material-symbols-outlined text-amber-600 text-base';
           this.dom.drawingFeedbackIcon.textContent = 'auto_stories';
         }
-        this.dom.drawingFeedbackText.textContent = 'All 3 attempts used. Take note of the idealized stroke order shown above.';
-        if (this.dom.resultDemoOrderBtn) this.dom.resultDemoOrderBtn.classList.remove('hidden');
+        if (this.dom.resultDemoOrderBtn) {
+          if (mode !== 'builder') {
+            this.dom.resultDemoOrderBtn.classList.remove('hidden');
+          } else {
+            this.dom.resultDemoOrderBtn.classList.add('hidden');
+          }
+        }
       }
     }
 
-    // 3. Populate Tone Feedback (BELOW DRAWING)
-    if (this.dom.toneVerdictBadge && this.dom.toneFeedbackText && this.dom.feedbackToneCard) {
-      const toneContours = {
-        1: '1st Tone (55 High Flat)',
-        2: '2nd Tone (35 Rising)',
-        3: '3rd Tone (214 Dipping)',
-        4: '4th Tone (51 Falling)',
-        5: 'Neutral Tone'
-      };
-
-      let toneMatched = true;
-      for (let i = 0; i < targetTones.length; i++) {
-        if (this.selectedTones[i] !== targetTones[i]) {
-          toneMatched = false;
-          break;
-        }
-      }
-
-      if (toneMatched) {
-        this.dom.toneVerdictBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-600';
-        this.dom.toneVerdictBadge.textContent = '✓ Tone Correct';
-        this.dom.feedbackToneCard.className = 'w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-emerald-50 border-emerald-500 text-emerald-950 flex flex-col gap-1.5';
-        if (this.dom.toneFeedbackIcon) {
-          this.dom.toneFeedbackIcon.className = 'material-symbols-outlined text-emerald-600 text-base';
-          this.dom.toneFeedbackIcon.textContent = 'check_circle';
-        }
-        const desc = targetTones.map(t => toneContours[t] || `Tone ${t}`).join(' • ');
-        this.dom.toneFeedbackText.textContent = `${desc} confirmed.`;
-      } else {
-        this.dom.toneVerdictBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-rose-100 text-rose-900 border border-rose-600';
-        this.dom.toneVerdictBadge.textContent = '✗ Tone Mismatch';
-        this.dom.feedbackToneCard.className = 'w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-rose-50 border-rose-500 text-rose-950 flex flex-col gap-1.5';
-        if (this.dom.toneFeedbackIcon) {
-          this.dom.toneFeedbackIcon.className = 'material-symbols-outlined text-rose-600 text-base';
-          this.dom.toneFeedbackIcon.textContent = 'error';
-        }
-        const userTones = this.selectedTones.map(t => t !== null ? `T${t}` : '?').join(', ');
-        const expTones = targetTones.map(t => `T${t} (${toneContours[t] || ''})`).join(', ');
-        this.dom.toneFeedbackText.textContent = `Selected: ${userTones} — Expected: ${expTones}`;
-      }
-    }
-
-    // 4. Update Next Word Button label
+    // 3. Update Next Word Button label
     if (this.dom.resultNextBtnText) {
       this.dom.resultNextBtnText.textContent = isMastered ? 'NEXT WORD' : 'NEXT WORD (REVIEW LATER)';
     }
 
-    // 5. Hide Exercise Input Panels, Show Result Panel
-    if (this.dom.promptArena) this.dom.promptArena.classList.add('hidden');
+    // 4. In-Place Seamless Transition: Hide interaction footer, show result feedback panel
     if (this.dom.interactionFooter) this.dom.interactionFooter.classList.add('hidden');
     if (this.dom.resultFeedbackPanel) this.dom.resultFeedbackPanel.classList.remove('hidden');
 
-    // 6. Mobile viewport auto-scroll: smoothly center/focus the feedback
+    // 5. Mobile auto-scroll
     if (window.innerWidth < 1024 && this.dom.resultFeedbackPanel) {
       setTimeout(() => {
         this.dom.resultFeedbackPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -1922,6 +1757,15 @@ export class WordTrainerEngineController {
     el.classList.remove('shake-error');
     void el.offsetWidth;
     el.classList.add('shake-error');
+  }
+
+  flashElement(id, type = 'success') {
+    const el = typeof id === 'string' ? document.getElementById(id) : id;
+    if (!el) return;
+    const cls = type === 'success' ? 'flash-success' : 'flash-error';
+    el.classList.remove('flash-success', 'flash-error');
+    void el.offsetWidth;
+    el.classList.add(cls);
   }
 
   updateAttemptPips() {
@@ -1939,37 +1783,36 @@ export class WordTrainerEngineController {
   }
 
   updateFeedback(status, message) {
-    const banner = this.dom.feedbackBanner;
-    const text = this.dom.feedbackText;
-    const icon = this.dom.feedbackIcon;
+    const banner = this.dom.feedbackToast || this.dom.feedbackBanner || document.getElementById('drawing-feedback-toast') || document.getElementById('validation-feedback-banner');
+    const text = this.dom.drawingFeedbackText || this.dom.feedbackText || document.getElementById('drawing-feedback-text') || document.getElementById('validation-feedback-text');
+    const icon = this.dom.drawingFeedbackIcon || this.dom.feedbackIcon || document.getElementById('drawing-feedback-icon') || document.getElementById('validation-feedback-icon');
     if (!banner || !text) return;
 
     text.textContent = message;
-    banner.className = 'order-3 lg:order-3 w-full rounded-xl p-2.5 sm:p-3 border-2 transition-all font-mono text-xs font-bold shadow-xs flex items-center gap-2.5';
+    banner.classList.remove('shake-subtle', 'bg-white', 'border-black/20', 'text-black/70',
+      'bg-emerald-50', 'border-emerald-500', 'border-emerald-600', 'text-emerald-950',
+      'bg-amber-50', 'border-amber-500', 'border-amber-600', 'text-amber-950',
+      'bg-rose-50', 'border-rose-500', 'border-rose-600', 'text-rose-950');
 
-    if (status === 'hanzi-error') {
+    if (status === 'correct' || status === 'success') {
+      banner.classList.add('bg-emerald-50', 'border-emerald-500', 'text-emerald-950');
+      if (icon) {
+        icon.className = 'material-symbols-outlined text-emerald-600 text-base shrink-0';
+        icon.textContent = 'verified';
+      }
+    } else if (status === 'error' || status === 'hanzi-error' || status === 'tone-error' || status === 'both-error') {
       banner.classList.add('bg-amber-50', 'border-amber-500', 'text-amber-950');
+      void banner.offsetWidth;
+      banner.classList.add('shake-subtle');
       if (icon) {
-        icon.className = 'material-symbols-outlined text-amber-600 text-lg shrink-0';
-        icon.textContent = 'draw';
-      }
-    } else if (status === 'tone-error') {
-      banner.classList.add('bg-rose-50', 'border-rose-500', 'text-rose-950');
-      if (icon) {
-        icon.className = 'material-symbols-outlined text-rose-600 text-lg shrink-0';
-        icon.textContent = 'music_off';
-      }
-    } else if (status === 'correct') {
-      banner.classList.add('bg-emerald-50', 'border-emerald-600', 'text-emerald-950');
-      if (icon) {
-        icon.className = 'material-symbols-outlined text-emerald-600 text-lg shrink-0';
-        icon.textContent = 'check_circle';
+        icon.className = 'material-symbols-outlined text-amber-600 text-base shrink-0';
+        icon.textContent = 'warning';
       }
     } else {
       banner.classList.add('bg-white', 'border-black/20', 'text-black/70');
       if (icon) {
-        icon.className = 'material-symbols-outlined text-black/50 text-lg shrink-0';
-        icon.textContent = 'lightbulb';
+        icon.className = 'material-symbols-outlined text-black/50 text-base shrink-0';
+        icon.textContent = 'info';
       }
     }
   }
@@ -2006,6 +1849,9 @@ export class WordTrainerEngineController {
   }
 
   advanceToNextWord() {
+    const pData = this.state.phases[this.activePhase];
+    const completedSet = new Set((pData && pData.completedWordIds) || []);
+
     if (this.isReappearanceStage) {
       // Reappearance stage completed
       if (this.reappearanceRetryQueue && this.reappearanceRetryQueue.length > 0) {
@@ -2014,20 +1860,32 @@ export class WordTrainerEngineController {
         this.isReappearanceStage = true;
         this.loadWord(this.anchorWord);
       } else {
-        // Cemented anchor word! Begin next cycle
+        // Cemented anchor word / retry words! Begin next cycle
         this.isReappearanceStage = false;
         this.loadBatchForActivePhase();
       }
     } else {
-      // Introductory stage
+      // Introductory or unassisted recall stage
       this.wordsSinceAnchor++;
       this.cycleIndex++;
       if (this.cycleIndex < this.cycleWords.length) {
         this.loadWord(this.cycleWords[this.cycleIndex]);
       } else {
-        // Cycle introductory pass finished -> delayed reappearance of anchor word with Guide OFF
-        this.isReappearanceStage = true;
-        this.loadWord(this.anchorWord);
+        // Cycle finished
+        if (this.reappearanceRetryQueue && this.reappearanceRetryQueue.length > 0) {
+          this.isReappearanceStage = true;
+          const retryWord = this.reappearanceRetryQueue.shift();
+          this.anchorWord = retryWord;
+          this.loadWord(this.anchorWord);
+        } else if (this.anchorWord && !completedSet.has(this.anchorWord.id)) {
+          // Delayed reappearance of unmastered anchor word with Guide OFF
+          this.isReappearanceStage = true;
+          this.loadWord(this.anchorWord);
+        } else {
+          // Anchor word already mastered (e.g. passed with Guide OFF) & retry queue clear -> next batch!
+          this.isReappearanceStage = false;
+          this.loadBatchForActivePhase();
+        }
       }
     }
   }
@@ -2063,8 +1921,13 @@ export class WordTrainerEngineController {
   playActiveWordAudio() {
     if (!this.activeWord || !this.activeWord.audio) return;
     try {
-      // Cease any currently playing audio track before starting a new one
+      // 1. Cease any currently playing audio track before starting a new one
       this.stopAudio();
+
+      // 2. Cease any global engine/drill audio instances
+      if (typeof window.stopGlobalAudio === 'function') {
+        try { window.stopGlobalAudio(); } catch (_) {}
+      }
 
       let audio = this.audioCache.get(this.activeWord.audio);
       if (!audio) {
@@ -2088,6 +1951,19 @@ export class WordTrainerEngineController {
         this.currentAudio.currentTime = 0;
       } catch (_) {}
       this.currentAudio = null;
+    }
+    if (this.audioCache) {
+      this.audioCache.forEach(a => {
+        try {
+          if (a && !a.paused) {
+            a.pause();
+            a.currentTime = 0;
+          }
+        } catch (_) {}
+      });
+    }
+    if (typeof window.stopGlobalAudio === 'function') {
+      try { window.stopGlobalAudio(); } catch (_) {}
     }
   }
 }

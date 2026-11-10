@@ -140,6 +140,54 @@
   animation: shake-error 0.4s ease-in-out !important;
 }
 
+/* Subtle Shake for Feedback Toast */
+@keyframes shake-subtle {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+.shake-subtle {
+  animation: shake-subtle 0.35s ease-in-out !important;
+}
+
+/* Success Glow Flash Keyframes (Emerald / Jade Bloom) */
+@keyframes flash-success {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.8), 5px 5px 0px #000000;
+    border-color: #10B981;
+  }
+  40% {
+    box-shadow: 0 0 24px 6px rgba(16, 185, 129, 0.75), 5px 5px 0px #000000;
+    border-color: #059669;
+  }
+  100% {
+    box-shadow: 5px 5px 0px #000000;
+    border-color: #000000;
+  }
+}
+.flash-success {
+  animation: flash-success 0.65s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Error Glow Flash Keyframes (Amber Warning Bloom) */
+@keyframes flash-error {
+  0% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.8), 5px 5px 0px #000000;
+    border-color: #F59E0B;
+  }
+  40% {
+    box-shadow: 0 0 24px 6px rgba(245, 158, 11, 0.75), 5px 5px 0px #000000;
+    border-color: #D97706;
+  }
+  100% {
+    box-shadow: 5px 5px 0px #000000;
+    border-color: #000000;
+  }
+}
+.flash-error {
+  animation: flash-error 0.65s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
 /* Pulse Animation for Missing Strokes (Incomplete Submission Scaffolding Hint) */
 @keyframes pulse-missing-stroke {
   0%, 100% {
@@ -240,6 +288,20 @@
   background-color: #065F46 !important;
   color: #D1FAE5 !important;
 }
+.theme-builder #prompt-task-badge,
+.theme-builder #interaction-task-badge {
+  background-color: #065F46 !important;
+  color: #ffffff !important;
+}
+.theme-builder #next-word-btn {
+  background-color: #065F46 !important;
+}
+.theme-builder #next-word-btn:hover {
+  background-color: #047857 !important;
+}
+.theme-builder #result-pinyin {
+  color: #065F46 !important;
+}
 .theme-builder .pip {
   color: #065F46 !important;
 }
@@ -254,11 +316,25 @@
   border-color: #000000 !important;
   box-shadow: 3px 3px 0px #000000 !important;
 }
+.theme-calligraphy #prompt-task-badge,
+.theme-calligraphy #interaction-task-badge {
+  background-color: #4C1D95 !important;
+  color: #ffffff !important;
+}
 .theme-calligraphy #submit-word-btn {
   background-color: #4C1D95 !important;
 }
 .theme-calligraphy #submit-word-btn:hover {
   background-color: #3B0764 !important;
+}
+.theme-calligraphy #next-word-btn {
+  background-color: #4C1D95 !important;
+}
+.theme-calligraphy #next-word-btn:hover {
+  background-color: #3B0764 !important;
+}
+.theme-calligraphy #result-pinyin {
+  color: #4C1D95 !important;
 }
 .theme-calligraphy #audio-replay-btn {
   background-color: #D97706 !important;
@@ -276,6 +352,32 @@
 .draggable-component-tile.dragging-ghost {
   opacity: 0.35;
   transform: scale(0.95);
+}
+
+/* Component Dock Tile & Canvas Assembly Optical Normalization */
+.component-tile-glyph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-family: "Noto Serif SC", "Kaiti SC", "STKaiti", serif;
+  font-size: clamp(28px, 6vw, 42px);
+  line-height: 1;
+  text-anchor: middle;
+  dominant-baseline: central;
+  /* Prevent horizontal distortion and preserve canonical glyph aspect ratios */
+  transform-origin: center center;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* For SVG rendered components (HanziWriter / Path segments) */
+.component-svg-container {
+  width: 100%;
+  height: 100%;
+  viewBox: 0 0 1024 1024;
+  preserveAspectRatio: xMidYMid meet; /* Strict proportional containment */
 }
 
 /* Placed Components on Canvas - PURE CALLIGRAPHIC STROKES ONLY */

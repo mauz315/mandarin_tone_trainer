@@ -106,7 +106,8 @@ export function evaluateSingleCharacterPlacement(placedComponents, targetDecompo
   switch (topology) {
     case 'ATOMIC': {
       // Indivisible single-root character (e.g. 日, 月, 人, 木)
-      return { success: true, reason: 'OK' };
+      const driftRatio = Math.hypot(normalized[0].centerX - canvasDim * 0.5, normalized[0].centerY - canvasDim * 0.5) / canvasDim;
+      return { success: true, reason: 'OK', driftRatio };
     }
 
     case 'LEFT_RIGHT': {
@@ -131,9 +132,12 @@ export function evaluateSingleCharacterPlacement(placedComponents, targetDecompo
       const yDelta = Math.abs(leftComp.centerY - rightComp.centerY);
       const isAlignedY = yDelta <= canvasDim * 0.38; // Generous 38% vertical drift tolerance
 
+      const driftRatio = yDelta / canvasDim;
+
       return {
         success: isLeft && isAlignedY,
-        reason: (isLeft && isAlignedY) ? 'OK' : 'MISPLACED_LEFT_RIGHT'
+        reason: (isLeft && isAlignedY) ? 'OK' : 'MISPLACED_LEFT_RIGHT',
+        driftRatio
       };
     }
 
@@ -159,9 +163,12 @@ export function evaluateSingleCharacterPlacement(placedComponents, targetDecompo
       const xDelta = Math.abs(topComp.centerX - bottomComp.centerX);
       const isAlignedX = xDelta <= canvasDim * 0.38;
 
+      const driftRatio = xDelta / canvasDim;
+
       return {
         success: isTop && isAlignedX,
-        reason: (isTop && isAlignedX) ? 'OK' : 'MISPLACED_TOP_BOTTOM'
+        reason: (isTop && isAlignedX) ? 'OK' : 'MISPLACED_TOP_BOTTOM',
+        driftRatio
       };
     }
 
@@ -182,9 +189,13 @@ export function evaluateSingleCharacterPlacement(placedComponents, targetDecompo
                          (Math.abs(midComp.centerX - bottomComp.centerX) <= canvasDim * 0.38) &&
                          (Math.abs(topComp.centerX - bottomComp.centerX) <= canvasDim * 0.42);
 
+      const maxDeltaX = Math.max(Math.abs(topComp.centerX - midComp.centerX), Math.abs(midComp.centerX - bottomComp.centerX));
+      const driftRatio = maxDeltaX / canvasDim;
+
       return {
         success: isOrderCorrect && isAlignedX,
-        reason: (isOrderCorrect && isAlignedX) ? 'OK' : 'MISPLACED_TOP_MID_BOTTOM'
+        reason: (isOrderCorrect && isAlignedX) ? 'OK' : 'MISPLACED_TOP_MID_BOTTOM',
+        driftRatio
       };
     }
 
@@ -214,9 +225,13 @@ export function evaluateSingleCharacterPlacement(placedComponents, targetDecompo
                          (Math.abs(midComp.centerY - rightComp.centerY) <= canvasDim * 0.38) &&
                          (Math.abs(leftComp.centerY - rightComp.centerY) <= canvasDim * 0.42);
 
+      const maxDeltaY = Math.max(Math.abs(leftComp.centerY - midComp.centerY), Math.abs(midComp.centerY - rightComp.centerY));
+      const driftRatio = maxDeltaY / canvasDim;
+
       return {
         success: isOrderCorrect && isAlignedY,
-        reason: (isOrderCorrect && isAlignedY) ? 'OK' : 'MISPLACED_LEFT_MID_RIGHT'
+        reason: (isOrderCorrect && isAlignedY) ? 'OK' : 'MISPLACED_LEFT_MID_RIGHT',
+        driftRatio
       };
     }
 
@@ -236,9 +251,14 @@ export function evaluateSingleCharacterPlacement(placedComponents, targetDecompo
       const isInsideY = (innerComp.centerY >= outerComp.y - 15) &&
                         (innerComp.centerY <= outerComp.y + outerComp.height + 40);
 
+      const outerCenterX = outerComp.x + outerComp.width * 0.5;
+      const outerCenterY = outerComp.y + outerComp.height * 0.5;
+      const driftRatio = Math.hypot(innerComp.centerX - outerCenterX, innerComp.centerY - outerCenterY) / canvasDim;
+
       return {
         success: isInsideX && isInsideY,
-        reason: (isInsideX && isInsideY) ? 'OK' : 'MISPLACED_ENCLOSURE'
+        reason: (isInsideX && isInsideY) ? 'OK' : 'MISPLACED_ENCLOSURE',
+        driftRatio
       };
     }
 
@@ -255,9 +275,13 @@ export function evaluateSingleCharacterPlacement(placedComponents, targetDecompo
       const isAlignedX = Math.abs(baseComp.centerX - markerComp.centerX) <= canvasDim * 0.40;
       const isAlignedY = Math.abs(baseComp.centerY - markerComp.centerY) <= canvasDim * 0.45;
 
+      const maxDelta = Math.max(Math.abs(baseComp.centerX - markerComp.centerX), Math.abs(baseComp.centerY - markerComp.centerY));
+      const driftRatio = maxDelta / canvasDim;
+
       return {
         success: isAlignedX && isAlignedY,
-        reason: (isAlignedX && isAlignedY) ? 'OK' : 'MISPLACED_CROSSING'
+        reason: (isAlignedX && isAlignedY) ? 'OK' : 'MISPLACED_CROSSING',
+        driftRatio
       };
     }
 
@@ -286,7 +310,8 @@ export function evaluatePlacement(placedComponents, targetDecompositions, canvas
 
   // Single-Character Fast Path
   if (charCount === 1) {
-    return evaluateSingleCharacterPlacement(placedComponents, decomps[0], canvasDim);
+    const r = evaluateSingleCharacterPlacement(placedComponents, decomps[0], canvasDim);
+    return { ...r, maxDriftRatio: r.driftRatio || 0 };
   }
 
   // Multi-Character Word on Single Canvas:
@@ -400,6 +425,7 @@ export function evaluatePlacement(placedComponents, targetDecompositions, canvas
   }
 
   // 5. Independently evaluate each character's topology
+  let maxDrift = 0;
   for (let k = 0; k < charCount; k++) {
     const evalResult = evaluateSingleCharacterPlacement(charBuckets[k], decomps[k], canvasDim);
     if (!evalResult.success) {
@@ -410,9 +436,156 @@ export function evaluatePlacement(placedComponents, targetDecompositions, canvas
         char: decomps[k].char
       };
     }
+    if ((evalResult.driftRatio || 0) > maxDrift) {
+      maxDrift = evalResult.driftRatio || 0;
+    }
   }
 
-  return { success: true, reason: 'OK' };
+  return { success: true, reason: 'OK', maxDriftRatio: maxDrift };
+}
+
+/**
+ * Three-Tier Diagnostic Grading Engine for Component Builder.
+ * Evaluates placed components against target character decompositions.
+ *
+ * Tier 1: CLEAN_PASS - Exact components, canonical topology, tight alignment (drift <= 15%).
+ * Tier 2: SOFT_PASS  - Correct components & ordering, moderate kerning/centering drift (15% - 38%). Passes word!
+ * Tier 3: DIAGNOSTIC_FAIL - Radical confusion / missing pieces / order inversion / enclosure breach.
+ *
+ * @param {Array} placedComponents - Placed component objects
+ * @param {Object|Array} targetDecompositions - Decomposition object(s)
+ * @param {number} canvasDim - Canvas dimension in pixels
+ * @param {Object} dictionary - Full character decompositions dictionary for semantic contrast
+ * @param {Array} corpus - Full word corpus for semantic meanings
+ * @returns {Object} { status: 'CLEAN_PASS'|'SOFT_PASS'|'DIAGNOSTIC_FAIL', tier: 1|2|3, success: boolean, badge: string, detail: string, reason?: string }
+ */
+export function gradeComponentBuilder(placedComponents, targetDecompositions, canvasDim = 320, dictionary = {}, corpus = []) {
+  if (!placedComponents || placedComponents.length === 0) {
+    return {
+      status: 'DIAGNOSTIC_FAIL',
+      tier: 3,
+      success: false,
+      badge: '⚠️ Incomplete',
+      detail: 'Drag component pieces from the dock onto the canvas.'
+    };
+  }
+
+  const decomps = Array.isArray(targetDecompositions) ? targetDecompositions : [targetDecompositions];
+  const evalResult = evaluatePlacement(placedComponents, decomps, canvasDim);
+
+  if (evalResult.success) {
+    const drift = evalResult.maxDriftRatio || 0;
+    if (drift > 0.15) {
+      return {
+        status: 'SOFT_PASS',
+        tier: 2,
+        success: true,
+        badge: '✨ Assembly Recognized!',
+        detail: '✓ Recognized! 💡 Tip: Keep the radical and stem closer together for optimal balance.',
+        maxDriftRatio: drift
+      };
+    }
+    return {
+      status: 'CLEAN_PASS',
+      tier: 1,
+      success: true,
+      badge: '🎯 Flawless Assembly!',
+      detail: 'Flawless execution! Spatial assembly and radical positioning verified.',
+      maxDriftRatio: drift
+    };
+  }
+
+  // Diagnostic Failure (Tier 3)
+  const reason = evalResult.reason;
+  let badge = '⚠️ Alignment Error';
+  let detail = 'Components are misplaced on the grid.';
+
+  if (reason === 'WRONG_COMPONENTS') {
+    const allTargetGlyphs = decomps.flatMap(d => (d.targetComponents || []).map(c => c.glyph));
+    const allPlacedGlyphs = placedComponents.map(c => c.glyph);
+
+    const targetCounts = {};
+    allTargetGlyphs.forEach(g => { targetCounts[g] = (targetCounts[g] || 0) + 1; });
+    const placedCounts = {};
+    allPlacedGlyphs.forEach(g => { placedCounts[g] = (placedCounts[g] || 0) + 1; });
+
+    const extraGlyphs = [];
+    Object.keys(placedCounts).forEach(g => {
+      const extraCount = placedCounts[g] - (targetCounts[g] || 0);
+      for (let i = 0; i < extraCount; i++) extraGlyphs.push(g);
+    });
+
+    const missingGlyphs = [];
+    Object.keys(targetCounts).forEach(g => {
+      const missingCount = targetCounts[g] - (placedCounts[g] || 0);
+      for (let i = 0; i < missingCount; i++) missingGlyphs.push(g);
+    });
+
+    if (allPlacedGlyphs.length < allTargetGlyphs.length && extraGlyphs.length === 0) {
+      badge = '⚠️ Missing Piece';
+      detail = `Missing component: ${missingGlyphs.join(', ')} is required to complete the character.`;
+    } else if (extraGlyphs.length > 0) {
+      // Dynamic semantic contrastive lookup!
+      let contrastFound = false;
+      if (dictionary && Object.keys(dictionary).length > 0) {
+        const placedSorted = allPlacedGlyphs.slice().sort().join('');
+        for (const [candidateChar, info] of Object.entries(dictionary)) {
+          if (info && info.targetComponents) {
+            const candSorted = info.targetComponents.map(c => c.glyph).slice().sort().join('');
+            if (candSorted === placedSorted) {
+              let candMeaning = '';
+              if (Array.isArray(corpus)) {
+                const w = corpus.find(item => item.hanzi_simp === candidateChar || (item.characters && item.characters.includes(candidateChar)));
+                if (w && w.english) candMeaning = ` (${w.english})`;
+              }
+              const targetChar = decomps.map(d => d.char).join('');
+              badge = '🔍 Radical Confusion';
+              detail = `Attempted: ${candidateChar}${candMeaning} using ${extraGlyphs[0]}. Target ${targetChar} uses radical ${missingGlyphs[0] || 'different radical'}.`;
+              contrastFound = true;
+              break;
+            }
+          }
+        }
+      }
+      if (!contrastFound) {
+        badge = '🔍 Radical Confusion';
+        detail = `Radical Confusion: Placed '${extraGlyphs.join(', ')}' instead of target radical '${missingGlyphs.join(', ')}'. Check the semantic radical.`;
+      }
+    } else {
+      badge = '⚠️ Wrong Pieces';
+      detail = 'Placed components do not match the target character.';
+    }
+  } else if (reason === 'MISPLACED_LEFT_RIGHT') {
+    badge = '🔄 Order Inversion';
+    detail = 'Invert positions: Semantic radical belongs on the left, stem belongs on the right.';
+  } else if (reason === 'MISPLACED_TOP_BOTTOM') {
+    badge = '🔄 Vertical Inversion';
+    detail = 'Invert vertical positions: Top component belongs above the base.';
+  } else if (reason === 'MISPLACED_ENCLOSURE') {
+    badge = '📦 Enclosure Breach';
+    detail = 'The inner component belongs inside the outer frame.';
+  } else if (reason === 'MISPLACED_TOP_MID_BOTTOM') {
+    badge = '🔄 Vertical Sequence';
+    detail = 'Sequence mismatch: Check the positional order of the 3 components from top to bottom.';
+  } else if (reason === 'MISPLACED_LEFT_MID_RIGHT') {
+    badge = '🔄 Horizontal Sequence';
+    detail = 'Sequence mismatch: Check the positional order of the 3 components from left to right.';
+  } else if (reason === 'MISPLACED_CHARACTERS') {
+    badge = '↔️ Reading Order';
+    detail = 'Invert character order: Chinese reads strictly left-to-right.';
+  } else if (reason === 'MISPLACED_CROSSING') {
+    badge = '🎯 Marker Alignment';
+    detail = 'Marker component is misaligned with the base root.';
+  }
+
+  return {
+    status: 'DIAGNOSTIC_FAIL',
+    tier: 3,
+    success: false,
+    badge,
+    detail,
+    reason
+  };
 }
 
 /**
@@ -554,7 +727,13 @@ export class ComponentPlacementController {
     if (this.dom.hintBtn) {
       this.dom.hintBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        this.toggleGhostHint();
+        const nextState = !this.isHintActive;
+        this.toggleGhostHint(nextState);
+        if (typeof this.onHintToggle === 'function') {
+          this.onHintToggle(nextState);
+        } else if (typeof window !== 'undefined' && window.WordTrainerEngine) {
+          window.WordTrainerEngine.toggleScaffolding(nextState);
+        }
       });
     }
   }
@@ -562,25 +741,27 @@ export class ComponentPlacementController {
   toggleGhostHint(forcedState) {
     this.isHintActive = (forcedState !== undefined) ? forcedState : !this.isHintActive;
     if (this.dom.hintWatermark) {
+      this.dom.hintWatermark.classList.remove('opacity-70', 'opacity-25', 'opacity-0');
       if (this.isHintActive) {
-        this.dom.hintWatermark.classList.remove('opacity-0');
         this.dom.hintWatermark.classList.add('opacity-25');
-        if (this.dom.hintBtn) {
-          this.dom.hintBtn.classList.add('bg-[#E11D48]');
-          this.dom.hintBtn.classList.remove('bg-[#065F46]');
-        }
-        const textSpan = document.getElementById('placement-hint-btn-text');
-        if (textSpan) textSpan.textContent = 'HINT: ON';
       } else {
-        this.dom.hintWatermark.classList.remove('opacity-25');
         this.dom.hintWatermark.classList.add('opacity-0');
-        if (this.dom.hintBtn) {
-          this.dom.hintBtn.classList.remove('bg-[#E11D48]');
-          this.dom.hintBtn.classList.add('bg-[#065F46]');
-        }
-        const textSpan = document.getElementById('placement-hint-btn-text');
-        if (textSpan) textSpan.textContent = 'HINT OUTLINE';
       }
+    }
+    const hintBtn = this.dom.hintBtn || (typeof document !== 'undefined' ? document.getElementById('placement-hint-btn') : null);
+    const textSpan = document.getElementById('placement-hint-btn-text');
+    if (this.isHintActive) {
+      if (hintBtn) {
+        hintBtn.classList.add('bg-[#E11D48]');
+        hintBtn.classList.remove('bg-[#065F46]');
+      }
+      if (textSpan) textSpan.textContent = 'HINT: ON';
+    } else {
+      if (hintBtn) {
+        hintBtn.classList.remove('bg-[#E11D48]');
+        hintBtn.classList.add('bg-[#065F46]');
+      }
+      if (textSpan) textSpan.textContent = 'HINT: OFF';
     }
   }
 
@@ -601,6 +782,12 @@ export class ComponentPlacementController {
     // Reset watermark
     if (this.dom.hintWatermark) {
       this.dom.hintWatermark.textContent = chars.join('');
+      this.dom.hintWatermark.classList.remove('opacity-70', 'opacity-25', 'opacity-0');
+      if (this.isHintActive) {
+        this.dom.hintWatermark.classList.add('opacity-25');
+      } else {
+        this.dom.hintWatermark.classList.add('opacity-0');
+      }
     }
 
     // Ensure multi-character grid divider lines are NEVER shown as visible borders
@@ -713,7 +900,10 @@ export class ComponentPlacementController {
       tile.dataset.glyph = item.glyph;
       tile.dataset.componentType = getComponentType(item.glyph);
       tile.title = `${item.glyph}`;
-      tile.textContent = item.glyph;
+      const glyphSpan = document.createElement('span');
+      glyphSpan.className = 'component-tile-glyph';
+      glyphSpan.textContent = item.glyph;
+      tile.appendChild(glyphSpan);
 
       this.bindDockTileDrag(tile, item);
       this.dom.dock.appendChild(tile);
@@ -931,10 +1121,11 @@ export class ComponentPlacementController {
   /**
    * Runs the RST evaluation on the current canvas state.
    */
-  evaluateActivePlacement() {
+  evaluateActivePlacement(dictionary = null, corpus = null) {
     const placed = this.getPlacedComponents();
     const canvasWidth = this.dom.canvas ? this.dom.canvas.clientWidth : 340;
-    return evaluatePlacement(placed, this.activeDecompositions, canvasWidth);
+    const dict = dictionary || this.decompositions || {};
+    return gradeComponentBuilder(placed, this.activeDecompositions, canvasWidth, dict, corpus || []);
   }
 
   /**
@@ -958,5 +1149,16 @@ export class ComponentPlacementController {
       });
       if (onComplete) onComplete();
     }, 450);
+  }
+
+  /**
+   * Reveals canonical solution upon attempt exhaustion by highlighting the watermark outline.
+   * NOTE: Purely visual review aid on canvas; does NOT mutate persistent user preference or button label.
+   */
+  revealCanonicalSolution() {
+    if (this.dom.hintWatermark) {
+      this.dom.hintWatermark.classList.remove('opacity-0', 'opacity-25');
+      this.dom.hintWatermark.classList.add('opacity-70');
+    }
   }
 }

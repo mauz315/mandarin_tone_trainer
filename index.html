@@ -1179,48 +1179,40 @@
           <div class="contents lg:flex lg:flex-col lg:col-span-5 xl:col-span-5 lg:gap-2.5">
             
             <!-- 1. ZONE 3: AUDIO & PROMPT ARENA (#prompt-arena) -->
-            <!-- On Mobile: order-1 (At the very top, compact play button + hint) -->
+            <!-- On Mobile: order-1 (At the very top, compact play button) -->
             <!-- On Desktop: Top of Right Column -->
             <section id="prompt-arena" class="order-1 w-full bg-white border-[3px] border-black rounded-2xl p-2.5 sm:p-3.5 shadow-hard-black shrink-0 flex flex-col gap-1.5 sm:gap-2 relative overflow-hidden">
               <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-1.5">
-                  <span class="font-mono text-[9px] font-black uppercase tracking-wider bg-[#4C1D95] text-white px-2 py-0.5 rounded">
+                  <span id="prompt-task-badge" class="font-mono text-[9px] font-black uppercase tracking-wider bg-[#4C1D95] text-white px-2 py-0.5 rounded">
                     AUDIO PROMPT
                   </span>
                   <span class="font-mono text-[9px] font-bold text-black/60 hidden xs:inline">
-                    LISTEN &amp; DRAW
+                    LISTEN &amp; BUILD
                   </span>
                 </div>
-                <span class="font-mono text-[9px] font-bold text-black/50">HSK 1 • PASS 1</span>
+                <span id="pass-badge" class="font-mono text-[9px] font-bold text-black/50">HSK 1 • PASS 1</span>
               </div>
 
               <div class="flex items-center gap-2 py-0.5">
-                <!-- Compact on Mobile (py-2), Full on Desktop (sm:py-3) - Solar Amber -->
+                <!-- Compact on Mobile (py-2), Full on Desktop (sm:py-3) -->
                 <button id="audio-replay-btn" class="flex-1 py-2 sm:py-3 px-3 sm:px-4 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white border-2 border-black font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-hard-black transition-all active-collapse cursor-pointer group" title="Replay Native Audio">
                   <span class="material-symbols-outlined text-lg sm:text-xl group-hover:scale-110 transition-transform">volume_up</span>
                   <span>PLAY AUDIO</span>
                 </button>
               </div>
-
-              <!-- Semantic Disambiguation Hint Box -->
-              <div id="prompt-hint-box" class="bg-[#FAF5FF] border border-[#E9D5FF] rounded-xl px-2.5 py-1.5 sm:p-2.5 flex items-start gap-1.5">
-                <span class="material-symbols-outlined text-[#6D28D9] text-sm mt-0.5 shrink-0">info</span>
-                <p id="prompt-hint" class="font-mono text-[11px] sm:text-xs text-[#3B0764] font-bold leading-tight">
-                  Context Hint: "[noun] sun, day; daytime"
-                </p>
-              </div>
             </section>
 
-            <!-- 2. ZONE 5: TONE SELECTOR & INTERACTION FOOTER (#interaction-footer) -->
+            <!-- 2. ZONE 5: INTERACTION FOOTER & DIAGNOSTIC TOAST (#interaction-footer) -->
             <!-- On Mobile: order-3 (Under canvas arena) -->
             <!-- On Desktop: Middle of Right Column -->
             <section id="interaction-footer" class="order-3 w-full bg-white border-[3px] border-black rounded-2xl p-3 sm:p-3.5 shadow-hard-black shrink-0 flex flex-col gap-2.5">
               <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2">
-                  <span class="font-mono text-[9px] font-black uppercase tracking-wider bg-[#4C1D95] text-white px-2 py-0.5 rounded">
-                    IDENTIFY TONE
+                  <span id="interaction-task-badge" class="font-mono text-[9px] font-black uppercase tracking-wider bg-[#4C1D95] text-white px-2 py-0.5 rounded">
+                    ORTHOGRAPHY
                   </span>
-                  <span class="font-mono text-[10px] font-bold text-black/60">CHOOSE PITCH</span>
+                  <span id="interaction-task-subtext" class="font-mono text-[10px] font-bold text-black/60 uppercase">VERIFICATION</span>
                 </div>
                 <!-- Attempts Dot Pips -->
                 <div id="attempt-indicator" class="flex items-center gap-1.5 bg-black/5 px-2 py-1 rounded-lg border border-black/15 font-mono text-[9px] font-bold">
@@ -1233,54 +1225,22 @@
                 </div>
               </div>
 
-              <!-- Multi-Character Tone Segment Slots (Shown for compound words) -->
-              <div id="tone-segment-slots" class="hidden flex items-center justify-center gap-2 p-1.5 bg-slate-50 border border-black/20 rounded-xl font-mono text-xs">
-                <span class="font-bold text-black/60 text-[10px] uppercase">SLOTS:</span>
-                <div class="tone-slot active px-3 py-1 rounded-lg border-2 border-black bg-white font-bold text-black shadow-xs" data-slot="0">
-                  Char 1: <span class="tone-slot-val font-black text-[#D97706]">_</span>
-                </div>
-                <div class="tone-slot px-3 py-1 rounded-lg border-2 border-black/30 bg-white/70 font-bold text-black/60" data-slot="1">
-                  Char 2: <span class="tone-slot-val font-black">_</span>
-                </div>
+              <!-- Diagnostic Feedback Toast Banner (#drawing-feedback-toast) -->
+              <div id="drawing-feedback-toast" class="w-full rounded-xl p-2.5 sm:p-3 border-2 transition-all font-mono text-xs font-bold shadow-xs flex items-center gap-2.5 bg-slate-50 border-black/20 text-black/80">
+                <span id="drawing-feedback-icon" class="material-symbols-outlined text-lg shrink-0 text-black/60">info</span>
+                <p id="drawing-feedback-text" class="text-xs font-bold leading-tight text-black/90">
+                  Assemble components or draw strokes, then submit.
+                </p>
               </div>
 
-              <!-- 5 Tone Keycaps Buttons -->
-              <div id="tone-selector-group" class="grid grid-cols-5 gap-1.5 sm:gap-2">
-                <button type="button" class="tone-choice-btn py-2 px-1 rounded-xl bg-badge-butter hover:bg-white text-black border-2 border-black font-speed font-black text-xs sm:text-sm shadow-sm flex flex-col items-center justify-center transition-all active-collapse cursor-pointer" data-tone="1">
-                  <span class="font-mono text-[9px] font-bold text-black/60 uppercase">1ST</span>
-                  <span class="text-base sm:text-lg leading-none mt-0.5">ˉ</span>
-                  <span class="font-mono text-[8px] text-black/50">55 High</span>
-                </button>
-                <button type="button" class="tone-choice-btn py-2 px-1 rounded-xl bg-badge-lavender hover:bg-white text-black border-2 border-black font-speed font-black text-xs sm:text-sm shadow-sm flex flex-col items-center justify-center transition-all active-collapse cursor-pointer" data-tone="2">
-                  <span class="font-mono text-[9px] font-bold text-black/60 uppercase">2ND</span>
-                  <span class="text-base sm:text-lg leading-none mt-0.5">ˊ</span>
-                  <span class="font-mono text-[8px] text-black/50">35 Rise</span>
-                </button>
-                <button type="button" class="tone-choice-btn py-2 px-1 rounded-xl bg-badge-pink text-white hover:bg-white hover:text-black border-2 border-black font-speed font-black text-xs sm:text-sm shadow-sm flex flex-col items-center justify-center transition-all active-collapse cursor-pointer" data-tone="3">
-                  <span class="font-mono text-[9px] font-bold text-white/80 uppercase">3RD</span>
-                  <span class="text-base sm:text-lg leading-none mt-0.5">ˇ</span>
-                  <span class="font-mono text-[8px] text-white/70">214 Dip</span>
-                </button>
-                <button type="button" class="tone-choice-btn py-2 px-1 rounded-xl bg-badge-cobalt text-white hover:bg-white hover:text-black border-2 border-black font-speed font-black text-xs sm:text-sm shadow-sm flex flex-col items-center justify-center transition-all active-collapse cursor-pointer" data-tone="4">
-                  <span class="font-mono text-[9px] font-bold text-white/80 uppercase">4TH</span>
-                  <span class="text-base sm:text-lg leading-none mt-0.5">ˋ</span>
-                  <span class="font-mono text-[8px] text-white/70">51 Fall</span>
-                </button>
-                <button type="button" class="tone-choice-btn py-2 px-1 rounded-xl bg-slate-100 hover:bg-white text-black border-2 border-black font-speed font-black text-xs sm:text-sm shadow-sm flex flex-col items-center justify-center transition-all active-collapse cursor-pointer" data-tone="5">
-                  <span class="font-mono text-[9px] font-bold text-black/60 uppercase">0</span>
-                  <span class="text-base sm:text-lg leading-none mt-0.5">•</span>
-                  <span class="font-mono text-[8px] text-black/50">Neutral</span>
-                </button>
-              </div>
-
-              <!-- Submit Button (Deep Midnight Violet) -->
+              <!-- Submit Button (Deep Midnight Violet in Calligraphy / Celadon in Builder) -->
               <button id="submit-word-btn" class="w-full py-3.5 sm:py-4 px-4 bg-[#4C1D95] hover:bg-[#3B0764] text-white border-[3px] border-black rounded-2xl shadow-hard-black font-speed font-black italic text-base sm:text-lg uppercase tracking-wider flex items-center justify-center gap-2 active-collapse cursor-pointer transition-all mt-1">
                 <span>SUBMIT ANSWER</span>
                 <span class="material-symbols-outlined text-lg sm:text-xl">arrow_forward</span>
               </button>
             </section>
 
-            <!-- [NEW] ZONE 6: IN-PLACE RESULT & THREE-TIER FEEDBACK PANEL (#result-feedback-panel) -->
+            <!-- 3. ZONE 6: IN-PLACE RESULT & THREE-TIER FEEDBACK PANEL (#result-feedback-panel) -->
             <!-- Hidden during active drawing; replaces exercise controls once submitted -->
             <section id="result-feedback-panel" class="order-3 w-full bg-white border-[3px] border-black rounded-2xl p-3.5 sm:p-4 shadow-hard-black shrink-0 flex flex-col gap-3 relative hidden">
               
@@ -1290,7 +1250,6 @@
                   <div class="flex items-baseline gap-2.5 flex-wrap">
                     <span id="result-hanzi" class="font-chinese font-black text-3xl sm:text-4xl text-[#1E1B2E] tracking-tight">日</span>
                     <span id="result-pinyin" class="font-speed font-black italic text-lg sm:text-xl text-[#4C1D95]">rì</span>
-                    <span id="result-tone-badge" class="px-2 py-0.5 rounded-full bg-[#FAF5FF] border border-[#E9D5FF] text-[10px] font-mono font-black text-[#6D28D9]">Tone 4</span>
                   </div>
                   <!-- Tactile Audio Replay Button -->
                   <button id="result-audio-replay-btn" type="button" class="py-2 px-3 sm:px-3.5 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white border-2 border-black font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-sm active-collapse cursor-pointer transition-all" title="Replay native audio">
@@ -1314,15 +1273,15 @@
                 </div>
               </div>
 
-              <!-- B. Three-Tier Feedback Group -->
+              <!-- B. Detailed Diagnostic Feedback Card -->
               <div id="result-feedback-group" class="flex flex-col gap-2.5">
                 
-                <!-- 1. Drawing Feedback Card (FIRST) -->
+                <!-- Drawing / Assembly Diagnostic Feedback Card -->
                 <div id="feedback-drawing-card" class="w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-emerald-50 border-emerald-500 text-emerald-950 flex flex-col gap-1.5">
                   <div class="flex items-center justify-between gap-2 border-b border-black/10 pb-1">
                     <div class="flex items-center gap-1.5">
                       <span class="material-symbols-outlined text-emerald-600 text-base" id="drawing-feedback-icon">verified</span>
-                      <span class="text-[9px] font-black uppercase tracking-wider text-black/70">1. HANZI DRAWING</span>
+                      <span id="drawing-feedback-title" class="text-[9px] font-black uppercase tracking-wider text-black/70">HANZI EVALUATION</span>
                     </div>
                     <span id="drawing-tier-badge" class="px-2 py-0.5 rounded-full font-black text-[10px] bg-emerald-200/70 text-emerald-900 border border-emerald-600">
                       🎯 Perfect Form!
@@ -1336,22 +1295,6 @@
                     <span class="material-symbols-outlined text-xs">replay</span>
                     <span>SEE STROKE ORDER</span>
                   </button>
-                </div>
-
-                <!-- 2. Tone Feedback Card (BELOW DRAWING) -->
-                <div id="feedback-tone-card" class="w-full rounded-xl p-3 border-2 transition-all font-mono text-xs shadow-xs bg-emerald-50 border-emerald-500 text-emerald-950 flex flex-col gap-1.5">
-                  <div class="flex items-center justify-between gap-2 border-b border-black/10 pb-1">
-                    <div class="flex items-center gap-1.5">
-                      <span class="material-symbols-outlined text-emerald-600 text-base" id="tone-feedback-icon">check_circle</span>
-                      <span class="text-[9px] font-black uppercase tracking-wider text-black/70">2. TONE &amp; PITCH CONTOUR</span>
-                    </div>
-                    <span id="tone-verdict-badge" class="px-2 py-0.5 rounded-full font-black text-[10px] bg-emerald-200/70 text-emerald-900 border border-emerald-600">
-                      ✓ Tone Correct
-                    </span>
-                  </div>
-                  <p id="tone-feedback-text" class="text-xs font-bold leading-relaxed text-black/90">
-                    Tone 4 (ˋ 51 Falling) confirmed.
-                  </p>
                 </div>
 
               </div>

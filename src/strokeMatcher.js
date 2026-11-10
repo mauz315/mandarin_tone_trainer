@@ -43,6 +43,60 @@ export function angleDifference(a, b) {
   return diff;
 }
 
+/**
+ * Detects sharp turns (>= 55 deg) in a single drawn stroke and decomposes it
+ * into two sub-strokes to satisfy orthogonal target pairs (e.g. 横 + 竖).
+ */
+export function deconstructCompoundStroke(strokePts) {
+  if (!strokePts || strokePts.length < 6) return [strokePts];
+
+  let maxAngleDiff = 0;
+  let splitIndex = -1;
+
+  for (let i = 2; i < strokePts.length - 2; i++) {
+    const pStart = strokePts[0];
+    const pMid = strokePts[i];
+    const pEnd = strokePts[strokePts.length - 1];
+
+    const v1 = [
+      (pMid[0] !== undefined ? pMid[0] : pMid.x) - (pStart[0] !== undefined ? pStart[0] : pStart.x),
+      (pMid[1] !== undefined ? pMid[1] : pMid.y) - (pStart[1] !== undefined ? pStart[1] : pStart.y)
+    ];
+    const v2 = [
+      (pEnd[0] !== undefined ? pEnd[0] : pEnd.x) - (pMid[0] !== undefined ? pMid[0] : pMid.x),
+      (pEnd[1] !== undefined ? pEnd[1] : pEnd.y) - (pMid[1] !== undefined ? pMid[1] : pMid.y)
+    ];
+    const a1 = Math.atan2(v1[1], v1[0]) * (180 / Math.PI);
+    const a2 = Math.atan2(v2[1], v2[0]) * (180 / Math.PI);
+    const diff = angleDifference(a1, a2);
+
+    if (diff > maxAngleDiff && diff >= 55) {
+      maxAngleDiff = diff;
+      splitIndex = i;
+    }
+  }
+
+  if (splitIndex !== -1) {
+    const subStroke1 = strokePts.slice(0, splitIndex + 1);
+    const subStroke2 = strokePts.slice(splitIndex);
+    return [subStroke1, subStroke2];
+  }
+
+  return [strokePts];
+}
+
+export function getStrokeTypeName(targetStroke) {
+  if (!targetStroke) return '';
+  if (targetStroke.isCompound) return 'compound (折)';
+  const angle = Math.abs(targetStroke.angle);
+  if (angle <= 30 || angle >= 150) return 'horizontal (横)';
+  if (angle >= 60 && angle <= 120) return 'vertical (竖)';
+  if ((targetStroke.angle > 120 && targetStroke.angle < 150) || (targetStroke.angle < -30 && targetStroke.angle > -60)) {
+    return 'slash / throw (撇/捺)';
+  }
+  return '';
+}
+
 export function pointToSegmentDist(px, py, x1, y1, x2, y2) {
   const dx = x2 - x1;
   const dy = y2 - y1;
@@ -662,7 +716,78 @@ export class StrokeMatcher {
       };
     }
 
-    // Pass 3: Component-Level Virtual Spatial Normalization (Core Fix 3)
+    // Pass 3: Cursive Compound Deconstruction (Core Fix: Deconstruct acute turns >= 55 deg)
+    // When cursive handwriting connects orthogonal strokes (e.g. 横 + 竖 in 年 as 横折),
+    // deconstruct the sharp turn into orthogonal sub-strokes.
+    const deconstructedStrokes = [];
+    let didDeconstruct = false;
+    for (const s of rawUserStrokes) {
+      const parts = deconstructCompoundStroke(s);
+      if (parts.length > 1) {
+        didDeconstruct = true;
+        deconstructedStrokes.push(...parts);
+      } else {
+        deconstructedStrokes.push(s);
+      }
+    }
+
+    if (didDeconstruct) {
+      // 3A. Try raw deconstructed strokes
+      this.reset();
+      for (const stroke of deconstructedStrokes) {
+        const match = this.matchUserStroke(stroke);
+        if (match.matched) {
+          this.claimStroke(match.strokeIndex, {
+            diffAngle: match.diffAngle || 0,
+            isCompoundMerged: !!match.isCompoundMerged
+          });
+        }
+      }
+      if (this.isComplete()) {
+        return {
+          isComplete: true,
+          spatialDrift: {
+            deltaX: rawDeltaX,
+            deltaY: rawDeltaY,
+            isShifted,
+            wasNormalized: false,
+            wasComponentNormalized: false,
+            wasCursiveDeconstructed: true
+          },
+          unclaimedCount: 0
+        };
+      }
+
+      // 3B. Try normalized deconstructed strokes
+      const { normalizedStrokes: normDecon, deltaX: dDeconX, deltaY: dDeconY } =
+        getNormalizedEvaluationStrokes(deconstructedStrokes, [targetCenterX, targetCenterY], canvasSize);
+      this.reset();
+      for (const stroke of normDecon) {
+        const match = this.matchUserStroke(stroke);
+        if (match.matched) {
+          this.claimStroke(match.strokeIndex, {
+            diffAngle: match.diffAngle || 0,
+            isCompoundMerged: !!match.isCompoundMerged
+          });
+        }
+      }
+      if (this.isComplete()) {
+        return {
+          isComplete: true,
+          spatialDrift: {
+            deltaX: dDeconX,
+            deltaY: dDeconY,
+            isShifted: Math.hypot(dDeconX, dDeconY) > driftThreshold,
+            wasNormalized: true,
+            wasComponentNormalized: false,
+            wasCursiveDeconstructed: true
+          },
+          unclaimedCount: 0
+        };
+      }
+    }
+
+    // Pass 4: Component-Level Virtual Spatial Normalization (Core Fix 3)
     // If the character has a recognized radical decomposition (0 < radStrokes.length < totalStrokes),
     // normalize the radical cluster and stem cluster independently to eliminate inter-radical kerning gaps.
     if (this.radStrokes && this.radStrokes.length > 0 && this.radStrokes.length < this.targetStrokes.length) {
@@ -802,6 +927,16 @@ export function classifyDrawing(charMatcher, userDrawnStrokes = [], spatialDrift
         showOrderReplay: false
       };
     }
+    // Cursive stroke joining leniency (e.g. 横折 compound splitting)
+    if (spatialDrift && spatialDrift.wasCursiveDeconstructed) {
+      return {
+        tier: 'TIER_2_SOFT_PASS_CURSIVE',
+        badge: '✓ Cursive Recognized!',
+        detail: '💡 Pro Tip: Connected cursive stroke recognized. In standard calligraphy, draw horizontal and vertical strokes distinctly.',
+        status: 'pass',
+        showOrderReplay: false
+      };
+    }
     // Spatial offset leniency (Centering drift)
     if (spatialDrift && spatialDrift.isShifted) {
       return {
@@ -841,14 +976,22 @@ export function classifyDrawing(charMatcher, userDrawnStrokes = [], spatialDrift
     };
   }
 
-  if (unclaimed.length > 0 && userStrokeCount < targetCount) {
+  if (unclaimed.length > 0) {
+    const missingStk = charMatcher.getFirstUnclaimedStroke();
+    const strokeName = missingStk ? getStrokeTypeName(missingStk) : '';
+    const trueMissingCount = Math.min(unclaimed.length, Math.max(1, targetCount - userStrokeCount));
+
     return {
       tier: 'TIER_3_MISSING_STROKE',
       badge: '⚠️ Almost There!',
-      detail: `${unclaimed.length} stroke${unclaimed.length > 1 ? 's are' : ' is'} missing (highlighted above).`,
+      detail: trueMissingCount === 1 
+        ? (strokeName 
+            ? `1 stroke (${strokeName}) is missing (highlighted in orange above).`
+            : `1 stroke is missing (highlighted in orange above).`)
+        : `${trueMissingCount} strokes are missing (highlighted above).`,
       status: 'fail',
       missingIndex: unclaimed[0],
-      missingCount: unclaimed.length
+      missingCount: trueMissingCount
     };
   }
 
@@ -866,5 +1009,53 @@ export function classifyDrawing(charMatcher, userDrawnStrokes = [], spatialDrift
     badge: '❓ Shape Unrecognized',
     detail: 'Listen again, or tap [Guide: ON] to trace the reference strokes.',
     status: 'fail'
+  };
+}
+
+/**
+ * Universal Three-Tier Diagnostic Grader for Calligraphy Lab.
+ * Adapts classifyDrawing into a unified { status, tier, badge, detail, ... } interface.
+ *
+ * Tier 1: CLEAN_PASS - Canonical stroke order, accurate angles (dev <= 15 deg), centered.
+ * Tier 2: SOFT_PASS  - Out-of-order execution, centering drift, kerning drift, cursive joining, angle dev <= 40 deg. Passes word!
+ * Tier 3: DIAGNOSTIC_FAIL - Missing strokes, extra strokes, wrong angle, or unrecognized shape.
+ *
+ * @param {StrokeMatcher} charMatcher
+ * @param {Array} userDrawnStrokes
+ * @param {Object} spatialDrift
+ * @param {number} canvasSize
+ * @returns {Object} { status: 'CLEAN_PASS'|'SOFT_PASS'|'DIAGNOSTIC_FAIL', tier: 1|2|3, success: boolean, badge: string, detail: string, ... }
+ */
+export function gradeCalligraphyDrawing(charMatcher, userDrawnStrokes = [], spatialDrift = null, canvasSize = 320) {
+  if (!charMatcher || !charMatcher.targetStrokes || charMatcher.targetStrokes.length === 0) {
+    return {
+      status: 'DIAGNOSTIC_FAIL',
+      tier: 3,
+      tierName: 'TIER_3_UNRECOGNIZED',
+      badge: '❓ Unrecognized',
+      detail: 'Character reference model not initialized.',
+      success: false
+    };
+  }
+
+  const effectiveCanvasSize = canvasSize || charMatcher.canvasSize || 320;
+
+  // STEP 1: Execute Full Geometric Evaluation across all passes
+  const evalResult = charMatcher.evaluateFullDrawing(userDrawnStrokes, effectiveCanvasSize);
+  const activeDrift = spatialDrift || evalResult.spatialDrift;
+
+  // STEP 2: Execute Three-Tier Classification
+  const result = classifyDrawing(charMatcher, userDrawnStrokes, activeDrift);
+  const isPass = result.status === 'pass';
+  const tierNum = result.tier === 'TIER_1_CLEAN_PASS' ? 1 : (isPass ? 2 : 3);
+  const statusStr = tierNum === 1 ? 'CLEAN_PASS' : (tierNum === 2 ? 'SOFT_PASS' : 'DIAGNOSTIC_FAIL');
+
+  return {
+    ...result,
+    status: statusStr,
+    tier: tierNum,
+    tierName: result.tier,
+    success: isPass,
+    evalResult
   };
 }

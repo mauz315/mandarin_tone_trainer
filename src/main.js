@@ -107,6 +107,22 @@ let currentWebAudioSource = null;
 let htmlAudioInstance = typeof Audio !== 'undefined' ? new Audio() : null;
 const audioBufferCache = new Map();
 
+export function stopGlobalAudio() {
+  if (currentWebAudioSource) {
+    try { currentWebAudioSource.stop(); } catch (_) {}
+    currentWebAudioSource = null;
+  }
+  if (htmlAudioInstance) {
+    try {
+      htmlAudioInstance.pause();
+      htmlAudioInstance.currentTime = 0;
+    } catch (_) {}
+  }
+}
+if (typeof window !== 'undefined') {
+  window.stopGlobalAudio = stopGlobalAudio;
+}
+
 function getAudioContext() {
   if (!audioCtx) {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -312,6 +328,10 @@ function setupMenu() {
   const backFromWordsBtn = document.getElementById('back-from-words-btn');
 
   function launchWordTrainerMode(mode) {
+    stopGlobalAudio();
+    if (window.WordTrainerEngine && typeof window.WordTrainerEngine.stopAudio === 'function') {
+      window.WordTrainerEngine.stopAudio();
+    }
     if (modeSelectionScreen) modeSelectionScreen.classList.add('hidden');
     if (wordTrainerScreen) wordTrainerScreen.classList.remove('hidden');
     localStorage.setItem('mandarin_trainer_selected_mode', mode);

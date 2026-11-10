@@ -451,22 +451,17 @@
   "五": {
     "char": "五",
     "strokeCount": 4,
-    "topology": "CROSSING",
+    "topology": "ATOMIC",
     "targetComponents": [
       {
-        "id": "comp_er",
-        "glyph": "二",
+        "id": "comp_wu",
+        "glyph": "五",
         "role": "base"
-      },
-      {
-        "id": "comp_yi",
-        "glyph": "乂",
-        "role": "marker"
       }
     ],
     "distractorComponents": [
-      "十",
-      "王",
+      "二",
+      "三",
       "正",
       "立"
     ]
