@@ -19,6 +19,107 @@ const STORAGE_KEY_CALLIGRAPHY = 'mandarin_trainer_word_progress_calligraphy';
 const STORAGE_KEY_BUILDER = 'mandarin_trainer_word_progress_builder';
 const STORAGE_KEY_LEGACY = 'mandarin_trainer_word_progress';
 
+export const CONCISE_ENGLISH_OVERRIDES = {
+  '了': 'completed action (particle)',
+  '个': 'general classifier',
+  '的': 'possessive / modifier',
+  '吗': 'yes/no question particle',
+  '吧': 'suggestion particle',
+  '呢': 'follow-up question',
+  '地': 'adverbial marker (de)',
+  '得': 'degree/result particle',
+  '第': 'ordinal prefix (1st, 2nd…)',
+  '些': 'some; a few',
+  '和': 'and',
+  '最': 'most; highest degree',
+  '过': 'past experience (particle)',
+  '他': 'he; him',
+  '她': 'she; her',
+  '它': 'it',
+  '他们': 'they; them (people)',
+  '她们': 'they; them (females)',
+  '它们': 'they; them (things)',
+  '你': 'you (informal)',
+  '您': 'you (courteous)',
+  '超市': 'supermarket',
+  '面': 'side; surface; noodles'
+};
+
+const KEEP_CONCISE_PARENS = new Set(['(plural)', '(side)', '(s)']);
+
+export function getConciseEnglish(word) {
+  if (!word) return '';
+  if (typeof word.english_concise === 'string' && word.english_concise.trim()) {
+    return word.english_concise.trim();
+  }
+  const hanzi = word.hanzi_simp || '';
+  if (hanzi && Object.prototype.hasOwnProperty.call(CONCISE_ENGLISH_OVERRIDES, hanzi)) {
+    return CONCISE_ENGLISH_OVERRIDES[hanzi];
+  }
+  const raw = String(word.english || '').trim();
+  if (!raw) return '';
+
+  // Strip [pinyin] tags
+  let cleaned = raw.replace(/\[[^\]]*\]/g, '');
+  // Iteratively strip parenthetical notes except compact semantic disambiguators
+  let prev;
+  do {
+    prev = cleaned;
+    cleaned = cleaned.replace(/\([^()]*\)/g, (m) => (
+      KEEP_CONCISE_PARENS.has(m.toLowerCase()) ? m : ''
+    ));
+  } while (cleaned !== prev);
+
+  // Strip embedded CJK substrings and collapse whitespace
+  cleaned = cleaned.replace(/[\u4e00-\u9fff]+/g, '').replace(/\s+/g, ' ');
+
+  const trimClauseEdges = (str) => str
+    .replace(/\s*\.{2,}$/, '')
+    .replace(/^[\s;:,-]+|[\s;:,-]+$/g, '');
+
+  const clauses = cleaned
+    .split(';')
+    .map(trimClauseEdges)
+    .filter(Boolean);
+
+  if (clauses.length === 0) {
+    return raw.replace(/[\u4e00-\u9fff]+/g, '').replace(/^[\s;:,\-()[\]]+|[\s;:,\-()[\]]+$/g, '').slice(0, 26).trim();
+  }
+
+  let out = clauses[0];
+  for (let i = 1; i < clauses.length; i++) {
+    const candidate = `${out}; ${clauses[i]}`;
+    if (candidate.length <= 26) {
+      out = candidate;
+    } else {
+      break;
+    }
+  }
+
+  if (out.length > 26) {
+    const commaParts = out.split(',').map((p) => p.trim()).filter(Boolean);
+    if (commaParts.length > 1 && commaParts[0].length <= 26) {
+      let cur = commaParts[0];
+      for (let i = 1; i < commaParts.length; i++) {
+        const cand = `${cur}, ${commaParts[i]}`;
+        if (cand.length <= 26) {
+          cur = cand;
+        } else {
+          break;
+        }
+      }
+      out = cur;
+    } else {
+      const slice = out.slice(0, 25);
+      const lastSpace = slice.lastIndexOf(' ');
+      const cut = (lastSpace > 0 ? slice.slice(0, lastSpace) : slice).replace(/[,;:]+$/, '');
+      out = `${cut || slice}…`;
+    }
+  }
+
+  return out;
+}
+
 export class WordTrainerEngineController {
   constructor() {
     this.corpus = [];
@@ -54,6 +155,7 @@ export class WordTrainerEngineController {
     this.attemptsLeft = 3;
     const savedGuide = (typeof localStorage !== 'undefined') ? localStorage.getItem('mandarin_trainer_guide_mode') : null;
     this.isScaffoldOn = (savedGuide !== null) ? (savedGuide === 'on') : (this.state.scaffoldDefault !== undefined ? this.state.scaffoldDefault : true);
+    this.effectiveGuideOn = this.isScaffoldOn;
 
     // Order-Agnostic Geometric Stroke Matchers & Handwriting Persistence
     this.charMatchers = [];
@@ -191,29 +293,32 @@ export class WordTrainerEngineController {
   }
 
   setGuideMode(isOn, persistState = true) {
+    const effectiveOn = Boolean(isOn);
+    this.effectiveGuideOn = effectiveOn;
     if (persistState) {
-      this.isScaffoldOn = isOn;
+      this.isScaffoldOn = effectiveOn;
       try {
         if (typeof localStorage !== 'undefined') {
-          localStorage.setItem('mandarin_trainer_guide_mode', isOn ? 'on' : 'off');
+          localStorage.setItem('mandarin_trainer_guide_mode', effectiveOn ? 'on' : 'off');
         }
       } catch (_) {}
     }
     this.updateScaffoldBtnUI();
     if (this.dom.hanziTargetCanvas) {
-      this.dom.hanziTargetCanvas.style.opacity = isOn ? '1' : '0';
-      this.dom.hanziTargetCanvas.style.visibility = isOn ? 'visible' : 'hidden';
+      this.dom.hanziTargetCanvas.style.opacity = effectiveOn ? '1' : '0';
+      this.dom.hanziTargetCanvas.style.visibility = effectiveOn ? 'visible' : 'hidden';
     }
     if (this.activeWriter) {
-      if (isOn) {
+      if (effectiveOn) {
         try { this.activeWriter.showOutline(); } catch (_) {}
       } else {
         try { this.activeWriter.hideOutline(); } catch (_) {}
       }
     }
     if (this.componentBuilder) {
-      this.componentBuilder.toggleGhostHint(isOn);
+      this.componentBuilder.toggleGhostHint(effectiveOn);
     }
+    this.updatePromptDisplay(effectiveOn);
     this.renderCanvasLayers();
   }
 
@@ -301,8 +406,11 @@ export class WordTrainerEngineController {
       passBadge: document.getElementById('pass-badge'),
       promptArena: document.getElementById('prompt-arena'),
       audioReplayBtn: document.getElementById('audio-replay-btn'),
-      promptHint: document.getElementById('prompt-hint'),
-      promptHintBox: document.getElementById('prompt-hint-box'),
+      promptModeSubtitle: document.getElementById('prompt-mode-subtitle'),
+      promptPassBadge: document.getElementById('prompt-pass-badge'),
+      promptLexicalBox: document.getElementById('prompt-lexical-box'),
+      promptPinyin: document.getElementById('prompt-pinyin-line'),
+      promptMeaning: document.getElementById('prompt-meaning-line'),
       drawingCanvasWrapper: document.getElementById('drawing-canvas-wrapper'),
       canvasGhostChar: document.getElementById('canvas-ghost-char'),
       hanziTargetCanvas: document.getElementById('hanzi-target-canvas'),
@@ -1038,19 +1146,21 @@ export class WordTrainerEngineController {
   }
 
   renderCanvasLayers() {
-    if (!this.dom.drawingCanvasWrapper) return;
-    const matcher = this.charMatchers[this.activeCharIndex];
-    const size = this.getCanvasSize();
-    const padding = Math.round(size * 0.08);
+    const isGuideActive = (this.effectiveGuideOn !== undefined) ? Boolean(this.effectiveGuideOn) : Boolean(this.isScaffoldOn);
 
     // Toggle demo order button visibility
     if (this.dom.demoOrderBtn) {
-      if (this.isScaffoldOn) {
+      if (isGuideActive) {
         this.dom.demoOrderBtn.classList.remove('hidden');
       } else {
         this.dom.demoOrderBtn.classList.add('hidden');
       }
     }
+
+    if (!this.dom.drawingCanvasWrapper) return;
+    const matcher = this.charMatchers[this.activeCharIndex];
+    const size = this.getCanvasSize();
+    const padding = Math.round(size * 0.08);
 
     let overlaySvg = document.getElementById('hanzi-custom-overlay-svg');
     if (!overlaySvg) {
@@ -1110,7 +1220,7 @@ export class WordTrainerEngineController {
     }
 
     // 3. Group for Numbered Starting Badges (Mode A: Guided Scaffolding)
-    if (this.isScaffoldOn && !this.charRecognized[this.activeCharIndex]) {
+    if (isGuideActive && !this.charRecognized[this.activeCharIndex]) {
       const badgesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       badgesGroup.setAttribute('id', 'scaffold-badges-group');
       const badges = matcher.getStrokeOriginBadges();
@@ -1486,8 +1596,9 @@ export class WordTrainerEngineController {
       });
     }
 
-    // Update Header labels
+    // Update Header labels & prompt display
     this.updateBatchLabels();
+    this.updatePromptDisplay(shouldGuideBeOn);
     this.updateAttemptPips();
     this.mountCharacter(0);
 
@@ -1500,16 +1611,6 @@ export class WordTrainerEngineController {
     if (this.getMode() === 'builder' && this.componentBuilder) {
       this.componentBuilder.mountWord(word);
       this.componentBuilder.toggleGhostHint(shouldGuideBeOn);
-    }
-
-    // Context disambiguation hint
-    if (this.dom.promptHint) {
-      if (word.characterCount === 1) {
-        this.dom.promptHint.textContent = `Context Hint: "${word.english}"`;
-        if (this.dom.promptHintBox) this.dom.promptHintBox.classList.remove('opacity-0');
-      } else {
-        this.dom.promptHint.textContent = `Context Hint: "[compound] ${word.characterCount} characters"`;
-      }
     }
 
     if (this.getMode() === 'builder') {
@@ -1552,6 +1653,35 @@ export class WordTrainerEngineController {
 
     if (this.dom.batchIndicatorLabel) {
       this.dom.batchIndicatorLabel.textContent = `Phase ${this.activePhase} • Mastered ${completedCount}/${totalWords} Words`;
+    }
+  }
+
+  updatePromptDisplay(isGuideVisible = this.effectiveGuideOn) {
+    const mode = this.getMode();
+    if (this.dom.promptModeSubtitle) {
+      this.dom.promptModeSubtitle.textContent = (mode === 'builder') ? 'LISTEN & BUILD' : 'LISTEN & WRITE';
+    }
+
+    const word = this.activeWord;
+    if (!word) return;
+
+    if (this.dom.promptPassBadge) {
+      this.dom.promptPassBadge.textContent = `${word.hsk_level || 'HSK'} • PHASE ${this.activePhase}`;
+    }
+
+    const showPinyin = Boolean(isGuideVisible);
+    if (this.dom.promptPinyin) {
+      this.dom.promptPinyin.textContent = word.pinyin || '';
+      if (this.dom.promptPinyin.classList) {
+        this.dom.promptPinyin.classList.toggle('hidden', !showPinyin);
+      }
+    }
+
+    if (this.dom.promptMeaning) {
+      this.dom.promptMeaning.textContent = getConciseEnglish(word);
+      if (this.dom.promptMeaning.classList) {
+        this.dom.promptMeaning.classList.remove('hidden');
+      }
     }
   }
 
@@ -1642,8 +1772,9 @@ export class WordTrainerEngineController {
     targetEl.innerHTML = '';
     targetEl.className = 'absolute inset-0 w-full h-full pointer-events-none transition-opacity duration-150 z-[15]';
     targetEl.style.zIndex = '15';
-    targetEl.style.opacity = this.isScaffoldOn ? '1' : '0';
-    targetEl.style.visibility = this.isScaffoldOn ? 'visible' : 'hidden';
+    const isGuideActive = (this.effectiveGuideOn !== undefined) ? Boolean(this.effectiveGuideOn) : Boolean(this.isScaffoldOn);
+    targetEl.style.opacity = isGuideActive ? '1' : '0';
+    targetEl.style.visibility = isGuideActive ? 'visible' : 'hidden';
 
     const rect = this.dom.drawingCanvasWrapper ? this.dom.drawingCanvasWrapper.getBoundingClientRect() : null;
     const actualW = rect ? Math.round(rect.width) : 0;
@@ -1654,7 +1785,7 @@ export class WordTrainerEngineController {
         width: size,
         height: size,
         padding: Math.round(size * 0.08),
-        showOutline: this.isScaffoldOn,
+        showOutline: isGuideActive,
         showCharacter: false,
         strokeAnimationSpeed: 1.5,
         delayBetweenStrokes: 120,
@@ -1700,22 +1831,25 @@ export class WordTrainerEngineController {
   // 6. SCAFFOLDING & CANVAS CONTROLS
   // ----------------------------------------------------
   toggleScaffolding(forcedState) {
-    this.isScaffoldOn = (forcedState !== undefined) ? forcedState : !this.isScaffoldOn;
-    this.state.scaffoldDefault = this.isScaffoldOn;
+    const currentEffective = (this.effectiveGuideOn !== undefined) ? Boolean(this.effectiveGuideOn) : Boolean(this.isScaffoldOn);
+    const nextState = (forcedState !== undefined) ? Boolean(forcedState) : !currentEffective;
+    this.isScaffoldOn = nextState;
+    this.effectiveGuideOn = nextState;
+    this.state.scaffoldDefault = nextState;
     try {
       if (typeof localStorage !== 'undefined') {
-        localStorage.setItem('mandarin_trainer_guide_mode', this.isScaffoldOn ? 'on' : 'off');
+        localStorage.setItem('mandarin_trainer_guide_mode', nextState ? 'on' : 'off');
       }
     } catch (_) {}
     this.updateScaffoldBtnUI();
 
     if (this.dom.hanziTargetCanvas) {
-      this.dom.hanziTargetCanvas.style.opacity = this.isScaffoldOn ? '1' : '0';
-      this.dom.hanziTargetCanvas.style.visibility = this.isScaffoldOn ? 'visible' : 'hidden';
+      this.dom.hanziTargetCanvas.style.opacity = nextState ? '1' : '0';
+      this.dom.hanziTargetCanvas.style.visibility = nextState ? 'visible' : 'hidden';
     }
 
     if (this.activeWriter) {
-      if (this.isScaffoldOn) {
+      if (nextState) {
         try { this.activeWriter.showOutline(); } catch (_) {}
       } else {
         try { this.activeWriter.hideOutline(); } catch (_) {}
@@ -1723,9 +1857,10 @@ export class WordTrainerEngineController {
     }
 
     if (this.componentBuilder) {
-      this.componentBuilder.toggleGhostHint(this.isScaffoldOn);
+      this.componentBuilder.toggleGhostHint(nextState);
     }
 
+    this.updatePromptDisplay(nextState);
     this.renderCanvasLayers();
     this.saveState();
   }
@@ -1733,7 +1868,8 @@ export class WordTrainerEngineController {
   updateScaffoldBtnUI() {
     const btn = this.dom.scaffoldToggleBtn;
     if (!btn) return;
-    if (this.isScaffoldOn) {
+    const isGuideActive = (this.effectiveGuideOn !== undefined) ? Boolean(this.effectiveGuideOn) : Boolean(this.isScaffoldOn);
+    if (isGuideActive) {
       btn.className = 'scaffold-on flex-1 py-1.5 lg:py-2.5 px-2 sm:px-3 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white border-2 border-black font-mono text-[10px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1 sm:gap-1.5 shadow-sm active-collapse cursor-pointer transition-all';
       btn.innerHTML = '<span class="material-symbols-outlined text-sm sm:text-base">visibility</span><span>GUIDE: ON</span>';
     } else {
@@ -2105,7 +2241,12 @@ export class WordTrainerEngineController {
     const placementCanvas = (typeof document !== 'undefined') ? document.getElementById('open-placement-canvas') : null;
     if (placementCanvas) placementCanvas.style.boxShadow = '';
 
+    const savedGuide = (typeof localStorage !== 'undefined') ? localStorage.getItem('mandarin_trainer_guide_mode') : null;
+    if (savedGuide !== null) {
+      this.isScaffoldOn = (savedGuide === 'on');
+    }
     const shouldGuideBeOn = this.isReappearanceStage ? false : this.isScaffoldOn;
+    this.setGuideMode(shouldGuideBeOn, !this.isReappearanceStage);
     const mode = this.getMode();
 
     if (mode === 'builder') {

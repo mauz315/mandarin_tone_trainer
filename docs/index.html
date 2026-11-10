@@ -26,8 +26,8 @@
         document.write('<script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"><\/script>');
       }
     </script>
-    <script type="module" crossorigin src="/mandarin_tone_trainer/assets/index-B-Rowh6E.js"></script>
-    <link rel="stylesheet" crossorigin href="/mandarin_tone_trainer/assets/index-BxidPaZM.css">
+    <script type="module" crossorigin src="/mandarin_tone_trainer/assets/index-BHI3wboS.js"></script>
+    <link rel="stylesheet" crossorigin href="/mandarin_tone_trainer/assets/index-DUeNE48n.css">
   </head>
   <body class="text-slate-900 font-grotesk h-full lg:min-h-[100dvh] antialiased selection:bg-badge-pink selection:text-white p-0 m-0 flex flex-col items-center justify-center overflow-hidden lg:overflow-x-hidden bg-canvas-acid">
 
@@ -1232,25 +1232,34 @@
           <div class="contents lg:flex lg:flex-col lg:col-span-5 xl:col-span-5 lg:gap-2.5">
             
             <!-- 1. ZONE 3: AUDIO & PROMPT ARENA (#prompt-arena) -->
-            <!-- Mobile: order-2 (compact 1-row bar under progress strip) -->
+            <!-- Mobile: order-2 (compact 50/50 row: left 2-line lexical cue, right PLAY AUDIO button) -->
             <!-- Desktop: Top of Right Column -->
-            <section id="prompt-arena" class="order-2 lg:order-1 w-full bg-white border-2 lg:border-[3px] border-black rounded-xl lg:rounded-2xl p-1.5 sm:p-2 lg:p-3.5 shadow-sm lg:shadow-hard-black shrink-0 flex flex-row lg:flex-col items-center lg:items-stretch justify-between gap-2 relative overflow-hidden">
-              <div class="flex items-center justify-between gap-1.5 shrink-0 lg:w-full">
+            <section id="prompt-arena" class="order-2 lg:order-1 w-full bg-white border-2 lg:border-[3px] border-black rounded-xl lg:rounded-2xl p-1.5 sm:p-2 lg:p-3.5 shadow-sm lg:shadow-hard-black shrink-0 grid grid-cols-2 items-center gap-2 lg:flex lg:flex-col lg:items-stretch lg:gap-2.5 relative overflow-hidden">
+              <div class="hidden lg:flex w-full items-center justify-between gap-1.5 shrink-0">
                 <div class="flex items-center gap-1.5">
                   <span id="prompt-task-badge" class="font-mono text-[9px] font-black uppercase tracking-wider bg-[#4C1D95] text-white px-2 py-0.5 rounded">
                     AUDIO PROMPT
                   </span>
-                  <span class="font-mono text-[9px] font-bold text-black/60 hidden lg:inline">
+                  <span id="prompt-mode-subtitle" class="font-mono text-[9px] font-bold text-black/60">
                     LISTEN &amp; BUILD
                   </span>
                 </div>
-                <span id="prompt-pass-badge" class="font-mono text-[9px] font-bold text-black/50 hidden lg:inline">HSK 1 • PASS 1</span>
+                <span id="prompt-pass-badge" class="font-mono text-[9px] font-bold text-black/50">HSK 1 • PHASE 1</span>
               </div>
 
-              <div class="flex-1 lg:flex-none flex items-center gap-2">
-                <!-- Compact on Mobile (py-1.5), Full on Desktop (lg:py-3) -->
-                <button id="audio-replay-btn" class="flex-1 py-1.5 lg:py-3 px-3 sm:px-4 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white border-2 border-black font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 sm:gap-2 shadow-sm lg:shadow-hard-black transition-all active-collapse cursor-pointer group" title="Replay Native Audio">
-                  <span class="material-symbols-outlined text-base sm:text-xl group-hover:scale-110 transition-transform">volume_up</span>
+              <div id="prompt-lexical-box" class="min-w-0 w-full h-[38px] sm:h-[42px] lg:h-[54px] flex flex-col justify-center overflow-hidden bg-slate-50 border border-black/15 rounded-xl px-2 sm:px-2.5 lg:px-3">
+                <div id="prompt-pinyin-line" class="w-full font-speed font-black italic text-[13px] sm:text-sm lg:text-lg text-[#4C1D95] leading-tight truncate">
+                  rì
+                </div>
+                <div id="prompt-meaning-line" class="w-full font-mono text-[11px] sm:text-xs lg:text-xs font-bold text-black/80 leading-tight truncate">
+                  day; date
+                </div>
+              </div>
+
+              <div class="w-full min-w-0 flex items-center">
+                <!-- Compact on Mobile (50% track), Full on Desktop (lg:py-3) -->
+                <button id="audio-replay-btn" class="w-full h-[38px] sm:h-[42px] lg:h-auto lg:py-3 px-2 sm:px-4 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white border-2 border-black font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider whitespace-nowrap flex items-center justify-center gap-1 sm:gap-2 shadow-sm lg:shadow-hard-black transition-all active-collapse cursor-pointer group" title="Replay Native Audio">
+                  <span class="material-symbols-outlined text-base sm:text-xl group-hover:scale-110 transition-transform shrink-0">volume_up</span>
                   <span>PLAY AUDIO</span>
                 </button>
               </div>

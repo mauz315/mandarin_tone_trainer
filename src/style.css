@@ -307,14 +307,14 @@
 .theme-builder #audio-replay-btn:hover {
   background-color: #047857 !important;
 }
-.theme-builder #prompt-hint-box {
+.theme-builder #prompt-lexical-box {
   background-color: #ECFDF5 !important;
   border-color: #A7F3D0 !important;
 }
-.theme-builder #prompt-hint-box span {
-  color: #059669 !important;
+.theme-builder #prompt-pinyin-line {
+  color: #065F46 !important;
 }
-.theme-builder #prompt-hint {
+.theme-builder #prompt-meaning-line {
   color: #064E3B !important;
 }
 .theme-builder #pass-badge {
@@ -425,6 +425,16 @@
 .theme-calligraphy #audio-replay-btn:hover,
 .theme-calligraphy #result-audio-replay-btn:hover {
   background-color: #B45309 !important;
+}
+.theme-calligraphy #prompt-lexical-box {
+  background-color: #FAF5FF !important;
+  border-color: #E9D5FF !important;
+}
+.theme-calligraphy #prompt-pinyin-line {
+  color: #4C1D95 !important;
+}
+.theme-calligraphy #prompt-meaning-line {
+  color: #1E1B2E !important;
 }
 
 /* Safe-area padding wrapper so #app background renders edge-to-edge behind status bar & home bar */
