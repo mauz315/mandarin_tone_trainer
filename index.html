@@ -1255,19 +1255,19 @@
             </section>
 
             <!-- 2. ZONE 5: INTERACTION FOOTER & DIAGNOSTIC TOAST (#interaction-footer) -->
-            <!-- Mobile: order-4 (pinned compact bottom action bar) -->
+            <!-- Mobile: order-4 (pinned compact bottom action bar, full-width feedback toast) -->
             <!-- Desktop: Middle of Right Column -->
             <section id="interaction-footer" class="order-4 lg:order-2 w-full bg-white border-2 lg:border-[3px] border-black rounded-xl lg:rounded-2xl p-2 lg:p-3.5 shadow-hard-black shrink-0 flex flex-col gap-1.5 lg:gap-2.5">
-              <div class="grid grid-cols-[1fr_auto] lg:flex lg:flex-col gap-1.5 lg:gap-2.5 items-center lg:items-stretch">
-                <div class="contents lg:flex lg:items-center lg:justify-between lg:gap-2">
-                  <div class="hidden lg:flex items-center gap-2">
-                    <span id="interaction-task-badge" class="font-mono text-[9px] font-black uppercase tracking-wider bg-[#4C1D95] text-white px-2 py-0.5 rounded">
+              <div class="flex flex-col gap-1.5 lg:gap-2.5 min-w-0">
+                <div class="flex items-center justify-between gap-2 min-w-0">
+                  <div class="flex items-center gap-1.5 lg:gap-2 min-w-0">
+                    <span id="interaction-task-badge" class="font-mono text-[9px] font-black uppercase tracking-wider bg-[#4C1D95] text-white px-2 py-0.5 rounded shrink-0">
                       ORTHOGRAPHY
                     </span>
-                    <span id="interaction-task-subtext" class="font-mono text-[10px] font-bold text-black/60 uppercase">VERIFICATION</span>
+                    <span id="interaction-task-subtext" class="hidden sm:inline font-mono text-[10px] font-bold text-black/60 uppercase truncate">VERIFICATION</span>
                   </div>
                   <!-- Attempts Dot Pips -->
-                  <div id="attempt-indicator" class="col-start-2 row-start-1 flex items-center gap-1 bg-black/5 px-2 py-1 rounded-lg border border-black/15 font-mono text-[9px] font-bold shrink-0">
+                  <div id="attempt-indicator" class="flex items-center gap-1 bg-black/5 px-2 py-0.5 lg:py-1 rounded-lg border border-black/15 font-mono text-[9px] font-bold shrink-0">
                     <span class="text-black/60 uppercase">TRIES:</span>
                     <div id="attempt-pips" class="flex items-center gap-0.5 sm:gap-1 text-xs sm:text-sm font-black text-[#D97706]">
                       <span class="pip text-[#D97706]">●</span>
@@ -1277,83 +1277,87 @@
                   </div>
                 </div>
 
-                <!-- Compact Inline Status Toast Banner (#drawing-feedback-toast) -->
-                <div id="drawing-feedback-toast" class="col-start-1 row-start-1 w-full rounded-xl py-1.5 px-2 lg:p-3 border-2 transition-all font-mono text-[11px] lg:text-xs font-bold shadow-xs flex items-center gap-1.5 lg:gap-2.5 bg-slate-50 border-black/20 text-black/80 min-w-0">
-                  <span id="toast-feedback-icon" class="material-symbols-outlined text-base lg:text-lg shrink-0 text-black/60">info</span>
-                  <p id="toast-feedback-text" class="text-[11px] lg:text-xs font-bold leading-tight text-black/90 line-clamp-2 lg:line-clamp-none">
+                <!-- Full-Width Inline Status Toast Banner (#drawing-feedback-toast) -->
+                <div id="drawing-feedback-toast" class="w-full rounded-xl py-1.5 px-2.5 lg:p-3 border-2 transition-all font-mono text-[11px] lg:text-xs font-bold shadow-xs flex items-start gap-2 lg:gap-2.5 bg-slate-50 border-black/20 text-black/80 min-w-0 max-h-[30dvh] lg:max-h-none overflow-y-auto lg:overflow-visible overscroll-contain">
+                  <span id="toast-feedback-icon" class="material-symbols-outlined text-base lg:text-lg leading-none shrink-0 text-black/60">info</span>
+                  <p id="toast-feedback-text" class="flex-1 min-w-0 text-[11px] lg:text-xs font-bold leading-snug text-black/90 break-words whitespace-normal">
                     Assemble components or draw strokes, then submit.
                   </p>
                 </div>
               </div>
 
               <!-- Submit Button (Deep Midnight Violet in Calligraphy / Celadon in Builder) -->
-              <button id="submit-word-btn" class="w-full py-2.5 lg:py-4 px-4 bg-[#4C1D95] hover:bg-[#3B0764] text-white border-[2.5px] lg:border-[3px] border-black rounded-xl lg:rounded-2xl shadow-hard-black font-speed font-black italic text-sm sm:text-base lg:text-lg uppercase tracking-wider flex items-center justify-center gap-2 active-collapse cursor-pointer transition-all lg:mt-1">
+              <button id="submit-word-btn" class="w-full py-2 sm:py-2.5 lg:py-4 px-4 bg-[#4C1D95] hover:bg-[#3B0764] text-white border-[2.5px] lg:border-[3px] border-black rounded-xl lg:rounded-2xl shadow-hard-black font-speed font-black italic text-sm sm:text-base lg:text-lg uppercase tracking-wider flex items-center justify-center gap-2 active-collapse cursor-pointer transition-all lg:mt-1">
                 <span>SUBMIT ANSWER</span>
                 <span class="material-symbols-outlined text-base sm:text-lg lg:text-xl">arrow_forward</span>
               </button>
             </section>
 
             <!-- 3. ZONE 6: IN-PLACE RESULT & THREE-TIER FEEDBACK PANEL (#result-feedback-panel) -->
-            <!-- Mobile View B: Contained compact card centered in leftover space (no vertical over-expansion, no scroll) -->
+            <!-- Mobile View B: Contained compact card centered in leftover space; scrolls internally only if taller than viewport -->
             <!-- Desktop: Replaces #interaction-footer in Right Column -->
-            <section id="result-feedback-panel" class="order-3 lg:order-2 w-full flex-none bg-white border-[3px] border-black rounded-2xl p-3 sm:p-4 shadow-hard-black shrink flex flex-col justify-start lg:justify-between gap-2 lg:gap-3 relative hidden overflow-hidden my-auto lg:my-0">
+            <section id="result-feedback-panel" class="order-3 lg:order-2 w-full flex-none bg-white border-[3px] border-black rounded-2xl p-3 sm:p-4 shadow-hard-black flex flex-col justify-start lg:justify-between gap-2 lg:gap-3 relative hidden overflow-hidden lg:overflow-visible my-auto lg:my-0">
               
-              <!-- A. Word Result Header & Mobile Inline Mi Zi Ge Showcase (Decision B) -->
-              <div id="result-word-header" class="flex flex-col gap-1.5 sm:gap-2 pb-2 border-b-2 border-black/10 shrink-0">
-                <div class="flex items-center justify-between gap-2.5">
-                  <div class="flex items-baseline gap-2.5 min-w-0 flex-wrap">
-                    <span id="result-hanzi" class="hidden lg:inline font-chinese font-black text-3xl sm:text-4xl text-[#1E1B2E] tracking-tight">日</span>
-                    <span id="result-pinyin" class="font-speed font-black italic text-xl sm:text-2xl lg:text-xl text-[#4C1D95] truncate">rì</span>
-                  </div>
-                  <!-- Tactile Audio Replay Button -->
-                  <button id="result-audio-replay-btn" type="button" class="py-1.5 sm:py-2 px-3 sm:px-3.5 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white border-2 border-black font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-sm active-collapse cursor-pointer transition-all shrink-0" title="Replay native audio">
-                    <span class="material-symbols-outlined text-base">volume_up</span>
-                    <span>REPLAY</span>
-                  </button>
+              <!-- A. Top Pinyin & Audio Replay Bar (Pinned at Top of Result Card) -->
+              <div class="flex items-center justify-between gap-2.5 pb-1.5 border-b-2 border-black/10 shrink-0">
+                <div class="flex items-baseline gap-2.5 min-w-0 flex-wrap flex-1">
+                  <span id="result-hanzi" class="hidden lg:inline font-chinese font-black text-3xl sm:text-4xl text-[#1E1B2E] tracking-tight shrink-0">日</span>
+                  <span id="result-pinyin" class="font-speed font-black italic text-xl sm:text-2xl lg:text-xl text-[#4C1D95] break-words leading-tight min-w-0">rì</span>
                 </div>
-
-                <!-- Mobile Inline Mi Zi Ge Showcase Square(s) for Solution Display & Stroke Order Replay -->
-                <div id="result-showcase-grid" class="flex lg:hidden items-center justify-center gap-2 py-0.5 shrink-0"></div>
-
-                <!-- English Meaning Box -->
-                <div id="result-meaning-box" class="w-full bg-[#FAF5FF] border border-[#E9D5FF] rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 flex items-start justify-between gap-2">
-                  <div class="flex-1 min-w-0">
-                    <span id="result-meaning-label" class="font-mono text-[9px] font-black uppercase text-[#6D28D9] block">ENGLISH MEANING:</span>
-                    <p id="result-meaning" class="font-mono text-xs sm:text-sm text-[#1E1B2E] font-bold leading-snug">
-                      sun, day; daytime
-                    </p>
-                  </div>
-                  <div id="result-radical-tag" class="text-right shrink-0 max-w-[45%]">
-                    <span class="font-mono text-[9px] font-black uppercase text-black/50 block">RADICAL:</span>
-                    <span id="result-decomposition" class="font-chinese text-xs font-bold text-black/80 leading-snug block break-words">日 (sun)</span>
-                  </div>
-                </div>
+                <!-- Tactile Audio Replay Button -->
+                <button id="result-audio-replay-btn" type="button" class="py-1.5 sm:py-2 px-3 sm:px-3.5 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white border-2 border-black font-mono text-[11px] sm:text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-sm active-collapse cursor-pointer transition-all shrink-0" title="Replay native audio">
+                  <span class="material-symbols-outlined text-base">volume_up</span>
+                  <span>REPLAY</span>
+                </button>
               </div>
 
-              <!-- B. Detailed Diagnostic Feedback Card -->
-              <div id="result-feedback-group" class="shrink min-h-0 flex flex-col gap-1.5 sm:gap-2">
-                
-                <!-- Drawing / Assembly Diagnostic Feedback Card -->
-                <div id="feedback-drawing-card" class="w-full rounded-xl p-2.5 sm:p-3 border-2 transition-all font-mono text-xs shadow-xs bg-emerald-50 border-emerald-500 text-emerald-950 flex flex-col gap-1.5">
-                  <div class="flex items-center justify-between gap-2 border-b border-black/10 pb-1">
-                    <div class="flex items-center gap-1.5">
-                      <span class="material-symbols-outlined text-emerald-600 text-base" id="result-feedback-icon">verified</span>
-                      <span id="result-feedback-title" class="text-[9px] font-black uppercase tracking-wider text-black/70">HANZI EVALUATION</span>
+              <!-- B. Adaptive Result Body (Natural compact fit; internal scroll safety net on constrained screens) -->
+              <div id="result-body" class="shrink min-h-0 overflow-y-auto lg:overflow-visible overscroll-contain flex flex-col gap-2 lg:gap-2.5">
+                <!-- Word Meaning, Radical & Mobile Inline Mi Zi Ge Showcase (Decision B) -->
+                <div id="result-word-header" class="flex flex-col gap-1.5 sm:gap-2 shrink-0">
+                  <!-- Mobile Inline Mi Zi Ge Showcase Square(s) for Solution Display & Stroke Order Replay -->
+                  <div id="result-showcase-grid" class="flex lg:hidden items-center justify-center gap-2 py-0.5 shrink-0"></div>
+
+                  <!-- English Meaning Box -->
+                  <div id="result-meaning-box" class="w-full bg-[#FAF5FF] border border-[#E9D5FF] rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 flex items-start justify-between gap-2 min-w-0">
+                    <div class="flex-1 min-w-0">
+                      <span id="result-meaning-label" class="font-mono text-[9px] font-black uppercase text-[#6D28D9] block">ENGLISH MEANING:</span>
+                      <p id="result-meaning" class="font-mono text-xs sm:text-sm text-[#1E1B2E] font-bold leading-snug break-words whitespace-normal">
+                        sun, day; daytime
+                      </p>
                     </div>
-                    <span id="drawing-tier-badge" class="px-2 py-0.5 rounded-full font-black text-[10px] bg-emerald-200/70 text-emerald-900 border border-emerald-600">
-                      🎯 Perfect Form!
-                    </span>
+                    <div id="result-radical-tag" class="text-right shrink-0 max-w-[45%]">
+                      <span class="font-mono text-[9px] font-black uppercase text-black/50 block">RADICAL:</span>
+                      <span id="result-decomposition" class="font-chinese text-xs font-bold text-black/80 leading-snug block break-words">日 (sun)</span>
+                    </div>
                   </div>
-                  <p id="result-feedback-text" class="text-xs sm:text-sm lg:text-xs font-bold leading-snug text-black/90">
-                    Flawless execution with canonical stroke order and accurate angles.
-                  </p>
-                  <!-- Optional "See Stroke Order" Button (Animates Inline Mi Zi Ge Showcase on Mobile & Canvas on Desktop) -->
-                  <button id="result-demo-order-btn" type="button" class="hidden self-start mt-0.5 py-1.5 px-3 rounded-lg bg-white hover:bg-slate-50 text-[#4C1D95] border-2 border-black/30 font-mono text-[10px] font-black uppercase flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-xs">
-                    <span class="material-symbols-outlined text-xs">replay</span>
-                    <span>SEE STROKE ORDER</span>
-                  </button>
                 </div>
 
+                <!-- Detailed Diagnostic Feedback Card -->
+                <div id="result-feedback-group" class="shrink-0 flex flex-col gap-1.5 sm:gap-2 min-w-0">
+                  
+                  <!-- Drawing / Assembly Diagnostic Feedback Card -->
+                  <div id="feedback-drawing-card" class="w-full rounded-xl p-2.5 sm:p-3 border-2 transition-all font-mono text-xs shadow-xs bg-emerald-50 border-emerald-500 text-emerald-950 flex flex-col gap-1.5 min-w-0 shrink-0">
+                    <div class="flex flex-wrap items-center justify-between gap-1.5 border-b border-black/10 pb-1">
+                      <div class="flex items-center gap-1.5 min-w-0">
+                        <span class="material-symbols-outlined text-emerald-600 text-base shrink-0" id="result-feedback-icon">verified</span>
+                        <span id="result-feedback-title" class="text-[9px] font-black uppercase tracking-wider text-black/70">HANZI EVALUATION</span>
+                      </div>
+                      <span id="drawing-tier-badge" class="px-2 py-0.5 rounded-full font-black text-[10px] leading-tight max-w-full whitespace-normal text-center bg-emerald-200/70 text-emerald-900 border border-emerald-600">
+                        🎯 Perfect Form!
+                      </span>
+                    </div>
+                    <p id="result-feedback-text" class="text-xs sm:text-[13px] lg:text-xs font-bold leading-snug text-black/90 break-words whitespace-normal">
+                      Flawless execution with canonical stroke order and accurate angles.
+                    </p>
+                    <!-- Optional "See Stroke Order" Button (Animates Inline Mi Zi Ge Showcase on Mobile & Canvas on Desktop) -->
+                    <button id="result-demo-order-btn" type="button" class="hidden self-start mt-0.5 py-1.5 px-3 rounded-lg bg-white hover:bg-slate-50 text-[#4C1D95] border-2 border-black/30 font-mono text-[10px] font-black uppercase flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-xs">
+                      <span class="material-symbols-outlined text-xs">replay</span>
+                      <span>SEE STROKE ORDER</span>
+                    </button>
+                  </div>
+
+                </div>
               </div>
 
               <!-- C. Dual Action Row (Try Again + Next Word - Mobile & Desktop) -->

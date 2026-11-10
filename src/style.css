@@ -520,7 +520,9 @@
     min-width: 0 !important;
   }
 
-  #stroke-guide-modal .overflow-y-auto {
+  #stroke-guide-modal .overflow-y-auto,
+  #drawing-feedback-toast,
+  #result-body {
     overscroll-behavior: contain;
     touch-action: pan-y;
     -webkit-overflow-scrolling: touch;

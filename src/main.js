@@ -511,6 +511,9 @@ function setupMenu() {
         if (typeof window.WordTrainerEngine.closeMobilePhaseBar === 'function') {
           window.WordTrainerEngine.closeMobilePhaseBar();
         }
+        if (typeof window.WordTrainerEngine.hidePhaseCompleteModal === 'function') {
+          window.WordTrainerEngine.hidePhaseCompleteModal();
+        }
         if (typeof window.WordTrainerEngine.clearResultShowcase === 'function') {
           window.WordTrainerEngine.clearResultShowcase();
         }

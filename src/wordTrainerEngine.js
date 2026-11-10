@@ -69,6 +69,8 @@ export class WordTrainerEngineController {
     this.activeWriter = null;
     this.resultShowcaseWriters = [];
     this._showcaseToken = 0;
+    this._wordSessionToken = 0;
+    this._completedModalPhase = null;
     this._lastWriterSize = 0;
     this._lastCanvasCssSize = 0;
     this._canvasResizeObserver = null;
@@ -137,6 +139,8 @@ export class WordTrainerEngineController {
   }
 
   resetAllProgress() {
+    this.hidePhaseCompleteModal();
+    this._completedModalPhase = null;
     this.state = this.getDefaultState();
     this.saveState();
     this.switchPhase(1);
@@ -160,6 +164,9 @@ export class WordTrainerEngineController {
       }
       // Load independent progress state for the newly selected mode
       this.closeMobilePhaseBar();
+      this.hidePhaseCompleteModal();
+      this._completedModalPhase = null;
+      if (this.dom.cardRevealModal) this.dom.cardRevealModal.classList.add('hidden');
       this.clearResultShowcase();
       if (this.dom.screen) this.dom.screen.classList.remove('mobile-result-active');
       this.state = this.loadState();
@@ -548,6 +555,9 @@ export class WordTrainerEngineController {
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
           this.closeMobilePhaseBar();
+          if (this.dom.phaseCompleteModal && !this.dom.phaseCompleteModal.classList.contains('hidden')) {
+            this.stayInCompletedPhase();
+          }
         }
       });
       document.addEventListener('click', (e) => {
@@ -670,7 +680,6 @@ export class WordTrainerEngineController {
     if (this.dom.advancePhaseBtn) {
       this.dom.advancePhaseBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (this.dom.phaseCompleteModal) this.dom.phaseCompleteModal.classList.add('hidden');
         this.advanceToNextPhase();
       });
     }
@@ -678,7 +687,7 @@ export class WordTrainerEngineController {
     if (this.dom.stayPhaseBtn) {
       this.dom.stayPhaseBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (this.dom.phaseCompleteModal) this.dom.phaseCompleteModal.classList.add('hidden');
+        this.stayInCompletedPhase();
       });
     }
   }
@@ -932,7 +941,7 @@ export class WordTrainerEngineController {
 
       // No intrusive error or premature feedback while drawing.
       // Full evaluation with spatial normalization is performed upon submission.
-      this.updateFeedback('neutral', 'Draw the character and select its tone to verify.');
+      this.updateFeedback('neutral', 'Draw the character strokes on the grid to verify.');
     };
 
     // Modern Pointer Events handle mouse, trackpad, pen, and touch with sub-pixel pointer capture
@@ -1292,6 +1301,11 @@ export class WordTrainerEngineController {
   // ----------------------------------------------------
   switchPhase(phaseId) {
     if (phaseId < 1 || phaseId > 5) phaseId = 1;
+    this.hidePhaseCompleteModal();
+    this._completedModalPhase = null;
+    if (this.dom && this.dom.cardRevealModal) {
+      this.dom.cardRevealModal.classList.add('hidden');
+    }
     this.activePhase = phaseId;
 
     if (!this.state.phases[phaseId]) {
@@ -1315,7 +1329,8 @@ export class WordTrainerEngineController {
       const isComp = pData && pData.status === 'completed';
 
       btn.classList.remove('phase-active', 'bg-[#4C1D95]', 'text-white', 'shadow-hard-black',
-        'phase-completed', 'phase-available', 'bg-white', 'text-black', 'shadow-sm');
+        'phase-completed', 'bg-emerald-100', 'text-emerald-900', 'border-emerald-600',
+        'phase-available', 'bg-white', 'text-black', 'shadow-sm');
 
       if (isCur) {
         btn.classList.add('phase-active', 'bg-[#4C1D95]', 'text-white', 'shadow-hard-black');
@@ -1370,22 +1385,29 @@ export class WordTrainerEngineController {
   loadBatchForActivePhase() {
     const pData = this.state.phases[this.activePhase];
     const words = this.phaseWordsMap[this.activePhase] || [];
-    const completedSet = new Set(pData.completedWordIds || []);
+    if (words.length === 0) return;
+
+    const completedSet = new Set((pData && pData.completedWordIds) || []);
     const unmastered = words.filter(w => !completedSet.has(w.id));
 
-    if (unmastered.length === 0) {
+    if (unmastered.length === 0 && pData && pData.status !== 'completed') {
       pData.status = 'completed';
       this.saveState();
       this.updatePhaseStepperUI();
-      this.triggerPhaseCompleteModal();
-      return;
     }
 
-    // Fisher-Yates shuffle unmastered words to guarantee varied selection
-    const shuffled = [...unmastered];
+    // Practice pool: unmastered words while progressing, or all phase words when revisiting a completed phase
+    const practicePool = unmastered.length > 0 ? unmastered : words;
+
+    // Fisher-Yates shuffle practice pool to guarantee varied selection
+    const shuffled = [...practicePool];
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    if (shuffled.length > 1 && this.activeWord && shuffled[0].id === this.activeWord.id) {
+      [shuffled[0], shuffled[1]] = [shuffled[1], shuffled[0]];
     }
 
     // Adaptive interval K: Phase 1 & 2 = 5 words; Phase 3, 4, 5 = 10 words
@@ -1424,6 +1446,8 @@ export class WordTrainerEngineController {
   // ----------------------------------------------------
   loadWord(word) {
     if (!word) return;
+    this._wordSessionToken = (this._wordSessionToken || 0) + 1;
+    const sessionToken = this._wordSessionToken;
     this.activeWord = word;
     this.activeCharIndex = 0;
     this.attemptsLeft = 3;
@@ -1449,6 +1473,7 @@ export class WordTrainerEngineController {
     // Pre-fetch stroke data for all characters in the word
     for (let i = 0; i < charCount; i++) {
       this.fetchCharacterData(chars[i]).then(data => {
+        if (this._wordSessionToken !== sessionToken) return;
         if (data && !this.charMatchers[i]) {
           const m = new StrokeMatcher();
           const size = this.getCanvasSize();
@@ -1546,8 +1571,10 @@ export class WordTrainerEngineController {
     this.userDrawnStrokes = [...(this.charUserStrokes[index] || [])];
 
     // Ensure matcher is loaded for this character
+    const sessionToken = this._wordSessionToken;
     if (!this.charMatchers[index]) {
       const charData = await this.fetchCharacterData(targetChar);
+      if (this._wordSessionToken !== sessionToken) return;
       if (charData) {
         const m = new StrokeMatcher();
         const size = this.getCanvasSize();
@@ -1814,7 +1841,9 @@ export class WordTrainerEngineController {
             this.reappearanceRetryQueue.push(failedWord);
           }
         }
+        const sessionToken = this._wordSessionToken;
         setTimeout(() => {
+          if (this._wordSessionToken !== sessionToken) return;
           this.showResultFeedbackPanel(false, worstGrade || {
             status: 'DIAGNOSTIC_FAIL',
             tier: 3,
@@ -1850,12 +1879,14 @@ export class WordTrainerEngineController {
           pData.status = 'completed';
           this.saveState();
           this.updatePhaseStepperUI();
-          this.triggerPhaseCompleteModal();
+          this.triggerPhaseCompleteModal(this.activePhase);
         }
       }
     }
 
+    const sessionToken = this._wordSessionToken;
     setTimeout(() => {
+      if (this._wordSessionToken !== sessionToken) return;
       this.showResultFeedbackPanel(true, passGrade);
     }, 400);
   }
@@ -1888,7 +1919,9 @@ export class WordTrainerEngineController {
             this.reappearanceRetryQueue.push(failedWord);
           }
         }
+        const sessionToken = this._wordSessionToken;
         setTimeout(() => {
+          if (this._wordSessionToken !== sessionToken) return;
           this.showResultFeedbackPanel(false, {
             status: 'DIAGNOSTIC_FAIL',
             tier: 3,
@@ -1923,17 +1956,20 @@ export class WordTrainerEngineController {
           pData.status = 'completed';
           this.saveState();
           this.updatePhaseStepperUI();
-          this.triggerPhaseCompleteModal();
+          this.triggerPhaseCompleteModal(this.activePhase);
         }
       }
     }
 
+    const sessionToken = this._wordSessionToken;
     if (this.componentBuilder) {
       this.componentBuilder.playCrystallizationAnimation(() => {
+        if (this._wordSessionToken !== sessionToken) return;
         this.showResultFeedbackPanel(true, gradeResult);
       });
     } else {
       setTimeout(() => {
+        if (this._wordSessionToken !== sessionToken) return;
         this.showResultFeedbackPanel(true, gradeResult);
       }, 400);
     }
@@ -1997,18 +2033,18 @@ export class WordTrainerEngineController {
 
       if (isMastered) {
         if (grade.tier === 1) {
-          this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-600';
-          this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-2.5 sm:p-3 border-2 transition-all font-mono text-xs shadow-xs bg-emerald-50 border-emerald-500 text-emerald-950 flex flex-col gap-1.5';
+          this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] leading-tight max-w-full whitespace-normal text-center bg-emerald-100 text-emerald-800 border border-emerald-600';
+          this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-2.5 sm:p-3 border-2 transition-all font-mono text-xs shadow-xs bg-emerald-50 border-emerald-500 text-emerald-950 flex flex-col gap-1.5 min-w-0 shrink-0';
           if (this.dom.resultFeedbackIcon) {
-            this.dom.resultFeedbackIcon.className = 'material-symbols-outlined text-emerald-600 text-base';
+            this.dom.resultFeedbackIcon.className = 'material-symbols-outlined text-emerald-600 text-base shrink-0';
             this.dom.resultFeedbackIcon.textContent = 'verified';
           }
         } else {
           // Tier 2 Soft Pass
-          this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-teal-100 text-teal-900 border border-teal-600';
-          this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-2.5 sm:p-3 border-2 transition-all font-mono text-xs shadow-xs bg-teal-50 border-teal-500 text-teal-950 flex flex-col gap-1.5';
+          this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] leading-tight max-w-full whitespace-normal text-center bg-teal-100 text-teal-900 border border-teal-600';
+          this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-2.5 sm:p-3 border-2 transition-all font-mono text-xs shadow-xs bg-teal-50 border-teal-500 text-teal-950 flex flex-col gap-1.5 min-w-0 shrink-0';
           if (this.dom.resultFeedbackIcon) {
-            this.dom.resultFeedbackIcon.className = 'material-symbols-outlined text-teal-600 text-base';
+            this.dom.resultFeedbackIcon.className = 'material-symbols-outlined text-teal-600 text-base shrink-0';
             this.dom.resultFeedbackIcon.textContent = 'lightbulb';
           }
         }
@@ -2021,10 +2057,10 @@ export class WordTrainerEngineController {
         }
       } else {
         // Attempts exhausted / Review Mode
-        this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] bg-amber-100 text-amber-900 border border-amber-600';
-        this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-2.5 sm:p-3 border-2 transition-all font-mono text-xs shadow-xs bg-amber-50 border-amber-500 text-amber-950 flex flex-col gap-1.5';
+        this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] leading-tight max-w-full whitespace-normal text-center bg-amber-100 text-amber-900 border border-amber-600';
+        this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-2.5 sm:p-3 border-2 transition-all font-mono text-xs shadow-xs bg-amber-50 border-amber-500 text-amber-950 flex flex-col gap-1.5 min-w-0 shrink-0';
         if (this.dom.resultFeedbackIcon) {
-          this.dom.resultFeedbackIcon.className = 'material-symbols-outlined text-amber-600 text-base';
+          this.dom.resultFeedbackIcon.className = 'material-symbols-outlined text-amber-600 text-base shrink-0';
           this.dom.resultFeedbackIcon.textContent = 'auto_stories';
         }
         if (this.dom.resultDemoOrderBtn) {
@@ -2051,6 +2087,7 @@ export class WordTrainerEngineController {
 
   retryCurrentWord() {
     if (!this.activeWord) return;
+    this._wordSessionToken = (this._wordSessionToken || 0) + 1;
 
     this.closeMobilePhaseBar();
     this.clearResultShowcase();
@@ -2147,7 +2184,7 @@ export class WordTrainerEngineController {
     if (status === 'correct' || status === 'success') {
       banner.classList.add('bg-emerald-50', 'border-emerald-500', 'text-emerald-950');
       if (icon) {
-        icon.className = 'material-symbols-outlined text-emerald-600 text-base lg:text-lg shrink-0';
+        icon.className = 'material-symbols-outlined text-emerald-600 text-base lg:text-lg leading-none shrink-0';
         icon.textContent = 'verified';
       }
     } else if (status === 'error' || status === 'hanzi-error' || status === 'tone-error' || status === 'both-error') {
@@ -2155,13 +2192,13 @@ export class WordTrainerEngineController {
       void banner.offsetWidth;
       banner.classList.add('shake-subtle');
       if (icon) {
-        icon.className = 'material-symbols-outlined text-amber-600 text-base lg:text-lg shrink-0';
+        icon.className = 'material-symbols-outlined text-amber-600 text-base lg:text-lg leading-none shrink-0';
         icon.textContent = 'warning';
       }
     } else {
       banner.classList.add('bg-white', 'border-black/20', 'text-black/70');
       if (icon) {
-        icon.className = 'material-symbols-outlined text-black/50 text-base lg:text-lg shrink-0';
+        icon.className = 'material-symbols-outlined text-black/50 text-base lg:text-lg leading-none shrink-0';
         icon.textContent = 'info';
       }
     }
@@ -2241,32 +2278,58 @@ export class WordTrainerEngineController {
     }
   }
 
-  triggerPhaseCompleteModal() {
+  triggerPhaseCompleteModal(phaseId = this.activePhase) {
     this.closeMobilePhaseBar();
     const modal = this.dom.phaseCompleteModal;
     if (!modal) return;
 
-    const words = this.phaseWordsMap[this.activePhase] || [];
+    const targetPhase = (phaseId >= 1 && phaseId <= 5) ? phaseId : (this.activePhase || 1);
+    this._completedModalPhase = targetPhase;
+
+    const words = this.phaseWordsMap[targetPhase] || [];
     if (this.dom.phaseCompleteTitle) {
-      this.dom.phaseCompleteTitle.textContent = `🎉 Phase ${this.activePhase} Complete!`;
+      this.dom.phaseCompleteTitle.textContent = `🎉 Phase ${targetPhase} Complete!`;
     }
     if (this.dom.phaseCompleteSummary) {
       this.dom.phaseCompleteSummary.textContent = `You have mastered all ${words.length} vocabulary words in this phase.`;
     }
     if (this.dom.advancePhaseBtn) {
-      if (this.activePhase < 5) {
-        this.dom.advancePhaseBtn.innerHTML = `<span>Advance to Phase ${this.activePhase + 1}</span><span class="material-symbols-outlined text-base">arrow_forward</span>`;
+      if (targetPhase < 5) {
+        this.dom.advancePhaseBtn.innerHTML = `<span>Advance to Phase ${targetPhase + 1}</span><span class="material-symbols-outlined text-base">arrow_forward</span>`;
         this.dom.advancePhaseBtn.classList.remove('hidden');
       } else {
         this.dom.advancePhaseBtn.classList.add('hidden');
       }
     }
+    if (this.dom.stayPhaseBtn) {
+      this.dom.stayPhaseBtn.textContent = `Stay & Practice Phase ${targetPhase}`;
+    }
     modal.classList.remove('hidden');
   }
 
+  hidePhaseCompleteModal() {
+    if (this.dom && this.dom.phaseCompleteModal) {
+      this.dom.phaseCompleteModal.classList.add('hidden');
+    }
+  }
+
+  stayInCompletedPhase() {
+    const targetPhase = (this._completedModalPhase >= 1 && this._completedModalPhase <= 5)
+      ? this._completedModalPhase
+      : (this.activePhase || 1);
+    this._completedModalPhase = null;
+    this.hidePhaseCompleteModal();
+    this.switchPhase(targetPhase);
+  }
+
   advanceToNextPhase() {
-    if (this.activePhase < 5) {
-      this.switchPhase(this.activePhase + 1);
+    const sourcePhase = (this._completedModalPhase >= 1 && this._completedModalPhase <= 5)
+      ? this._completedModalPhase
+      : (this.activePhase || 1);
+    this._completedModalPhase = null;
+    this.hidePhaseCompleteModal();
+    if (sourcePhase < 5) {
+      this.switchPhase(sourcePhase + 1);
     }
   }
 
