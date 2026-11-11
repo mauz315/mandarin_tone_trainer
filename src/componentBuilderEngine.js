@@ -12,6 +12,7 @@
  * - Dock population with active word targets + balanced distractors.
  * - Crystallization animation upon verified assembly.
  */
+import { flipFlexChildren, prefersReducedMotion, EASE_SNAP } from './motion.js';
 
 // Optical Stroke Harmonization Glyph Lists (Matching UI Engineer's CSS)
 const OUTER_FRAME_GLYPHS = ['门', '門', '囗', '冂', '凵', '匚', '匸', '广', '厂', '户', '戶', '勹', '弋', '戈', '气', '辶', '⻌', '⻍', '廴', '疒'];
@@ -1095,13 +1096,11 @@ export class ComponentPlacementController {
     }
     const hintBtn = this.dom.hintBtn || (typeof document !== 'undefined' ? document.getElementById('placement-hint-btn') : null);
     if (hintBtn) {
-      if (this.isHintActive) {
-        hintBtn.className = 'scaffold-on flex-1 min-h-[44px] py-2 lg:py-2.5 px-2 sm:px-3 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white border-2 border-black font-mono text-[10px] sm:text-xs font-black uppercase tracking-wider whitespace-nowrap flex items-center justify-center gap-1 sm:gap-1.5 shadow-sm active-collapse cursor-pointer transition-all';
-        hintBtn.innerHTML = '<span class="material-symbols-outlined text-sm sm:text-base shrink-0">visibility</span><span id="placement-hint-btn-text">Guide: On</span>';
-      } else {
-        hintBtn.className = 'scaffold-off flex-1 min-h-[44px] py-2 lg:py-2.5 px-2 sm:px-3 rounded-xl bg-[#18181b] hover:bg-[#27272a] text-white/90 border-2 border-black font-mono text-[10px] sm:text-xs font-black uppercase tracking-wider whitespace-nowrap flex items-center justify-center gap-1 sm:gap-1.5 shadow-sm active-collapse cursor-pointer transition-all';
-        hintBtn.innerHTML = '<span class="material-symbols-outlined text-sm sm:text-base shrink-0">visibility_off</span><span id="placement-hint-btn-text">Guide: Off</span>';
-      }
+      hintBtn.classList.toggle('scaffold-on', this.isHintActive);
+      hintBtn.classList.toggle('scaffold-off', !this.isHintActive);
+      hintBtn.innerHTML = this.isHintActive
+        ? '<span class="material-symbols-outlined text-sm sm:text-base shrink-0">visibility</span><span id="placement-hint-btn-text">Guide: On</span>'
+        : '<span class="material-symbols-outlined text-sm sm:text-base shrink-0">visibility_off</span><span id="placement-hint-btn-text">Guide: Off</span>';
     }
   }
 
@@ -1533,7 +1532,9 @@ export class ComponentPlacementController {
           dropY >= cRect.top &&
           dropY <= cRect.bottom
         ) {
-          tile.classList.add('hidden');
+          flipFlexChildren(this.dom.dock, '.draggable-component-tile', () => {
+            tile.classList.add('hidden');
+          });
 
           const dropRelCenterX = dropX - cRect.left;
           const dropRelCenterY = dropY - cRect.top;
@@ -1555,6 +1556,10 @@ export class ComponentPlacementController {
             placedEl.dataset.normCy = ((clampedY + dropFontSize * 0.5) / cRect.height).toFixed(4);
           }
           this.refreshActiveCharStyles();
+          if (placedEl && !prefersReducedMotion()) {
+            placedEl.classList.add('piece-land-cushion');
+            placedEl.addEventListener('animationend', () => placedEl.classList.remove('piece-land-cushion'), { once: true });
+          }
           this.syncActiveCharToState();
           this.notifyPlacedChange();
         }
@@ -1649,7 +1654,9 @@ export class ComponentPlacementController {
       ? this.dom.dock.querySelector(`.draggable-component-tile[data-component-id="${compId}"]`)
       : null);
     if (tile) {
-      tile.classList.remove('hidden');
+      flipFlexChildren(this.dom.dock, '.draggable-component-tile', () => {
+        tile.classList.remove('hidden');
+      });
     }
     this.refreshActiveCharStyles();
     this.syncActiveCharToState();
@@ -1685,7 +1692,9 @@ export class ComponentPlacementController {
     }
     this.activePlacedComponents = [];
     if (this.dom.dock) {
-      this.dom.dock.querySelectorAll('.draggable-component-tile').forEach(t => t.classList.remove('hidden'));
+      flipFlexChildren(this.dom.dock, '.draggable-component-tile', () => {
+        this.dom.dock.querySelectorAll('.draggable-component-tile').forEach(t => t.classList.remove('hidden'));
+      });
     }
     this.notifyPlacedChange();
   }
@@ -1837,19 +1846,21 @@ export class ComponentPlacementController {
       return;
     }
 
+    const reduced = prefersReducedMotion();
     const glyphs = this.dom.placedLayer.querySelectorAll('.placed-component-glyph');
     glyphs.forEach(g => {
       g.classList.add('crystallize-pulse');
-      g.style.transition = 'opacity 0.28s ease-out, filter 0.15s ease';
+      g.style.transition = `opacity ${reduced ? '120ms' : '240ms'} ease-out, filter 150ms ease`;
       g.style.opacity = '0.2';
-      g.style.filter = 'drop-shadow(0 0 14px #10B981)';
+      g.style.filter = 'drop-shadow(0 0 12px #10B981)';
     });
 
     const chars = (this.activeWord && (this.activeWord.characters || Array.from(this.activeWord.hanzi_simp || ''))) || [];
     const activeChar = chars[this.activeCharIndex] || (this.activeWord && this.activeWord.hanzi_simp) || '';
+    let overlay = null;
     if (activeChar) {
       const canvasWidth = this.dom.canvas ? (this.dom.canvas.clientWidth || 340) : 340;
-      const overlay = document.createElement('div');
+      overlay = document.createElement('div');
       overlay.className = 'crystallized-word-overlay crystallize-pulse';
       overlay.style.setProperty('--sx', '1');
       overlay.style.setProperty('--sy', '1');
@@ -1858,13 +1869,32 @@ export class ComponentPlacementController {
       this.dom.placedLayer.appendChild(overlay);
     }
 
-    setTimeout(() => {
+    const finish = () => {
       glyphs.forEach(g => {
         g.style.filter = '';
         g.style.opacity = '0';
       });
       if (onComplete) onComplete();
-    }, 420);
+    };
+
+    if (reduced) {
+      setTimeout(finish, 140);
+      return;
+    }
+
+    if (overlay && typeof overlay.animate === 'function') {
+      const anim = overlay.animate(
+        [
+          { opacity: 0.35, transform: 'scale(0.92)' },
+          { opacity: 1, transform: 'scale(1.04)', offset: 0.55 },
+          { opacity: 1, transform: 'scale(1)' }
+        ],
+        { duration: 380, easing: EASE_SNAP }
+      );
+      anim.finished.catch(() => {}).finally(finish);
+    } else {
+      setTimeout(finish, 380);
+    }
   }
 
   /**

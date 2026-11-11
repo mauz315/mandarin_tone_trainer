@@ -14,6 +14,20 @@
 
 import { StrokeMatcher, getHanziPositioner, classifyDrawing, gradeCalligraphyDrawing } from './strokeMatcher.js';
 import { ComponentPlacementController, gradeComponentBuilder, resolveWordDecompositions } from './componentBuilderEngine.js';
+import {
+  openSheetModal,
+  closeSheetModal,
+  attachSheetSwipeDismiss,
+  triggerDampedShake,
+  animateSpringPop,
+  spawnFloatingChip,
+  launchNeoConfetti,
+  swapViews,
+  revealInline,
+  hideInline,
+  prefersReducedMotion,
+  EASE_SNAP
+} from './motion.js';
 
 const STORAGE_KEY_CALLIGRAPHY = 'mandarin_trainer_word_progress_calligraphy';
 const STORAGE_KEY_BUILDER = 'mandarin_trainer_word_progress_builder';
@@ -801,7 +815,11 @@ export class WordTrainerEngineController {
         e.stopPropagation();
         if (!this.dom.resultFullNotes) return;
         const isCurrentlyHidden = this.dom.resultFullNotes.classList.contains('hidden');
-        this.dom.resultFullNotes.classList.toggle('hidden', !isCurrentlyHidden);
+        if (isCurrentlyHidden) {
+          revealInline(this.dom.resultFullNotes, { slideY: 6, duration: 170 });
+        } else {
+          hideInline(this.dom.resultFullNotes, { slideY: 4, duration: 120 });
+        }
         this.dom.resultMoreNotesBtn.textContent = isCurrentlyHidden ? 'Hide notes ⌄' : 'More notes ›';
         this.dom.resultMoreNotesBtn.setAttribute('aria-expanded', isCurrentlyHidden ? 'true' : 'false');
       });
@@ -837,6 +855,10 @@ export class WordTrainerEngineController {
           this.closeStrokeGuideModal();
         }
       });
+      const guideHandle = this.dom.strokeGuideModal.querySelector('.modal-drag-handle');
+      if (guideHandle) {
+        attachSheetSwipeDismiss(this.dom.strokeGuideModal, guideHandle, () => this.closeStrokeGuideModal());
+      }
     }
 
     if (this.dom.advancePhaseBtn) {
@@ -857,7 +879,30 @@ export class WordTrainerEngineController {
   setMobileResultPeek(isPeek) {
     const screen = this.dom && this.dom.screen;
     if (!screen || !screen.classList) return;
-    screen.classList.toggle('mobile-result-peek', Boolean(isPeek));
+    const nextPeek = Boolean(isPeek);
+    const prevPeek = screen.classList.contains('mobile-result-peek');
+    screen.classList.toggle('mobile-result-peek', nextPeek);
+    if (nextPeek !== prevPeek && !prefersReducedMotion()) {
+      if (nextPeek) {
+        const banner = document.getElementById('result-peek-banner');
+        const activeArena = this.getMode() === 'builder'
+          ? document.getElementById('open-placement-arena')
+          : document.getElementById('canvas-arena');
+        [banner, activeArena].forEach(el => {
+          if (el && typeof el.animate === 'function') {
+            el.animate(
+              [{ opacity: 0.4, transform: 'translate3d(0, 10px, 0)' }, { opacity: 1, transform: 'translate3d(0, 0, 0)' }],
+              { duration: 200, easing: EASE_SNAP }
+            );
+          }
+        });
+      } else if (this.dom.resultFeedbackPanel && typeof this.dom.resultFeedbackPanel.animate === 'function') {
+        this.dom.resultFeedbackPanel.animate(
+          [{ opacity: 0.4, transform: 'translate3d(0, 10px, 0)' }, { opacity: 1, transform: 'translate3d(0, 0, 0)' }],
+          { duration: 200, easing: EASE_SNAP }
+        );
+      }
+    }
   }
 
   setMobilePhaseBarOpen(isOpen) {
@@ -906,13 +951,13 @@ export class WordTrainerEngineController {
       this.dom.guideModalCloseBtn.textContent = 'Close Guide';
     }
     if (this.dom.strokeGuideModal) {
-      this.dom.strokeGuideModal.classList.remove('hidden');
+      openSheetModal(this.dom.strokeGuideModal);
     }
   }
 
   closeStrokeGuideModal() {
     if (this.dom.strokeGuideModal) {
-      this.dom.strokeGuideModal.classList.add('hidden');
+      closeSheetModal(this.dom.strokeGuideModal);
     }
   }
 
@@ -1211,29 +1256,55 @@ export class WordTrainerEngineController {
 
   snapCharacterToCalligraphy() {
     const canvas = this.dom.paintCanvas;
-    if (canvas) {
-      canvas.style.transition = 'opacity 200ms ease-out';
-      canvas.style.opacity = '0';
-    }
+    const snapToken = this._wordSessionToken;
+    const reduced = prefersReducedMotion();
 
-    setTimeout(() => {
+    const commitSnap = () => {
+      if (this._wordSessionToken !== snapToken) return;
       this.renderCanvasLayers();
       if (canvas) {
         const ctx = canvas.getContext('2d');
-        const rect = canvas.getBoundingClientRect();
-        if (ctx) ctx.clearRect(0, 0, rect.width, rect.height);
+        if (ctx) {
+          ctx.save();
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.restore();
+        }
         canvas.style.opacity = '1';
-        canvas.style.transition = '';
       }
-    }, 200);
+      const overlaySvg = document.getElementById('hanzi-custom-overlay-svg');
+      if (overlaySvg && !reduced && typeof overlaySvg.animate === 'function') {
+        overlaySvg.animate(
+          [
+            { opacity: 0.45, transform: 'scale(0.97)', filter: 'drop-shadow(0 0 8px rgba(16,185,129,0.7))' },
+            { opacity: 1, transform: 'scale(1)', filter: 'drop-shadow(0 0 0 rgba(16,185,129,0))' }
+          ],
+          { duration: 200, easing: EASE_SNAP }
+        );
+      }
+    };
+
+    if (canvas && !reduced && typeof canvas.animate === 'function') {
+      const fadeAnim = canvas.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 150, easing: 'ease-out', fill: 'forwards' });
+      fadeAnim.finished.catch(() => {}).finally(() => {
+        try { fadeAnim.cancel(); } catch (_) {}
+        commitSnap();
+      });
+    } else {
+      commitSnap();
+    }
   }
 
   renderCanvasLayers() {
     const isGuideActive = (this.effectiveGuideOn !== undefined) ? Boolean(this.effectiveGuideOn) : Boolean(this.isScaffoldOn);
 
-    // Toggle demo order button visibility (lives in bottom utility strip when Guide ON)
+    // Toggle demo order button smoothly in bottom utility strip when Guide ON
     if (this.dom.demoOrderBtn) {
-      this.dom.demoOrderBtn.classList.toggle('hidden', !isGuideActive);
+      if (isGuideActive) {
+        revealInline(this.dom.demoOrderBtn, { slideX: -4, slideY: 0, duration: 160 });
+      } else {
+        this.dom.demoOrderBtn.classList.add('hidden');
+      }
     }
 
     if (!this.dom.drawingCanvasWrapper) return;
@@ -1777,7 +1848,8 @@ export class WordTrainerEngineController {
       this.updateFeedback('neutral', 'Trace or draw the character.');
     }
 
-    // Reset panels: Switch back to View A on mobile, close phase tray, show exercise inputs, hide result panel
+    // Reset panels: Switch back to View A cleanly, clear residual canvas flash states & pending phase modal
+    this._pendingPhaseComplete = null;
     this.closeMobilePhaseBar();
     this.setMobileResultPeek(false);
     this.clearResultShowcase();
@@ -1785,8 +1857,15 @@ export class WordTrainerEngineController {
     if (this.dom.promptArena) this.dom.promptArena.classList.remove('hidden');
     if (this.dom.interactionFooter) this.dom.interactionFooter.classList.remove('hidden');
     if (this.dom.resultFeedbackPanel) this.dom.resultFeedbackPanel.classList.add('hidden');
-    if (this.dom.drawingCanvasWrapper) this.dom.drawingCanvasWrapper.style.boxShadow = '';
+    if (this.dom.drawingCanvasWrapper) {
+      this.dom.drawingCanvasWrapper.style.boxShadow = '';
+      this.dom.drawingCanvasWrapper.classList.remove('flash-success', 'flash-error');
+    }
     const placementCanvas = (typeof document !== 'undefined') ? document.getElementById('open-placement-canvas') : null;
+    if (placementCanvas) {
+      placementCanvas.style.boxShadow = '';
+      placementCanvas.classList.remove('flash-success', 'flash-error');
+    }
     if (placementCanvas) placementCanvas.style.boxShadow = '';
 
     this.updateSubmitIdleState();
@@ -2009,13 +2088,11 @@ export class WordTrainerEngineController {
     const btn = this.dom.scaffoldToggleBtn;
     if (!btn) return;
     const isGuideActive = (this.effectiveGuideOn !== undefined) ? Boolean(this.effectiveGuideOn) : Boolean(this.isScaffoldOn);
-    if (isGuideActive) {
-      btn.className = 'scaffold-on flex-1 min-h-[44px] py-2 lg:py-2.5 px-2 sm:px-3 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white border-2 border-black font-mono text-[10px] sm:text-xs font-black uppercase tracking-wider whitespace-nowrap flex items-center justify-center gap-1 sm:gap-1.5 shadow-sm active-collapse cursor-pointer transition-all';
-      btn.innerHTML = '<span class="material-symbols-outlined text-sm sm:text-base shrink-0">visibility</span><span>Guide: On</span>';
-    } else {
-      btn.className = 'scaffold-off flex-1 min-h-[44px] py-2 lg:py-2.5 px-2 sm:px-3 rounded-xl bg-[#18181b] hover:bg-[#27272a] text-white/90 border-2 border-black font-mono text-[10px] sm:text-xs font-black uppercase tracking-wider whitespace-nowrap flex items-center justify-center gap-1 sm:gap-1.5 shadow-sm active-collapse cursor-pointer transition-all';
-      btn.innerHTML = '<span class="material-symbols-outlined text-sm sm:text-base shrink-0">visibility_off</span><span>Guide: Off</span>';
-    }
+    btn.classList.toggle('scaffold-on', isGuideActive);
+    btn.classList.toggle('scaffold-off', !isGuideActive);
+    btn.innerHTML = isGuideActive
+      ? '<span class="material-symbols-outlined text-sm sm:text-base shrink-0">visibility</span><span>Guide: On</span>'
+      : '<span class="material-symbols-outlined text-sm sm:text-base shrink-0">visibility_off</span><span>Guide: Off</span>';
   }
 
   clearCanvas() {
@@ -2244,7 +2321,7 @@ export class WordTrainerEngineController {
         pData.status = 'completed';
         this.saveState();
         this.updatePhaseStepperUI();
-        this.triggerPhaseCompleteModal(this.activePhase);
+        this._pendingPhaseComplete = this.activePhase;
       }
     }
     return true;
@@ -2346,14 +2423,18 @@ export class WordTrainerEngineController {
     const practiceNote = (!wasCemented && !this.effectiveGuideOn && this.usedGuideInAttempt)
       ? '(Practice only — guide was used on this word.)'
       : '';
-    const feedbackGrade = practiceNote ? { ...passGrade, practiceNote } : passGrade;
+    const feedbackGrade = {
+      ...passGrade,
+      wasCemented,
+      ...(practiceNote ? { practiceNote } : {})
+    };
     this.updateFeedback('success', practiceNote ? `${passGrade.detail} ${practiceNote}` : passGrade.detail);
 
     const sessionToken = this._wordSessionToken;
     setTimeout(() => {
       if (this._wordSessionToken !== sessionToken) return;
       this.showResultFeedbackPanel(true, feedbackGrade);
-    }, 400);
+    }, 340);
   }
 
   validateBuilderSubmission() {
@@ -2420,7 +2501,11 @@ export class WordTrainerEngineController {
     const practiceNote = (!wasCemented && !this.effectiveGuideOn && this.usedGuideInAttempt)
       ? '(Practice only — guide was used on this word.)'
       : '';
-    const feedbackGrade = practiceNote ? { ...humanizedPass, practiceNote } : humanizedPass;
+    const feedbackGrade = {
+      ...humanizedPass,
+      wasCemented,
+      ...(practiceNote ? { practiceNote } : {})
+    };
     this.updateFeedback('success', practiceNote ? `${humanizedPass.detail} ${practiceNote}` : humanizedPass.detail);
 
     const sessionToken = this._wordSessionToken;
@@ -2516,18 +2601,42 @@ export class WordTrainerEngineController {
       this.dom.resultNextBtnText.textContent = 'Continue';
     }
 
-    // 4. Desktop & Mobile View B Deduplication: Prompt collapses so Pinyin, English & Speaker appear strictly once
+    // 4. Desktop & Mobile View B Deduplication & Choreographed Reveal
     this.closeMobilePhaseBar();
     this.setMobileResultPeek(false);
-    if (this.dom.promptArena) this.dom.promptArena.classList.add('hidden');
-    if (this.dom.interactionFooter) this.dom.interactionFooter.classList.add('hidden');
-    if (this.dom.resultFeedbackPanel) this.dom.resultFeedbackPanel.classList.remove('hidden');
     if (this.dom.screen) this.dom.screen.classList.add('mobile-result-active');
+    swapViews(
+      [this.dom.promptArena, this.dom.interactionFooter],
+      [this.dom.resultFeedbackPanel],
+      {
+        direction: 'forward',
+        distancePx: 14,
+        onAfterShow: () => {
+          if (isMastered && this.dom.drawingTierBadge) {
+            animateSpringPop(this.dom.drawingTierBadge, { scalePeak: 1.09, duration: 240 });
+          }
+          if (isMastered && gradeResult && gradeResult.wasCemented) {
+            const anchor = this.dom.resultFeedbackPanel || this.dom.drawingTierBadge;
+            spawnFloatingChip(anchor, '+1 Mastered', { bg: '#B8F526', color: '#000000' });
+          }
+          if (this._pendingPhaseComplete) {
+            const completedPhaseId = this._pendingPhaseComplete;
+            this._pendingPhaseComplete = null;
+            const modalToken = this._wordSessionToken;
+            setTimeout(() => {
+              if (this._wordSessionToken !== modalToken) return;
+              this.triggerPhaseCompleteModal(completedPhaseId);
+            }, 420);
+          }
+        }
+      }
+    );
   }
 
   retryCurrentWord() {
     if (!this.activeWord) return;
     this._wordSessionToken = (this._wordSessionToken || 0) + 1;
+    this._pendingPhaseComplete = null;
 
     this.closeMobilePhaseBar();
     this.setMobileResultPeek(false);
@@ -2536,14 +2645,22 @@ export class WordTrainerEngineController {
     this.flashingStrokeIndex = null;
     this.updateAttemptPips();
 
-    // Return to View A on Mobile and restore Prompt + Canvas/Builder + Footer
+    // Return to View A smoothly and clear any previous canvas flash classes
     if (this.dom.screen) this.dom.screen.classList.remove('mobile-result-active', 'mobile-result-peek');
-    if (this.dom.promptArena) this.dom.promptArena.classList.remove('hidden');
-    if (this.dom.interactionFooter) this.dom.interactionFooter.classList.remove('hidden');
-    if (this.dom.resultFeedbackPanel) this.dom.resultFeedbackPanel.classList.add('hidden');
-    if (this.dom.drawingCanvasWrapper) this.dom.drawingCanvasWrapper.style.boxShadow = '';
+    if (this.dom.drawingCanvasWrapper) {
+      this.dom.drawingCanvasWrapper.style.boxShadow = '';
+      this.dom.drawingCanvasWrapper.classList.remove('flash-success', 'flash-error');
+    }
     const placementCanvas = (typeof document !== 'undefined') ? document.getElementById('open-placement-canvas') : null;
-    if (placementCanvas) placementCanvas.style.boxShadow = '';
+    if (placementCanvas) {
+      placementCanvas.style.boxShadow = '';
+      placementCanvas.classList.remove('flash-success', 'flash-error');
+    }
+    swapViews(
+      [this.dom.resultFeedbackPanel],
+      [this.dom.promptArena, this.dom.interactionFooter],
+      { direction: 'back', distancePx: 10 }
+    );
 
     // Strict mastery gate: View B already revealed the character/solution, so retrying stays practice-only
     this.usedGuideInAttempt = true;
@@ -2584,11 +2701,9 @@ export class WordTrainerEngineController {
   }
 
   shakeElement(id) {
-    const el = document.getElementById(id);
+    const el = typeof id === 'string' ? document.getElementById(id) : id;
     if (!el) return;
-    el.classList.remove('shake-error');
-    void el.offsetWidth;
-    el.classList.add('shake-error');
+    triggerDampedShake(el, { intensity: 7, duration: 260 });
   }
 
   flashElement(id, type = 'success') {
@@ -2607,10 +2722,13 @@ export class WordTrainerEngineController {
       pipsEl.innerHTML = '<span class="pip pip-active">●</span><span class="pip pip-active">●</span><span class="pip pip-active">●</span>';
     } else if (this.attemptsLeft === 2) {
       pipsEl.innerHTML = '<span class="pip pip-active">●</span><span class="pip pip-active">●</span><span class="pip pip-spent text-black/25">○</span>';
+      animateSpringPop(pipsEl.lastElementChild, { scalePeak: 1.25, duration: 200 });
     } else if (this.attemptsLeft === 1) {
       pipsEl.innerHTML = '<span class="pip pip-danger text-rose-600 animate-pulse">●</span><span class="pip pip-spent text-black/25">○</span><span class="pip pip-spent text-black/25">○</span>';
+      animateSpringPop(pipsEl.children[1], { scalePeak: 1.25, duration: 200 });
     } else {
       pipsEl.innerHTML = '<span class="pip pip-spent text-black/25">○</span><span class="pip pip-spent text-black/25">○</span><span class="pip pip-spent text-black/25">○</span>';
+      animateSpringPop(pipsEl.firstElementChild, { scalePeak: 1.25, duration: 200 });
     }
   }
 
@@ -2725,12 +2843,13 @@ export class WordTrainerEngineController {
     if (this.dom.stayPhaseBtn) {
       this.dom.stayPhaseBtn.textContent = `Stay & Practice Phase ${targetPhase}`;
     }
-    modal.classList.remove('hidden');
+    openSheetModal(modal);
+    launchNeoConfetti({ particleCount: 34, durationMs: 1050 });
   }
 
   hidePhaseCompleteModal() {
     if (this.dom && this.dom.phaseCompleteModal) {
-      this.dom.phaseCompleteModal.classList.add('hidden');
+      closeSheetModal(this.dom.phaseCompleteModal);
     }
   }
 
@@ -2772,7 +2891,15 @@ export class WordTrainerEngineController {
       }
       audio.currentTime = 0;
       this.currentAudio = audio;
+      const setAudioRings = (active) => {
+        if (this.dom && this.dom.audioReplayBtn) this.dom.audioReplayBtn.classList.toggle('audio-playing-ring', active);
+        if (this.dom && this.dom.resultAudioReplayBtn) this.dom.resultAudioReplayBtn.classList.toggle('audio-playing-ring', active);
+      };
+      setAudioRings(true);
+      audio.onended = () => setAudioRings(false);
+      audio.onpause = () => setAudioRings(false);
       audio.play().catch(e => {
+        setAudioRings(false);
         console.warn('WordTrainerEngine: Audio playback notice', e);
       });
     } catch (e) {
@@ -2781,6 +2908,8 @@ export class WordTrainerEngineController {
   }
 
   stopAudio() {
+    if (this.dom && this.dom.audioReplayBtn) this.dom.audioReplayBtn.classList.remove('audio-playing-ring');
+    if (this.dom && this.dom.resultAudioReplayBtn) this.dom.resultAudioReplayBtn.classList.remove('audio-playing-ring');
     if (this.currentAudio) {
       try {
         this.currentAudio.pause();

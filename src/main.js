@@ -6,6 +6,22 @@ import { PitchTracker } from './audio/pitchTracker.js';
 import { DTWComparator } from './audio/dtwComparator.js';
 import { scoreSyllableTone, computeSyllableCoaching, computeUtterancePriority } from './audio/toneGrading.js';
 import { WordTrainerEngine, getConciseEnglish, getModeMasteryCounts } from './wordTrainerEngine.js';
+import {
+  navigateScreens,
+  swapViews,
+  openSheetModal,
+  closeSheetModal,
+  attachSheetSwipeDismiss,
+  revealInline,
+  hideInline,
+  triggerDampedShake,
+  animateSpringPop,
+  spawnFloatingChip,
+  animateStrokeDraw,
+  pressKeycap,
+  prefersReducedMotion,
+  EASE_SNAP
+} from './motion.js';
 
 const KeenSlider = KS.default || KS;
 
@@ -14,7 +30,8 @@ let hskDeck = [];
 let currentItem = null;
 let nextPendingItem = null;
 let currentGameMode = 'tones'; // Options: 'tones', 'initials', 'endings'
-let nextQuestionTimer = null; 
+let nextQuestionTimer = null;
+let toneStreak = 0;
 let toneProfiles = {}; // Human story audio reference profiles (tone_profiles.json)
 let toneProfilesTTS = {}; // Neural citation TTS reference profiles (tone_profiles_tts.json)
 
@@ -339,7 +356,6 @@ function setAppBackground(colorClass) {
   const targets = [app, document.body];
   targets.forEach(el => {
     if (!el) return;
-    // Remove all previous background color classes (named canvas tokens and arbitrary hex classes)
     const bgClassesToRemove = Array.from(el.classList).filter(
       c => c.startsWith('bg-canvas-') || c.startsWith('bg-[')
     );
@@ -350,18 +366,7 @@ function setAppBackground(colorClass) {
   });
 
   if (document.documentElement) {
-    document.documentElement.style.backgroundColor = resolvedHex;
-  }
-  if (document.body) {
-    document.body.style.backgroundColor = resolvedHex;
-  }
-
-  const statusBarBackdrop = document.getElementById('status-bar-backdrop');
-  if (statusBarBackdrop) {
-    statusBarBackdrop.style.backgroundColor = resolvedHex;
-    if (isIOSStandaloneApp()) {
-      void statusBarBackdrop.offsetHeight;
-    }
+    document.documentElement.style.setProperty('--canvas-bg', resolvedHex);
   }
 
   // Keep dynamic <meta name="theme-color"> for Safari tabs & Android Chrome via node replacement,
@@ -379,19 +384,19 @@ function setupMenu() {
   const menuScreen = document.getElementById('menu-screen');
   const gameScreen = document.getElementById('game-screen');
   const audioLibraryScreen = document.getElementById('audio-library-screen');
-  
+
   const mainMenu = document.getElementById('main-menu');
   const submenu = document.getElementById('submenu');
-  
+
   const startTonesBtn = document.getElementById('start-tones-btn');
   const openSubmenuBtn = document.getElementById('open-submenu-btn');
   const closeSubmenuBtn = document.getElementById('close-submenu-btn');
   const openLibraryBtn = document.getElementById('open-library-btn');
   const backToMainMenuBtn = document.getElementById('back-to-main-menu-btn');
-  
+
   const startInitialsBtn = document.getElementById('start-initials-btn');
   const startEndingsBtn = document.getElementById('start-endings-btn');
-  
+
   const backBtn = document.getElementById('back-to-menu-btn');
   const engineScreen = document.getElementById('engine-screen');
   const openEngineBtn = document.getElementById('open-engine-btn');
@@ -409,26 +414,42 @@ function setupMenu() {
   const gatewayBuilderProgress = document.getElementById('gateway-builder-progress');
   const gatewayCalligraphyProgress = document.getElementById('gateway-calligraphy-progress');
 
-  function updateGatewayProgressUI() {
+  let lastGatewayMastered = { builder: null, calligraphy: null };
+
+  function updateGatewayProgressUI(animateBump = false) {
     const counts = getModeMasteryCounts();
     if (gatewayBuilderProgress) {
       gatewayBuilderProgress.textContent = `${counts.builder.mastered} / ${counts.builder.total} mastered`;
+      if (animateBump && lastGatewayMastered.builder !== null && counts.builder.mastered > lastGatewayMastered.builder) {
+        animateSpringPop(gatewayBuilderProgress, { scalePeak: 1.12, duration: 240 });
+      }
+      lastGatewayMastered.builder = counts.builder.mastered;
     }
     if (gatewayCalligraphyProgress) {
       gatewayCalligraphyProgress.textContent = `${counts.calligraphy.mastered} / ${counts.calligraphy.total} mastered`;
+      if (animateBump && lastGatewayMastered.calligraphy !== null && counts.calligraphy.mastered > lastGatewayMastered.calligraphy) {
+        animateSpringPop(gatewayCalligraphyProgress, { scalePeak: 1.12, duration: 240 });
+      }
+      lastGatewayMastered.calligraphy = counts.calligraphy.mastered;
     }
   }
-  updateGatewayProgressUI();
+  updateGatewayProgressUI(false);
 
-  function launchWordTrainerMode(mode) {
+  function resetMenuSubmenuState() {
+    if (mainMenu) mainMenu.classList.remove('hidden');
+    if (submenu) {
+      submenu.classList.add('hidden');
+      submenu.classList.remove('flex');
+    }
+  }
+
+  function applyWordTrainerModeSetup(mode, { isInlineSwitch = false } = {}) {
     stopGlobalAudio();
     if (window.WordTrainerEngine && typeof window.WordTrainerEngine.stopAudio === 'function') {
       window.WordTrainerEngine.stopAudio();
     }
-    if (modeSelectionScreen) modeSelectionScreen.classList.add('hidden');
     if (wordTrainerScreen) {
       wordTrainerScreen.classList.remove('mobile-result-active', 'mobile-phase-open', 'mobile-result-peek');
-      wordTrainerScreen.classList.remove('hidden');
     }
     const mobilePhaseTriggerEl = document.getElementById('mobile-phase-trigger');
     if (mobilePhaseTriggerEl) mobilePhaseTriggerEl.setAttribute('aria-expanded', 'false');
@@ -455,8 +476,12 @@ function setupMenu() {
       }
       setAppBackground('bg-canvas-builder');
 
-      if (canvasArena) canvasArena.classList.add('hidden');
-      if (openPlacementArena) openPlacementArena.classList.remove('hidden');
+      if (isInlineSwitch) {
+        swapViews([canvasArena], [openPlacementArena], { distancePx: 8 });
+      } else {
+        if (canvasArena) canvasArena.classList.add('hidden');
+        if (openPlacementArena) openPlacementArena.classList.remove('hidden');
+      }
 
       if (typeof window.initComponentBuilderArena === 'function') {
         window.initComponentBuilderArena();
@@ -468,8 +493,12 @@ function setupMenu() {
       }
       setAppBackground('bg-canvas-calligraphy');
 
-      if (openPlacementArena) openPlacementArena.classList.add('hidden');
-      if (canvasArena) canvasArena.classList.remove('hidden');
+      if (isInlineSwitch) {
+        swapViews([openPlacementArena], [canvasArena], { distancePx: 8 });
+      } else {
+        if (openPlacementArena) openPlacementArena.classList.add('hidden');
+        if (canvasArena) canvasArena.classList.remove('hidden');
+      }
 
       if (typeof window.initWordTrainerCanvas === 'function') {
         window.initWordTrainerCanvas();
@@ -492,6 +521,29 @@ function setupMenu() {
     }
   }
 
+  function launchWordTrainerMode(mode) {
+    const isAlreadyInTrainer = wordTrainerScreen && !wordTrainerScreen.classList.contains('hidden');
+    if (isAlreadyInTrainer) {
+      applyWordTrainerModeSetup(mode, { isInlineSwitch: true });
+      return;
+    }
+    const heroCard = mode === 'builder' ? startBuilderBtn : startCalligraphyBtn;
+    navigateScreens(modeSelectionScreen, wordTrainerScreen, {
+      direction: 'forward',
+      heroCard,
+      targetHeroEl: document.getElementById('wt-mode-builder-btn')?.parentElement,
+      onBeforeIn: () => applyWordTrainerModeSetup(mode, { isInlineSwitch: false }),
+      onAfterIn: () => {
+        if (mode === 'calligraphy' && window.WordTrainerEngine && typeof window.WordTrainerEngine.syncCanvasDimensions === 'function') {
+          window.WordTrainerEngine.syncCanvasDimensions();
+        } else if (mode === 'builder' && window.WordTrainerEngine?.componentBuilder) {
+          window.WordTrainerEngine.componentBuilder.updateWatermarkSizing();
+          window.WordTrainerEngine.componentBuilder.rescaleActivePlacedPieces();
+        }
+      }
+    });
+  }
+
   if (wtModeBuilderBtn) {
     wtModeBuilderBtn.addEventListener('click', () => {
       if (window.WordTrainerEngine && window.WordTrainerEngine.getMode() === 'builder') return;
@@ -508,21 +560,40 @@ function setupMenu() {
 
   if (startWordsBtn) {
     startWordsBtn.addEventListener('click', () => {
-      updateGatewayProgressUI();
-      menuScreen.classList.add('hidden');
-      mainMenu.classList.remove('hidden');
-      submenu.classList.add('hidden');
-      if (modeSelectionScreen) modeSelectionScreen.classList.remove('hidden');
-      setAppBackground('bg-canvas-celadon');
+      navigateScreens(menuScreen, modeSelectionScreen, {
+        direction: 'forward',
+        heroCard: startWordsBtn,
+        targetHeroEl: modeSelectionScreen ? modeSelectionScreen.querySelector('h1') : null,
+        onBeforeIn: () => {
+          resetMenuSubmenuState();
+          updateGatewayProgressUI(true);
+          setAppBackground('bg-canvas-celadon');
+        },
+        onAfterIn: () => {
+          if (!prefersReducedMotion()) {
+            [startBuilderBtn, startCalligraphyBtn].forEach((card, i) => {
+              if (card && typeof card.animate === 'function') {
+                card.animate(
+                  [{ transform: 'translate3d(0, 12px, 0)' }, { transform: '' }],
+                  { duration: 220, delay: i * 45, easing: EASE_SNAP }
+                );
+              }
+            });
+          }
+        }
+      });
     });
   }
 
   if (modeSelectBackBtn) {
     modeSelectBackBtn.addEventListener('click', () => {
-      if (modeSelectionScreen) modeSelectionScreen.classList.add('hidden');
-      menuScreen.classList.remove('hidden');
-      mainMenu.classList.remove('hidden');
-      setAppBackground('bg-canvas-acid');
+      navigateScreens(modeSelectionScreen, menuScreen, {
+        direction: 'back',
+        onBeforeIn: () => {
+          resetMenuSubmenuState();
+          setAppBackground('bg-canvas-acid');
+        }
+      });
     });
   }
 
@@ -537,54 +608,57 @@ function setupMenu() {
   if (backFromWordsBtn) {
     backFromWordsBtn.addEventListener('click', () => {
       stopGlobalAudio();
-      if (wordTrainerScreen) {
-        wordTrainerScreen.classList.remove('mobile-result-active', 'mobile-phase-open', 'mobile-result-peek');
-        wordTrainerScreen.classList.add('hidden');
+      if (window.WordTrainerEngine && typeof window.WordTrainerEngine.stopAudio === 'function') {
+        window.WordTrainerEngine.stopAudio();
       }
-      if (modeSelectionScreen) {
-        modeSelectionScreen.classList.remove('hidden');
-        setAppBackground('bg-canvas-celadon');
-      } else {
-        menuScreen.classList.remove('hidden');
-        mainMenu.classList.remove('hidden');
-        setAppBackground('bg-canvas-acid');
-      }
-      if (window.WordTrainerEngine) {
-        if (typeof window.WordTrainerEngine.closeMobilePhaseBar === 'function') {
-          window.WordTrainerEngine.closeMobilePhaseBar();
+      const targetScreen = modeSelectionScreen || menuScreen;
+      navigateScreens(wordTrainerScreen, targetScreen, {
+        direction: 'back',
+        onBeforeIn: () => {
+          if (wordTrainerScreen) {
+            wordTrainerScreen.classList.remove('mobile-result-active', 'mobile-phase-open', 'mobile-result-peek');
+          }
+          if (window.WordTrainerEngine) {
+            if (typeof window.WordTrainerEngine.closeMobilePhaseBar === 'function') {
+              window.WordTrainerEngine.closeMobilePhaseBar();
+            }
+            if (typeof window.WordTrainerEngine.hidePhaseCompleteModal === 'function') {
+              window.WordTrainerEngine.hidePhaseCompleteModal();
+            }
+            if (typeof window.WordTrainerEngine.closeStrokeGuideModal === 'function') {
+              window.WordTrainerEngine.closeStrokeGuideModal();
+            }
+            if (typeof window.WordTrainerEngine.clearResultShowcase === 'function') {
+              window.WordTrainerEngine.clearResultShowcase();
+            }
+          }
+          if (modeSelectionScreen) {
+            setAppBackground('bg-canvas-celadon');
+            updateGatewayProgressUI(true);
+          } else {
+            resetMenuSubmenuState();
+            setAppBackground('bg-canvas-acid');
+          }
         }
-        if (typeof window.WordTrainerEngine.hidePhaseCompleteModal === 'function') {
-          window.WordTrainerEngine.hidePhaseCompleteModal();
-        }
-        if (typeof window.WordTrainerEngine.closeStrokeGuideModal === 'function') {
-          window.WordTrainerEngine.closeStrokeGuideModal();
-        }
-        if (typeof window.WordTrainerEngine.clearResultShowcase === 'function') {
-          window.WordTrainerEngine.clearResultShowcase();
-        }
-        if (typeof window.WordTrainerEngine.stopAudio === 'function') {
-          window.WordTrainerEngine.stopAudio();
-        }
-      }
-      updateGatewayProgressUI();
+      });
     });
   }
 
   if (openEngineBtn) {
     openEngineBtn.addEventListener('click', () => {
-      menuScreen.classList.add('hidden');
-      mainMenu.classList.remove('hidden');
-      submenu.classList.add('hidden');
-      if (engineScreen) engineScreen.classList.remove('hidden');
-      setAppBackground('bg-canvas-ice');
-      if (window.PronunciationEngine) {
-        window.PronunciationEngine.setRevealState(1);
-        if (typeof window.PronunciationEngine.hasPickedWord === 'function') {
-          if (!window.PronunciationEngine.hasPickedWord()) {
-            window.PronunciationEngine.pickRandomWord();
+      navigateScreens(menuScreen, engineScreen, {
+        direction: 'forward',
+        onBeforeIn: () => {
+          resetMenuSubmenuState();
+          setAppBackground('bg-canvas-ice');
+          if (window.PronunciationEngine) {
+            window.PronunciationEngine.setRevealState(1);
+            if (typeof window.PronunciationEngine.hasPickedWord === 'function' && !window.PronunciationEngine.hasPickedWord()) {
+              window.PronunciationEngine.pickRandomWord();
+            }
           }
         }
-      }
+      });
     });
   }
 
@@ -593,95 +667,126 @@ function setupMenu() {
       stopGlobalAudio();
       const settingsModal = document.getElementById('engine-settings-modal');
       if (settingsModal) settingsModal.classList.add('hidden');
-      if (window.PronunciationEngine && typeof window.PronunciationEngine.reset === 'function') {
-        window.PronunciationEngine.reset();
-      }
-      if (engineScreen) engineScreen.classList.add('hidden');
-      menuScreen.classList.remove('hidden');
-      mainMenu.classList.remove('hidden');
-      setAppBackground('bg-canvas-acid');
+      navigateScreens(engineScreen, menuScreen, {
+        direction: 'back',
+        onBeforeIn: () => {
+          if (window.PronunciationEngine && typeof window.PronunciationEngine.reset === 'function') {
+            window.PronunciationEngine.reset();
+          }
+          resetMenuSubmenuState();
+          setAppBackground('bg-canvas-acid');
+        }
+      });
     });
   }
 
   openSubmenuBtn.addEventListener('click', () => {
-    mainMenu.classList.add('hidden');
-    submenu.classList.remove('hidden');
-    submenu.classList.add('flex');
     setAppBackground('bg-canvas-lavender');
+    if (submenu) submenu.classList.add('flex');
+    swapViews([mainMenu], [submenu], { direction: 'forward', distancePx: 18 });
   });
-  
+
   closeSubmenuBtn.addEventListener('click', () => {
-    submenu.classList.add('hidden');
-    submenu.classList.remove('flex');
-    mainMenu.classList.remove('hidden');
     setAppBackground('bg-canvas-acid');
+    swapViews([submenu], [mainMenu], {
+      direction: 'back',
+      distancePx: 14,
+      onAfterShow: () => {
+        if (submenu) submenu.classList.remove('flex');
+      }
+    });
   });
 
   openLibraryBtn.addEventListener('click', () => {
-    menuScreen.classList.add('hidden');
-    mainMenu.classList.remove('hidden');
-    submenu.classList.add('hidden');
-    audioLibraryScreen.classList.remove('hidden');
-    setAppBackground('bg-canvas-navy');
-    setTimeout(() => {
-      if (initialsSlider) initialsSlider.update();
-      if (finalsSlider) finalsSlider.update();
-    }, 60);
+    navigateScreens(menuScreen, audioLibraryScreen, {
+      direction: 'forward',
+      heroCard: openLibraryBtn,
+      targetHeroEl: audioLibraryScreen ? audioLibraryScreen.querySelector('h2, header') : null,
+      onBeforeIn: () => {
+        resetMenuSubmenuState();
+        setAppBackground('bg-canvas-navy');
+      },
+      onAfterIn: () => {
+        if (initialsSlider) initialsSlider.update();
+        if (finalsSlider) finalsSlider.update();
+      }
+    });
   });
 
   backToMainMenuBtn.addEventListener('click', () => {
-    audioLibraryScreen.classList.add('hidden');
-    menuScreen.classList.remove('hidden');
-    mainMenu.classList.remove('hidden');
-    setAppBackground('bg-canvas-acid');
+    stopGlobalAudio();
+    navigateScreens(audioLibraryScreen, menuScreen, {
+      direction: 'back',
+      onBeforeIn: () => {
+        resetMenuSubmenuState();
+        setAppBackground('bg-canvas-acid');
+      }
+    });
   });
 
-  startTonesBtn.addEventListener('click', () => startGame('tones'));
-  startInitialsBtn.addEventListener('click', () => startGame('initials'));
-  startEndingsBtn.addEventListener('click', () => startGame('endings'));
+  startTonesBtn.addEventListener('click', () => startGame('tones', startTonesBtn));
+  startInitialsBtn.addEventListener('click', () => startGame('initials', startInitialsBtn));
+  startEndingsBtn.addEventListener('click', () => startGame('endings', startEndingsBtn));
 
   backBtn.addEventListener('click', () => {
-    gameScreen.classList.add('hidden');
-    menuScreen.classList.remove('hidden');
-    
-    // If returning from Initials or Endings, return to the Submenu (Lavender)
-    if (currentGameMode === 'initials' || currentGameMode === 'endings') {
-      mainMenu.classList.add('hidden');
-      submenu.classList.remove('hidden');
-      submenu.classList.add('flex');
-      setAppBackground('bg-canvas-lavender');
-    } else {
-      submenu.classList.add('hidden');
-      submenu.classList.remove('flex');
-      mainMenu.classList.remove('hidden');
-      setAppBackground('bg-canvas-acid');
+    if (nextQuestionTimer) {
+      clearTimeout(nextQuestionTimer);
+      nextQuestionTimer = null;
     }
+    stopGlobalAudio();
+    toneStreak = 0;
 
-    document.querySelector('.options').style.display = 'grid';
-    document.getElementById('play-btn').style.transform = "scale(1)";
-    document.getElementById('feedback').innerHTML = "[IDENTIFY THE CORRECT TONE CONTOUR]";
+    navigateScreens(gameScreen, menuScreen, {
+      direction: 'back',
+      onBeforeIn: () => {
+        if (currentGameMode === 'initials' || currentGameMode === 'endings') {
+          if (mainMenu) mainMenu.classList.add('hidden');
+          if (submenu) {
+            submenu.classList.remove('hidden');
+            submenu.classList.add('flex');
+          }
+          setAppBackground('bg-canvas-lavender');
+        } else {
+          resetMenuSubmenuState();
+          setAppBackground('bg-canvas-acid');
+        }
+        const opts = document.querySelector('.options');
+        if (opts) opts.style.display = 'grid';
+        const playBtn = document.getElementById('play-btn');
+        if (playBtn) playBtn.style.transform = '';
+        const fb = document.getElementById('feedback');
+        if (fb) fb.innerHTML = '<span class="text-white/80">[IDENTIFY THE TARGET SOUND]</span>';
+      }
+    });
   });
 }
 
-function startGame(mode) {
+function startGame(mode, heroCard = null) {
   ensureAudioUnlocked();
   currentGameMode = mode;
-  document.getElementById('menu-screen').classList.add('hidden');
-  document.getElementById('game-screen').classList.remove('hidden');
-  
+  toneStreak = 0;
+  const menuScreen = document.getElementById('menu-screen');
+  const gameScreen = document.getElementById('game-screen');
   const modeBadge = document.getElementById('game-mode-badge');
-  if (mode === 'tones') {
-    setAppBackground('bg-canvas-mint');
-    if (modeBadge) modeBadge.textContent = 'DRILL // TONE TRAINER';
-  } else if (mode === 'initials') {
-    setAppBackground('bg-canvas-butter');
-    if (modeBadge) modeBadge.textContent = 'DRILL // INITIALS (声母)';
-  } else if (mode === 'endings') {
-    setAppBackground('bg-canvas-pink');
-    if (modeBadge) modeBadge.textContent = 'DRILL // ENDINGS (韵母)';
-  }
 
-  nextQuestion(); 
+  navigateScreens(menuScreen, gameScreen, {
+    direction: 'forward',
+    heroCard,
+    targetHeroEl: modeBadge,
+    onBeforeIn: () => {
+      if (mode === 'tones') {
+        setAppBackground('bg-canvas-mint');
+        if (modeBadge) modeBadge.textContent = 'DRILL // TONE TRAINER';
+      } else if (mode === 'initials') {
+        setAppBackground('bg-canvas-butter');
+        if (modeBadge) modeBadge.textContent = 'DRILL // INITIALS (声母)';
+      } else if (mode === 'endings') {
+        setAppBackground('bg-canvas-pink');
+        if (modeBadge) modeBadge.textContent = 'DRILL // ENDINGS (韵母)';
+      }
+      nextQuestion();
+    }
+  });
 }
 
 async function fetchJsonSafe(relativePath) {
@@ -748,10 +853,6 @@ async function init() {
 
     setupAudioLibrary();
     setupAudioSourceToggles();
-
-    setTimeout(() => {
-      document.querySelectorAll('.tone-btn').forEach(btn => btn.classList.remove('pop-up'));
-    }, 1000);
   } catch (err) {
     console.error('Initialization error:', err);
   }
@@ -896,9 +997,21 @@ function setupButtons() {
       }
 
       if (isCorrect) {
-        document.getElementById('feedback').innerHTML = `<span class="bg-black text-canvas-acid px-3 py-1 rounded-full border border-black font-mono font-bold text-xs uppercase shadow-hard-black tracking-wider animate-bounce">CORRECT! +1</span>`;
+        toneStreak += 1;
+        const feedbackEl = document.getElementById('feedback');
+        if (feedbackEl) {
+          feedbackEl.innerHTML = `<span class="bg-black text-canvas-acid px-3 py-1 rounded-full border border-black font-mono font-bold text-xs uppercase shadow-hard-black tracking-wider inline-block">CORRECT! +1</span>`;
+          animateSpringPop(feedbackEl, { scalePeak: 1.09, tiltDeg: toneStreak >= 3 ? -2.5 : 0, duration: 240 });
+        }
+
+        if (toneStreak >= 3) {
+          spawnFloatingChip(btn, `${toneStreak}× STREAK!`, { bg: '#FDF197', color: '#000000' });
+        } else {
+          spawnFloatingChip(btn, '+1', { bg: '#B8F526', color: '#000000' });
+        }
+
         document.querySelector('.options').style.display = 'none';
-        
+
         const fabContainer = document.getElementById('fab-container');
         fabContainer.innerHTML = `
           <div class="w-14 h-14 rounded-2xl bg-canvas-acid text-black border-2 border-black shadow-hard-black flex items-center justify-center animate-[pop-up_0.3s_ease-out]">
@@ -907,11 +1020,13 @@ function setupButtons() {
         `;
         fabContainer.classList.remove('hidden');
 
-        document.getElementById('pinyin-display').innerHTML = `
+        const pinyinEl = document.getElementById('pinyin-display');
+        pinyinEl.innerHTML = `
             <div class="font-chinese font-black text-5xl sm:text-6xl text-black leading-none">${currentItem.hanzi}</div>
             <div class="font-speed font-black italic text-2xl sm:text-3xl text-black">${currentItem.pinyin_correct}</div>
         `;
-        
+        animateSpringPop(pinyinEl, { scalePeak: 1.05, duration: 200 });
+
         const explanationBox = document.getElementById('explanation-box');
         let explanationContent = '';
 
@@ -932,7 +1047,7 @@ function setupButtons() {
                 </div>
             `;
             explanationBox.innerHTML = explanationContent;
-            explanationBox.classList.remove('hidden');
+            revealInline(explanationBox, { slideY: 10, duration: 200 });
 
             const nextBtn = document.getElementById('next-question-btn');
             nextBtn.addEventListener('click', () => nextQuestion(), { once: true });
@@ -950,11 +1065,17 @@ function setupButtons() {
             if (nextQuestionTimer) {
               clearTimeout(nextQuestionTimer);
             }
-            nextQuestionTimer = setTimeout(nextQuestion, 1500);
+            nextQuestionTimer = setTimeout(nextQuestion, 1400);
         }
       } else {
-        document.getElementById('feedback').innerHTML = `<span class="bg-badge-red text-white px-3 py-1 rounded-full border border-black font-mono font-bold text-xs uppercase shadow-hard-black tracking-wider">TRY AGAIN</span>`;
-        
+        toneStreak = 0;
+        triggerDampedShake(btn, { intensity: 7, duration: 250 });
+        const feedbackEl = document.getElementById('feedback');
+        if (feedbackEl) {
+          feedbackEl.innerHTML = `<span class="bg-badge-red text-white px-3 py-1 rounded-full border border-black font-mono font-bold text-xs uppercase shadow-hard-black tracking-wider inline-block">TRY AGAIN</span>`;
+          animateSpringPop(feedbackEl, { scalePeak: 1.05, duration: 180 });
+        }
+
         const fabContainer = document.getElementById('fab-container');
         fabContainer.innerHTML = `
           <div class="w-14 h-14 rounded-2xl bg-badge-red text-white border-2 border-black shadow-hard-black flex items-center justify-center animate-[pop-up_0.3s_ease-out]">
@@ -962,10 +1083,10 @@ function setupButtons() {
           </div>
         `;
         fabContainer.classList.remove('hidden');
-        
+
         setTimeout(() => {
             fabContainer.classList.add('hidden');
-        }, 1000);
+        }, 900);
 
         playAudio();
       }
@@ -1036,7 +1157,12 @@ function nextQuestion() {
       });
   }
 
-  buttons.forEach(btn => void btn.offsetWidth);
+  if (display && !prefersReducedMotion() && typeof display.animate === 'function') {
+    display.animate(
+      [{ opacity: 0, transform: 'translate3d(14px, 0, 0)' }, { opacity: 1, transform: 'translate3d(0, 0, 0)' }],
+      { duration: 180, easing: EASE_SNAP }
+    );
+  }
 
   document.getElementById('feedback').innerHTML = '<span class="text-white/80">[IDENTIFY THE TARGET SOUND]</span>';
   playAudio();
@@ -1272,18 +1398,23 @@ function setupAudioLibrary() {
             }
         });
 
-        toneModal.classList.remove('hidden');
+        openSheetModal(toneModal, '.modal-sheet-card');
     }
 
     mainPlayBtn.addEventListener('click', openToneModal);
 
     closeModalBtn.addEventListener('click', () => {
-        toneModal.classList.add('hidden');
+        closeSheetModal(toneModal, '.modal-sheet-card');
     });
 
     toneModal.addEventListener('click', e => {
+        if (e.target === toneModal) {
+            closeSheetModal(toneModal, '.modal-sheet-card');
+            return;
+        }
         const toneBtn = e.target.closest('.tone-select-btn');
         if (toneBtn && !toneBtn.disabled) {
+            animateSpringPop(toneBtn, { scalePeak: 1.08, duration: 200 });
             const tone = parseInt(toneBtn.dataset.tone);
             const initialKey = selectedInitial === '∅' ? '' : selectedInitial;
             
@@ -1297,31 +1428,43 @@ function setupAudioLibrary() {
                 const audioPath = (audioSourceMode === 'tts' && word.is_lexical && word.audio_tts)
                     ? `${import.meta.env.BASE_URL}${word.audio_tts}`
                     : `${import.meta.env.BASE_URL}${word.audio}`;
-                playAudio(audioPath);
+                toneBtn.classList.add('audio-playing-ring');
+                playAudio(audioPath, {
+                    onEnded: () => toneBtn.classList.remove('audio-playing-ring')
+                });
             } else {
                 console.warn(`No audio found for ${initialKey}${selectedFinal}${tone}`);
             }
         }
     });
 
-    // Initial sync
-    setTimeout(syncSelection, 50);
+    // Initial sync via animation frame
+    requestAnimationFrame(syncSelection);
 }
 
-// Global Keyboard Navigation (1, 2, 3, 4 and Space)
+// Global Keyboard Navigation (1, 2, 3, 4, Space, Escape, N) with keycap press parity
 window.addEventListener('keydown', (e) => {
   const gameScreen = document.getElementById('game-screen');
   const engineScreen = document.getElementById('engine-screen');
+  const libraryScreen = document.getElementById('audio-library-screen');
 
-  if (gameScreen && !gameScreen.classList.contains('hidden')) {
+  if (libraryScreen && !libraryScreen.classList.contains('hidden')) {
+    const toneModal = document.getElementById('library-tone-modal');
+    if (toneModal && !toneModal.classList.contains('hidden') && e.code === 'Escape') {
+      e.preventDefault();
+      closeSheetModal(toneModal, '.modal-sheet-card');
+    }
+  } else if (gameScreen && !gameScreen.classList.contains('hidden')) {
     if (e.key >= '1' && e.key <= '4') {
       const index = parseInt(e.key) - 1;
       const targetBtn = document.querySelectorAll('.tone-btn')[index];
       if (targetBtn && document.querySelector('.options').style.display !== 'none') {
+        pressKeycap(targetBtn);
         targetBtn.click();
       }
     } else if (e.code === 'Space') {
       e.preventDefault();
+      pressKeycap(document.getElementById('play-btn'));
       playAudio();
     }
   } else if (engineScreen && !engineScreen.classList.contains('hidden')) {
@@ -1329,7 +1472,7 @@ window.addEventListener('keydown', (e) => {
     if (settingsModal && !settingsModal.classList.contains('hidden')) {
       if (e.code === 'Escape') {
         e.preventDefault();
-        settingsModal.classList.add('hidden');
+        closeSheetModal(settingsModal);
       }
       return;
     }
@@ -1338,11 +1481,17 @@ window.addEventListener('keydown', (e) => {
     if (e.code === 'Space' && !e.repeat) {
       e.preventDefault();
       const recordBtn = document.getElementById('engine-record-btn');
-      if (recordBtn) recordBtn.click();
+      if (recordBtn) {
+        pressKeycap(recordBtn);
+        recordBtn.click();
+      }
     } else if (e.code === 'KeyN' && !e.repeat && !e.metaKey && !e.ctrlKey && !e.altKey) {
       e.preventDefault();
       const nextBtn = document.getElementById('engine-next-btn');
-      if (nextBtn) nextBtn.click();
+      if (nextBtn) {
+        pressKeycap(nextBtn);
+        nextBtn.click();
+      }
     }
   }
 });
@@ -1622,28 +1771,34 @@ function setupEnginePlaceholders() {
 
     if (quickSpeedBtn) {
       if (audioTrackMode === 'human') {
-        quickSpeedBtn.classList.remove('hidden');
         quickSpeedBtn.setAttribute('aria-pressed', isSlow ? 'true' : 'false');
         quickSpeedBtn.innerHTML = isSlow
           ? '<span class="lg:hidden">0.65×</span><span class="hidden lg:inline">0.65× Slow</span>'
           : '<span class="lg:hidden">1.0×</span><span class="hidden lg:inline">1.0× Speed</span>';
-        if (isSlow) {
-          quickSpeedBtn.className = 'min-w-[54px] min-h-[44px] px-3 rounded-xl bg-amber-300 hover:bg-amber-400 text-black border-2 border-black font-mono text-xs font-black whitespace-nowrap flex items-center justify-center active-collapse cursor-pointer shadow-sm shrink-0 transition-colors';
-        } else {
-          quickSpeedBtn.className = 'min-w-[54px] min-h-[44px] px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-black border-2 border-black font-mono text-xs font-black whitespace-nowrap flex items-center justify-center active-collapse cursor-pointer shadow-sm shrink-0 transition-colors';
-        }
+        quickSpeedBtn.classList.toggle('bg-amber-300', isSlow);
+        quickSpeedBtn.classList.toggle('hover:bg-amber-400', isSlow);
+        quickSpeedBtn.classList.toggle('bg-slate-100', !isSlow);
+        quickSpeedBtn.classList.toggle('hover:bg-slate-200', !isSlow);
+        revealInline(quickSpeedBtn, { slideX: -8, slideY: 0, duration: 170 });
       } else {
-        quickSpeedBtn.classList.add('hidden');
+        hideInline(quickSpeedBtn, { slideX: -6, slideY: 0, duration: 120 });
       }
     }
   }
 
   function openSettingsModal() {
-    if (settingsModal) settingsModal.classList.remove('hidden');
+    if (settingsModal) openSheetModal(settingsModal);
   }
 
   function closeSettingsModal() {
-    if (settingsModal) settingsModal.classList.add('hidden');
+    if (settingsModal) closeSheetModal(settingsModal);
+  }
+
+  if (settingsModal) {
+    const settingsHandle = settingsModal.querySelector('.modal-drag-handle');
+    if (settingsHandle) {
+      attachSheetSwipeDismiss(settingsModal, settingsHandle, closeSettingsModal);
+    }
   }
 
   if (settingsBtn) {
@@ -1977,7 +2132,7 @@ function setupEnginePlaceholders() {
       if (sandhiInfo.isSandhi) {
         if (toneTitle) toneTitle.textContent = sandhiInfo.title;
         if (toneSubtext) toneSubtext.textContent = sandhiInfo.subtext;
-        sandhiBadge.classList.remove('hidden');
+        revealInline(sandhiBadge, { slideY: 6, duration: 180 });
       } else {
         sandhiBadge.classList.add('hidden');
       }
@@ -2238,6 +2393,9 @@ function setupEnginePlaceholders() {
 
     pathsContainer.innerHTML = pathHtml;
     pointsContainer.innerHTML = pointsHtml;
+    pathsContainer.querySelectorAll('path').forEach((p, idx) => {
+      animateStrokeDraw(p, { duration: 300, delay: idx * 65 });
+    });
   }
 
   function getPillToneStyle(score) {
@@ -2362,6 +2520,9 @@ function setupEnginePlaceholders() {
         </div>
       </details>
     `;
+    if (!prefersReducedMotion() && typeof detailWrap.animate === 'function') {
+      detailWrap.animate([{ opacity: 0.45 }, { opacity: 1 }], { duration: 150, easing: 'ease-out' });
+    }
   }
 
   function renderDynamicAudit(result, wordData, refProfile) {
@@ -2401,6 +2562,10 @@ function setupEnginePlaceholders() {
         priorityHeader.textContent = 'Check Starting Sound';
       } else {
         priorityHeader.textContent = 'Great Tone Match!';
+      }
+      if ((result?.overallScore ?? 0) >= 85) {
+        animateSpringPop(priorityHeader, { scalePeak: 1.07, duration: 240 });
+        spawnFloatingChip(priorityHeader, `${Math.round(result.overallScore)}% Match!`, { bg: '#B8F526', color: '#000000' });
       }
     }
 
@@ -2498,21 +2663,21 @@ function setupEnginePlaceholders() {
     if (audioSrc) {
       if (playNativeBtn) {
         playNativeBtn.classList.remove('bg-black');
-        playNativeBtn.classList.add('bg-badge-cobalt', 'text-white');
+        playNativeBtn.classList.add('bg-badge-cobalt', 'text-white', 'audio-playing-ring');
       }
       if (coachNativeBtn) {
         coachNativeBtn.classList.remove('bg-white', 'text-black');
-        coachNativeBtn.classList.add('bg-badge-cobalt', 'text-white');
+        coachNativeBtn.classList.add('bg-badge-cobalt', 'text-white', 'audio-playing-ring');
       }
       playAudio(`${import.meta.env.BASE_URL}${audioSrc}`, {
         playbackRate: targetSpeed,
         onEnded: () => {
           if (playNativeBtn) {
-            playNativeBtn.classList.remove('bg-badge-cobalt');
+            playNativeBtn.classList.remove('bg-badge-cobalt', 'audio-playing-ring');
             playNativeBtn.classList.add('bg-black', 'text-white');
           }
           if (coachNativeBtn) {
-            coachNativeBtn.classList.remove('bg-badge-cobalt', 'text-white');
+            coachNativeBtn.classList.remove('bg-badge-cobalt', 'text-white', 'audio-playing-ring');
             coachNativeBtn.classList.add('bg-white', 'text-black');
           }
         }
@@ -2543,10 +2708,19 @@ function setupEnginePlaceholders() {
       const isTts = audioTrackMode === 'tts';
       cardTtsBtn.setAttribute('aria-pressed', isTts ? 'true' : 'false');
       cardHumanBtn.setAttribute('aria-pressed', isTts ? 'false' : 'true');
-      const activeCls = 'flex-1 min-h-[44px] px-2.5 lg:px-2 py-1.5 rounded-[10px] bg-black text-white font-mono text-[11px] sm:text-xs font-black whitespace-nowrap flex items-center justify-center transition-colors cursor-pointer';
-      const idleCls = 'flex-1 min-h-[44px] px-2.5 lg:px-2 py-1.5 rounded-[10px] bg-transparent text-black/75 hover:text-black hover:bg-white/60 font-mono text-[11px] sm:text-xs font-black whitespace-nowrap flex items-center justify-center transition-colors cursor-pointer';
-      cardTtsBtn.className = isTts ? activeCls : idleCls;
-      cardHumanBtn.className = isTts ? idleCls : activeCls;
+      cardTtsBtn.classList.toggle('bg-black', isTts);
+      cardTtsBtn.classList.toggle('text-white', isTts);
+      cardTtsBtn.classList.toggle('bg-transparent', !isTts);
+      cardTtsBtn.classList.toggle('text-black/75', !isTts);
+      cardTtsBtn.classList.toggle('hover:text-black', !isTts);
+      cardTtsBtn.classList.toggle('hover:bg-white/60', !isTts);
+
+      cardHumanBtn.classList.toggle('bg-black', !isTts);
+      cardHumanBtn.classList.toggle('text-white', !isTts);
+      cardHumanBtn.classList.toggle('bg-transparent', isTts);
+      cardHumanBtn.classList.toggle('text-black/75', isTts);
+      cardHumanBtn.classList.toggle('hover:text-black', isTts);
+      cardHumanBtn.classList.toggle('hover:bg-white/60', isTts);
     }
 
     const isSlow = (humanPlaybackSpeed === 0.65 || humanPlaybackSpeed === 0.8);
@@ -2765,9 +2939,10 @@ function setupEnginePlaceholders() {
         if (coachCard) coachCard.classList.add('hidden');
         if (timelineWrap) timelineWrap.classList.add('hidden');
         if (cursor) cursor.classList.add('hidden');
-        if (state1Hint) state1Hint.classList.remove('hidden');
+        if (state1Hint) revealInline(state1Hint, { slideY: 4, duration: 150 });
         if (recordBtn) {
-          recordBtn.className = 'flex-1 min-h-[52px] py-3 sm:py-3.5 px-4 sm:px-6 bg-badge-tangerine text-white hover:bg-[#ff4800] border-[3px] border-black rounded-2xl shadow-hard-black flex items-center justify-center gap-2 sm:gap-3 active-collapse cursor-pointer';
+          recordBtn.classList.remove('bg-black', 'text-badge-tangerine');
+          recordBtn.classList.add('bg-badge-tangerine', 'text-white', 'hover:bg-[#ff4800]');
           recordBtn.innerHTML = `
             <span class="w-3.5 h-3.5 rounded-full bg-white animate-pulse border border-black shrink-0"></span>
             <span class="font-speed font-black italic text-base sm:text-xl uppercase tracking-tight">Record</span>
@@ -2776,14 +2951,15 @@ function setupEnginePlaceholders() {
         }
       } else if (state === 2) {
         if (userTrack) userTrack.classList.add('hidden');
-        if (waveform) waveform.classList.remove('hidden');
+        if (waveform) revealInline(waveform, { slideY: 0, duration: 150 });
         if (auditSec) auditSec.classList.add('hidden');
         if (coachCard) coachCard.classList.add('hidden');
         if (timelineWrap) timelineWrap.classList.add('hidden');
         if (cursor) cursor.classList.add('hidden');
         if (state1Hint) state1Hint.classList.add('hidden');
         if (recordBtn) {
-          recordBtn.className = 'flex-1 min-h-[52px] py-3 sm:py-3.5 px-4 sm:px-6 bg-black text-badge-tangerine border-[3px] border-black rounded-2xl shadow-hard-black flex items-center justify-center gap-2 sm:gap-3 active-collapse cursor-pointer';
+          recordBtn.classList.remove('bg-badge-tangerine', 'text-white', 'hover:bg-[#ff4800]');
+          recordBtn.classList.add('bg-black', 'text-badge-tangerine');
           recordBtn.innerHTML = `
             <span class="w-3.5 h-3.5 rounded-full bg-badge-tangerine animate-ping border border-black shrink-0"></span>
             <span class="font-speed font-black italic text-base sm:text-xl uppercase tracking-tight">Stop Recording (<span id="record-countdown-val">${countdownSeconds}</span>s)</span>
@@ -2793,11 +2969,12 @@ function setupEnginePlaceholders() {
         if (userTrack) userTrack.classList.remove('hidden');
         if (waveform) waveform.classList.add('hidden');
         if (state1Hint) state1Hint.classList.add('hidden');
-        if (auditSec) auditSec.classList.remove('hidden');
-        if (coachCard) coachCard.classList.remove('hidden');
-        if (timelineWrap) timelineWrap.classList.remove('hidden');
+        if (timelineWrap) revealInline(timelineWrap, { slideY: 6, duration: 180 });
+        if (auditSec) revealInline(auditSec, { slideY: 12, duration: 220 });
+        if (coachCard) revealInline(coachCard, { slideY: 16, duration: 260 });
         if (recordBtn) {
-          recordBtn.className = 'flex-1 min-h-[52px] py-3 sm:py-3.5 px-4 sm:px-6 bg-badge-tangerine text-white hover:bg-[#ff4800] border-[3px] border-black rounded-2xl shadow-hard-black flex items-center justify-center gap-2 sm:gap-3 active-collapse cursor-pointer';
+          recordBtn.classList.remove('bg-black', 'text-badge-tangerine');
+          recordBtn.classList.add('bg-badge-tangerine', 'text-white', 'hover:bg-[#ff4800]');
           recordBtn.innerHTML = `
             <span class="w-3.5 h-3.5 rounded-full bg-white animate-pulse border border-black shrink-0"></span>
             <span class="font-speed font-black italic text-base sm:text-xl uppercase tracking-tight">Record Again</span>

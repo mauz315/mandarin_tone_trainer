@@ -8,7 +8,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Mandarin Tone Trainer - Neo-Sponsor Badge Collage</title>
     <style>
-      html, body { background-color: #B8F526; }
+      :root { --canvas-bg: #B8F526; }
+      html, body, #status-bar-backdrop { background-color: var(--canvas-bg); }
     </style>
 
     <!-- Google Fonts: Diverse Typographic Collision -->
@@ -26,15 +27,15 @@
         document.write('<script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"><\/script>');
       }
     </script>
-    <script type="module" crossorigin src="/mandarin_tone_trainer/assets/index-DkoYetZs.js"></script>
-    <link rel="stylesheet" crossorigin href="/mandarin_tone_trainer/assets/index-Ci58D4UH.css">
+    <script type="module" crossorigin src="/mandarin_tone_trainer/assets/index-BeLlm1At.js"></script>
+    <link rel="stylesheet" crossorigin href="/mandarin_tone_trainer/assets/index-DC6QEITn.css">
   </head>
   <body class="text-slate-900 font-grotesk h-full lg:min-h-[100dvh] antialiased selection:bg-badge-pink selection:text-white p-0 m-0 flex flex-col items-center justify-center overflow-hidden lg:overflow-x-hidden bg-canvas-acid">
 
     <!-- POSTER CANVAS CONTAINER (Full-bleed on both mobile and desktop) -->
-    <main id="app" class="app-safe-area w-full relative overflow-hidden h-full lg:h-screen lg:min-h-screen flex flex-col justify-between lg:transition-colors lg:duration-500 bg-canvas-acid">
+    <main id="app" class="app-safe-area w-full relative overflow-hidden h-full lg:h-screen lg:min-h-screen flex flex-col justify-between bg-canvas-acid">
       <!-- Instant Top Safe-Area Backdrop for iOS Home Screen black-translucent Status Bar -->
-      <div id="status-bar-backdrop" class="lg:hidden" style="background-color: #B8F526;" aria-hidden="true"></div>
+      <div id="status-bar-backdrop" class="lg:hidden" aria-hidden="true"></div>
       <!-- Halftone Texture Background Layer -->
       <div class="absolute inset-0 bg-halftone-dots pointer-events-none z-0"></div>
 
@@ -443,7 +444,7 @@
         </div>
 
         <div id="library-tone-modal" class="hidden fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div class="bg-canvas-acid border-[3.5px] border-black p-6 rounded-3xl shadow-hard-black-lg max-w-sm w-full flex flex-col items-center">
+          <div class="modal-sheet-card modal-center-card bg-canvas-acid border-[3.5px] border-black p-6 rounded-3xl shadow-hard-black-lg max-w-sm w-full flex flex-col items-center">
             <div class="bg-black text-white px-3 py-1 rounded-full font-mono text-xs font-bold uppercase mb-2">
               SELECT TONE CONTOUR
             </div>
@@ -679,15 +680,18 @@
 
         <!-- [4] Practice Options Drawer Modal (#engine-settings-modal) -->
         <div id="engine-settings-modal" class="hidden fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div class="bg-white border-[3px] border-black rounded-t-3xl sm:rounded-3xl shadow-hard-black-lg w-full max-w-md overflow-hidden flex flex-col max-h-[85dvh]">
-            <div class="p-4 border-b-2 border-black bg-slate-50 flex items-center justify-between shrink-0">
-              <div>
-                <h2 class="font-speed font-black italic text-xl text-black">Practice Options</h2>
-                <p class="font-mono text-[11px] font-bold text-black/60">Deck filter, voice track &amp; speed</p>
+          <div class="modal-sheet-card bg-white border-[3px] border-black rounded-t-3xl sm:rounded-3xl shadow-hard-black-lg w-full max-w-md overflow-hidden flex flex-col max-h-[85dvh]">
+            <div class="modal-drag-handle p-4 pt-3 sm:pt-4 border-b-2 border-black bg-slate-50 shrink-0">
+              <div class="w-10 h-1 bg-black/25 rounded-full mx-auto mb-2 sm:hidden" aria-hidden="true"></div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <h2 class="font-speed font-black italic text-xl text-black">Practice Options</h2>
+                  <p class="font-mono text-[11px] font-bold text-black/60">Deck filter, voice track &amp; speed</p>
+                </div>
+                <button id="engine-settings-close-btn" type="button" class="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl bg-black hover:bg-badge-tangerine text-white flex items-center justify-center active-collapse cursor-pointer transition-colors" aria-label="Close Practice Options">
+                  <span class="material-symbols-outlined text-lg">close</span>
+                </button>
               </div>
-              <button id="engine-settings-close-btn" type="button" class="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl bg-black hover:bg-badge-tangerine text-white flex items-center justify-center active-collapse cursor-pointer transition-colors" aria-label="Close Practice Options">
-                <span class="material-symbols-outlined text-lg">close</span>
-              </button>
             </div>
 
             <div class="p-4 overflow-y-auto overscroll-contain space-y-4">
@@ -1170,7 +1174,7 @@
 
         <!-- PHASE COMPLETE MODAL (#phase-complete-modal) -->
         <div id="phase-complete-modal" class="hidden fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div class="bg-white border-[3px] border-black rounded-3xl p-6 shadow-hard-black-lg max-w-sm w-full flex flex-col items-center text-center gap-3">
+          <div class="modal-sheet-card modal-center-card bg-white border-[3px] border-black rounded-3xl p-6 shadow-hard-black-lg max-w-sm w-full flex flex-col items-center text-center gap-3">
             <h2 id="phase-complete-title" class="font-speed font-black italic text-2xl text-black">🎉 Phase 1 Complete!</h2>
             <p id="phase-complete-summary" class="font-mono text-xs font-bold text-black/75 leading-relaxed">
               You mastered all 55 words in Phase 1: Roots!
@@ -1188,20 +1192,23 @@
         </div>
 
         <!-- MODE-AWARE STROKE / STRUCTURE GUIDE MODAL (#stroke-guide-modal) -->
-        <div id="stroke-guide-modal" class="hidden fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">
-          <div class="bg-white border-[3px] border-black rounded-3xl shadow-hard-black-lg max-w-2xl w-full max-h-[88dvh] flex flex-col overflow-hidden">
+        <div id="stroke-guide-modal" class="hidden fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div class="modal-sheet-card bg-white border-[3px] border-black rounded-t-3xl sm:rounded-3xl shadow-hard-black-lg max-w-2xl w-full max-h-[88dvh] flex flex-col overflow-hidden">
             <!-- Theme-Synced Modal Header -->
-            <div class="wt-modal-header p-4 border-b-2 border-black flex items-center justify-between shrink-0">
-              <div class="flex items-center gap-2.5 min-w-0">
-                <span id="guide-modal-badge-char" class="wt-modal-badge font-chinese font-black text-xl w-9 h-9 rounded-xl flex items-center justify-center border-2 border-black shrink-0">永</span>
-                <div class="min-w-0">
-                  <h2 id="guide-modal-title" class="font-speed font-black italic text-lg sm:text-xl text-black leading-tight truncate">Chinese Stroke Guide</h2>
-                  <p id="guide-modal-subtitle" class="font-mono text-[11px] font-bold text-black/65 truncate">8 Strokes • Compound Forms • 7 Rules</p>
+            <div class="modal-drag-handle wt-modal-header p-4 pt-3 sm:pt-4 border-b-2 border-black shrink-0">
+              <div class="w-10 h-1 bg-black/25 rounded-full mx-auto mb-2 sm:hidden" aria-hidden="true"></div>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <span id="guide-modal-badge-char" class="wt-modal-badge font-chinese font-black text-xl w-9 h-9 rounded-xl flex items-center justify-center border-2 border-black shrink-0">永</span>
+                  <div class="min-w-0">
+                    <h2 id="guide-modal-title" class="font-speed font-black italic text-lg sm:text-xl text-black leading-tight truncate">Chinese Stroke Guide</h2>
+                    <p id="guide-modal-subtitle" class="font-mono text-[11px] font-bold text-black/65 truncate">8 Strokes • Compound Forms • 7 Rules</p>
+                  </div>
                 </div>
+                <button id="close-stroke-guide-btn" type="button" class="wt-modal-close-btn w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl bg-black text-white flex items-center justify-center active-collapse cursor-pointer transition-colors shrink-0" aria-label="Close Practice Guide">
+                  <span class="material-symbols-outlined text-lg">close</span>
+                </button>
               </div>
-              <button id="close-stroke-guide-btn" type="button" class="wt-modal-close-btn w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl bg-black text-white flex items-center justify-center active-collapse cursor-pointer transition-colors shrink-0" aria-label="Close Practice Guide">
-                <span class="material-symbols-outlined text-lg">close</span>
-              </button>
             </div>
 
             <!-- Scrollable Modal Body -->
