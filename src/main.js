@@ -1368,6 +1368,8 @@ function setupEnginePlaceholders() {
   const settingsDoneBtn = document.getElementById('engine-settings-done-btn');
   const settingsSummaryEl = document.getElementById('engine-settings-summary');
   const quickSpeedBtn = document.getElementById('engine-quick-speed-btn');
+  const cardTtsBtn = document.getElementById('engine-card-tts-btn');
+  const cardHumanBtn = document.getElementById('engine-card-human-btn');
 
   let currentDeckFilter = 'all'; // 'all' | 'hsk1' | 'hsk2'
   let shuffleBag = [];
@@ -1601,25 +1603,24 @@ function setupEnginePlaceholders() {
   }
 
   function updateEngineSettingsSummary() {
-    const deckLabel = currentDeckFilter === 'all' ? 'All' : (currentDeckFilter === 'hsk1' ? 'HSK 1' : 'HSK 2');
+    const deckLabel = currentDeckFilter === 'all' ? 'All Words' : (currentDeckFilter === 'hsk1' ? 'HSK 1' : 'HSK 2');
     const isSlow = audioTrackMode === 'human' && (humanPlaybackSpeed === 0.65 || humanPlaybackSpeed === 0.8);
-    const voiceLabel = audioTrackMode === 'tts'
-      ? 'Studio'
-      : (isSlow ? 'Natural 0.65×' : 'Natural');
 
     if (settingsSummaryEl) {
-      settingsSummaryEl.textContent = `${deckLabel} • ${voiceLabel}`;
+      settingsSummaryEl.textContent = deckLabel;
     }
 
     if (quickSpeedBtn) {
       if (audioTrackMode === 'human') {
         quickSpeedBtn.classList.remove('hidden');
-        quickSpeedBtn.textContent = isSlow ? '0.65×' : '1.0×';
         quickSpeedBtn.setAttribute('aria-pressed', isSlow ? 'true' : 'false');
+        quickSpeedBtn.innerHTML = isSlow
+          ? '<span class="lg:hidden">0.65×</span><span class="hidden lg:inline">0.65× Slow</span>'
+          : '<span class="lg:hidden">1.0×</span><span class="hidden lg:inline">1.0× Speed</span>';
         if (isSlow) {
-          quickSpeedBtn.className = 'min-w-[44px] min-h-[44px] px-2.5 rounded-xl bg-amber-300 hover:bg-amber-400 text-black border-2 border-black font-mono text-xs font-black active-collapse cursor-pointer shadow-sm shrink-0 transition-colors';
+          quickSpeedBtn.className = 'min-w-[54px] min-h-[44px] px-3 rounded-xl bg-amber-300 hover:bg-amber-400 text-black border-2 border-black font-mono text-xs font-black whitespace-nowrap flex items-center justify-center active-collapse cursor-pointer shadow-sm shrink-0 transition-colors';
         } else {
-          quickSpeedBtn.className = 'min-w-[44px] min-h-[44px] px-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-black border-2 border-black font-mono text-xs font-black active-collapse cursor-pointer shadow-sm shrink-0 transition-colors';
+          quickSpeedBtn.className = 'min-w-[54px] min-h-[44px] px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-black border-2 border-black font-mono text-xs font-black whitespace-nowrap flex items-center justify-center active-collapse cursor-pointer shadow-sm shrink-0 transition-colors';
         }
       } else {
         quickSpeedBtn.classList.add('hidden');
@@ -2515,6 +2516,16 @@ function setupEnginePlaceholders() {
       }
     }
 
+    if (cardTtsBtn && cardHumanBtn) {
+      const isTts = audioTrackMode === 'tts';
+      cardTtsBtn.setAttribute('aria-pressed', isTts ? 'true' : 'false');
+      cardHumanBtn.setAttribute('aria-pressed', isTts ? 'false' : 'true');
+      const activeCls = 'flex-1 min-h-[44px] px-2.5 lg:px-2 py-1.5 rounded-[10px] bg-black text-white font-mono text-[11px] sm:text-xs font-black whitespace-nowrap flex items-center justify-center transition-colors cursor-pointer';
+      const idleCls = 'flex-1 min-h-[44px] px-2.5 lg:px-2 py-1.5 rounded-[10px] bg-transparent text-black/75 hover:text-black hover:bg-white/60 font-mono text-[11px] sm:text-xs font-black whitespace-nowrap flex items-center justify-center transition-colors cursor-pointer';
+      cardTtsBtn.className = isTts ? activeCls : idleCls;
+      cardHumanBtn.className = isTts ? idleCls : activeCls;
+    }
+
     const isSlow = (humanPlaybackSpeed === 0.65 || humanPlaybackSpeed === 0.8);
     if (speed1xBtn && speed065xBtn) {
       if (isSlow) {
@@ -2665,6 +2676,8 @@ function setupEnginePlaceholders() {
 
   if (trackTtsBtn) trackTtsBtn.addEventListener('click', () => setAudioTrackMode('tts'));
   if (trackHumanBtn) trackHumanBtn.addEventListener('click', () => setAudioTrackMode('human'));
+  if (cardTtsBtn) cardTtsBtn.addEventListener('click', () => setAudioTrackMode('tts'));
+  if (cardHumanBtn) cardHumanBtn.addEventListener('click', () => setAudioTrackMode('human'));
   if (speed1xBtn) speed1xBtn.addEventListener('click', () => setHumanPlaybackSpeed(1.0));
   if (speed065xBtn) speed065xBtn.addEventListener('click', () => setHumanPlaybackSpeed(0.65));
 
