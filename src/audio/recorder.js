@@ -228,6 +228,11 @@ export class AudioRecorder {
       this.mediaStream.getTracks().forEach((track) => track.stop());
       this.mediaStream = null;
     }
+    if (typeof navigator !== "undefined" && navigator.audioSession) {
+      try {
+        navigator.audioSession.type = "playback";
+      } catch (_) {}
+    }
   }
 
   /**

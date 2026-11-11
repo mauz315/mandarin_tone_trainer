@@ -143,6 +143,20 @@ if (typeof window !== 'undefined') {
   window.stopGlobalAudio = stopGlobalAudio;
 }
 
+const SILENT_WAV_DATA_URI = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+let activePlayRequestId = 0;
+let webAudioUnlocked = false;
+let htmlAudioUnlocked = false;
+let isMicRecordingActive = false;
+
+function setAudioSessionType(type) {
+  if (typeof navigator !== 'undefined' && navigator.audioSession && navigator.audioSession.type !== type) {
+    try {
+      navigator.audioSession.type = type;
+    } catch (_) {}
+  }
+}
+
 function getAudioContext() {
   if (!audioCtx) {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -150,33 +164,73 @@ function getAudioContext() {
       audioCtx = new AudioContextClass();
     }
   }
-  if (audioCtx && audioCtx.state === 'suspended') {
+  if (audioCtx && audioCtx.state !== 'running') {
     audioCtx.resume().catch(() => {});
   }
   return audioCtx;
 }
 
-function ensureAudioUnlocked() {
-  // Request 'play-and-record' audio session so iOS ignores the hardware mute switch,
-  // matching the behaviour of native media apps while keeping mic recording enabled.
-  if (navigator.audioSession && navigator.audioSession.type !== 'play-and-record') {
-    try {
-      navigator.audioSession.type = 'play-and-record';
-    } catch (_) {}
+function ensureAudioUnlocked(fromUserGesture = false) {
+  // Use 'playback' whenever not actively recording so iOS routes to loudspeaker
+  // and ignores the hardware mute switch ('play-and-record' routes to earpiece receiver).
+  if (!isMicRecordingActive) {
+    setAudioSessionType('playback');
   }
-  getAudioContext();
+
+  const ctx = getAudioContext();
   if (!htmlAudioInstance && typeof Audio !== 'undefined') {
     htmlAudioInstance = new Audio();
+  }
+
+  if (fromUserGesture) {
+    if (ctx && (!webAudioUnlocked || ctx.state !== 'running')) {
+      try {
+        const silentBuf = ctx.createBuffer(1, 1, 22050);
+        const src = ctx.createBufferSource();
+        src.buffer = silentBuf;
+        src.connect(ctx.destination);
+        src.start(0);
+        if (ctx.state === 'running') {
+          webAudioUnlocked = true;
+        }
+      } catch (_) {}
+    }
+
+    if (htmlAudioInstance && !htmlAudioUnlocked && !htmlAudioInstance.currentSrc && htmlAudioInstance.paused) {
+      try {
+        htmlAudioInstance.muted = true;
+        htmlAudioInstance.src = SILENT_WAV_DATA_URI;
+        const p = htmlAudioInstance.play();
+        if (p && typeof p.then === 'function') {
+          p.then(() => {
+            htmlAudioUnlocked = true;
+            if (htmlAudioInstance.src === SILENT_WAV_DATA_URI) {
+              htmlAudioInstance.pause();
+              htmlAudioInstance.removeAttribute('src');
+              htmlAudioInstance.load();
+            }
+            htmlAudioInstance.muted = false;
+          }).catch(() => {
+            htmlAudioInstance.muted = false;
+          });
+        } else {
+          htmlAudioInstance.muted = false;
+        }
+      } catch (_) {
+        htmlAudioInstance.muted = false;
+      }
+    }
   }
 }
 
 if (typeof window !== 'undefined') {
-  const unlockEvents = ['touchstart', 'touchend', 'click', 'keydown'];
+  // touchend/click/keydown qualify as audio-activating gestures in iOS WebKit (touchstart does not)
+  const unlockEvents = ['touchend', 'click', 'keydown'];
   const unlockHandler = () => {
-    ensureAudioUnlocked();
+    ensureAudioUnlocked(true);
   };
   unlockEvents.forEach(evt => {
-    window.addEventListener(evt, unlockHandler, { passive: true });
+    window.addEventListener(evt, unlockHandler, { capture: true, passive: true });
   });
 
   // Mobile-only debug helpers
@@ -762,7 +816,7 @@ function setupMenu() {
 }
 
 function startGame(mode, heroCard = null) {
-  ensureAudioUnlocked();
+  ensureAudioUnlocked(true);
   currentGameMode = mode;
   toneStreak = 0;
   const menuScreen = document.getElementById('menu-screen');
@@ -860,85 +914,72 @@ async function init() {
 
 async function playAudio(customPath, options = {}) {
   const { playbackRate = 1.0, onEnded = null } = options || {};
-  ensureAudioUnlocked();
+  ensureAudioUnlocked(false);
   stopGlobalAudio();
-  let rawPath = null;
+  const requestId = ++activePlayRequestId;
+
+  let audioPath = null;
   if (typeof customPath === 'string' && customPath.trim().length > 0) {
-    rawPath = customPath.trim();
+    audioPath = customPath.trim();
   } else if (currentItem) {
-    if (audioSourceMode === 'tts' && currentItem.is_lexical && currentItem.audio_tts) {
-      rawPath = `${import.meta.env.BASE_URL}${currentItem.audio_tts}`;
+    if (audioSourceMode === 'tts' && currentItem.is_lexical !== false && currentItem.audio_tts) {
+      audioPath = `${import.meta.env.BASE_URL}${currentItem.audio_tts}`;
     } else {
-      rawPath = `${import.meta.env.BASE_URL}${currentItem.audio}`;
+      audioPath = `${import.meta.env.BASE_URL}${currentItem.audio}`;
     }
   }
-
-  // Handle TTS route rewrite if a syllable audio path was passed
-  let audioPath = rawPath;
-  if (audioSourceMode === 'tts' && rawPath) {
-    if (rawPath.includes('audio/') && !rawPath.includes('audio/tts/') && !rawPath.includes('hsk_tts/')) {
-      audioPath = rawPath.replace('audio/', 'audio/tts/');
-    }
-  }
-
-  console.log('[DEBUG] playAudio | customPath:', customPath, '| resolved:', audioPath, '| currentItem:', currentItem ? currentItem.audio : null);
 
   if (!audioPath) {
-    console.warn('[DEBUG] playAudio: no audioPath, aborting');
     if (typeof onEnded === 'function') onEnded();
     return;
   }
 
   const ctx = getAudioContext();
-  console.log('[DEBUG] AudioContext state:', ctx ? ctx.state : 'null');
 
-  // 1. Primary Engine: Web Audio API
+  // 1. Primary Engine: Web Audio API (only when AudioContext is actively running)
   if (ctx) {
     try {
-      if (ctx.state === 'suspended') {
-        console.log('[DEBUG] Resuming suspended AudioContext...');
+      if (ctx.state !== 'running') {
         await ctx.resume();
-        console.log('[DEBUG] AudioContext state after resume:', ctx.state);
       }
-      let buffer = audioBufferCache.get(audioPath);
-      if (!buffer) {
-        console.log('[DEBUG] Fetching audio:', audioPath);
-        const resp = await fetch(audioPath);
-        console.log('[DEBUG] Fetch response:', resp.status, resp.ok);
-        if (resp.ok) {
-          const arrayBuf = await resp.arrayBuffer();
-          buffer = await decodeAudioDataSafe(ctx, arrayBuf);
-          if (buffer) {
-            audioBufferCache.set(audioPath, buffer);
-            console.log('[DEBUG] Buffer decoded and cached');
-          } else {
-            console.warn('[DEBUG] decodeAudioDataSafe returned null');
+      if (requestId !== activePlayRequestId) return;
+
+      if (ctx.state === 'running') {
+        let buffer = audioBufferCache.get(audioPath);
+        if (!buffer) {
+          const resp = await fetch(audioPath);
+          if (requestId !== activePlayRequestId) return;
+          if (resp.ok) {
+            const arrayBuf = await resp.arrayBuffer();
+            if (requestId !== activePlayRequestId) return;
+            buffer = await decodeAudioDataSafe(ctx, arrayBuf);
+            if (requestId !== activePlayRequestId) return;
+            if (buffer) {
+              audioBufferCache.set(audioPath, buffer);
+            }
           }
-        } else {
-          console.error('[DEBUG] Fetch failed with status:', resp.status);
         }
-      } else {
-        console.log('[DEBUG] Using cached buffer for:', audioPath);
-      }
-      if (buffer) {
-        stopGlobalAudio();
-        const source = ctx.createBufferSource();
-        source.buffer = buffer;
-        source.playbackRate.value = Number.isFinite(playbackRate) && playbackRate > 0 ? playbackRate : 1.0;
-        source.connect(ctx.destination);
-        source.onended = () => {
-          if (currentWebAudioSource === source) currentWebAudioSource = null;
-          if (typeof onEnded === 'function') onEnded();
-        };
-        source.start(0);
-        currentWebAudioSource = source;
-        console.log('[DEBUG] WebAudio playback started OK');
-        return;
+        if (buffer && ctx.state === 'running') {
+          stopGlobalAudio();
+          const source = ctx.createBufferSource();
+          source.buffer = buffer;
+          source.playbackRate.value = Number.isFinite(playbackRate) && playbackRate > 0 ? playbackRate : 1.0;
+          source.connect(ctx.destination);
+          source.onended = () => {
+            if (currentWebAudioSource === source) currentWebAudioSource = null;
+            if (typeof onEnded === 'function') onEnded();
+          };
+          source.start(0);
+          currentWebAudioSource = source;
+          return;
+        }
       }
     } catch (err) {
       console.warn('[DEBUG] Web Audio failed, falling back to HTMLAudio:', err);
     }
   }
+
+  if (requestId !== activePlayRequestId) return;
 
   // 2. HTML5 Audio fallback
   try {
@@ -947,6 +988,8 @@ async function playAudio(customPath, options = {}) {
     }
     htmlAudioInstance.pause();
     htmlAudioInstance.currentTime = 0;
+    htmlAudioInstance.muted = false;
+    htmlAudioInstance.volume = 1;
     htmlAudioInstance.src = audioPath;
     htmlAudioInstance.playbackRate = Number.isFinite(playbackRate) && playbackRate > 0 ? playbackRate : 1.0;
     htmlAudioInstance.onended = () => {
@@ -955,15 +998,12 @@ async function playAudio(customPath, options = {}) {
     htmlAudioInstance.onerror = () => {
       if (typeof onEnded === 'function') onEnded();
     };
-    console.log('[DEBUG] HTMLAudio .play() called for:', audioPath);
     const playPromise = htmlAudioInstance.play();
     if (playPromise && typeof playPromise.catch === 'function') {
-      playPromise
-        .then(() => console.log('[DEBUG] HTMLAudio play resolved OK'))
-        .catch(e => {
-          console.error('[DEBUG] HTMLAudio play rejected:', e);
-          if (typeof onEnded === 'function') onEnded();
-        });
+      playPromise.catch(e => {
+        console.error('[DEBUG] HTMLAudio play rejected:', e);
+        if (typeof onEnded === 'function') onEnded();
+      });
     }
   } catch (e) {
     console.error('[DEBUG] HTMLAudio threw synchronously:', e);
@@ -2161,14 +2201,11 @@ function setupEnginePlaceholders() {
   }
 
   async function startRealRecording() {
-    ensureAudioUnlocked();
+    ensureAudioUnlocked(true);
     stopGlobalAudio();
     stopUserPlayback();
-    if (typeof navigator !== 'undefined' && navigator.audioSession) {
-      try {
-        navigator.audioSession.type = 'play-and-record';
-      } catch (_) {}
-    }
+    isMicRecordingActive = true;
+    setAudioSessionType('play-and-record');
 
     if (!audioPipeline) {
       audioPipeline = new AudioPipeline({
@@ -2206,6 +2243,8 @@ function setupEnginePlaceholders() {
         }
       }, 50);
     } catch (err) {
+      isMicRecordingActive = false;
+      setAudioSessionType('playback');
       console.error('[AudioEngine] Microphone access failed:', err);
       alert('Microphone access denied or audio device unavailable: ' + err.message);
       if (window.PronunciationEngine) {
@@ -2276,6 +2315,9 @@ function setupEnginePlaceholders() {
       if (window.PronunciationEngine) {
         window.PronunciationEngine.setRevealState(1);
       }
+    } finally {
+      isMicRecordingActive = false;
+      setAudioSessionType('playback');
     }
   }
 
@@ -2598,6 +2640,8 @@ function setupEnginePlaceholders() {
       if (audioPipeline && audioPipeline.isRecording) {
         audioPipeline.recorder.stop();
       }
+      isMicRecordingActive = false;
+      setAudioSessionType('playback');
       pickRandomWord();
     });
   }
@@ -2613,6 +2657,8 @@ function setupEnginePlaceholders() {
       if (audioPipeline && audioPipeline.isRecording) {
         audioPipeline.recorder.stop();
       }
+      isMicRecordingActive = false;
+      setAudioSessionType('playback');
       if (currentTargetWord) {
         displayWord(currentTargetWord);
       } else {
@@ -2863,6 +2909,7 @@ function setupEnginePlaceholders() {
   if (coachPlayBtn) {
     coachPlayBtn.addEventListener('click', () => {
       if (!lastUserAudioBlob) return;
+      ensureAudioUnlocked(true);
       stopGlobalAudio();
 
       if (activeUserAudio && !activeUserAudio.paused) {
