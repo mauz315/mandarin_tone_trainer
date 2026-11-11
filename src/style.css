@@ -204,237 +204,191 @@
   transform-origin: center;
 }
 
-/* Phase Stepper Custom States - Option E: Pale Lavender Chalk & Solar Amber */
-.phase-btn.phase-active {
-  background-color: #4C1D95 !important;
+/* ======================================================== */
+/* WORD TRAINER DUAL THEMING: CSS CUSTOM PROPERTY TOKENS    */
+/* ======================================================== */
+#word-trainer-screen.theme-calligraphy {
+  --wt-accent: #4C1D95;
+  --wt-accent-hover: #3B0764;
+  --wt-accent-tint: #FAF5FF;
+  --wt-accent-tint-strong: #F3E8FF;
+  --wt-accent-border: #E9D5FF;
+  --wt-highlight: #D97706;
+  --wt-highlight-hover: #B45309;
+  --wt-highlight-end: #F59E0B;
+  --wt-pill-sub: #FDE68A;
+  --wt-soft-text: #6D28D9;
+  --wt-grid-stroke: rgba(76, 29, 149, 0.18);
+  --wt-grid-inner: rgba(76, 29, 149, 0.12);
+  --wt-watermark: rgba(76, 29, 149, 0.06);
+  background-color: transparent !important;
+}
+
+#word-trainer-screen.theme-builder {
+  --wt-accent: #065F46;
+  --wt-accent-hover: #047857;
+  --wt-accent-tint: #ECFDF5;
+  --wt-accent-tint-strong: #DCFCE7;
+  --wt-accent-border: #A7F3D0;
+  --wt-highlight: #065F46;
+  --wt-highlight-hover: #047857;
+  --wt-highlight-end: #10B981;
+  --wt-pill-sub: #D1FAE5;
+  --wt-soft-text: #047857;
+  --wt-grid-stroke: rgba(6, 95, 70, 0.22);
+  --wt-grid-inner: rgba(6, 95, 70, 0.14);
+  --wt-watermark: rgba(6, 95, 70, 0.06);
+  background-color: transparent !important;
+}
+
+/* Watermark, Header, Guide & Modal Accent Token Bindings */
+#word-trainer-screen #word-trainer-watermark {
+  color: var(--wt-watermark);
+}
+#word-trainer-screen #back-from-words-btn:hover {
+  background-color: var(--wt-accent);
+}
+#word-trainer-screen #open-stroke-guide-btn .material-symbols-outlined,
+#word-trainer-screen .wt-guide-icon {
+  color: var(--wt-accent);
+}
+#word-trainer-screen .wt-mode-segment.wt-mode-active {
+  background-color: var(--wt-accent);
+  color: #ffffff;
+}
+#word-trainer-screen .wt-grid-stroke {
+  stroke: var(--wt-grid-stroke);
+}
+#word-trainer-screen .wt-grid-inner {
+  stroke: var(--wt-grid-inner);
+}
+
+/* Phase Stepper States */
+#word-trainer-screen .phase-btn.phase-active {
+  background-color: var(--wt-accent) !important;
   color: #ffffff !important;
   border-color: #000000 !important;
   box-shadow: 3px 3px 0px #000000 !important;
 }
-.phase-btn.phase-active .phase-btn-sub {
-  color: #FDE68A !important;
+#word-trainer-screen .phase-btn.phase-active .phase-btn-sub {
+  color: var(--wt-pill-sub) !important;
 }
-.phase-btn.phase-available .phase-btn-sub {
+#word-trainer-screen .phase-btn.phase-available .phase-btn-sub {
   color: rgba(0, 0, 0, 0.55) !important;
 }
-.phase-btn.phase-completed {
-  background-color: #EDE9FE !important;
-  color: #4C1D95 !important;
-  border-color: #6D28D9 !important;
+#word-trainer-screen .phase-btn.phase-completed {
+  background-color: var(--wt-accent-tint-strong) !important;
+  color: var(--wt-accent) !important;
+  border-color: var(--wt-soft-text) !important;
 }
-.phase-btn.phase-completed .phase-btn-sub {
-  color: #6D28D9 !important;
-}
-.phase-btn.phase-recommended {
-  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.5) !important;
-  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+#word-trainer-screen .phase-btn.phase-completed .phase-btn-sub {
+  color: var(--wt-soft-text) !important;
 }
 
-/* Tone Selector Keycaps Active State */
-.tone-choice-btn.tone-selected {
-  outline: 3px solid #000000 !important;
-  box-shadow: 3px 3px 0px #000000 !important;
-  transform: translate(1px, 1px) scale(0.98);
-  filter: brightness(1.08);
+/* Mobile Consolidated Trigger & Progress Controls */
+#word-trainer-screen #mobile-phase-trigger {
+  background-color: var(--wt-accent);
+  color: #ffffff;
+  border-color: #000000;
+  box-shadow: 3px 3px 0px #000000;
+}
+#word-trainer-screen #mobile-phase-trigger:hover {
+  background-color: var(--wt-accent-hover);
+}
+#word-trainer-screen #mobile-phase-trigger .mobile-phase-sub {
+  color: var(--wt-pill-sub);
+}
+#word-trainer-screen #mobile-progress-fill,
+#word-trainer-screen #progress-bar-fill {
+  background: linear-gradient(90deg, var(--wt-highlight) 0%, var(--wt-highlight-end) 100%);
 }
 
-/* Scaffolding Guide Toggle States - Option E: Pale Lavender Chalk & Solar Amber */
+/* Scaffolding Guide Toggle States (Identical Solar Amber ON / Charcoal OFF Across Mirror Modes) */
 .scaffold-on {
   background-color: #D97706 !important;
   color: #ffffff !important;
 }
-.scaffold-off {
-  background-color: #18181b !important;
-  color: #DDD6FE !important;
-}
-
-/* ======================================================== */
-/* WORD TRAINER DUAL THEMING: OPTION 3 IMPERIAL CELADON & PLUM */
-/* ======================================================== */
-
-/* Component Builder Theme (.theme-builder) - Celadon & Jade */
-#word-trainer-screen.theme-builder {
-  background-color: transparent !important;
-}
-.theme-builder .theme-primary-accent {
-  background-color: #065F46 !important;
-  color: #ffffff !important;
-}
-.theme-builder .phase-btn.phase-active {
-  background-color: #065F46 !important;
-  color: #ffffff !important;
-  border-color: #000000 !important;
-  box-shadow: 3px 3px 0px #000000 !important;
-}
-.theme-builder .phase-btn.phase-active .phase-btn-sub {
-  color: #D1FAE5 !important;
-}
-.theme-builder .phase-btn.phase-completed {
-  background-color: #DCFCE7 !important;
-  color: #065F46 !important;
-  border-color: #059669 !important;
-}
-.theme-builder .phase-btn.phase-completed .phase-btn-sub {
-  color: #047857 !important;
-}
-.theme-builder #mobile-phase-trigger {
-  background-color: #065F46 !important;
-  color: #ffffff !important;
-  border-color: #000000 !important;
-  box-shadow: 3px 3px 0px #000000 !important;
-}
-.theme-builder #mobile-phase-trigger:hover {
-  background-color: #047857 !important;
-}
-.theme-builder #mobile-phase-trigger .mobile-phase-sub {
-  color: #D1FAE5 !important;
-}
-.theme-builder #mobile-progress-dot {
-  background-color: #065F46 !important;
-}
-.theme-builder #mobile-progress-fill {
-  background: linear-gradient(90deg, #065F46 0%, #10B981 100%) !important;
-}
-.theme-builder #submit-word-btn {
-  background-color: #065F46 !important;
-}
-.theme-builder #submit-word-btn:hover {
-  background-color: #047857 !important;
-}
-.theme-builder #audio-replay-btn {
-  background-color: #065F46 !important;
-}
-.theme-builder #audio-replay-btn:hover {
-  background-color: #047857 !important;
-}
-.theme-builder #prompt-lexical-box {
-  background-color: #ECFDF5 !important;
-  border-color: #A7F3D0 !important;
-}
-.theme-builder #prompt-pinyin-line {
-  color: #065F46 !important;
-}
-.theme-builder #prompt-meaning-line {
-  color: #064E3B !important;
-}
-.theme-builder #pass-badge {
-  background-color: #065F46 !important;
-  color: #D1FAE5 !important;
-}
-.theme-builder #prompt-task-badge,
-.theme-builder #interaction-task-badge {
-  background-color: #065F46 !important;
-  color: #ffffff !important;
-}
-.theme-builder #result-next-btn {
-  background-color: #065F46 !important;
-}
-.theme-builder #result-next-btn:hover {
-  background-color: #047857 !important;
-}
-.theme-builder #result-audio-replay-btn {
-  background-color: #065F46 !important;
-}
-.theme-builder #result-audio-replay-btn:hover {
-  background-color: #047857 !important;
-}
-.theme-builder #result-meaning-box {
-  background-color: #ECFDF5 !important;
-  border-color: #A7F3D0 !important;
-}
-.theme-builder #result-meaning-label {
-  color: #059669 !important;
-}
-.theme-builder #result-try-again-btn:hover {
-  background-color: #ECFDF5 !important;
-}
-.theme-builder #result-demo-order-btn {
-  color: #065F46 !important;
-}
-.theme-builder #mobile-stroke-guide-btn .material-symbols-outlined {
-  color: #065F46 !important;
-}
-.theme-builder #result-pinyin {
-  color: #065F46 !important;
-}
-.theme-builder .pip {
-  color: #065F46 !important;
-}
-
-/* Calligraphy Lab Theme (.theme-calligraphy) - Pale Lavender Chalk & Midnight Violet */
-#word-trainer-screen.theme-calligraphy {
-  background-color: transparent !important;
-}
-.theme-calligraphy .phase-btn.phase-active {
-  background-color: #4C1D95 !important;
-  color: #ffffff !important;
-  border-color: #000000 !important;
-  box-shadow: 3px 3px 0px #000000 !important;
-}
-.theme-calligraphy .phase-btn.phase-active .phase-btn-sub {
-  color: #FDE68A !important;
-}
-.theme-calligraphy #mobile-phase-trigger {
-  background-color: #4C1D95 !important;
-  color: #ffffff !important;
-  border-color: #000000 !important;
-  box-shadow: 3px 3px 0px #000000 !important;
-}
-.theme-calligraphy #mobile-phase-trigger:hover {
-  background-color: #3B0764 !important;
-}
-.theme-calligraphy #mobile-phase-trigger .mobile-phase-sub {
-  color: #FDE68A !important;
-}
-.theme-calligraphy #mobile-progress-dot {
-  background-color: #D97706 !important;
-}
-.theme-calligraphy #mobile-progress-fill {
-  background: linear-gradient(90deg, #D97706 0%, #F59E0B 100%) !important;
-}
-.theme-calligraphy #prompt-task-badge,
-.theme-calligraphy #interaction-task-badge {
-  background-color: #4C1D95 !important;
-  color: #ffffff !important;
-}
-.theme-calligraphy #submit-word-btn {
-  background-color: #4C1D95 !important;
-}
-.theme-calligraphy #submit-word-btn:hover {
-  background-color: #3B0764 !important;
-}
-.theme-calligraphy #result-next-btn {
-  background-color: #4C1D95 !important;
-}
-.theme-calligraphy #result-next-btn:hover {
-  background-color: #3B0764 !important;
-}
-.theme-calligraphy #result-try-again-btn:hover {
-  background-color: #FAF5FF !important;
-}
-.theme-calligraphy #result-demo-order-btn {
-  color: #4C1D95 !important;
-}
-.theme-calligraphy #result-pinyin {
-  color: #4C1D95 !important;
-}
-.theme-calligraphy #audio-replay-btn,
-.theme-calligraphy #result-audio-replay-btn {
-  background-color: #D97706 !important;
-}
-.theme-calligraphy #audio-replay-btn:hover,
-.theme-calligraphy #result-audio-replay-btn:hover {
+.scaffold-on:hover {
   background-color: #B45309 !important;
 }
-.theme-calligraphy #prompt-lexical-box {
-  background-color: #FAF5FF !important;
-  border-color: #E9D5FF !important;
+.scaffold-off {
+  background-color: #18181b !important;
+  color: rgba(255, 255, 255, 0.88) !important;
 }
-.theme-calligraphy #prompt-pinyin-line {
-  color: #4C1D95 !important;
+.scaffold-off:hover {
+  background-color: #27272a !important;
 }
-.theme-calligraphy #prompt-meaning-line {
-  color: #1E1B2E !important;
+
+/* Prompt, Submit, Feedback, Pips & Modals Tokenized */
+#word-trainer-screen #prompt-lexical-box,
+#word-trainer-screen #result-meaning-box {
+  background-color: var(--wt-accent-tint);
+}
+#word-trainer-screen #prompt-pinyin-line,
+#word-trainer-screen #result-pinyin,
+#word-trainer-screen .wt-accent-text {
+  color: var(--wt-accent);
+}
+#word-trainer-screen #prompt-meaning-line {
+  color: #1E1B2E;
+}
+#word-trainer-screen #audio-replay-btn,
+#word-trainer-screen #result-audio-replay-btn {
+  background-color: var(--wt-highlight);
+}
+#word-trainer-screen #audio-replay-btn:hover,
+#word-trainer-screen #result-audio-replay-btn:hover {
+  background-color: var(--wt-highlight-hover);
+}
+#word-trainer-screen #submit-word-btn,
+#word-trainer-screen #result-next-btn {
+  background-color: var(--wt-accent);
+}
+#word-trainer-screen #submit-word-btn:hover,
+#word-trainer-screen #result-next-btn:hover {
+  background-color: var(--wt-accent-hover);
+}
+#word-trainer-screen #result-try-again-btn:hover {
+  background-color: var(--wt-accent-tint);
+}
+#word-trainer-screen .pip-active {
+  color: var(--wt-accent);
+}
+#word-trainer-screen #advance-phase-btn:hover {
+  background-color: var(--wt-accent);
+  color: #ffffff;
+}
+#word-trainer-screen .wt-modal-header {
+  background-color: var(--wt-accent-tint);
+}
+#word-trainer-screen .wt-modal-badge {
+  background-color: var(--wt-accent);
+  color: var(--wt-pill-sub);
+}
+#word-trainer-screen .wt-modal-heading {
+  color: var(--wt-accent);
+}
+#word-trainer-screen .wt-modal-card {
+  background-color: var(--wt-accent-tint);
+  border-color: var(--wt-accent-border);
+}
+#word-trainer-screen .wt-modal-close-btn:hover {
+  background-color: var(--wt-accent);
+}
+
+/* Collapsible Mobile Pre-Attempt Idle Toast */
+@media (max-width: 1023px) {
+  #drawing-feedback-toast.toast-idle-compact {
+    padding-top: 0.3125rem;
+    padding-bottom: 0.3125rem;
+    max-height: 36px;
+    overflow: hidden;
+  }
+  #drawing-feedback-toast.toast-idle-compact #toast-feedback-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 /* Safe-area padding wrapper so #app background renders edge-to-edge behind status bar & home bar */
@@ -528,9 +482,13 @@
 
   #word-trainer-screen.mobile-phase-open #phase-stepper .phase-btn {
     min-width: 0 !important;
+    min-height: 44px;
   }
 
   #stroke-guide-modal .overflow-y-auto,
+  #engine-settings-modal .overflow-y-auto,
+  #mode-selection-screen,
+  #engine-cockpit,
   #drawing-feedback-toast,
   #result-body {
     overscroll-behavior: contain;
@@ -538,20 +496,30 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  #word-trainer-screen.mobile-result-active #prompt-arena,
-  #word-trainer-screen.mobile-result-active #canvas-arena,
-  #word-trainer-screen.mobile-result-active #open-placement-arena,
-  #word-trainer-screen.mobile-result-active #interaction-footer {
+  #word-trainer-screen.mobile-result-active:not(.mobile-result-peek) #prompt-arena,
+  #word-trainer-screen.mobile-result-active:not(.mobile-result-peek) #canvas-arena,
+  #word-trainer-screen.mobile-result-active:not(.mobile-result-peek) #open-placement-arena,
+  #word-trainer-screen.mobile-result-active:not(.mobile-result-peek) #interaction-footer {
     display: none !important;
   }
 
-  #word-trainer-screen.mobile-result-active #result-feedback-panel {
+  #word-trainer-screen.mobile-result-active:not(.mobile-result-peek) #result-feedback-panel {
     display: flex !important;
     flex: 0 1 auto !important;
     min-height: 0 !important;
     max-height: 100% !important;
     margin-top: auto !important;
     margin-bottom: auto !important;
+  }
+
+  #word-trainer-screen.mobile-result-active.mobile-result-peek #prompt-arena,
+  #word-trainer-screen.mobile-result-active.mobile-result-peek #interaction-footer,
+  #word-trainer-screen.mobile-result-active.mobile-result-peek #result-feedback-panel {
+    display: none !important;
+  }
+
+  #word-trainer-screen.mobile-result-active.mobile-result-peek #result-peek-banner {
+    display: flex !important;
   }
 
   .canvas-fit-slot {

@@ -646,20 +646,20 @@ function getTier2CoachingTip(decomps, driftAxis) {
   switch (effectiveTopology) {
     case 'LEFT_RIGHT':
     case 'LEFT_MID_RIGHT':
-      return '✓ Recognized! 💡 Tip: Keep the left and right components aligned and closer together.';
+      return '✓ Nice! Try keeping the left and right pieces closer together.';
     case 'TOP_BOTTOM':
     case 'TOP_MID_BOTTOM':
-      return '✓ Recognized! 💡 Tip: Stack components directly above one another along the center vertical axis.';
+      return '✓ Nice! Stack the top and bottom pieces straight down the center.';
     case 'ENCLOSURE':
-      return '✓ Recognized! 💡 Tip: Tuck the inner piece cleanly inside the outer frame.';
+      return '✓ Nice! Tuck the inner piece deeper inside the outer frame.';
     case 'CROSSING':
-      return '✓ Recognized! 💡 Tip: Anchor the marker cleanly relative to the base character.';
+      return '✓ Nice! Place the small mark closer to the base piece.';
     case 'ATOMIC':
     default:
       if (charCount > 1) {
-        return '✓ Recognized! 💡 Tip: Space each character evenly from left to right across the grid.';
+        return '✓ Nice! Space each character evenly from left to right.';
       }
-      return '✓ Recognized! 💡 Tip: Place the character near the center crosshairs for balanced framing.';
+      return '✓ Nice! Center the piece inside the square.';
   }
 }
 
@@ -686,8 +686,8 @@ export function gradeComponentBuilder(placedComponents, targetDecompositions, ca
         status: 'DIAGNOSTIC_FAIL',
         tier: 3,
         success: false,
-        badge: '📖 Solution Revealed',
-        detail: 'All 3 attempts used. Study the canonical components above before continuing.',
+        badge: '📖 Solution Shown',
+        detail: 'Out of tries. Check the highlighted pieces above before continuing.',
         isPass: false
       };
     }
@@ -695,8 +695,8 @@ export function gradeComponentBuilder(placedComponents, targetDecompositions, ca
       status: 'DIAGNOSTIC_FAIL',
       tier: 3,
       success: false,
-      badge: '⚠️ Incomplete',
-      detail: 'Drag component pieces from the dock onto the canvas.'
+      badge: '⚠️ Nothing Placed',
+      detail: 'Drag pieces from the tray onto the grid.'
     };
   }
 
@@ -710,7 +710,7 @@ export function gradeComponentBuilder(placedComponents, targetDecompositions, ca
         status: 'SOFT_PASS',
         tier: 2,
         success: true,
-        badge: '✨ Assembly Recognized!',
+        badge: '✓ Good Fit!',
         detail: getTier2CoachingTip(decomps, evalResult.maxDriftAxis),
         maxDriftRatio: drift,
         maxDriftAxis: evalResult.maxDriftAxis || null
@@ -720,8 +720,8 @@ export function gradeComponentBuilder(placedComponents, targetDecompositions, ca
       status: 'CLEAN_PASS',
       tier: 1,
       success: true,
-      badge: '🎯 Flawless Assembly!',
-      detail: 'Flawless execution! Spatial assembly and radical positioning verified.',
+      badge: '🎯 Clean Assembly!',
+      detail: 'All pieces snapped cleanly into place.',
       maxDriftRatio: drift,
       maxDriftAxis: evalResult.maxDriftAxis || null
     };
@@ -732,8 +732,8 @@ export function gradeComponentBuilder(placedComponents, targetDecompositions, ca
       status: 'DIAGNOSTIC_FAIL',
       tier: 3,
       success: false,
-      badge: '📖 Solution Revealed',
-      detail: 'All 3 attempts used. Study the canonical components above before continuing.',
+      badge: '📖 Solution Shown',
+      detail: 'Out of tries. Study the character above before continuing.',
       reason: evalResult.reason,
       isPass: false
     };
@@ -741,8 +741,8 @@ export function gradeComponentBuilder(placedComponents, targetDecompositions, ca
 
   // Diagnostic Failure (Tier 3) — Zero-Spoiler Policy
   const reason = evalResult.reason;
-  let badge = '⚠️ Alignment Error';
-  let detail = 'Components are misplaced on the grid.';
+  let badge = '⚠️ Check Placement';
+  let detail = 'Some pieces are out of position on the grid.';
 
   if (reason === 'WRONG_COMPONENTS') {
     const allTargetGlyphs = decomps.flatMap(d => (d.targetComponents || []).map(c => c.glyph));
@@ -762,7 +762,7 @@ export function gradeComponentBuilder(placedComponents, targetDecompositions, ca
     if (allPlacedGlyphs.length < allTargetGlyphs.length && extraGlyphs.length === 0) {
       const deficit = allTargetGlyphs.length - allPlacedGlyphs.length;
       badge = '⚠️ Missing Piece';
-      detail = `Almost! You need ${deficit} more component${deficit > 1 ? 's' : ''} on the grid to complete this word.`;
+      detail = `Almost! Place ${deficit} more piece${deficit > 1 ? 's' : ''} on the grid.`;
     } else if (extraGlyphs.length > 0) {
       // Dynamic semantic contrastive lookup (ZERO spoiler: never disclose target glyph or missing pieces)
       let contrastFound = false;
@@ -777,11 +777,11 @@ export function gradeComponentBuilder(placedComponents, targetDecompositions, ca
                 ? candMeaningRaw.split(/[;；]/)[0].trim()
                 : candMeaningRaw;
               const candMeaning = candMeaningConcise ? ` (${candMeaningConcise})` : '';
-              badge = '🔍 Radical Confusion';
+              badge = '🔍 Wrong Piece';
               if (info.topology === 'ATOMIC') {
-                detail = `You selected '${candidateChar}'${candMeaning}. Check the audio prompt and try swapping '${extraGlyphs[0]}'.`;
+                detail = `You picked '${candidateChar}'${candMeaning}. Listen again and swap '${extraGlyphs[0]}'.`;
               } else {
-                detail = `You assembled '${candidateChar}'${candMeaning} with '${extraGlyphs[0]}'. Check the audio prompt and try swapping '${extraGlyphs[0]}'.`;
+                detail = `You built '${candidateChar}'${candMeaning} with '${extraGlyphs[0]}'. Listen again and swap '${extraGlyphs[0]}'.`;
               }
               contrastFound = true;
               break;
@@ -797,34 +797,34 @@ export function gradeComponentBuilder(placedComponents, targetDecompositions, ca
         const targetMeaning = targetMeaningRaw && targetMeaningRaw.length > 32
           ? targetMeaningRaw.split(/[;；]/)[0].trim()
           : targetMeaningRaw;
-        badge = '🔍 Radical Confusion';
-        detail = `'${extraStr}'${extraGloss ? ` (${extraGloss})` : ''} doesn't belong here${targetMeaning ? ` (this prompt means "${targetMeaning}")` : ''}. Try swapping it for another piece.`;
+        badge = '🔍 Wrong Piece';
+        detail = `'${extraStr}'${extraGloss ? ` (${extraGloss})` : ''} doesn't belong here${targetMeaning ? ` (meaning: "${targetMeaning}")` : ''}. Try another piece.`;
       }
     } else {
       badge = '⚠️ Wrong Pieces';
-      detail = 'Placed components do not match the target character.';
+      detail = 'Those pieces do not match this character.';
     }
   } else if (reason === 'MISPLACED_LEFT_RIGHT') {
-    badge = '🔄 Order Inversion';
-    detail = 'Invert positions: Semantic radical belongs on the left, stem belongs on the right.';
+    badge = '🔄 Swapped Sides';
+    detail = 'Left and right pieces are swapped — place the side root on the left.';
   } else if (reason === 'MISPLACED_TOP_BOTTOM') {
-    badge = '🔄 Vertical Inversion';
-    detail = 'Invert vertical positions: Top component belongs above the base.';
+    badge = '🔄 Swapped Top & Bottom';
+    detail = 'Top and bottom pieces are swapped — move the upper piece higher.';
   } else if (reason === 'MISPLACED_ENCLOSURE') {
-    badge = '📦 Enclosure Breach';
-    detail = 'The inner component belongs inside the outer frame.';
+    badge = '📦 Outside Frame';
+    detail = 'Place the inner piece inside the outer frame.';
   } else if (reason === 'MISPLACED_TOP_MID_BOTTOM') {
-    badge = '🔄 Vertical Sequence';
-    detail = 'Sequence mismatch: Check the positional order of the 3 components from top to bottom.';
+    badge = '🔄 Check Top-to-Bottom Order';
+    detail = 'Arrange the 3 pieces in order from top to bottom.';
   } else if (reason === 'MISPLACED_LEFT_MID_RIGHT') {
-    badge = '🔄 Horizontal Sequence';
-    detail = 'Sequence mismatch: Check the positional order of the 3 components from left to right.';
+    badge = '🔄 Check Left-to-Right Order';
+    detail = 'Arrange the 3 pieces in order from left to right.';
   } else if (reason === 'MISPLACED_CHARACTERS') {
     badge = '↔️ Reading Order';
-    detail = 'Invert character order: Chinese reads strictly left-to-right.';
+    detail = 'Characters read from left to right.';
   } else if (reason === 'MISPLACED_CROSSING') {
-    badge = '🎯 Marker Alignment';
-    detail = 'Marker component is misaligned with the base root.';
+    badge = '🎯 Mark Alignment';
+    detail = 'Adjust the mark position relative to the main piece.';
   }
 
   return {
@@ -838,11 +838,9 @@ export function gradeComponentBuilder(placedComponents, targetDecompositions, ca
 }
 
 /**
- * Resolves decompositions for a target word, applying Adaptive Multi-Character Decomposition:
- * - Single/2-character words: full radical decomposition for all characters.
- * - 3-character words (e.g. 出租车): decompose the single most complex character (租 -> [禾, 且]),
- *   while keeping the simpler characters whole ([出], [车]) to maintain a strict dock budget.
- * - 4-character words (e.g. 不好意思): present each character as a whole morpheme tile.
+ * Resolves decompositions for a target word for stepped 1-character-per-canvas assembly.
+ * Because each character is assembled cleanly on its own full-size canvas with its own 1-row dock,
+ * every character 1..N uses its canonical radical decomposition when available.
  *
  * @param {Object} word - Corpus word object ({ characters, hanzi_simp, ... })
  * @param {Object} decompositions - Character decompositions dictionary
@@ -852,52 +850,6 @@ export function resolveWordDecompositions(word, decompositions = {}) {
   if (!word) return [];
   const chars = word.characters || Array.from(word.hanzi_simp || '');
 
-  // 4+ character words (e.g. 不好意思):
-  // Present at character morpheme level (1 tile per character)
-  if (chars.length >= 4) {
-    return chars.map(ch => ({
-      char: ch,
-      strokeCount: decompositions[ch]?.strokeCount || 1,
-      topology: 'ATOMIC',
-      targetComponents: [{ id: `comp_${ch}`, glyph: ch, role: 'base' }],
-      distractorComponents: decompositions[ch]?.distractorComponents || ['一', '日', '木', '口']
-    }));
-  }
-
-  // 3-character words (e.g. 出租车):
-  // Decompose the most complex character, keep the other 2 as whole morpheme tiles
-  if (chars.length === 3) {
-    let bestIdx = 0;
-    let maxScore = -1;
-
-    chars.forEach((ch, idx) => {
-      const decomp = decompositions[ch];
-      const isAtomic = !decomp || decomp.topology === 'ATOMIC';
-      const strokeCount = decomp?.strokeCount || 1;
-      const targetLen = decomp?.targetComponents?.length || 1;
-      // Compound characters get heavy priority; then rank by stroke count and target components
-      const score = isAtomic ? 0 : (strokeCount * 10 + targetLen);
-      if (score > maxScore) {
-        maxScore = score;
-        bestIdx = idx;
-      }
-    });
-
-    return chars.map((ch, idx) => {
-      if (idx === bestIdx && decompositions[ch] && decompositions[ch].topology !== 'ATOMIC') {
-        return decompositions[ch];
-      }
-      return {
-        char: ch,
-        strokeCount: decompositions[ch]?.strokeCount || 1,
-        topology: 'ATOMIC',
-        targetComponents: [{ id: `comp_${ch}`, glyph: ch, role: 'base' }],
-        distractorComponents: decompositions[ch]?.distractorComponents || ['一', '日', '木', '口']
-      };
-    });
-  }
-
-  // 1 or 2 character words: full canonical decomposition
   return chars.map(ch => {
     if (decompositions[ch]) {
       return decompositions[ch];
@@ -921,7 +873,10 @@ export class ComponentPlacementController {
     this.decompositions = decompositions || {};
     this.activeWord = null;
     this.activeDecompositions = [];
-    this.activePlacedComponents = []; // In-memory state of placed items
+    this.activeCharIndex = 0;
+    this.charPlacedItems = []; // Stored placed pieces per character: Array<Array<{id, glyph, componentType, normCx, normCy}>>
+    this.charDockOrders = [];  // Deterministic dock tile list per character
+    this.activePlacedComponents = [];
     this.isHintActive = false;
 
     // DOM references
@@ -930,16 +885,20 @@ export class ComponentPlacementController {
       canvas: null,
       placedLayer: null,
       dock: null,
-      dockCountBadge: null,
       hintBtn: null,
       hintWatermark: null,
+      undoBtn: null,
       clearBtn: null,
-      multiGrid: null
+      prevCharBtn: null,
+      nextCharBtn: null,
+      charPills: null
     };
 
     this.isEventsBound = false;
+    this.isCarouselEventsBound = false;
     this._resizeObserver = null;
     this._resizeRafId = null;
+    this._lastCanvasDim = 0;
   }
 
   setDecompositions(dict) {
@@ -952,29 +911,45 @@ export class ComponentPlacementController {
       canvas: document.getElementById('open-placement-canvas'),
       placedLayer: document.getElementById('placed-components-layer'),
       dock: document.getElementById('component-dock'),
-      dockCountBadge: document.getElementById('dock-count-badge'),
       hintBtn: document.getElementById('placement-hint-btn'),
       hintWatermark: document.getElementById('placement-ghost-watermark'),
+      undoBtn: document.getElementById('undo-placement-btn'),
       clearBtn: document.getElementById('clear-placement-btn'),
-      multiGrid: document.getElementById('multi-character-grid')
+      prevCharBtn: document.getElementById('builder-prev-char-btn'),
+      nextCharBtn: document.getElementById('builder-next-char-btn'),
+      charPills: document.getElementById('builder-char-pills')
     };
 
     this.bindControlEvents();
+    this.bindCarouselEvents();
   }
 
   bindControlEvents() {
     if (this.isEventsBound) return;
     this.isEventsBound = true;
 
-    // 1. Clear Button: Wipe canvas pieces and restore dock
-    if (this.dom.clearBtn) {
-      this.dom.clearBtn.addEventListener('click', (e) => {
+    // 1. Undo Button: Pop last placed piece on current character back to dock
+    if (this.dom.undoBtn) {
+      this.dom.undoBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        this.resetCanvas();
+        this.undoLastPlaced();
       });
     }
 
-    // 2. Hint Outline Button: Toggle ghost watermark
+    // 2. Clear Button: Wipe active character pieces and restore dock
+    if (this.dom.clearBtn) {
+      this.dom.clearBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.clearActiveCharacter();
+        if (typeof this.onReset === 'function') {
+          this.onReset();
+        } else if (typeof window !== 'undefined' && window.WordTrainerEngine && typeof window.WordTrainerEngine.updateFeedback === 'function') {
+          window.WordTrainerEngine.updateFeedback('neutral', 'Pieces cleared. Place pieces on the grid.');
+        }
+      });
+    }
+
+    // 3. Guide Outline Button: Toggle ghost watermark (Normalized amber ON / charcoal OFF)
     if (this.dom.hintBtn) {
       this.dom.hintBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -988,16 +963,84 @@ export class ComponentPlacementController {
       });
     }
 
-    // 3. Responsive Watermark Resizing (Decision C)
+    // 4. Responsive Watermark & Piece Resizing
     if (typeof ResizeObserver !== 'undefined' && this.dom.canvas && !this._resizeObserver) {
       this._resizeObserver = new ResizeObserver(() => {
         if (this._resizeRafId) cancelAnimationFrame(this._resizeRafId);
         this._resizeRafId = requestAnimationFrame(() => {
           this._resizeRafId = null;
           this.updateWatermarkSizing();
+          this.rescaleActivePlacedPieces();
         });
       });
       this._resizeObserver.observe(this.dom.canvas);
+    }
+  }
+
+  bindCarouselEvents() {
+    if (this.isCarouselEventsBound) return;
+    this.isCarouselEventsBound = true;
+
+    if (this.dom.prevCharBtn) {
+      this.dom.prevCharBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.prevChar();
+      });
+    }
+
+    if (this.dom.nextCharBtn) {
+      this.dom.nextCharBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.nextChar();
+      });
+    }
+
+    // Touch swipe on empty canvas area switches between characters without blocking tile drags
+    if (this.dom.canvas) {
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let touchStartTime = 0;
+      let startedOnTile = false;
+
+      this.dom.canvas.addEventListener('touchstart', (e) => {
+        startedOnTile = Boolean(e.target && typeof e.target.closest === 'function' && e.target.closest('.placed-component-glyph'));
+        if (!startedOnTile && e.touches && e.touches.length === 1) {
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+          touchStartTime = Date.now();
+        }
+      }, { passive: true });
+
+      this.dom.canvas.addEventListener('touchend', (e) => {
+        if (startedOnTile || !e.changedTouches || e.changedTouches.length === 0) return;
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        const dy = e.changedTouches[0].clientY - touchStartY;
+        const dt = Date.now() - touchStartTime;
+        if (dt < 350 && Math.abs(dx) > 70 && Math.abs(dy) < 40) {
+          if (dx < -70) this.nextChar();
+          else if (dx > 70) this.prevChar();
+        }
+      }, { passive: true });
+    }
+  }
+
+  prevChar() {
+    if (this.activeCharIndex > 0) {
+      this.mountCharacter(this.activeCharIndex - 1);
+    }
+  }
+
+  nextChar() {
+    const count = Math.max(1, (this.activeDecompositions || []).length);
+    if (this.activeCharIndex < count - 1) {
+      this.mountCharacter(this.activeCharIndex + 1);
+    }
+  }
+
+  setCharIndex(index) {
+    const count = Math.max(1, (this.activeDecompositions || []).length);
+    if (index >= 0 && index < count && index !== this.activeCharIndex) {
+      this.mountCharacter(index);
     }
   }
 
@@ -1006,100 +1049,88 @@ export class ComponentPlacementController {
     const canvasDim = this.dom.canvas.clientWidth || 0;
     if (canvasDim <= 0) return;
 
-    const chars = this.activeWord.characters || Array.from(this.activeWord.hanzi_simp || '');
-    const count = Math.max(1, chars.length);
-
-    let ratio = 0.50;
-    if (count === 2) ratio = 0.36;
-    else if (count === 3) ratio = 0.25;
-    else if (count >= 4) ratio = 0.19;
-
-    const fontSize = Math.max(36, Math.round(canvasDim * ratio));
+    // Stepped 1-character-per-canvas always draws at full canonical proportion
+    const fontSize = Math.max(48, Math.round(canvasDim * 0.50));
     this.dom.hintWatermark.style.fontSize = `${fontSize}px`;
   }
 
+  rescaleActivePlacedPieces() {
+    if (!this.dom.canvas || !this.dom.placedLayer) return;
+    const canvasDim = this.dom.canvas.clientWidth || 0;
+    if (canvasDim <= 0) return;
+    if (this._lastCanvasDim > 0 && Math.abs(canvasDim - this._lastCanvasDim) <= 2) return;
+    this._lastCanvasDim = canvasDim;
+
+    const placedEls = this.dom.placedLayer.querySelectorAll('.placed-component-glyph');
+    if (placedEls.length === 0) return;
+
+    const decomp = this.activeDecompositions[this.activeCharIndex] || null;
+    const contextTopology = decomp?.topology || 'ATOMIC';
+
+    placedEls.forEach(el => {
+      const glyph = el.dataset.glyph || el.textContent.trim();
+      const normCx = parseFloat(el.dataset.normCx);
+      const normCy = parseFloat(el.dataset.normCy);
+      if (!Number.isFinite(normCx) || !Number.isFinite(normCy)) return;
+
+      const ctx = this._resolvePlacementContext(glyph);
+      const fontSize = getComponentFontSize(glyph, canvasDim, 1, ctx.role, contextTopology);
+      const fontWeight = getComponentFontWeight(glyph, contextTopology, ctx.role);
+      const vt = getComponentVisualTransform(glyph, contextTopology, ctx.role);
+
+      el.style.fontSize = `${fontSize}px`;
+      el.style.fontWeight = fontWeight;
+      el.style.setProperty('--sx', String(vt.scaleX));
+      el.style.setProperty('--sy', String(vt.scaleY));
+      el.style.left = `${Math.round(normCx * canvasDim - fontSize * 0.5)}px`;
+      el.style.top = `${Math.round(normCy * canvasDim - fontSize * 0.5)}px`;
+    });
+  }
+
   toggleGhostHint(forcedState) {
-    this.isHintActive = (forcedState !== undefined) ? forcedState : !this.isHintActive;
+    this.isHintActive = (forcedState !== undefined) ? Boolean(forcedState) : !this.isHintActive;
     if (this.dom.hintWatermark) {
       this.dom.hintWatermark.classList.remove('opacity-70', 'opacity-25', 'opacity-0');
-      if (this.isHintActive) {
-        this.dom.hintWatermark.classList.add('opacity-25');
-      } else {
-        this.dom.hintWatermark.classList.add('opacity-0');
-      }
+      this.dom.hintWatermark.classList.add(this.isHintActive ? 'opacity-25' : 'opacity-0');
     }
     const hintBtn = this.dom.hintBtn || (typeof document !== 'undefined' ? document.getElementById('placement-hint-btn') : null);
-    const textSpan = document.getElementById('placement-hint-btn-text');
-    if (this.isHintActive) {
-      if (hintBtn) {
-        hintBtn.classList.add('bg-[#E11D48]');
-        hintBtn.classList.remove('bg-[#065F46]');
+    if (hintBtn) {
+      if (this.isHintActive) {
+        hintBtn.className = 'scaffold-on flex-1 min-h-[44px] py-2 lg:py-2.5 px-2 sm:px-3 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white border-2 border-black font-mono text-[10px] sm:text-xs font-black uppercase tracking-wider whitespace-nowrap flex items-center justify-center gap-1 sm:gap-1.5 shadow-sm active-collapse cursor-pointer transition-all';
+        hintBtn.innerHTML = '<span class="material-symbols-outlined text-sm sm:text-base shrink-0">visibility</span><span id="placement-hint-btn-text">Guide: On</span>';
+      } else {
+        hintBtn.className = 'scaffold-off flex-1 min-h-[44px] py-2 lg:py-2.5 px-2 sm:px-3 rounded-xl bg-[#18181b] hover:bg-[#27272a] text-white/90 border-2 border-black font-mono text-[10px] sm:text-xs font-black uppercase tracking-wider whitespace-nowrap flex items-center justify-center gap-1 sm:gap-1.5 shadow-sm active-collapse cursor-pointer transition-all';
+        hintBtn.innerHTML = '<span class="material-symbols-outlined text-sm sm:text-base shrink-0">visibility_off</span><span id="placement-hint-btn-text">Guide: Off</span>';
       }
-      if (textSpan) textSpan.textContent = 'HINT: ON';
-    } else {
-      if (hintBtn) {
-        hintBtn.classList.remove('bg-[#E11D48]');
-        hintBtn.classList.add('bg-[#065F46]');
-      }
-      if (textSpan) textSpan.textContent = 'HINT: OFF';
     }
   }
 
   /**
-   * Mounts an active word into the Component Builder.
-   * Clears existing state, populates the dock with targets + distractors,
-   * sets watermark, and configures canvas.
+   * Mounts an active word into the Component Builder using stepped 1-char-per-canvas assembly.
    */
   mountWord(word) {
     if (!word) return;
     this.initDom();
     this.activeWord = word;
-    this.activePlacedComponents = [];
-
-    const chars = word.characters || Array.from(word.hanzi_simp || '');
     this.activeDecompositions = resolveWordDecompositions(word, this.decompositions);
 
-    // Reset watermark
-    if (this.dom.hintWatermark) {
-      this.dom.hintWatermark.textContent = chars.join('');
-      this.dom.hintWatermark.classList.remove('opacity-70', 'opacity-25', 'opacity-0');
-      if (this.isHintActive) {
-        this.dom.hintWatermark.classList.add('opacity-25');
-      } else {
-        this.dom.hintWatermark.classList.add('opacity-0');
-      }
-      this.updateWatermarkSizing();
-      if (typeof requestAnimationFrame === 'function') {
-        requestAnimationFrame(() => this.updateWatermarkSizing());
-      }
-    }
+    const charCount = Math.max(1, this.activeDecompositions.length);
+    this.activeCharIndex = 0;
+    this.charPlacedItems = Array.from({ length: charCount }, () => []);
+    this.charDockOrders = this.activeDecompositions.map((decomp, idx) => this._buildCharDockOrder(decomp, idx));
+    this.activePlacedComponents = [];
+    this._lastCanvasDim = this.dom.canvas ? (this.dom.canvas.clientWidth || 0) : 0;
 
-    // Ensure multi-character grid divider lines are NEVER shown as visible borders
-    if (this.dom.multiGrid) {
-      this.dom.multiGrid.classList.add('hidden');
-      this.dom.multiGrid.innerHTML = '';
-    }
-
-    // Reset placed layer
-    if (this.dom.placedLayer) {
-      this.dom.placedLayer.innerHTML = '';
-    }
-
-    // Populate dock
-    this.populateDock();
+    this.mountCharacter(0, { skipSync: true });
   }
 
   /**
-   * Populates the dock dynamically with target components and 2-3 balanced distractors.
+   * Builds a deterministic 1-row tile set (targets + distractors) for one character step.
    */
-  populateDock() {
-    if (!this.dom.dock) return;
+  _buildCharDockOrder(decomp, charIdx) {
+    if (!decomp) return [];
 
-    // Collect all targets
-    const targetItems = [];
     const usedGlyphs = new Set();
-
-    // 1. Proactively block the full word and all its constituent characters from ever appearing as distractors
     if (this.activeWord) {
       if (this.activeWord.hanzi_simp) {
         Array.from(this.activeWord.hanzi_simp).forEach(c => usedGlyphs.add(c));
@@ -1108,11 +1139,10 @@ export class ComponentPlacementController {
         this.activeWord.characters.forEach(c => usedGlyphs.add(c));
       }
     }
-    this.activeDecompositions.forEach(decomp => {
-      if (decomp.char) usedGlyphs.add(decomp.char);
+    this.activeDecompositions.forEach(d => {
+      if (d && d.char) usedGlyphs.add(d.char);
     });
 
-    // Proactively block any character from appearing as a distractor if it contains any active target character as a component
     if (this.decompositions) {
       const activeCharSet = new Set(this.activeDecompositions.map(d => d.char));
       Object.entries(this.decompositions).forEach(([compoundChar, info]) => {
@@ -1126,18 +1156,15 @@ export class ComponentPlacementController {
       });
     }
 
-    // 2. Add all target component glyphs
-    this.activeDecompositions.forEach((decomp, charIdx) => {
-      decomp.targetComponents.forEach(tc => {
-        targetItems.push({
-          id: `${tc.id}_${charIdx}`,
-          glyph: tc.glyph,
-          role: tc.role,
-          char: decomp.char,
-          isTarget: true
-        });
-        usedGlyphs.add(tc.glyph);
-      });
+    const targetItems = (decomp.targetComponents || []).map((tc, pieceIdx) => {
+      usedGlyphs.add(tc.glyph);
+      return {
+        id: `${tc.id || tc.glyph}_${charIdx}_${pieceIdx}`,
+        glyph: tc.glyph,
+        role: tc.role,
+        char: decomp.char,
+        isTarget: true
+      };
     });
 
     // Block visually ambiguous square pairs (囗 / 冂 vs 口) dynamically
@@ -1149,19 +1176,15 @@ export class ComponentPlacementController {
       usedGlyphs.add('冂');
     }
 
-    // Collect 2-3 distractors that do not clash with targets
     const distractorCandidates = [];
-    this.activeDecompositions.forEach(decomp => {
-      if (decomp.distractorComponents) {
-        decomp.distractorComponents.forEach(d => {
-          if (!usedGlyphs.has(d) && !distractorCandidates.includes(d)) {
-            distractorCandidates.push(d);
-          }
-        });
-      }
-    });
+    if (Array.isArray(decomp.distractorComponents)) {
+      decomp.distractorComponents.forEach(d => {
+        if (!usedGlyphs.has(d) && !distractorCandidates.includes(d)) {
+          distractorCandidates.push(d);
+        }
+      });
+    }
 
-    // Default backup distractors if needed
     const backupDistractors = ['禾', '日', '手', '口', '宀', '木', '土', '人', '女', '子', '心'];
     for (const bd of backupDistractors) {
       if (!usedGlyphs.has(bd) && !distractorCandidates.includes(bd)) {
@@ -1169,30 +1192,196 @@ export class ComponentPlacementController {
       }
     }
 
+    // Keep dock concise (4-6 tiles total) so tiles always fit on 1 clean horizontal row
     const distractorCount = targetItems.length <= 2 ? 3 : 2;
     const selectedDistractors = distractorCandidates.slice(0, distractorCount).map((glyph, idx) => ({
-      id: `distractor_${idx}_${glyph}`,
-      glyph: glyph,
+      id: `distractor_${charIdx}_${idx}_${glyph}`,
+      glyph,
       role: 'distractor',
       isTarget: false
     }));
 
-    // Merge and shuffle dock items
     const dockItems = [...targetItems, ...selectedDistractors];
     for (let i = dockItems.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [dockItems[i], dockItems[j]] = [dockItems[j], dockItems[i]];
     }
 
-    // Render tactile tiles in dock
+    return dockItems;
+  }
+
+  /**
+   * Saves normalized center coordinates of pieces currently placed on the active canvas.
+   */
+  syncActiveCharToState() {
+    if (!this.dom.placedLayer || !this.activeWord) return;
+    if (!Array.isArray(this.charPlacedItems)) this.charPlacedItems = [];
+
+    const canvasRect = this.dom.canvas ? this.dom.canvas.getBoundingClientRect() : null;
+    const canvasW = (canvasRect && canvasRect.width > 0)
+      ? canvasRect.width
+      : (this.dom.canvas?.offsetWidth || this.dom.canvas?.clientWidth || 340);
+    const canvasH = (canvasRect && canvasRect.height > 0)
+      ? canvasRect.height
+      : (this.dom.canvas?.offsetHeight || this.dom.canvas?.clientHeight || 340);
+
+    const els = Array.from(this.dom.placedLayer.querySelectorAll('.placed-component-glyph'));
+    const saved = els.map(el => {
+      const elRect = el.getBoundingClientRect();
+      let cx;
+      let cy;
+      if (canvasRect && canvasRect.width > 0 && elRect.width > 0) {
+        cx = elRect.left - canvasRect.left + elRect.width * 0.5;
+        cy = elRect.top - canvasRect.top + elRect.height * 0.5;
+      } else if (Number.isFinite(parseFloat(el.dataset.normCx)) && Number.isFinite(parseFloat(el.dataset.normCy))) {
+        cx = parseFloat(el.dataset.normCx) * canvasW;
+        cy = parseFloat(el.dataset.normCy) * canvasH;
+      } else {
+        const fs = parseFloat(el.style.fontSize) || 60;
+        cx = (parseFloat(el.style.left) || 0) + fs * 0.5;
+        cy = (parseFloat(el.style.top) || 0) + fs * 0.5;
+      }
+
+      const normCx = canvasW > 0 ? Math.max(0.05, Math.min(0.95, cx / canvasW)) : 0.5;
+      const normCy = canvasH > 0 ? Math.max(0.05, Math.min(0.95, cy / canvasH)) : 0.5;
+      el.dataset.normCx = normCx.toFixed(4);
+      el.dataset.normCy = normCy.toFixed(4);
+
+      return {
+        id: el.dataset.componentId || el.dataset.glyph,
+        glyph: el.dataset.glyph || el.textContent.trim(),
+        componentType: el.dataset.componentType || 'standard',
+        normCx,
+        normCy
+      };
+    });
+
+    this.charPlacedItems[this.activeCharIndex] = saved;
+    this.activePlacedComponents = saved;
+  }
+
+  /**
+   * Renders a specific character step (0..N-1) onto the full-size square canvas and 1-row dock.
+   */
+  mountCharacter(index, { skipSync = false } = {}) {
+    if (!this.activeWord) return;
+    const decomps = this.activeDecompositions || [];
+    const charCount = Math.max(1, decomps.length);
+    if (index < 0 || index >= charCount) return;
+
+    if (!skipSync) {
+      this.syncActiveCharToState();
+    }
+
+    this.activeCharIndex = index;
+    const activeDecomp = decomps[index] || {};
+    const targetChar = activeDecomp.char || (Array.from(this.activeWord.hanzi_simp || '')[index] || '');
+
+    // Update watermark for active single character
+    if (this.dom.hintWatermark) {
+      this.dom.hintWatermark.textContent = targetChar;
+      this.dom.hintWatermark.classList.remove('opacity-70', 'opacity-25', 'opacity-0');
+      this.dom.hintWatermark.classList.add(this.isHintActive ? 'opacity-25' : 'opacity-0');
+      this.updateWatermarkSizing();
+      if (typeof requestAnimationFrame === 'function') {
+        requestAnimationFrame(() => this.updateWatermarkSizing());
+      }
+    }
+
+    // Clear canvas layer and populate active char's single-row dock
+    if (this.dom.placedLayer) {
+      this.dom.placedLayer.innerHTML = '';
+    }
+    this.populateDockForChar(index);
+
+    // Restore placed pieces for this character
+    const savedPieces = Array.isArray(this.charPlacedItems[index]) ? [...this.charPlacedItems[index]] : [];
+    const canvasRect = this.dom.canvas ? this.dom.canvas.getBoundingClientRect() : null;
+    const canvasDim = (canvasRect && canvasRect.width > 0)
+      ? canvasRect.width
+      : (this.dom.canvas?.clientWidth || this.dom.canvas?.offsetWidth || 320);
+    const contextTopology = activeDecomp.topology || 'ATOMIC';
+
+    savedPieces.forEach(item => {
+      const tile = this.dom.dock
+        ? this.dom.dock.querySelector(`.draggable-component-tile[data-component-id="${item.id}"]`)
+        : null;
+      if (tile) tile.classList.add('hidden');
+
+      const ctx = this._resolvePlacementContext(item.glyph);
+      const fontSize = getComponentFontSize(item.glyph, canvasDim, 1, ctx.role, contextTopology);
+      const fontWeight = getComponentFontWeight(item.glyph, contextTopology, ctx.role);
+      const compType = getComponentType(item.glyph, ctx.role, contextTopology);
+      const vt = getComponentVisualTransform(item.glyph, contextTopology, ctx.role);
+
+      const x = Math.round(item.normCx * canvasDim - fontSize * 0.5);
+      const y = Math.round(item.normCy * canvasDim - fontSize * 0.5);
+      const el = this.createPlacedGlyph(item.glyph, item.id, x, y, fontSize, fontWeight, compType, tile, vt);
+      if (el) {
+        el.dataset.normCx = Number(item.normCx).toFixed(4);
+        el.dataset.normCy = Number(item.normCy).toFixed(4);
+      }
+    });
+
+    this.refreshActiveCharStyles();
+    this.updateCarouselUI();
+    this.notifyPlacedChange();
+  }
+
+  updateCarouselUI() {
+    const count = Math.max(1, (this.activeDecompositions || []).length);
+    const isMulti = count > 1;
+    const index = this.activeCharIndex;
+
+    const carouselBar = (typeof document !== 'undefined') ? document.getElementById('builder-char-carousel') : null;
+    if (carouselBar) {
+      carouselBar.classList.toggle('hidden', !isMulti);
+    }
+
+    if (this.dom.prevCharBtn) {
+      const canPrev = isMulti && index > 0;
+      this.dom.prevCharBtn.disabled = !canPrev;
+      this.dom.prevCharBtn.classList.toggle('opacity-30', !canPrev);
+      this.dom.prevCharBtn.classList.toggle('pointer-events-none', !canPrev);
+      this.dom.prevCharBtn.classList.toggle('hidden', !isMulti);
+    }
+    if (this.dom.nextCharBtn) {
+      const canNext = isMulti && index < count - 1;
+      this.dom.nextCharBtn.disabled = !canNext;
+      this.dom.nextCharBtn.classList.toggle('opacity-30', !canNext);
+      this.dom.nextCharBtn.classList.toggle('pointer-events-none', !canNext);
+      this.dom.nextCharBtn.classList.toggle('hidden', !isMulti);
+    }
+    if (this.dom.charPills) {
+      if (isMulti) {
+        this.dom.charPills.classList.remove('hidden');
+        const dots = Array.from({ length: count }, (_, i) => {
+          const hasPieces = (i === this.activeCharIndex && this.dom.placedLayer)
+            ? this.dom.placedLayer.querySelectorAll('.placed-component-glyph').length > 0
+            : ((this.charPlacedItems[i] && this.charPlacedItems[i].length > 0) || false);
+          return hasPieces ? '●' : '○';
+        }).join('');
+        this.dom.charPills.textContent = `Char ${index + 1} of ${count} • ${dots}`;
+      } else {
+        this.dom.charPills.classList.add('hidden');
+      }
+    }
+  }
+
+  /**
+   * Populates the single-row dock for character index charIdx.
+   */
+  populateDockForChar(charIdx) {
+    if (!this.dom.dock) return;
+
+    const dockItems = this.charDockOrders[charIdx] || [];
+    const activeDecomp = this.activeDecompositions[charIdx] || null;
+    const dockTopology = activeDecomp?.topology || 'ATOMIC';
+
     this.dom.dock.innerHTML = '';
-    const hasEnclosure = this._hasEnclosureInWord();
-    const dockTopology = (this.activeDecompositions && this.activeDecompositions.length === 1)
-      ? (this.activeDecompositions[0]?.topology || 'ATOMIC')
-      : (hasEnclosure ? 'ENCLOSURE' : 'ATOMIC');
     dockItems.forEach(item => {
       const tile = document.createElement('div');
-      tile.className = 'draggable-component-tile w-10 h-10 xs:w-11 xs:h-11 lg:w-14 lg:h-14 bg-white border-2 border-black rounded-xl shadow-hard-black flex items-center justify-center font-chinese font-bold text-xl xs:text-2xl lg:text-3xl text-black cursor-grab active:cursor-grabbing select-none transition-transform hover:scale-105 active:scale-95 touch-none';
+      tile.className = 'draggable-component-tile w-11 h-11 sm:w-12 sm:h-12 lg:w-[52px] lg:h-[52px] shrink-0 bg-white border-2 border-black rounded-xl shadow-hard-black flex items-center justify-center font-chinese font-bold text-xl sm:text-2xl lg:text-3xl text-black cursor-grab active:cursor-grabbing select-none transition-transform hover:scale-105 active:scale-95 touch-none';
       tile.dataset.componentId = item.id;
       tile.dataset.glyph = item.glyph;
       tile.dataset.componentType = getComponentType(item.glyph, null, dockTopology);
@@ -1205,119 +1394,81 @@ export class ComponentPlacementController {
       this.bindDockTileDrag(tile, item);
       this.dom.dock.appendChild(tile);
     });
-
-    this.updateDockCount();
   }
 
-  _hasEnclosureInWord() {
-    return (this.activeDecompositions || []).some(d => d && d.topology === 'ENCLOSURE');
-  }
-
-  /**
-   * Resolves (topology, role, charCount) strictly from activeDecompositions and placed canvas geometry.
-   * ZERO-SPOILER RULE: never reads item.isTarget, ensuring target and distractor tiles morph identically.
-   */
-  _resolvePlacementContext(glyph, dropCenterX = null, dropCenterY = null, excludeEl = null) {
-    const charCount = Math.max(1, (this.activeDecompositions || []).length);
-    const hasEnclosure = this._hasEnclosureInWord();
-
-    if (charCount === 1) {
-      const contextTopology = this.activeDecompositions[0]?.topology || 'ATOMIC';
-      let contextRole = null;
-      if (contextTopology === 'ENCLOSURE') {
-        contextRole = isOuterFrameGlyph(glyph, 'ENCLOSURE') ? 'outer' : 'inner';
-      }
-      return { topology: contextTopology, role: contextRole, charCount };
-    }
-
-    // Multi-character word: recognize outer frames if word contains an ENCLOSURE character
-    if (isOuterFrameGlyph(glyph, hasEnclosure ? 'ENCLOSURE' : null)) {
-      return { topology: 'ENCLOSURE', role: 'outer', charCount };
-    }
-
-    if (dropCenterX !== null && dropCenterY !== null && this.dom.placedLayer && this.dom.canvas) {
-      const canvasRect = this.dom.canvas.getBoundingClientRect();
-      const placedEls = this.dom.placedLayer.querySelectorAll('.placed-component-glyph');
-      for (const el of placedEls) {
-        if (el === excludeEl) continue;
-        const elGlyph = el.dataset.glyph || el.textContent.trim();
-        if (!isOuterFrameGlyph(elGlyph, hasEnclosure ? 'ENCLOSURE' : null)) continue;
-        const elRect = el.getBoundingClientRect();
-        const ex = elRect.left - canvasRect.left;
-        const ey = elRect.top - canvasRect.top;
-        const ew = elRect.width || parseFloat(el.style.fontSize) || 60;
-        const eh = elRect.height || parseFloat(el.style.fontSize) || 60;
-        const padX = ew * 0.12;
-        const padY = eh * 0.12;
-        if (dropCenterX >= ex - padX && dropCenterX <= ex + ew + padX &&
-            dropCenterY >= ey - padY && dropCenterY <= ey + eh + padY) {
-          return { topology: 'ENCLOSURE', role: 'inner', charCount };
-        }
-      }
-    }
-
-    return { topology: 'ATOMIC', role: null, charCount };
+  populateDock() {
+    this.populateDockForChar(this.activeCharIndex);
   }
 
   /**
-   * Auto-rescales pieces on multi-character canvases whenever an outer frame or inner glyph
-   * is dropped, repositioned, or removed. Keeps piece center pinned when size changes.
+   * Resolves (topology, role, charCount) strictly for the active single character canvas (ZERO-SPOILER).
    */
-  refreshMultiCharEnclosureStyles() {
+  _resolvePlacementContext(glyph) {
+    const activeDecomp = (this.activeDecompositions || [])[this.activeCharIndex] || null;
+    const contextTopology = activeDecomp?.topology || 'ATOMIC';
+    let contextRole = null;
+    if (contextTopology === 'ENCLOSURE') {
+      contextRole = isOuterFrameGlyph(glyph, 'ENCLOSURE') ? 'outer' : 'inner';
+    }
+    return { topology: contextTopology, role: contextRole, charCount: 1 };
+  }
+
+  /**
+   * Harmonizes proportions and weights whenever a piece is dropped, moved, or removed.
+   */
+  refreshActiveCharStyles() {
     if (!this.dom.placedLayer || !this.dom.canvas) return;
-    const charCount = Math.max(1, (this.activeDecompositions || []).length);
-    if (charCount < 2) return;
 
     const canvasRect = this.dom.canvas.getBoundingClientRect();
-    const canvasDim = canvasRect.width || 340;
+    const canvasDim = canvasRect.width || this.dom.canvas.clientWidth || 340;
     const placedEls = Array.from(this.dom.placedLayer.querySelectorAll('.placed-component-glyph'));
 
-    const snapshots = placedEls.map(el => {
+    placedEls.forEach(el => {
       const rect = el.getBoundingClientRect();
+      const glyph = el.dataset.glyph || el.textContent.trim();
       const oldSize = parseFloat(el.style.fontSize) || rect.height || 60;
-      const cx = rect.width > 0
-        ? (rect.left - canvasRect.left + rect.width * 0.5)
-        : ((parseFloat(el.style.left) || 0) + oldSize * 0.5);
-      const cy = rect.height > 0
-        ? (rect.top - canvasRect.top + rect.height * 0.5)
-        : ((parseFloat(el.style.top) || 0) + oldSize * 0.5);
-      return {
-        el,
-        glyph: el.dataset.glyph || el.textContent.trim(),
-        oldSize,
-        cx,
-        cy
-      };
-    });
+      const ctx = this._resolvePlacementContext(glyph);
+      const newSize = getComponentFontSize(glyph, canvasDim, 1, ctx.role, ctx.topology);
+      const newWeight = getComponentFontWeight(glyph, ctx.topology, ctx.role);
+      const compType = getComponentType(glyph, ctx.role, ctx.topology);
+      const vt = getComponentVisualTransform(glyph, ctx.topology, ctx.role);
 
-    for (const snap of snapshots) {
-      const ctx = this._resolvePlacementContext(snap.glyph, snap.cx, snap.cy, snap.el);
-      const newSize = getComponentFontSize(snap.glyph, canvasDim, charCount, ctx.role, ctx.topology);
-      const newWeight = getComponentFontWeight(snap.glyph, ctx.topology, ctx.role);
-      const compType = getComponentType(snap.glyph, ctx.role, ctx.topology);
-      const vt = getComponentVisualTransform(snap.glyph, ctx.topology, ctx.role);
+      el.dataset.componentType = compType;
+      el.style.fontSize = `${newSize}px`;
+      el.style.fontWeight = newWeight;
+      el.style.setProperty('--sx', String(vt.scaleX));
+      el.style.setProperty('--sy', String(vt.scaleY));
 
-      snap.el.dataset.componentType = compType;
-      snap.el.style.fontSize = `${newSize}px`;
-      snap.el.style.fontWeight = newWeight;
-      snap.el.style.setProperty('--sx', String(vt.scaleX));
-      snap.el.style.setProperty('--sy', String(vt.scaleY));
-
-      if (Math.abs(newSize - snap.oldSize) > 0.5) {
-        const oldLeft = parseFloat(snap.el.style.left) || 0;
-        const oldTop = parseFloat(snap.el.style.top) || 0;
-        const deltaHalf = (snap.oldSize - newSize) * 0.5;
-        snap.el.style.left = `${Math.round(oldLeft + deltaHalf)}px`;
-        snap.el.style.top = `${Math.round(oldTop + deltaHalf)}px`;
+      if (Math.abs(newSize - oldSize) > 0.5) {
+        const oldLeft = parseFloat(el.style.left) || 0;
+        const oldTop = parseFloat(el.style.top) || 0;
+        const deltaHalf = (oldSize - newSize) * 0.5;
+        el.style.left = `${Math.round(oldLeft + deltaHalf)}px`;
+        el.style.top = `${Math.round(oldTop + deltaHalf)}px`;
       }
-    }
+    });
   }
 
-  updateDockCount() {
-    if (!this.dom.dock) return;
-    const visibleTiles = this.dom.dock.querySelectorAll('.draggable-component-tile:not(.hidden)');
-    if (this.dom.dockCountBadge) {
-      this.dom.dockCountBadge.textContent = `${visibleTiles.length} PIECES`;
+  getActiveCharPlacedCount() {
+    if (this.dom.placedLayer) {
+      return this.dom.placedLayer.querySelectorAll('.placed-component-glyph').length;
+    }
+    return (this.charPlacedItems[this.activeCharIndex] || []).length;
+  }
+
+  getTotalPlacedCount() {
+    this.syncActiveCharToState();
+    return (this.charPlacedItems || []).reduce((sum, list) => sum + (Array.isArray(list) ? list.length : 0), 0);
+  }
+
+  notifyPlacedChange() {
+    this.updateCarouselUI();
+    if (typeof this.onPlacedChange === 'function') {
+      const activeCount = this.getActiveCharPlacedCount();
+      const totalCount = (this.charPlacedItems || []).reduce((sum, list, idx) => (
+        sum + (idx === this.activeCharIndex ? activeCount : (Array.isArray(list) ? list.length : 0))
+      ), 0);
+      this.onPlacedChange(activeCount, totalCount);
     }
   }
 
@@ -1333,9 +1484,9 @@ export class ComponentPlacementController {
       const compId = item.id;
       const canvasRect = this.dom.canvas.getBoundingClientRect();
       const canvasDim = canvasRect.width || 340;
-      const dragCtx = this._resolvePlacementContext(glyph, null, null, null);
+      const dragCtx = this._resolvePlacementContext(glyph);
       const compType = getComponentType(glyph, dragCtx.role, dragCtx.topology);
-      const targetFontSize = getComponentFontSize(glyph, canvasDim, dragCtx.charCount, dragCtx.role, dragCtx.topology);
+      const targetFontSize = getComponentFontSize(glyph, canvasDim, 1, dragCtx.role, dragCtx.topology);
       const targetFontWeight = getComponentFontWeight(glyph, dragCtx.topology, dragCtx.role);
       const visualTransform = getComponentVisualTransform(glyph, dragCtx.topology, dragCtx.role);
 
@@ -1376,7 +1527,6 @@ export class ComponentPlacementController {
         const dropX = ue.clientX;
         const dropY = ue.clientY;
 
-        // Check if dropped inside canvas
         if (
           dropX >= cRect.left &&
           dropX <= cRect.right &&
@@ -1384,13 +1534,12 @@ export class ComponentPlacementController {
           dropY <= cRect.bottom
         ) {
           tile.classList.add('hidden');
-          this.updateDockCount();
 
           const dropRelCenterX = dropX - cRect.left;
           const dropRelCenterY = dropY - cRect.top;
-          const dropCtx = this._resolvePlacementContext(glyph, dropRelCenterX, dropRelCenterY, null);
+          const dropCtx = this._resolvePlacementContext(glyph);
           const dropCanvasDim = cRect.width || 340;
-          const dropFontSize = getComponentFontSize(glyph, dropCanvasDim, dropCtx.charCount, dropCtx.role, dropCtx.topology);
+          const dropFontSize = getComponentFontSize(glyph, dropCanvasDim, 1, dropCtx.role, dropCtx.topology);
           const dropFontWeight = getComponentFontWeight(glyph, dropCtx.topology, dropCtx.role);
           const dropCompType = getComponentType(glyph, dropCtx.role, dropCtx.topology);
           const dropTransform = getComponentVisualTransform(glyph, dropCtx.topology, dropCtx.role);
@@ -1400,8 +1549,14 @@ export class ComponentPlacementController {
           const clampedX = Math.max(-Math.round(dropFontSize * 0.15), Math.min(cRect.width - Math.round(dropFontSize * 0.7), relX));
           const clampedY = Math.max(-Math.round(dropFontSize * 0.15), Math.min(cRect.height - Math.round(dropFontSize * 0.7), relY));
 
-          this.createPlacedGlyph(glyph, compId, clampedX, clampedY, dropFontSize, dropFontWeight, dropCompType, tile, dropTransform);
-          this.refreshMultiCharEnclosureStyles();
+          const placedEl = this.createPlacedGlyph(glyph, compId, clampedX, clampedY, dropFontSize, dropFontWeight, dropCompType, tile, dropTransform);
+          if (placedEl && cRect.width > 0 && cRect.height > 0) {
+            placedEl.dataset.normCx = ((clampedX + dropFontSize * 0.5) / cRect.width).toFixed(4);
+            placedEl.dataset.normCy = ((clampedY + dropFontSize * 0.5) / cRect.height).toFixed(4);
+          }
+          this.refreshActiveCharStyles();
+          this.syncActiveCharToState();
+          this.notifyPlacedChange();
         }
       };
 
@@ -1414,7 +1569,7 @@ export class ComponentPlacementController {
    * Creates a pure typography glyph element on the canvas drop surface.
    */
   createPlacedGlyph(glyph, compId, x, y, fontSize, fontWeight, compType, sourceTile, visualTransform = null) {
-    if (!this.dom.placedLayer) return;
+    if (!this.dom.placedLayer) return null;
 
     const vt = visualTransform || { scaleX: 1, scaleY: 1 };
     const placed = document.createElement('div');
@@ -1430,7 +1585,6 @@ export class ComponentPlacementController {
     placed.dataset.glyph = glyph;
     placed.textContent = glyph;
 
-    // Repositioning drag on canvas
     let hasMoved = false;
     placed.addEventListener('pointerdown', (e) => {
       e.preventDefault();
@@ -1463,14 +1617,15 @@ export class ComponentPlacementController {
         window.removeEventListener('pointerup', onUp);
         try { placed.releasePointerCapture(e.pointerId); } catch (_) {}
 
-        // If user tapped without dragging, or dragged outside canvas: return piece to dock
         const cRect = this.dom.canvas.getBoundingClientRect();
         const isOutside = (ue.clientX < cRect.left || ue.clientX > cRect.right || ue.clientY < cRect.top || ue.clientY > cRect.bottom);
 
         if (!hasMoved || isOutside) {
           this.returnGlyphToDock(placed, sourceTile);
         } else {
-          this.refreshMultiCharEnclosureStyles();
+          this.refreshActiveCharStyles();
+          this.syncActiveCharToState();
+          this.notifyPlacedChange();
         }
       };
 
@@ -1479,38 +1634,75 @@ export class ComponentPlacementController {
     });
 
     this.dom.placedLayer.appendChild(placed);
+    return placed;
   }
 
   /**
    * Returns a placed component back to the dock tray.
    */
-  returnGlyphToDock(placedEl, sourceTile) {
+  returnGlyphToDock(placedEl, sourceTile = null) {
+    const compId = placedEl ? placedEl.dataset.componentId : null;
     if (placedEl && placedEl.parentNode) {
       placedEl.parentNode.removeChild(placedEl);
     }
-    if (sourceTile) {
-      sourceTile.classList.remove('hidden');
+    const tile = sourceTile || (compId && this.dom.dock
+      ? this.dom.dock.querySelector(`.draggable-component-tile[data-component-id="${compId}"]`)
+      : null);
+    if (tile) {
+      tile.classList.remove('hidden');
     }
-    this.updateDockCount();
-    this.refreshMultiCharEnclosureStyles();
+    this.refreshActiveCharStyles();
+    this.syncActiveCharToState();
+    this.notifyPlacedChange();
   }
 
   /**
-   * Resets all placed components back to the dock.
+   * Removes the most recently placed piece from the active character (Mirror Parity: Undo).
    */
-  resetCanvas() {
+  undoLastPlaced() {
+    if (!this.dom.placedLayer) return;
+    const placedEls = this.dom.placedLayer.querySelectorAll('.placed-component-glyph');
+    if (placedEls.length === 0) {
+      if (typeof this.onUndo === 'function') this.onUndo(false);
+      return;
+    }
+    const lastEl = placedEls[placedEls.length - 1];
+    this.returnGlyphToDock(lastEl);
+    if (typeof this.onUndo === 'function') {
+      this.onUndo(true);
+    }
+  }
+
+  /**
+   * Clears only the active character's placed components (Mirror Parity with Calligraphy clearCanvas).
+   */
+  clearActiveCharacter() {
     if (this.dom.placedLayer) {
       this.dom.placedLayer.innerHTML = '';
     }
-    if (this.dom.dock) {
-      const tiles = this.dom.dock.querySelectorAll('.draggable-component-tile');
-      tiles.forEach(t => t.classList.remove('hidden'));
+    if (Array.isArray(this.charPlacedItems)) {
+      this.charPlacedItems[this.activeCharIndex] = [];
     }
-    this.updateDockCount();
+    this.activePlacedComponents = [];
+    if (this.dom.dock) {
+      this.dom.dock.querySelectorAll('.draggable-component-tile').forEach(t => t.classList.remove('hidden'));
+    }
+    this.notifyPlacedChange();
   }
 
   /**
-   * Reads all placed components currently on the canvas.
+   * Resets all characters in the active word back to Character 1 (used on word retry).
+   */
+  resetCanvas() {
+    const charCount = Math.max(1, (this.activeDecompositions || []).length);
+    this.charPlacedItems = Array.from({ length: charCount }, () => []);
+    this.activePlacedComponents = [];
+    this.activeCharIndex = 0;
+    this.mountCharacter(0, { skipSync: true });
+  }
+
+  /**
+   * Reads all placed components currently on the active canvas.
    */
   getPlacedComponents() {
     if (!this.dom.placedLayer) return [];
@@ -1528,10 +1720,10 @@ export class ComponentPlacementController {
       list.push({
         id: el.dataset.componentId || el.dataset.glyph,
         glyph: el.dataset.glyph || el.textContent.trim(),
-        x: x,
-        y: y,
-        width: width,
-        height: height,
+        x,
+        y,
+        width,
+        height,
         centerX: x + width * 0.5,
         centerY: y + height * 0.5,
         element: el
@@ -1541,19 +1733,103 @@ export class ComponentPlacementController {
     return list;
   }
 
-  /**
-   * Runs the RST evaluation on the current canvas state.
-   */
-  evaluateActivePlacement(dictionary = null, corpus = null, attemptsLeft = 3) {
-    const placed = this.getPlacedComponents();
-    const canvasWidth = this.dom.canvas ? this.dom.canvas.clientWidth : 340;
-    const dict = dictionary || this.decompositions || {};
-    return gradeComponentBuilder(placed, this.activeDecompositions, canvasWidth, dict, corpus || [], attemptsLeft);
+  _buildPlacedForCharIndex(charIdx, canvasWidth) {
+    if (charIdx === this.activeCharIndex && this.dom.canvas && this.dom.canvas.clientWidth > 0) {
+      return this.getPlacedComponents();
+    }
+    const saved = (this.charPlacedItems && this.charPlacedItems[charIdx]) || [];
+    const decomp = (this.activeDecompositions || [])[charIdx] || {};
+    const topology = decomp.topology || 'ATOMIC';
+    return saved.map(item => {
+      const role = topology === 'ENCLOSURE'
+        ? (isOuterFrameGlyph(item.glyph, 'ENCLOSURE') ? 'outer' : 'inner')
+        : null;
+      const size = getComponentFontSize(item.glyph, canvasWidth, 1, role, topology);
+      const centerX = item.normCx * canvasWidth;
+      const centerY = item.normCy * canvasWidth;
+      return {
+        id: item.id,
+        glyph: item.glyph,
+        x: centerX - size * 0.5,
+        y: centerY - size * 0.5,
+        width: size,
+        height: size,
+        centerX,
+        centerY
+      };
+    });
   }
 
   /**
-   * Plays the crystallization animation upon successful assembly, morphing loose tiles into
-   * the canonical unified character string for orthographic reinforcement.
+   * Runs the RST evaluation across the active word (stepped 1-char-per-canvas flow).
+   */
+  evaluateActivePlacement(dictionary = null, corpus = null, attemptsLeft = 3) {
+    this.syncActiveCharToState();
+    const canvasWidth = (this.dom.canvas && (this.dom.canvas.clientWidth || this.dom.canvas.offsetWidth)) || 340;
+    const dict = dictionary || this.decompositions || {};
+    const decomps = this.activeDecompositions || [];
+    const charCount = Math.max(1, decomps.length);
+
+    const charBuckets = Array.from({ length: charCount }, (_, idx) => this._buildPlacedForCharIndex(idx, canvasWidth));
+    const totalPlaced = charBuckets.reduce((sum, list) => sum + list.length, 0);
+
+    if (totalPlaced === 0) {
+      return gradeComponentBuilder([], [decomps[this.activeCharIndex] || {}], canvasWidth, dict, corpus || [], attemptsLeft);
+    }
+
+    // Stepped Multi-Char Check: if active character is built & valid while another character is still empty, advance cleanly without penalty
+    if (charCount > 1) {
+      const activeIdx = this.activeCharIndex;
+      const activeDecomp = decomps[activeIdx];
+      const activePlaced = charBuckets[activeIdx] || [];
+      if (activePlaced.length > 0 && activeDecomp) {
+        const activeGrade = gradeComponentBuilder(activePlaced, [activeDecomp], canvasWidth, dict, corpus || [], attemptsLeft);
+        if (activeGrade.success) {
+          const nextEmptyIdx = charBuckets.findIndex((b, idx) => idx !== activeIdx && b.length === 0);
+          if (nextEmptyIdx !== -1) {
+            return {
+              status: 'NEXT_CHAR',
+              success: false,
+              noPenalty: true,
+              autoAdvanceToChar: nextEmptyIdx,
+              charIndex: activeIdx,
+              badge: `Part ${activeIdx + 1} Ready!`,
+              detail: `Nice! Now build character ${nextEmptyIdx + 1} of ${charCount}.`
+            };
+          }
+        } else {
+          return { ...activeGrade, charIndex: activeIdx };
+        }
+      }
+    }
+
+    let worstTier = 1;
+    let chosenDetail = 'All pieces snapped cleanly into place.';
+    let chosenBadge = '🎯 Clean Assembly!';
+
+    for (let k = 0; k < charCount; k++) {
+      const res = gradeComponentBuilder(charBuckets[k], [decomps[k]], canvasWidth, dict, corpus || [], attemptsLeft);
+      if (!res.success) {
+        return { ...res, charIndex: k };
+      }
+      if (res.tier > worstTier) {
+        worstTier = res.tier;
+        chosenDetail = res.detail;
+        chosenBadge = res.badge;
+      }
+    }
+
+    return {
+      status: worstTier === 2 ? 'SOFT_PASS' : 'CLEAN_PASS',
+      tier: worstTier,
+      success: true,
+      badge: chosenBadge,
+      detail: chosenDetail
+    };
+  }
+
+  /**
+   * Plays the crystallization animation upon successful assembly on the active 1-char canvas.
    */
   playCrystallizationAnimation(onComplete) {
     if (!this.dom.placedLayer) {
@@ -1569,20 +1845,16 @@ export class ComponentPlacementController {
       g.style.filter = 'drop-shadow(0 0 14px #10B981)';
     });
 
-    if (this.activeWord && this.activeWord.hanzi_simp) {
-      const charLen = Math.max(1, Array.from(this.activeWord.hanzi_simp).length);
+    const chars = (this.activeWord && (this.activeWord.characters || Array.from(this.activeWord.hanzi_simp || ''))) || [];
+    const activeChar = chars[this.activeCharIndex] || (this.activeWord && this.activeWord.hanzi_simp) || '';
+    if (activeChar) {
       const canvasWidth = this.dom.canvas ? (this.dom.canvas.clientWidth || 340) : 340;
-      let overlayRatio = 0.52;
-      if (charLen === 2) overlayRatio = 0.38;
-      else if (charLen === 3) overlayRatio = 0.26;
-      else if (charLen >= 4) overlayRatio = 0.20;
-
       const overlay = document.createElement('div');
       overlay.className = 'crystallized-word-overlay crystallize-pulse';
       overlay.style.setProperty('--sx', '1');
       overlay.style.setProperty('--sy', '1');
-      overlay.style.fontSize = `${Math.round(canvasWidth * overlayRatio)}px`;
-      overlay.textContent = this.activeWord.hanzi_simp;
+      overlay.style.fontSize = `${Math.round(canvasWidth * 0.52)}px`;
+      overlay.textContent = activeChar;
       this.dom.placedLayer.appendChild(overlay);
     }
 
@@ -1592,12 +1864,11 @@ export class ComponentPlacementController {
         g.style.opacity = '0';
       });
       if (onComplete) onComplete();
-    }, 450);
+    }, 420);
   }
 
   /**
-   * Reveals canonical solution upon attempt exhaustion by highlighting the watermark outline.
-   * NOTE: Purely visual review aid on canvas; does NOT mutate persistent user preference or button label.
+   * Reveals canonical solution for the active character upon attempt exhaustion.
    */
   revealCanonicalSolution() {
     if (this.dom.hintWatermark) {

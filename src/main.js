@@ -2,7 +2,10 @@ import './style.css';
 import 'keen-slider/keen-slider.min.css';
 import KS from 'keen-slider';
 import { AudioPipeline } from './audio/audioPipeline.js';
-import { WordTrainerEngine } from './wordTrainerEngine.js';
+import { PitchTracker } from './audio/pitchTracker.js';
+import { DTWComparator } from './audio/dtwComparator.js';
+import { ToneClassifier } from './audio/toneClassifier.js';
+import { WordTrainerEngine, getConciseEnglish, getModeMasteryCounts } from './wordTrainerEngine.js';
 
 const KeenSlider = KS.default || KS;
 
@@ -401,6 +404,21 @@ function setupMenu() {
   const startCalligraphyBtn = document.getElementById('start-calligraphy-btn');
   const wordTrainerScreen = document.getElementById('word-trainer-screen');
   const backFromWordsBtn = document.getElementById('back-from-words-btn');
+  const wtModeBuilderBtn = document.getElementById('wt-mode-builder-btn');
+  const wtModeCalligraphyBtn = document.getElementById('wt-mode-calligraphy-btn');
+  const gatewayBuilderProgress = document.getElementById('gateway-builder-progress');
+  const gatewayCalligraphyProgress = document.getElementById('gateway-calligraphy-progress');
+
+  function updateGatewayProgressUI() {
+    const counts = getModeMasteryCounts();
+    if (gatewayBuilderProgress) {
+      gatewayBuilderProgress.textContent = `${counts.builder.mastered} / ${counts.builder.total} mastered`;
+    }
+    if (gatewayCalligraphyProgress) {
+      gatewayCalligraphyProgress.textContent = `${counts.calligraphy.mastered} / ${counts.calligraphy.total} mastered`;
+    }
+  }
+  updateGatewayProgressUI();
 
   function launchWordTrainerMode(mode) {
     stopGlobalAudio();
@@ -409,7 +427,7 @@ function setupMenu() {
     }
     if (modeSelectionScreen) modeSelectionScreen.classList.add('hidden');
     if (wordTrainerScreen) {
-      wordTrainerScreen.classList.remove('mobile-result-active', 'mobile-phase-open');
+      wordTrainerScreen.classList.remove('mobile-result-active', 'mobile-phase-open', 'mobile-result-peek');
       wordTrainerScreen.classList.remove('hidden');
     }
     const mobilePhaseTriggerEl = document.getElementById('mobile-phase-trigger');
@@ -418,37 +436,40 @@ function setupMenu() {
 
     const canvasArena = document.getElementById('canvas-arena');
     const openPlacementArena = document.getElementById('open-placement-arena');
-    const modeTitle = document.getElementById('word-trainer-mode-title');
-    const modeDot = document.getElementById('word-trainer-mode-dot');
+
+    if (wtModeBuilderBtn) {
+      const active = mode === 'builder';
+      wtModeBuilderBtn.classList.toggle('wt-mode-active', active);
+      wtModeBuilderBtn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    }
+    if (wtModeCalligraphyBtn) {
+      const active = mode !== 'builder';
+      wtModeCalligraphyBtn.classList.toggle('wt-mode-active', active);
+      wtModeCalligraphyBtn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    }
 
     if (mode === 'builder') {
-      wordTrainerScreen.classList.remove('theme-calligraphy');
-      wordTrainerScreen.classList.add('theme-builder');
+      if (wordTrainerScreen) {
+        wordTrainerScreen.classList.remove('theme-calligraphy');
+        wordTrainerScreen.classList.add('theme-builder');
+      }
       setAppBackground('bg-canvas-builder');
 
       if (canvasArena) canvasArena.classList.add('hidden');
       if (openPlacementArena) openPlacementArena.classList.remove('hidden');
 
-      if (modeTitle) modeTitle.textContent = 'WORD TRAINER // COMPONENT BUILDER';
-      if (modeDot) {
-        modeDot.className = 'w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#065F46] animate-pulse border border-black shrink-0';
-      }
-
       if (typeof window.initComponentBuilderArena === 'function') {
         window.initComponentBuilderArena();
       }
     } else {
-      wordTrainerScreen.classList.remove('theme-builder');
-      wordTrainerScreen.classList.add('theme-calligraphy');
+      if (wordTrainerScreen) {
+        wordTrainerScreen.classList.remove('theme-builder');
+        wordTrainerScreen.classList.add('theme-calligraphy');
+      }
       setAppBackground('bg-canvas-calligraphy');
 
       if (openPlacementArena) openPlacementArena.classList.add('hidden');
       if (canvasArena) canvasArena.classList.remove('hidden');
-
-      if (modeTitle) modeTitle.textContent = 'WORD TRAINER // CALLIGRAPHY LAB';
-      if (modeDot) {
-        modeDot.className = 'w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#D97706] animate-pulse border border-black shrink-0';
-      }
 
       if (typeof window.initWordTrainerCanvas === 'function') {
         window.initWordTrainerCanvas();
@@ -471,8 +492,23 @@ function setupMenu() {
     }
   }
 
+  if (wtModeBuilderBtn) {
+    wtModeBuilderBtn.addEventListener('click', () => {
+      if (window.WordTrainerEngine && window.WordTrainerEngine.getMode() === 'builder') return;
+      launchWordTrainerMode('builder');
+    });
+  }
+
+  if (wtModeCalligraphyBtn) {
+    wtModeCalligraphyBtn.addEventListener('click', () => {
+      if (window.WordTrainerEngine && window.WordTrainerEngine.getMode() === 'calligraphy') return;
+      launchWordTrainerMode('calligraphy');
+    });
+  }
+
   if (startWordsBtn) {
     startWordsBtn.addEventListener('click', () => {
+      updateGatewayProgressUI();
       menuScreen.classList.add('hidden');
       mainMenu.classList.remove('hidden');
       submenu.classList.add('hidden');
@@ -500,19 +536,28 @@ function setupMenu() {
 
   if (backFromWordsBtn) {
     backFromWordsBtn.addEventListener('click', () => {
+      stopGlobalAudio();
       if (wordTrainerScreen) {
-        wordTrainerScreen.classList.remove('mobile-result-active', 'mobile-phase-open');
+        wordTrainerScreen.classList.remove('mobile-result-active', 'mobile-phase-open', 'mobile-result-peek');
         wordTrainerScreen.classList.add('hidden');
       }
-      menuScreen.classList.remove('hidden');
-      mainMenu.classList.remove('hidden');
-      setAppBackground('bg-canvas-acid');
+      if (modeSelectionScreen) {
+        modeSelectionScreen.classList.remove('hidden');
+        setAppBackground('bg-canvas-celadon');
+      } else {
+        menuScreen.classList.remove('hidden');
+        mainMenu.classList.remove('hidden');
+        setAppBackground('bg-canvas-acid');
+      }
       if (window.WordTrainerEngine) {
         if (typeof window.WordTrainerEngine.closeMobilePhaseBar === 'function') {
           window.WordTrainerEngine.closeMobilePhaseBar();
         }
         if (typeof window.WordTrainerEngine.hidePhaseCompleteModal === 'function') {
           window.WordTrainerEngine.hidePhaseCompleteModal();
+        }
+        if (typeof window.WordTrainerEngine.closeStrokeGuideModal === 'function') {
+          window.WordTrainerEngine.closeStrokeGuideModal();
         }
         if (typeof window.WordTrainerEngine.clearResultShowcase === 'function') {
           window.WordTrainerEngine.clearResultShowcase();
@@ -521,6 +566,7 @@ function setupMenu() {
           window.WordTrainerEngine.stopAudio();
         }
       }
+      updateGatewayProgressUI();
     });
   }
 
@@ -544,6 +590,9 @@ function setupMenu() {
 
   if (backFromEngineBtn) {
     backFromEngineBtn.addEventListener('click', () => {
+      stopGlobalAudio();
+      const settingsModal = document.getElementById('engine-settings-modal');
+      if (settingsModal) settingsModal.classList.add('hidden');
       if (window.PronunciationEngine && typeof window.PronunciationEngine.reset === 'function') {
         window.PronunciationEngine.reset();
       }
@@ -708,8 +757,10 @@ async function init() {
   }
 }
 
-async function playAudio(customPath) {
+async function playAudio(customPath, options = {}) {
+  const { playbackRate = 1.0, onEnded = null } = options || {};
   ensureAudioUnlocked();
+  stopGlobalAudio();
   let rawPath = null;
   if (typeof customPath === 'string' && customPath.trim().length > 0) {
     rawPath = customPath.trim();
@@ -733,6 +784,7 @@ async function playAudio(customPath) {
 
   if (!audioPath) {
     console.warn('[DEBUG] playAudio: no audioPath, aborting');
+    if (typeof onEnded === 'function') onEnded();
     return;
   }
 
@@ -768,13 +820,15 @@ async function playAudio(customPath) {
         console.log('[DEBUG] Using cached buffer for:', audioPath);
       }
       if (buffer) {
-        if (currentWebAudioSource) {
-          try { currentWebAudioSource.stop(); } catch (_) {}
-          currentWebAudioSource = null;
-        }
+        stopGlobalAudio();
         const source = ctx.createBufferSource();
         source.buffer = buffer;
+        source.playbackRate.value = Number.isFinite(playbackRate) && playbackRate > 0 ? playbackRate : 1.0;
         source.connect(ctx.destination);
+        source.onended = () => {
+          if (currentWebAudioSource === source) currentWebAudioSource = null;
+          if (typeof onEnded === 'function') onEnded();
+        };
         source.start(0);
         currentWebAudioSource = source;
         console.log('[DEBUG] WebAudio playback started OK');
@@ -793,15 +847,26 @@ async function playAudio(customPath) {
     htmlAudioInstance.pause();
     htmlAudioInstance.currentTime = 0;
     htmlAudioInstance.src = audioPath;
+    htmlAudioInstance.playbackRate = Number.isFinite(playbackRate) && playbackRate > 0 ? playbackRate : 1.0;
+    htmlAudioInstance.onended = () => {
+      if (typeof onEnded === 'function') onEnded();
+    };
+    htmlAudioInstance.onerror = () => {
+      if (typeof onEnded === 'function') onEnded();
+    };
     console.log('[DEBUG] HTMLAudio .play() called for:', audioPath);
     const playPromise = htmlAudioInstance.play();
     if (playPromise && typeof playPromise.catch === 'function') {
       playPromise
         .then(() => console.log('[DEBUG] HTMLAudio play resolved OK'))
-        .catch(e => console.error('[DEBUG] HTMLAudio play rejected:', e));
+        .catch(e => {
+          console.error('[DEBUG] HTMLAudio play rejected:', e);
+          if (typeof onEnded === 'function') onEnded();
+        });
     }
   } catch (e) {
     console.error('[DEBUG] HTMLAudio threw synchronously:', e);
+    if (typeof onEnded === 'function') onEnded();
   }
 }
 
@@ -1260,32 +1325,49 @@ window.addEventListener('keydown', (e) => {
       playAudio();
     }
   } else if (engineScreen && !engineScreen.classList.contains('hidden')) {
-    if (e.code === 'Space') {
+    const settingsModal = document.getElementById('engine-settings-modal');
+    if (settingsModal && !settingsModal.classList.contains('hidden')) {
+      if (e.code === 'Escape') {
+        e.preventDefault();
+        settingsModal.classList.add('hidden');
+      }
+      return;
+    }
+    const tag = e.target && e.target.tagName ? e.target.tagName.toLowerCase() : '';
+    if (tag === 'input' || tag === 'textarea' || tag === 'select' || e.target?.isContentEditable) return;
+    if (e.code === 'Space' && !e.repeat) {
       e.preventDefault();
       const recordBtn = document.getElementById('engine-record-btn');
       if (recordBtn) recordBtn.click();
+    } else if (e.code === 'KeyN' && !e.repeat && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      e.preventDefault();
+      const nextBtn = document.getElementById('engine-next-btn');
+      if (nextBtn) nextBtn.click();
     }
   }
 });
 
 // ========================================================
-// ACOUSTIC PRONUNCIATION ENGINE: EXTENSIBLE UI HOOKS
-// Aero Sky Ice & Racing Tangerine Palette | Multi-Syllable Scenarios (1, 2, 3)
-// ========================================================
-// ========================================================
-// ACOUSTIC PRONUNCIATION ENGINE: EXTENSIBLE UI HOOKS
-// Aero Sky Ice & Racing Tangerine Palette | Dynamic Multi-Syllable Scenarios (1-4 Syllables)
+// ACOUSTIC PRONUNCIATION ENGINE: ELSA 3-TIER UI & DSP HOOKS
+// Progressive Disclosure | Plain-English Coaching | Seekable Playback
 // ========================================================
 function setupEnginePlaceholders() {
   const recordBtn = document.getElementById('engine-record-btn');
   const nextBtn = document.getElementById('engine-next-btn');
   const resetBtn = document.getElementById('engine-reset-btn');
   const coachPlayBtn = document.getElementById('coach-hear-user-btn');
-  const stepCounter = document.getElementById('engine-step-counter');
+  const coachNativeBtn = document.getElementById('coach-hear-native-btn');
   const practiceCounter = document.getElementById('engine-practice-counter');
   const playNativeBtn = document.getElementById('engine-play-native-btn');
   const hanziDisplay = document.getElementById('engine-hanzi-display');
   const pinyinDisplay = document.getElementById('engine-pinyin-display');
+
+  const settingsBtn = document.getElementById('engine-settings-btn');
+  const settingsModal = document.getElementById('engine-settings-modal');
+  const settingsCloseBtn = document.getElementById('engine-settings-close-btn');
+  const settingsDoneBtn = document.getElementById('engine-settings-done-btn');
+  const settingsSummaryEl = document.getElementById('engine-settings-summary');
+  const quickSpeedBtn = document.getElementById('engine-quick-speed-btn');
 
   let currentDeckFilter = 'all'; // 'all' | 'hsk1' | 'hsk2'
   let shuffleBag = [];
@@ -1293,16 +1375,135 @@ function setupEnginePlaceholders() {
   let practicedCount = 0;
   let currentSyllableCount = 1;
   let currentSyllables = [];
+  let selectedSyllableIdx = 0;
 
-  let currentEngineState = 1; // 1: Priming (Record), 2: Capture (Recording...), 4: Audit (Try Again)
+  let currentEngineState = 1; // 1: Priming, 2: Recording, 4: Audit
   let audioPipeline = null;
   let lastUserAudioBlob = null;
   let lastUserAudioUrl = null;
+  let activeUserAudio = null;
+  let userAudioRafId = null;
+  let lastDurationSec = 0;
   const RECORDING_DURATION_SEC = 4;
   let countdownSeconds = RECORDING_DURATION_SEC;
   let countdownInterval = null;
 
-  // Syllable horizontal SVG spans (ViewBox 0 0 660 155)
+  function escapeHtml(str) {
+    return String(str ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  const INITIAL_PLAIN = {
+    NO_AUDIO: 'Too quiet to hear clearly',
+    UNVOICED_FAIL: 'Speak a bit louder and clearer',
+    ACCURATE_ASPIRATED: 'Strong, clear burst of air',
+    LAX_ASPIRATED: 'Slightly light air burst — push more breath',
+    UNDER_ASPIRATED: 'Needs a stronger burst of air',
+    ACCURATE_UNASPIRATED: 'Clean, dry consonant without extra air',
+    SLIGHT_ASPIRATION: 'Keep extra breath out on release',
+    OVER_ASPIRATED: 'Too much air — release gently',
+    SHORT_FRICATIVE: 'Hold the starting friction sound slightly longer',
+    EXACT_DENTAL: 'Crisp S sound right behind front teeth',
+    MID_DENTAL: 'Slide tongue tip slightly forward',
+    SLURRED_DENTAL: 'Point tongue closer to teeth for a crisp S',
+    EXACT_RETROFLEX: 'Good curled-tongue SH sound',
+    FORWARD_RETROFLEX: 'Curl tongue tip slightly back',
+    DEEP_RETROFLEX: 'Sounded slightly deep — bring tongue forward',
+    EXACT_PALATAL: 'Clear soft X/Q/J sound',
+    PASS_PALATAL: 'Widen lips slightly for a brighter sound',
+    PASS_GENERIC_FRICATIVE: 'Clear consonant onset',
+    PASS_SONORANT: 'Smooth, natural voiced start',
+    PASS_FRICATIVE: 'Clear consonant onset',
+    PASS: 'Clear consonant onset'
+  };
+
+  const TONE_PLAIN = {
+    EXACT: {
+      1: 'Steady high pitch',
+      2: 'Crisp upward rise',
+      3: 'Dipped low cleanly',
+      4: 'Sharp downward drop',
+      5: 'Light neutral tone'
+    },
+    UNVOICED: 'No clear pitch detected',
+    DROPPED: 'Pitch drifted down at the end — hold it level',
+    CLIMBED: 'Pitch rose at the end — hold it flat',
+    TOO_LOW: 'Flat pitch, but start higher',
+    FLAT_RISE: 'Needs a stronger upward lift',
+    FALLING_INSTEAD_OF_RISING: 'Dropped instead of rising — sweep up firmly',
+    SHALLOW_DIP: 'Drop pitch lower before lifting',
+    ROSE_TOO_EARLY: 'Stay low a bit longer before rising',
+    NOT_FALLING: 'Drop pitch decisively from top to bottom'
+  };
+
+  const FINAL_PLAIN = {
+    NO_AUDIO: 'Vowel too brief to read',
+    PASS_GENERIC_AUDIBLE: 'Clear vowel resonance',
+    EXACT_OPEN: 'Wide, clear A vowel',
+    MID_OPEN: 'Drop jaw slightly wider for A',
+    CLOSED_JAW: 'Open mouth wider for A',
+    EXACT_BACK: 'Deep rounded U sound',
+    MID_BACK: 'Pull tongue slightly back for U',
+    FRONTED_VOWEL: 'Round lips tightly and pull tongue back',
+    EXACT_FRONT: 'Bright, clear EE sound',
+    LAX_FRONT: 'Widen corners of mouth like a gentle smile',
+    PASS_PHONOTACTIC_I: 'Clear front vowel',
+    BACKED_VOWEL: 'Lift front of tongue higher',
+    EXACT_ROUNDED_FRONT: 'Clear rounded Ü with tight lips',
+    PASS_PHONOTACTIC_U: 'Clear rounded vowel',
+    UNROUNDED_LIPS: 'Hold EE tongue, purse lips like whistling',
+    SLIPPED_TO_U: 'Push tongue forward while keeping lips rounded',
+    WEAK_ROUNDING: 'Round lips into a smaller circle',
+    PASS_GENERIC: 'Clear vowel sound'
+  };
+
+  function getInitialPlain(init) {
+    if (!init) return 'Clean onset';
+    return INITIAL_PLAIN[init.diagnosticCode] || 'Clear starting sound';
+  }
+
+  function getTonePlain(syl) {
+    const code = syl?.diagnosticCode || syl?.toneResult?.diagnosticCode || 'EXACT';
+    const tone = Number(syl?.tone) || 1;
+    const score = syl?.toneScore !== undefined ? syl.toneScore : (syl?.toneResult?.score ?? 90);
+    if (code === 'EXACT') {
+      if (tone === 2 && score < 85) return 'Gentle rise — sweep slightly higher';
+      if (tone === 4 && score < 85) return 'Soft drop — make the fall sharper';
+      return TONE_PLAIN.EXACT[tone] || 'Accurate tone contour';
+    }
+    return TONE_PLAIN[code] || 'Adjust tone contour';
+  }
+
+  function getFinalPlain(fin) {
+    if (!fin) return 'Clear vowel sound';
+    return FINAL_PLAIN[fin.diagnosticCode] || 'Clear vowel resonance';
+  }
+
+  function stripHtmlTags(str) {
+    return String(str ?? '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+  }
+
+  function humanizeCoachAdviceText(rawAdvice, wordData, result) {
+    const clean = stripHtmlTags(rawAdvice);
+    if (!clean || result?.coachingPriority === 'PERFECT') {
+      const hanzi = wordData?.hanzi_simp || wordData?.hanzi || '';
+      const score = result?.overallScore !== undefined ? result.overallScore : 90;
+      if (score >= 85) {
+        return `Nice work on "${hanzi}" — your tones matched the native model closely (${score}%).`;
+      }
+      return `Good clarity on "${hanzi}". Replay Native vs My Voice to fine-tune the contour.`;
+    }
+    return clean
+      .replace(/Level 5 \(high soprano\/head voice\)/gi, 'the top of your comfortable pitch range')
+      .replace(/chest register \(Level 1\)/gi, 'your lowest relaxed pitch')
+      .replace(/Chao corridor/gi, 'target curve')
+      .replace(/phonemic targets/gi, 'sound targets')
+      .replace(/All phonemic targets verified\.?/gi, 'Everything sounded clear.');
+  }
+
   function getSyllableSpans(count) {
     if (count === 1) {
       return [{ xMin: 80, xMax: 580, id: 'target-ribbon-s1', pathId: 'user-pitch-path-s1', ptsId: 'user-pitch-points-s1' }];
@@ -1334,68 +1535,54 @@ function setupEnginePlaceholders() {
     return [];
   }
 
-  // Mandarin Tone Sandhi & Formula Analyzer
   function getToneSandhiInfo(word, syllables) {
     const tones = (syllables || []).map(s => s.tone);
     const hanzi = (word.hanzi_simp || word.hanzi || '').trim();
 
-    // Rule 1: Two consecutive 3rd tones -> 2nd + 3rd
     for (let i = 0; i < tones.length - 1; i++) {
       if (tones[i] === 3 && tones[i + 1] === 3) {
         return {
-          title: 'TONE SANDHI: 3RD + 3RD ➔ 2ND + 3RD',
-          pattern: 'Tone 3 + Tone 3 ➔ Tone 2 + Tone 3',
-          subtext: 'First 3rd tone shifts to 2nd rising tone (35).',
+          title: 'Tone Shift',
+          subtext: 'Two 3rd tones together: the first rises like Tone 2.',
           isSandhi: true,
         };
       }
     }
 
-    // Rule 2: "一" (yī) Tone Sandhi
     if (hanzi.includes('一') && tones.length > 1) {
       const idx = hanzi.indexOf('一');
       if (idx < tones.length - 1) {
         const nextTone = tones[idx + 1];
         if (nextTone === 4) {
           return {
-            title: 'TONE SANDHI: 一 (YĪ) BEFORE 4TH TONE',
-            pattern: 'Tone 1 + Tone 4 ➔ Tone 2 + Tone 4',
-            subtext: '一 shifts from Tone 1 to rising Tone 2 (yí).',
+            title: 'Tone Shift',
+            subtext: '一 (yī) rises to Tone 2 (yí) before a 4th tone.',
             isSandhi: true,
           };
         } else if ([1, 2, 3].includes(nextTone)) {
           return {
-            title: `TONE SANDHI: 一 (YĪ) BEFORE TONE ${nextTone}`,
-            pattern: `Tone 1 + Tone ${nextTone} ➔ Tone 4 + Tone ${nextTone}`,
-            subtext: `一 shifts from Tone 1 to falling Tone 4 (yì).`,
+            title: 'Tone Shift',
+            subtext: `一 (yī) drops to Tone 4 (yì) before Tone ${nextTone}.`,
             isSandhi: true,
           };
         }
       }
     }
 
-    // Rule 3: "不" (bù) Tone Sandhi
     if (hanzi.includes('不') && tones.length > 1) {
       const idx = hanzi.indexOf('不');
-      if (idx < tones.length - 1) {
-        const nextTone = tones[idx + 1];
-        if (nextTone === 4) {
-          return {
-            title: 'TONE SANDHI: 不 (BÙ) BEFORE 4TH TONE',
-            pattern: 'Tone 4 + Tone 4 ➔ Tone 2 + Tone 4',
-            subtext: '不 shifts from Tone 4 to rising Tone 2 (bú).',
-            isSandhi: true,
-          };
-        }
+      if (idx < tones.length - 1 && tones[idx + 1] === 4) {
+        return {
+          title: 'Tone Shift',
+          subtext: '不 (bù) rises to Tone 2 (bú) before a 4th tone.',
+          isSandhi: true,
+        };
       }
     }
 
-    // Standard tone pattern (not sandhi)
-    const toneNames = { 1: '55 High', 2: '35 Rising', 3: '214 Dip', 4: '51 Falling', 5: 'Neutral' };
     return {
-      title: `TONE PROFILE: ${tones.map(t => 'T' + t).join(' + ')}`,
-      pattern: tones.map(t => `T${t} (${toneNames[t] || 'Standard'})`).join(' • '),
-      subtext: (syllables || []).map(s => s.syllable).join(' '),
+      title: '',
+      subtext: '',
       isSandhi: false,
     };
   }
@@ -1413,6 +1600,74 @@ function setupEnginePlaceholders() {
     });
   }
 
+  function updateEngineSettingsSummary() {
+    const deckLabel = currentDeckFilter === 'all' ? 'All' : (currentDeckFilter === 'hsk1' ? 'HSK 1' : 'HSK 2');
+    const isSlow = audioTrackMode === 'human' && (humanPlaybackSpeed === 0.65 || humanPlaybackSpeed === 0.8);
+    const voiceLabel = audioTrackMode === 'tts'
+      ? 'Studio'
+      : (isSlow ? 'Natural 0.65×' : 'Natural');
+
+    if (settingsSummaryEl) {
+      settingsSummaryEl.textContent = `${deckLabel} • ${voiceLabel}`;
+    }
+
+    if (quickSpeedBtn) {
+      if (audioTrackMode === 'human') {
+        quickSpeedBtn.classList.remove('hidden');
+        quickSpeedBtn.textContent = isSlow ? '0.65×' : '1.0×';
+        quickSpeedBtn.setAttribute('aria-pressed', isSlow ? 'true' : 'false');
+        if (isSlow) {
+          quickSpeedBtn.className = 'min-w-[44px] min-h-[44px] px-2.5 rounded-xl bg-amber-300 hover:bg-amber-400 text-black border-2 border-black font-mono text-xs font-black active-collapse cursor-pointer shadow-sm shrink-0 transition-colors';
+        } else {
+          quickSpeedBtn.className = 'min-w-[44px] min-h-[44px] px-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-black border-2 border-black font-mono text-xs font-black active-collapse cursor-pointer shadow-sm shrink-0 transition-colors';
+        }
+      } else {
+        quickSpeedBtn.classList.add('hidden');
+      }
+    }
+  }
+
+  function openSettingsModal() {
+    if (settingsModal) settingsModal.classList.remove('hidden');
+  }
+
+  function closeSettingsModal() {
+    if (settingsModal) settingsModal.classList.add('hidden');
+  }
+
+  if (settingsBtn) {
+    settingsBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openSettingsModal();
+    });
+  }
+  if (settingsCloseBtn) {
+    settingsCloseBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeSettingsModal();
+    });
+  }
+  if (settingsDoneBtn) {
+    settingsDoneBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeSettingsModal();
+    });
+  }
+  if (settingsModal) {
+    settingsModal.addEventListener('click', (e) => {
+      if (e.target === settingsModal) {
+        closeSettingsModal();
+      }
+    });
+  }
+  if (quickSpeedBtn) {
+    quickSpeedBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const next = (humanPlaybackSpeed === 0.65 || humanPlaybackSpeed === 0.8) ? 1.0 : 0.65;
+      setHumanPlaybackSpeed(next);
+    });
+  }
+
   function initShuffleBag() {
     let pool = hskDeck;
     if (currentDeckFilter === 'hsk1') {
@@ -1422,17 +1677,12 @@ function setupEnginePlaceholders() {
     }
     if (!pool || pool.length === 0) pool = hskDeck;
 
-    // Fisher-Yates shuffle
     shuffleBag = [...pool];
     for (let i = shuffleBag.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [shuffleBag[i], shuffleBag[j]] = [shuffleBag[j], shuffleBag[i]];
     }
-
-    if (stepCounter) {
-      const label = currentDeckFilter === 'all' ? 'HSK 1+2' : currentDeckFilter.toUpperCase();
-      stepCounter.textContent = `${label} • ${pool.length} WORDS`;
-    }
+    updateEngineSettingsSummary();
   }
 
   async function pickRandomWord() {
@@ -1455,29 +1705,142 @@ function setupEnginePlaceholders() {
     }
   }
 
+  function getActiveDurationSec() {
+    if (lastProcessedResult && Number.isFinite(lastProcessedResult.duration) && lastProcessedResult.duration > 0) {
+      return lastProcessedResult.duration;
+    }
+    if (lastDurationSec > 0) return lastDurationSec;
+    return RECORDING_DURATION_SEC;
+  }
+
+  function updateTimelineProgressUI(fraction, durSec = getActiveDurationSec(), showCursor = false) {
+    const clamped = Math.max(0, Math.min(1, Number.isFinite(fraction) ? fraction : 0));
+    const fill = document.getElementById('pitch-timeline-fill');
+    const thumb = document.getElementById('pitch-timeline-thumb');
+    const text = document.getElementById('pitch-timeline-text');
+    const cursor = document.getElementById('pitch-playback-cursor');
+
+    if (fill) fill.style.width = `${(clamped * 100).toFixed(1)}%`;
+    if (thumb) thumb.style.left = `${(clamped * 100).toFixed(1)}%`;
+    if (text) {
+      const total = Math.max(0.1, Number.isFinite(durSec) ? durSec : RECORDING_DURATION_SEC);
+      const cur = (clamped * total).toFixed(2);
+      text.textContent = `${cur}s / ${total.toFixed(2)}s`;
+    }
+    if (cursor) {
+      const spans = getSyllableSpans(currentSyllableCount);
+      const xStart = spans[0] ? spans[0].xMin : 25;
+      const xEnd = spans[spans.length - 1] ? spans[spans.length - 1].xMax : 635;
+      const x = xStart + clamped * (xEnd - xStart);
+      cursor.setAttribute('x1', x.toFixed(1));
+      cursor.setAttribute('x2', x.toFixed(1));
+      cursor.classList.toggle('hidden', !showCursor);
+    }
+  }
+
+  function setCoachPlayButtonState(isPlaying) {
+    if (!coachPlayBtn) return;
+    if (isPlaying) {
+      coachPlayBtn.innerHTML = '<span class="material-symbols-outlined text-base animate-pulse">stop_circle</span><span>Playing…</span>';
+      coachPlayBtn.classList.add('bg-badge-tangerine', 'text-white');
+      coachPlayBtn.classList.remove('bg-black');
+    } else {
+      coachPlayBtn.innerHTML = '<span class="material-symbols-outlined text-base">play_circle</span><span>My Voice</span>';
+      coachPlayBtn.classList.remove('bg-badge-tangerine');
+      coachPlayBtn.classList.add('bg-black', 'text-white');
+    }
+  }
+
+  function stopUserPlayback({ resetCursor = true } = {}) {
+    if (userAudioRafId) {
+      cancelAnimationFrame(userAudioRafId);
+      userAudioRafId = null;
+    }
+    if (activeUserAudio) {
+      try {
+        activeUserAudio.pause();
+        activeUserAudio.currentTime = 0;
+      } catch (_) {}
+    }
+    setCoachPlayButtonState(false);
+    if (resetCursor) {
+      const cursor = document.getElementById('pitch-playback-cursor');
+      if (cursor) cursor.classList.add('hidden');
+    }
+  }
+
+  function seekUserAudio(fraction) {
+    const clamped = Math.max(0, Math.min(1, Number.isFinite(fraction) ? fraction : 0));
+    const totalDur = (activeUserAudio && Number.isFinite(activeUserAudio.duration) && activeUserAudio.duration > 0)
+      ? activeUserAudio.duration
+      : getActiveDurationSec();
+
+    if (activeUserAudio && Number.isFinite(totalDur) && totalDur > 0) {
+      try {
+        activeUserAudio.currentTime = clamped * totalDur;
+      } catch (_) {}
+    }
+    updateTimelineProgressUI(clamped, totalDur, Boolean(lastUserAudioBlob));
+  }
+
+  function bindTimelineScrubber() {
+    const hitEl = document.getElementById('pitch-timeline-hit');
+    if (!hitEl || hitEl.dataset.bound === 'true') return;
+    hitEl.dataset.bound = 'true';
+
+    let isDragging = false;
+    const fractionFromEvent = (e) => {
+      const rect = hitEl.getBoundingClientRect();
+      if (!rect || rect.width <= 0) return 0;
+      return Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    };
+
+    hitEl.addEventListener('pointerdown', (e) => {
+      if (!lastUserAudioBlob) return;
+      isDragging = true;
+      try { hitEl.setPointerCapture(e.pointerId); } catch (_) {}
+      seekUserAudio(fractionFromEvent(e));
+    });
+
+    hitEl.addEventListener('pointermove', (e) => {
+      if (!isDragging || !lastUserAudioBlob) return;
+      seekUserAudio(fractionFromEvent(e));
+    });
+
+    const endDrag = () => {
+      isDragging = false;
+    };
+    hitEl.addEventListener('pointerup', endDrag);
+    hitEl.addEventListener('pointercancel', endDrag);
+  }
+  bindTimelineScrubber();
+
   function renderCanvasGeometry(count, syllables, profile) {
     const dividersContainer = document.getElementById('pitch-syllable-dividers') || document.getElementById('pitch-canvas-dividers');
     const ribbonsContainer = document.getElementById('pitch-target-ribbons');
+    const milestonesContainer = document.getElementById('pitch-time-milestones');
     const userPaths = document.getElementById('user-pitch-paths-container');
     const userPts = document.getElementById('user-pitch-points-container');
+    const cursor = document.getElementById('pitch-playback-cursor');
 
-    // 1. Dividers and syllable labels
+    if (milestonesContainer) milestonesContainer.innerHTML = '';
+    if (cursor) cursor.classList.add('hidden');
+
     if (dividersContainer) {
       const dividers = getDividers(count);
       const spans = getSyllableSpans(count);
       let divHtml = '';
       dividers.forEach(x => {
-        divHtml += `<line x1="${x}" y1="8" x2="${x}" y2="148" stroke="#000000" stroke-width="1.5" stroke-dasharray="4,3" />`;
+        divHtml += `<line x1="${x}" y1="8" x2="${x}" y2="142" stroke="#000000" stroke-opacity="0.22" stroke-width="1.5" stroke-dasharray="4,3" />`;
       });
       spans.forEach((span, i) => {
-        const syl = syllables[i] || { syllable: '', tone: '?' };
+        const syl = syllables[i] || { syllable: '', tone: 1 };
         const midX = (span.xMin + span.xMax) / 2;
-        divHtml += `<text x="${midX.toFixed(1)}" y="148" font-family="monospace" font-size="9" font-weight="900" text-anchor="middle" fill="#000000" letter-spacing="0.5">${syl.syllable || ''} (T${syl.tone})</text>`;
+        divHtml += `<text x="${midX.toFixed(1)}" y="149" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11" font-weight="900" text-anchor="middle" fill="#000000" letter-spacing="0.4">${escapeHtml(syl.syllable || '')}</text>`;
       });
       dividersContainer.innerHTML = divHtml;
     }
 
-    // 2. Reference Target Corridor Ribbons
     if (ribbonsContainer) {
       const spans = getSyllableSpans(count);
       let ribbonsHtml = '';
@@ -1501,12 +1864,11 @@ function setupEnginePlaceholders() {
           for (let k = 0; k < sylF0.length; k++) {
             const x = span.xMin + (k / (sylF0.length - 1)) * (span.xMax - span.xMin);
             const st = sylF0[k];
-            const centerY = Math.max(16, Math.min(138, 78 - st * 16));
+            const centerY = Math.max(16, Math.min(136, 78 - st * 16));
             upperPts.push(`${x.toFixed(1)},${Math.max(8, centerY - 10.35).toFixed(1)}`);
-            lowerPts.unshift(`${x.toFixed(1)},${Math.min(146, centerY + 10.35).toFixed(1)}`);
+            lowerPts.unshift(`${x.toFixed(1)},${Math.min(142, centerY + 10.35).toFixed(1)}`);
           }
         } else {
-          // Fallback canonical Chao ribbon
           const syl = syllables[i] || { tone: 1 };
           const N = 10;
           for (let k = 0; k < N; k++) {
@@ -1518,16 +1880,15 @@ function setupEnginePlaceholders() {
             else if (syl.tone === 3) centerY = t < 0.5 ? 95 + t * 60 : 125 - (t - 0.5) * 140;
             else if (syl.tone === 4) centerY = 24 + t * 105;
             upperPts.push(`${x.toFixed(1)},${Math.max(8, centerY - 10.35).toFixed(1)}`);
-            lowerPts.unshift(`${x.toFixed(1)},${Math.min(146, centerY + 10.35).toFixed(1)}`);
+            lowerPts.unshift(`${x.toFixed(1)},${Math.min(142, centerY + 10.35).toFixed(1)}`);
           }
         }
         const allPts = upperPts.concat(lowerPts).join(' ');
-        ribbonsHtml += `<polygon id="${span.id}" points="${allPts}" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />`;
+        ribbonsHtml += `<polygon id="${span.id}" points="${allPts}" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3] transition-all duration-150" />`;
       });
       ribbonsContainer.innerHTML = ribbonsHtml;
     }
 
-    // 3. Clear user pitch paths & points
     if (userPaths) userPaths.innerHTML = '';
     if (userPts) userPts.innerHTML = '';
   }
@@ -1557,13 +1918,22 @@ function setupEnginePlaceholders() {
 
   function displayWord(word) {
     if (!word) return;
+    stopUserPlayback();
+    if (activeUserAudio) {
+      activeUserAudio = null;
+    }
+    if (lastUserAudioUrl) {
+      try { URL.revokeObjectURL(lastUserAudioUrl); } catch (_) {}
+      lastUserAudioUrl = null;
+    }
+
     currentTargetWord = word;
-    lastProcessedResult = null; // Reset previous utterance for new word
+    lastProcessedResult = null;
+    lastUserAudioBlob = null;
+    lastDurationSec = 0;
+    selectedSyllableIdx = 0;
 
-    // Resolve reference tone profile using active track (TTS or Human Story)
     const refProfile = getActiveProfileForWord(word);
-
-    // Determine syllables and count
     let syllables = [];
     if (refProfile && refProfile.syllables && refProfile.syllables.length > 0) {
       syllables = refProfile.syllables;
@@ -1574,79 +1944,42 @@ function setupEnginePlaceholders() {
     currentSyllableCount = count;
     currentSyllables = syllables;
 
-    // 1. Update Header Context Card
-    const hanziEl = document.getElementById('engine-hanzi-display');
-    const pinyinEl = document.getElementById('engine-pinyin-display');
     const glossEl = document.getElementById('engine-gloss-display');
-    const stageLabel = document.getElementById('engine-stage-label');
-    const arenaSubtitle = document.getElementById('engine-arena-subtitle');
-    const syllableBadge = document.getElementById('engine-syllable-badge');
+    const hskTagEl = document.getElementById('engine-hsk-tag');
 
-    if (hanziEl) hanziEl.textContent = word.hanzi_simp || word.hanzi || '';
-    if (pinyinEl) pinyinEl.textContent = word.pinyin || '';
+    if (hanziDisplay) hanziDisplay.textContent = word.hanzi_simp || word.hanzi || '';
+    if (pinyinDisplay) pinyinDisplay.textContent = word.pinyin || '';
     if (glossEl) {
-      const gloss = word.english || (word.translations ? word.translations.join(', ') : word.gloss || '');
-      glossEl.textContent = `"${gloss}"`;
+      glossEl.textContent = getConciseEnglish(word);
     }
-    if (stageLabel) {
-      const idxStr = word.word_index != null ? `#${String(word.word_index + 1).padStart(3, '0')}` : '';
-      stageLabel.textContent = `[${word.hsk_level || 'HSK'} • ${idxStr || (word.hanzi_simp || word.hanzi)}]`;
-    }
-    if (arenaSubtitle) {
-      const contourLabels = { 1: 'SINGLE-CONTOUR', 2: 'DUAL-CONTOUR', 3: 'TRIPLE-CONTOUR', 4: 'QUAD-CONTOUR' };
-      arenaSubtitle.textContent = `CHAO 5-LEVEL ${contourLabels[count] || 'MULTI-CONTOUR'}`;
-    }
-    if (syllableBadge) {
-      const sylWord = count === 1 ? 'SYLLABLE' : 'SYLLABLES';
-      syllableBadge.textContent = `${count} ${sylWord} • ${word.hsk_level || 'HSK'}`;
+    if (hskTagEl) {
+      hskTagEl.textContent = (word.hsk_level || 'HSK').toUpperCase();
     }
 
-    // 2. Update Dynamic Tone Sandhi Banner
+    // Tone Sandhi notice only when an actual tone shift rule applies
     const sandhiInfo = getToneSandhiInfo(word, syllables);
     const sandhiBadge = document.getElementById('engine-sandhi-badge');
     const toneTitle = document.getElementById('engine-tone-title');
-    const tonePattern = document.getElementById('engine-tone-pattern');
     const toneSubtext = document.getElementById('engine-tone-subtext');
-
-    if (toneTitle) toneTitle.textContent = sandhiInfo.title;
-    if (tonePattern) tonePattern.textContent = sandhiInfo.pattern;
-    if (toneSubtext) toneSubtext.textContent = sandhiInfo.subtext;
 
     if (sandhiBadge) {
       if (sandhiInfo.isSandhi) {
-        sandhiBadge.className = 'w-full bg-badge-tangerine text-white border-2 border-black rounded-xl p-2 font-mono text-xs font-bold shadow-sm z-10 transition-colors flex items-center justify-between gap-2 min-h-[50px]';
+        if (toneTitle) toneTitle.textContent = sandhiInfo.title;
+        if (toneSubtext) toneSubtext.textContent = sandhiInfo.subtext;
+        sandhiBadge.classList.remove('hidden');
       } else {
-        sandhiBadge.className = 'w-full bg-badge-cobalt text-white border-2 border-black rounded-xl p-2 font-mono text-xs font-bold shadow-sm z-10 transition-colors flex items-center justify-between gap-2 min-h-[50px]';
+        sandhiBadge.classList.add('hidden');
       }
     }
 
-    // 3. Render SVG Canvas Geometry & Pitch Ribbons
     renderCanvasGeometry(count, syllables, refProfile);
+    updateTimelineProgressUI(0, RECORDING_DURATION_SEC, false);
 
-    // 4. Reset Timeline and Recording State
-    lastUserAudioBlob = null;
-    const timelineFill = document.getElementById('pitch-timeline-fill');
-    const timelineText = document.getElementById('pitch-timeline-text');
-    if (timelineFill) timelineFill.style.width = '0%';
-    if (timelineText) timelineText.textContent = `0.0s / ${RECORDING_DURATION_SEC}s`;
-
-    // 5. Default Articulatory Coach Prompt for the word
-    const coachText = document.getElementById('coach-advice-text');
-    if (coachText) {
-      if (sandhiInfo.isSandhi) {
-        coachText.innerHTML = `Tone Sandhi active! Notice how <strong>'${word.hanzi_simp || word.hanzi}'</strong> shifts tone: <em class="text-badge-cobalt font-black">${sandhiInfo.subtext}</em>`;
-      } else {
-        coachText.innerHTML = `Listen to the native model, then press <strong class="bg-badge-tangerine text-white px-1.5 py-0.5 rounded">RECORD</strong> to trace your voice against the Chao corridor.`;
-      }
-    }
-
-    // 6. Reset reveal state to State 1 (Priming / Record)
     if (window.PronunciationEngine) {
       window.PronunciationEngine.setRevealState(1);
     }
   }
 
-  // Backwards compatibility shim
   function renderSyllableScenario(count, customData) {
     if (customData) {
       displayWord(customData);
@@ -1663,6 +1996,8 @@ function setupEnginePlaceholders() {
 
   async function startRealRecording() {
     ensureAudioUnlocked();
+    stopGlobalAudio();
+    stopUserPlayback();
     if (typeof navigator !== 'undefined' && navigator.audioSession) {
       try {
         navigator.audioSession.type = 'play-and-record';
@@ -1688,44 +2023,22 @@ function setupEnginePlaceholders() {
         window.PronunciationEngine.setRevealState(2);
       }
 
-      // Initial timeline reset for the 4-second window
-      const timelineFill = document.getElementById('pitch-timeline-fill');
-      const timelineText = document.getElementById('pitch-timeline-text');
-      if (timelineFill) timelineFill.style.width = '0%';
-      if (timelineText) timelineText.textContent = `0.0s / ${RECORDING_DURATION_SEC}s`;
-
       const startTime = performance.now();
       if (countdownInterval) clearInterval(countdownInterval);
-
-      let elapsedMs = 0;
       const totalMs = RECORDING_DURATION_SEC * 1000;
 
       countdownInterval = setInterval(() => {
-        elapsedMs = performance.now() - startTime;
+        const elapsedMs = performance.now() - startTime;
         const remainingSec = Math.max(0, Math.ceil((totalMs - elapsedMs) / 1000));
-        
         const countValEl = document.getElementById('record-countdown-val');
-        if (countValEl) {
-          countValEl.textContent = remainingSec;
-        }
+        if (countValEl) countValEl.textContent = remainingSec;
 
-        if (timelineFill) {
-          const progress = (elapsedMs / totalMs) * 100;
-          timelineFill.style.width = `${Math.min(100, Math.max(0, progress))}%`;
-        }
-        if (timelineText) {
-          const currentSec = (Math.min(totalMs, elapsedMs) / 1000).toFixed(1);
-          timelineText.textContent = `${currentSec}s / ${RECORDING_DURATION_SEC}s`;
-        }
-
-        // Auto-stop exactly at 4.0 seconds
         if (elapsedMs >= totalMs) {
           clearInterval(countdownInterval);
           countdownInterval = null;
           stopRealRecordingAndCalculate();
         }
       }, 50);
-
     } catch (err) {
       console.error('[AudioEngine] Microphone access failed:', err);
       alert('Microphone access denied or audio device unavailable: ' + err.message);
@@ -1743,15 +2056,15 @@ function setupEnginePlaceholders() {
 
     if (!audioPipeline || !audioPipeline.isRecording) {
       if (window.PronunciationEngine) {
-        window.PronunciationEngine.setRevealState(4);
+        window.PronunciationEngine.setRevealState(currentTargetWord && lastProcessedResult ? 4 : 1);
       }
       return;
     }
 
     if (recordBtn) {
       recordBtn.innerHTML = `
-        <span class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
-        <span class="font-speed font-black italic text-base sm:text-xl uppercase tracking-tight">ANALYZING PITCH...</span>
+        <span class="material-symbols-outlined text-base animate-spin">progress_activity</span>
+        <span class="font-speed font-black italic text-base sm:text-xl uppercase tracking-tight">Analyzing pitch…</span>
       `;
     }
 
@@ -1765,30 +2078,27 @@ function setupEnginePlaceholders() {
         referenceProfile: refProfile,
       });
 
-      console.log('[AudioEngine] Utterance result:', result);
       lastProcessedResult = result;
       lastUserAudioBlob = result.userAudioBlob;
+      lastDurationSec = Number.isFinite(result.duration) ? result.duration : RECORDING_DURATION_SEC;
+      selectedSyllableIdx = 0;
 
-      // Update practice counter telemetry
+      if (activeUserAudio) {
+        activeUserAudio.pause();
+        activeUserAudio = null;
+      }
+      if (lastUserAudioUrl) {
+        try { URL.revokeObjectURL(lastUserAudioUrl); } catch (_) {}
+        lastUserAudioUrl = null;
+      }
+
       practicedCount++;
       if (practiceCounter) {
-        practiceCounter.textContent = `PRACTICED: ${practicedCount}`;
+        practiceCounter.textContent = `Practiced: ${practicedCount}`;
       }
 
-      // Update timeline display with real user duration
-      const timelineText = document.getElementById('pitch-timeline-text');
-      const timelineFill = document.getElementById('pitch-timeline-fill');
-      if (timelineText) {
-        timelineText.textContent = `${result.duration.toFixed(2)}s / ${result.duration.toFixed(2)}s`;
-      }
-      if (timelineFill) {
-        timelineFill.style.width = '100%';
-      }
-
-      // Draw real user pitch curve on SVG chart!
+      updateTimelineProgressUI(0, lastDurationSec, Boolean(lastUserAudioBlob));
       renderUserPitchOnChart(result, currentWord, refProfile);
-
-      // Render diagnostic audit cards and coach feedback
       renderDynamicAudit(result, currentWord, refProfile);
 
       if (window.PronunciationEngine) {
@@ -1811,7 +2121,6 @@ function setupEnginePlaceholders() {
     let ribbonsHtml = '';
     const hasSylNorm = refProfile.syllables && refProfile.syllables.some(s => s.f0_norm && s.f0_norm.length >= 2);
     const hasFullNorm = refProfile.f0_norm && refProfile.f0_norm.length >= 2;
-
     if (!hasSylNorm && !hasFullNorm) return;
 
     spans.forEach((span, i) => {
@@ -1825,7 +2134,6 @@ function setupEnginePlaceholders() {
         const sliceEnd = i === spans.length - 1 ? f0.length : (i + 1) * ptsPerSyl;
         sylF0 = f0.slice(sliceStart, sliceEnd);
       }
-
       if (!sylF0 || sylF0.length < 2) return;
 
       const upperPts = [];
@@ -1833,12 +2141,15 @@ function setupEnginePlaceholders() {
       for (let k = 0; k < sylF0.length; k++) {
         const x = span.xMin + (k / (sylF0.length - 1)) * (span.xMax - span.xMin);
         const st = sylF0[k];
-        const centerY = Math.max(16, Math.min(138, 78 - st * 16));
+        const centerY = Math.max(16, Math.min(136, 78 - st * 16));
         upperPts.push(`${x.toFixed(1)},${Math.max(8, centerY - 10.35).toFixed(1)}`);
-        lowerPts.unshift(`${x.toFixed(1)},${Math.min(146, centerY + 10.35).toFixed(1)}`);
+        lowerPts.unshift(`${x.toFixed(1)},${Math.min(142, centerY + 10.35).toFixed(1)}`);
       }
       const allPts = upperPts.concat(lowerPts).join(' ');
-      ribbonsHtml += `<polygon id="${span.id}" points="${allPts}" class="fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3]" />`;
+      const activeRibbonClass = (lastProcessedResult && i === selectedSyllableIdx)
+        ? 'fill-badge-cobalt/35 stroke-badge-cobalt stroke-[2.5] stroke-dasharray-[3,3] transition-all duration-150'
+        : 'fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3] transition-all duration-150';
+      ribbonsHtml += `<polygon id="${span.id}" points="${allPts}" class="${activeRibbonClass}" />`;
     });
 
     if (ribbonsHtml) {
@@ -1854,26 +2165,23 @@ function setupEnginePlaceholders() {
 
     let pathHtml = '';
     let pointsHtml = '';
-
     const syllableSpans = getSyllableSpans(count);
 
     result.syllables.forEach((syl, i) => {
       const span = syllableSpans[i] || syllableSpans[syllableSpans.length - 1];
       if (!syl.userF0Norm || syl.userF0Norm.length < 3) {
-        return; // Unvoiced / silent
+        return;
       }
 
-      // Convert normalized points to (x, y) coordinates independently of vector length
       const pts = [];
       const numPts = syl.userF0Norm.length;
       for (let k = 0; k < numPts; k++) {
         const x = span.xMin + (k / (numPts - 1)) * (span.xMax - span.xMin);
         const st = syl.userF0Norm[k];
-        const y = Math.max(12, Math.min(142, 78 - st * 16));
+        const y = Math.max(12, Math.min(140, 78 - st * 16));
         pts.push({ x, y, st });
       }
 
-      // Generate smooth SVG path d
       let d = `M ${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`;
       for (let j = 1; j < pts.length; j++) {
         const prev = pts[j - 1];
@@ -1886,22 +2194,21 @@ function setupEnginePlaceholders() {
 
       pathHtml += `<path id="${span.pathId}" d="${d}" fill="none" stroke="#000000" stroke-width="4.5" stroke-linecap="round" />`;
 
-      // Select 5 milestone circles mapped proportionally across vector lengths
       const circleIndices = [0, Math.floor(numPts * 0.25), Math.floor(numPts * 0.5), Math.floor(numPts * 0.75), numPts - 1];
       let sylPointsHtml = `<g id="${span.ptsId}">`;
       circleIndices.forEach(idx => {
         const pt = pts[idx];
         if (!pt) return;
-        let color = '#B8F526'; // Green
+        let color = '#10B981';
         if (syl.referenceF0Norm && syl.referenceF0Norm.length > 0) {
           const t = numPts > 1 ? idx / (numPts - 1) : 0;
           const refIdx = Math.min(syl.referenceF0Norm.length - 1, Math.round(t * (syl.referenceF0Norm.length - 1)));
           const refVal = syl.referenceF0Norm[refIdx];
           if (refVal !== undefined && refVal !== null) {
-            const refY = Math.max(12, Math.min(142, 78 - refVal * 16));
+            const refY = Math.max(12, Math.min(140, 78 - refVal * 16));
             const diff = Math.abs(pt.y - refY);
             if (diff > 35) color = '#FF5C1C';
-            else if (diff > 20) color = '#FDF197';
+            else if (diff > 20) color = '#FBBF24';
           }
         }
         sylPointsHtml += `<circle cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="4.5" fill="${color}" stroke="#000" stroke-width="2" />`;
@@ -1910,278 +2217,178 @@ function setupEnginePlaceholders() {
       pointsHtml += sylPointsHtml;
     });
 
-    if (pathHtml) {
-      pathsContainer.innerHTML = pathHtml;
-      pointsContainer.innerHTML = pointsHtml;
-    }
+    pathsContainer.innerHTML = pathHtml;
+    pointsContainer.innerHTML = pointsHtml;
   }
 
-  function getTriadTheme(score, tier) {
-    if (score >= 85 || tier === 'EMERALD') {
+  function getPillToneStyle(score) {
+    if (score >= 80) {
       return {
-        boxClass: 'bg-emerald-500/10 border-emerald-500 text-emerald-950',
-        scoreClass: 'text-emerald-700',
-        labelClass: 'text-emerald-800 font-bold',
-        badgeClass: 'bg-emerald-600 text-white',
+        pill: 'bg-emerald-50 border-emerald-500 text-emerald-950',
+        mark: '✓'
       };
     }
-    if (score >= 65 || tier === 'AMBER') {
+    if (score >= 60) {
       return {
-        boxClass: 'bg-amber-500/10 border-amber-500 text-amber-950',
-        scoreClass: 'text-amber-700',
-        labelClass: 'text-amber-800 font-bold',
-        badgeClass: 'bg-amber-600 text-white',
+        pill: 'bg-amber-50 border-amber-500 text-amber-950',
+        mark: '!'
       };
     }
     return {
-      boxClass: 'bg-rose-500/10 border-rose-500 text-rose-950',
-      scoreClass: 'text-rose-700',
-      labelClass: 'text-rose-800 font-bold',
-      badgeClass: 'bg-rose-600 text-white',
+      pill: 'bg-rose-50 border-rose-500 text-rose-950',
+      mark: '!'
     };
   }
 
-  function decomposePinyin(sylPinyin) {
-    if (!sylPinyin) return { initial: '∅', final: '—' };
-    const clean = sylPinyin.toLowerCase();
-    const initials = ['zh', 'ch', 'sh', 'b', 'p', 'm', 'f', 'd', 't', 'n', 'l', 'g', 'k', 'h', 'j', 'q', 'x', 'r', 'z', 'c', 's', 'y', 'w'];
-    for (const init of initials) {
-      if (clean.startsWith(init)) {
-        return { initial: init, final: sylPinyin.slice(init.length) || '—' };
-      }
-    }
-    return { initial: '∅', final: sylPinyin };
+  function getCellSurfaceClass(score) {
+    if (score >= 85) return 'bg-emerald-50/80 text-emerald-950';
+    if (score >= 65) return 'bg-amber-50/80 text-amber-950';
+    return 'bg-rose-50/80 text-rose-950';
   }
 
-  function renderEmptyAudit() {
-    const auditGrid = document.getElementById('phonetic-audit-grid');
-    const priorityHeader = document.getElementById('coach-priority-header');
-    const priorityDot = document.getElementById('coach-priority-dot');
-    const coachPlayBtn = document.getElementById('coach-hear-user-btn');
-    if (!auditGrid) return;
+  function getScoreColorClass(score) {
+    if (score >= 85) return 'text-emerald-700';
+    if (score >= 65) return 'text-amber-700';
+    return 'text-rose-700';
+  }
 
-    const syllables = (currentSyllables && currentSyllables.length > 0)
-      ? currentSyllables
-      : (currentTargetWord ? parsePinyinSyllables(currentTargetWord.pinyin) : [{ syllable: '', tone: 1 }]);
-    const sylCount = syllables.length;
+  function selectAuditSyllable(idx) {
+    if (!lastProcessedResult || !Array.isArray(lastProcessedResult.syllables) || lastProcessedResult.syllables.length === 0) return;
+    selectedSyllableIdx = Math.max(0, Math.min(idx, lastProcessedResult.syllables.length - 1));
 
-    // Dynamically adjust grid columns across full 12-column width (same as renderDynamicAudit)
-    if (sylCount === 1) {
-      auditGrid.className = 'grid grid-cols-1 max-w-xl mx-auto gap-3.5';
-    } else if (sylCount === 2) {
-      auditGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-3.5';
-    } else if (sylCount === 3) {
-      auditGrid.className = 'grid grid-cols-1 md:grid-cols-3 gap-3';
-    } else {
-      auditGrid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3';
+    const pillsWrap = document.getElementById('phonetic-audit-pills');
+    const detailWrap = document.getElementById('phonetic-syllable-detail');
+
+    if (pillsWrap) {
+      pillsWrap.querySelectorAll('button[data-syl-idx]').forEach(btn => {
+        const bIdx = parseInt(btn.dataset.sylIdx, 10);
+        const active = bIdx === selectedSyllableIdx;
+        btn.classList.toggle('ring-2', active);
+        btn.classList.toggle('ring-black', active);
+        btn.classList.toggle('shadow-hard-black', active);
+        btn.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
     }
 
-    let cardHtml = '';
-    syllables.forEach((syl, i) => {
-      const sylPinyin = syl.syllable || (syl.initial ? (syl.initial + (syl.final || '')) : `S${i + 1}`);
-      const toneNum = syl.tone || 1;
-      const decomp = decomposePinyin(sylPinyin);
-      const initSym = syl.initial || decomp.initial;
-      const finSym = syl.final || decomp.final;
-
-      cardHtml += `
-        <div class="bg-white border-[2.5px] border-black/30 rounded-xl p-3 sm:p-3.5 shadow-sm flex flex-col justify-between border-dashed">
-          <!-- Card Header: Syllable label & Overall Badge (Empty / Primed) -->
-          <div class="flex items-center justify-between mb-2.5 pb-2 border-b border-black/10">
-            <div class="flex items-center gap-2">
-              <span class="font-speed font-black text-sm uppercase text-black/60">SYLLABLE ${i + 1}:</span>
-              <span class="font-mono text-sm font-black bg-black/10 text-black/80 px-2 py-0.5 rounded shadow-xs">[${sylPinyin}]</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="font-mono text-[10px] font-bold text-black/40 uppercase">OVERALL:</span>
-              <span class="font-speed font-black text-xs sm:text-sm px-2.5 py-0.5 rounded border border-black/20 bg-slate-100 text-black/40">
-                --%
-              </span>
-              <span class="hidden sm:inline-block font-mono text-[9px] font-black uppercase px-2 py-0.5 rounded border border-black/20 bg-slate-50 text-black/50">
-                AWAITING RECORDING
-              </span>
-            </div>
-          </div>
-
-          <!-- Phonetic Triad Grid: Initial -> Tone -> Final -->
-          <div class="grid grid-cols-3 gap-2 font-mono text-center">
-            <!-- 1. INITIAL -->
-            <div class="border-[1.5px] border-dashed border-black/20 bg-slate-50/70 rounded-lg p-2 flex flex-col justify-between">
-              <span class="block text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-black/45 truncate">[1. INITIAL: ${initSym}]</span>
-              <span class="font-speed font-black text-sm sm:text-base md:text-lg my-0.5 text-black/30">--%</span>
-              <span class="block text-[9px] sm:text-[10px] font-bold leading-tight text-black/40 truncate">Ready to Record</span>
-              <span class="block text-[8px] sm:text-[9px] text-black/35 font-semibold mt-0.5 truncate">Voiced Attack</span>
-            </div>
-
-            <!-- 2. TONE -->
-            <div class="border-[1.5px] border-dashed border-black/20 bg-slate-50/70 rounded-lg p-2 flex flex-col justify-between">
-              <span class="block text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-black/45 truncate">[2. TONE: T${toneNum}]</span>
-              <span class="font-speed font-black text-sm sm:text-base md:text-lg my-0.5 text-black/30">--%</span>
-              <span class="block text-[9px] sm:text-[10px] font-bold leading-tight text-black/40 truncate">Corridor Primed</span>
-              <span class="block text-[8px] sm:text-[9px] text-black/35 font-semibold mt-0.5 truncate">Chao DTW</span>
-            </div>
-
-            <!-- 3. FINAL -->
-            <div class="border-[1.5px] border-dashed border-black/20 bg-slate-50/70 rounded-lg p-2 flex flex-col justify-between">
-              <span class="block text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-black/45 truncate">[3. FINAL: ${finSym}]</span>
-              <span class="font-speed font-black text-sm sm:text-base md:text-lg my-0.5 text-black/30">--%</span>
-              <span class="block text-[9px] sm:text-[10px] font-bold leading-tight text-black/40 truncate">Ready to Record</span>
-              <span class="block text-[8px] sm:text-[9px] text-black/35 font-semibold mt-0.5 truncate">Formant Track</span>
-            </div>
-          </div>
-        </div>
-      `;
+    const spans = getSyllableSpans(lastProcessedResult.syllables.length);
+    spans.forEach((span, i) => {
+      const poly = document.getElementById(span.id);
+      if (!poly) return;
+      poly.setAttribute(
+        'class',
+        i === selectedSyllableIdx
+          ? 'fill-badge-cobalt/35 stroke-badge-cobalt stroke-[2.5] stroke-dasharray-[3,3] transition-all duration-150'
+          : 'fill-badge-cobalt/20 stroke-badge-cobalt stroke-[2] stroke-dasharray-[3,3] transition-all duration-150'
+      );
     });
 
-    auditGrid.innerHTML = cardHtml;
+    if (!detailWrap) return;
+    const syl = lastProcessedResult.syllables[selectedSyllableIdx];
+    const init = syl.initial || { symbol: '', score: 90, diagnosticCode: 'PASS_SONORANT', votMs: 0 };
+    const fin = syl.final || { symbol: '', score: 88, diagnosticCode: 'PASS_GENERIC', f1Hz: 0, f2Hz: 0 };
+    const toneScore = syl.toneScore !== undefined ? syl.toneScore : (syl.toneResult?.score ?? 85);
+    const toneDtw = syl.dtwScore !== undefined ? syl.dtwScore : 90;
 
-    if (priorityHeader && priorityDot) {
-      priorityHeader.textContent = 'AWAITING VOCAL CAPTURE • COACH READY';
-      priorityDot.className = 'w-2.5 h-2.5 rounded-full bg-slate-300 border border-black';
-    }
+    const initDesc = getInitialPlain(init);
+    const toneDesc = getTonePlain(syl);
+    const finDesc = getFinalPlain(fin);
 
-    if (coachPlayBtn) {
-      coachPlayBtn.classList.add('opacity-40', 'pointer-events-none', 'cursor-not-allowed');
-    }
+    const initMetric = init.cogHz
+      ? `CoG ${init.cogHz} Hz`
+      : (init.votMs !== undefined ? `VOT ${init.votMs} ms` : 'Voiced onset');
+    const toneMetric = `Shape match ${toneDtw}%`;
+    const finMetric = (fin.f1Hz && fin.f2Hz) ? `F1 ${fin.f1Hz} Hz • F2 ${fin.f2Hz} Hz` : 'Formants nominal';
+
+    detailWrap.innerHTML = `
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <div class="rounded-xl p-2.5 ${getCellSurfaceClass(init.score)}">
+          <div class="flex items-center justify-between gap-2 mb-1">
+            <span class="font-mono text-[11px] font-black text-black/75">Start (${escapeHtml(init.symbol || 'none')})</span>
+            <span class="font-speed font-black text-sm ${getScoreColorClass(init.score)}">${init.score}%</span>
+          </div>
+          <p class="font-mono text-xs font-bold leading-snug text-black/85">${escapeHtml(initDesc)}</p>
+        </div>
+
+        <div class="rounded-xl p-2.5 ${getCellSurfaceClass(toneScore)}">
+          <div class="flex items-center justify-between gap-2 mb-1">
+            <span class="font-mono text-[11px] font-black text-black/75">Tone (T${Number(syl.tone) || 1})</span>
+            <span class="font-speed font-black text-sm ${getScoreColorClass(toneScore)}">${toneScore}%</span>
+          </div>
+          <p class="font-mono text-xs font-bold leading-snug text-black/85">${escapeHtml(toneDesc)}</p>
+        </div>
+
+        <div class="rounded-xl p-2.5 ${getCellSurfaceClass(fin.score)}">
+          <div class="flex items-center justify-between gap-2 mb-1">
+            <span class="font-mono text-[11px] font-black text-black/75">Vowel (${escapeHtml(fin.symbol || '—')})</span>
+            <span class="font-speed font-black text-sm ${getScoreColorClass(fin.score)}">${fin.score}%</span>
+          </div>
+          <p class="font-mono text-xs font-bold leading-snug text-black/85">${escapeHtml(finDesc)}</p>
+        </div>
+      </div>
+
+      <details class="mt-2 pt-1.5 border-t border-black/10 group">
+        <summary class="cursor-pointer select-none font-mono text-[11px] font-bold text-black/60 hover:text-black list-none flex items-center gap-1 min-h-[44px]">
+          <span class="material-symbols-outlined text-sm transition-transform group-open:rotate-90">chevron_right</span>
+          <span>Acoustic Metrics</span>
+        </summary>
+        <div class="mt-1.5 grid grid-cols-3 gap-2 font-mono text-[11px] text-black/70 bg-slate-50 rounded-xl p-2">
+          <div><strong class="block text-black">Consonant</strong>${escapeHtml(initMetric)}</div>
+          <div><strong class="block text-black">Pitch Curve</strong>${escapeHtml(toneMetric)}</div>
+          <div><strong class="block text-black">Resonance</strong>${escapeHtml(finMetric)}</div>
+        </div>
+      </details>
+    `;
   }
 
   function renderDynamicAudit(result, wordData, refProfile) {
-    const auditGrid = document.getElementById('phonetic-audit-grid');
+    const pillsWrap = document.getElementById('phonetic-audit-pills');
+    const detailWrap = document.getElementById('phonetic-syllable-detail');
     const coachText = document.getElementById('coach-advice-text');
     const priorityHeader = document.getElementById('coach-priority-header');
-    const priorityDot = document.getElementById('coach-priority-dot');
-    if (!auditGrid) return;
 
-    // Dynamically adjust grid columns across full 12-column width
-    const sylCount = result.syllables.length;
-    if (sylCount === 1) {
-      auditGrid.className = 'grid grid-cols-1 max-w-xl mx-auto gap-3.5';
-    } else if (sylCount === 2) {
-      auditGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-3.5';
-    } else if (sylCount === 3) {
-      auditGrid.className = 'grid grid-cols-1 md:grid-cols-3 gap-3';
-    } else {
-      auditGrid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3';
+    if (pillsWrap && result && Array.isArray(result.syllables)) {
+      pillsWrap.innerHTML = '';
+      result.syllables.forEach((syl, i) => {
+        const compositeScore = syl.finalScore !== undefined ? syl.finalScore : 88;
+        const style = getPillToneStyle(compositeScore);
+        const pill = document.createElement('button');
+        pill.type = 'button';
+        pill.dataset.sylIdx = String(i);
+        pill.setAttribute('role', 'tab');
+        pill.setAttribute('aria-selected', i === selectedSyllableIdx ? 'true' : 'false');
+        pill.className = `min-h-[44px] px-3.5 py-2 rounded-xl border-2 font-mono text-xs sm:text-sm font-black flex items-center gap-2 cursor-pointer transition-all active-collapse ${style.pill} ${i === selectedSyllableIdx ? 'ring-2 ring-black shadow-hard-black' : ''}`;
+        pill.innerHTML = `<span>${escapeHtml(syl.syllable || `S${i + 1}`)}</span><span class="font-speed italic">${compositeScore}%</span><span>${style.mark}</span>`;
+        pill.addEventListener('click', () => selectAuditSyllable(i));
+        pillsWrap.appendChild(pill);
+      });
+
+      selectAuditSyllable(selectedSyllableIdx);
+    } else if (detailWrap) {
+      detailWrap.innerHTML = '';
     }
 
-    let cardHtml = '';
-
-    result.syllables.forEach((syl, i) => {
-      const compositeScore = syl.finalScore !== undefined ? syl.finalScore : 88;
-      const toneScore = syl.toneScore !== undefined ? syl.toneScore : (syl.toneResult?.score || 85);
-      const toneSublabel = syl.toneResult?.sublabel || syl.comment || '✓ Exact';
-      const toneDtw = syl.dtwScore !== undefined ? syl.dtwScore : 90;
-
-      const init = syl.initial || { symbol: '', score: 92, sublabel: '✓ Clean Onset', tier: 'EMERALD', votMs: 0 };
-      const fin = syl.final || { symbol: 'a', score: 88, sublabel: '✓ Open Vowel', tier: 'EMERALD', f1Hz: 750, f2Hz: 1200 };
-
-      const initTheme = getTriadTheme(init.score, init.tier);
-      const toneTheme = getTriadTheme(toneScore, syl.toneResult?.tier || (toneScore >= 85 ? 'EMERALD' : (toneScore >= 65 ? 'AMBER' : 'ROSE')));
-      const finalTheme = getTriadTheme(fin.score, fin.tier);
-      const overallTheme = getTriadTheme(compositeScore);
-
-      // Formatting human-readable sub-metrics
-      let initMetricText = 'Voiced Attack';
-      if (init.votMs !== undefined && init.votMs > 0) {
-        initMetricText = `VOT: ${init.votMs}ms`;
-      } else if (init.cogHz) {
-        initMetricText = `CoG: ${init.cogHz}Hz`;
-      }
-
-      const toneMetricText = `DTW: ${toneDtw}%`;
-      const finalMetricText = fin.f1Hz && fin.f2Hz ? `F1: ${fin.f1Hz} • F2: ${fin.f2Hz}` : `Vowel Clarity`;
-
-      // Status pill at card top
-      let statusText = 'TARGET MET';
-      if (!syl.userF0Norm) {
-        statusText = 'NO VOICING';
-      } else if (compositeScore < 65) {
-        statusText = 'NEEDS POLISH';
-      } else if (compositeScore < 85) {
-        statusText = 'COMPREHENSIBLE';
-      }
-
-      cardHtml += `
-        <div class="bg-white border-[2.5px] border-black rounded-xl p-3 sm:p-3.5 shadow-hard-black flex flex-col justify-between">
-          <!-- Card Header: Syllable label & Overall Badge -->
-          <div class="flex items-center justify-between mb-2.5 pb-2 border-b border-black/10">
-            <div class="flex items-center gap-2">
-              <span class="font-speed font-black text-sm uppercase text-black">SYLLABLE ${i + 1}:</span>
-              <span class="font-mono text-sm font-black bg-black text-white px-2 py-0.5 rounded shadow-xs">[${syl.syllable}]</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="font-mono text-[10px] font-bold text-black/60 uppercase">OVERALL:</span>
-              <span class="font-speed font-black text-xs sm:text-sm px-2.5 py-0.5 rounded border border-black ${overallTheme.badgeClass}">
-                ${compositeScore}%
-              </span>
-              <span class="hidden sm:inline-block font-mono text-[9px] font-black uppercase px-2 py-0.5 rounded border border-black/30 bg-slate-100 text-black/80">
-                ${statusText}
-              </span>
-            </div>
-          </div>
-
-          <!-- Phonetic Triad Grid: Initial -> Tone -> Final -->
-          <div class="grid grid-cols-3 gap-2 font-mono text-center">
-            <!-- 1. INITIAL -->
-            <div class="border-[1.5px] rounded-lg p-2 flex flex-col justify-between ${initTheme.boxClass}">
-              <span class="block text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-black/75 truncate">[1. INITIAL: ${init.symbol || '∅'}]</span>
-              <span class="font-speed font-black text-sm sm:text-base md:text-lg my-0.5 ${initTheme.scoreClass}">${init.score}%</span>
-              <span class="block text-[9px] sm:text-[10px] font-bold leading-tight line-clamp-1 ${initTheme.labelClass}" title="${init.sublabel}">${init.sublabel}</span>
-              <span class="block text-[8px] sm:text-[9px] text-black/60 font-semibold mt-0.5 truncate">${initMetricText}</span>
-            </div>
-
-            <!-- 2. TONE -->
-            <div class="border-[1.5px] rounded-lg p-2 flex flex-col justify-between ${toneTheme.boxClass}">
-              <span class="block text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-black/75 truncate">[2. TONE: T${syl.tone}]</span>
-              <span class="font-speed font-black text-sm sm:text-base md:text-lg my-0.5 ${toneTheme.scoreClass}">${toneScore}%</span>
-              <span class="block text-[9px] sm:text-[10px] font-bold leading-tight line-clamp-1 ${toneTheme.labelClass}" title="${toneSublabel}">${toneSublabel}</span>
-              <span class="block text-[8px] sm:text-[9px] text-black/60 font-semibold mt-0.5 truncate">${toneMetricText}</span>
-            </div>
-
-            <!-- 3. FINAL -->
-            <div class="border-[1.5px] rounded-lg p-2 flex flex-col justify-between ${finalTheme.boxClass}">
-              <span class="block text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-black/75 truncate">[3. FINAL: ${fin.symbol || 'V'}]</span>
-              <span class="font-speed font-black text-sm sm:text-base md:text-lg my-0.5 ${finalTheme.scoreClass}">${fin.score}%</span>
-              <span class="block text-[9px] sm:text-[10px] font-bold leading-tight line-clamp-1 ${finalTheme.labelClass}" title="${fin.sublabel}">${fin.sublabel}</span>
-              <span class="block text-[8px] sm:text-[9px] text-black/60 font-semibold mt-0.5 truncate">${finalMetricText}</span>
-            </div>
-          </div>
-        </div>
-      `;
-    });
-
-    auditGrid.innerHTML = cardHtml;
-
-    // The "One Critical Fix" Articulatory Coach Card
-    if (coachText) {
-      if (result.coachingAdvice) {
-        coachText.innerHTML = `"${result.coachingAdvice}"`;
-      } else {
-        const accuracy = result.overallScore !== undefined ? result.overallScore : 94;
-        coachText.innerHTML = `"Outstanding pitch contour! Your pronunciation on <strong class="bg-black text-white px-1.5 py-0.5 rounded">'${wordData.hanzi_simp || wordData.hanzi}'</strong> matched the native model with <strong class="text-emerald-600 font-bold">${accuracy}%</strong> accuracy."`;
-      }
-    }
-
-    if (priorityHeader && priorityDot) {
-      const p = result.coachingPriority;
+    if (priorityHeader) {
+      const p = result?.coachingPriority;
       if (p === 'TONE') {
-        priorityHeader.textContent = `PRIORITY FIX: TONE CONTOUR DIRECTION`;
-        priorityDot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse border border-black';
+        priorityHeader.textContent = 'Adjust Pitch Direction';
       } else if (p === 'FINAL') {
-        priorityHeader.textContent = `PRIORITY FIX: VOWEL MOUTH & LIP SHAPE`;
-        priorityDot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse border border-black';
+        priorityHeader.textContent = 'Shape Your Vowel';
       } else if (p === 'INITIAL') {
-        priorityHeader.textContent = `PRIORITY FIX: CONSONANT BREATH RELEASE`;
-        priorityDot.className = 'w-2.5 h-2.5 rounded-full bg-badge-tangerine animate-pulse border border-black';
+        priorityHeader.textContent = 'Check Starting Sound';
       } else {
-        priorityHeader.textContent = `PHONETIC TRIAD VERIFIED (NATIVE RESIDUAL)`;
-        priorityDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 border border-black';
+        priorityHeader.textContent = 'Great Tone Match!';
       }
     }
 
-    const coachPlayBtn = document.getElementById('coach-hear-user-btn');
+    if (coachText) {
+      coachText.textContent = humanizeCoachAdviceText(result?.coachingAdvice, wordData, result);
+    }
+
     if (coachPlayBtn) {
-      coachPlayBtn.classList.remove('opacity-40', 'pointer-events-none', 'cursor-not-allowed');
+      const hasBlob = Boolean(lastUserAudioBlob);
+      coachPlayBtn.classList.toggle('opacity-40', !hasBlob);
+      coachPlayBtn.classList.toggle('pointer-events-none', !hasBlob);
+      coachPlayBtn.classList.toggle('cursor-not-allowed', !hasBlob);
     }
   }
 
@@ -2191,9 +2398,10 @@ function setupEnginePlaceholders() {
     displayWord(hskDeck[safeIdx]);
   }
 
-  // Next Word Button picks a random word from the shuffle bag
   if (nextBtn) {
     nextBtn.addEventListener('click', () => {
+      stopGlobalAudio();
+      stopUserPlayback();
       if (countdownInterval) {
         clearInterval(countdownInterval);
         countdownInterval = null;
@@ -2205,9 +2413,10 @@ function setupEnginePlaceholders() {
     });
   }
 
-  // Reset Button resets current word or repicks
   if (resetBtn) {
     resetBtn.addEventListener('click', () => {
+      stopGlobalAudio();
+      stopUserPlayback();
       if (countdownInterval) {
         clearInterval(countdownInterval);
         countdownInterval = null;
@@ -2220,34 +2429,34 @@ function setupEnginePlaceholders() {
       } else {
         pickRandomWord();
       }
-      if (window.PronunciationEngine) {
-        window.PronunciationEngine.setRevealState(1);
-      }
     });
   }
 
-  // Deck filter buttons (ALL, HSK 1, HSK 2)
   const deckFilterBtns = document.querySelectorAll('#engine-deck-filter-group button');
+  function updateDeckFilterBtnsUI() {
+    deckFilterBtns.forEach(b => {
+      const isSel = (b.dataset.filter || 'all') === currentDeckFilter;
+      if (isSel) {
+        b.className = 'flex-1 min-h-[44px] px-3 py-2 rounded-xl bg-black text-white border-2 border-black font-mono text-xs font-black uppercase shadow-hard-black active-collapse cursor-pointer transition-all';
+      } else {
+        b.className = 'flex-1 min-h-[44px] px-3 py-2 rounded-xl bg-white hover:bg-slate-50 text-black border-2 border-black font-mono text-xs font-black uppercase active-collapse cursor-pointer transition-all';
+      }
+    });
+  }
   deckFilterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      const filter = btn.dataset.filter || 'all';
-      currentDeckFilter = filter;
-      deckFilterBtns.forEach(b => {
-        if (b === btn) {
-          b.className = 'px-2 py-0.5 rounded bg-black text-badge-tangerine border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer';
-        } else {
-          b.className = 'px-2 py-0.5 rounded bg-white border border-black font-mono text-[9px] font-bold active-collapse cursor-pointer';
-        }
-      });
+      currentDeckFilter = btn.dataset.filter || 'all';
+      updateDeckFilterBtnsUI();
       initShuffleBag();
       pickRandomWord();
     });
   });
+  updateDeckFilterBtnsUI();
 
-  // Native Reference Audio Trigger (Supports Dual-Track: Neural TTS & Human Story + 0.65x Speed)
   function playCurrentNativeAudio() {
     const currentWord = currentTargetWord || (hskDeck && hskDeck[0]);
     if (!currentWord) return;
+    stopUserPlayback();
 
     let audioSrc = currentWord.audio;
     let targetSpeed = 1.0;
@@ -2263,60 +2472,66 @@ function setupEnginePlaceholders() {
     }
 
     if (audioSrc) {
-      const audio = new Audio(`${import.meta.env.BASE_URL}${audioSrc}`);
-      audio.playbackRate = targetSpeed;
       if (playNativeBtn) {
-        playNativeBtn.classList.add('bg-badge-cobalt');
-        audio.onended = () => playNativeBtn.classList.remove('bg-badge-cobalt');
-        audio.onerror = () => playNativeBtn.classList.remove('bg-badge-cobalt');
+        playNativeBtn.classList.remove('bg-black');
+        playNativeBtn.classList.add('bg-badge-cobalt', 'text-white');
       }
-      audio.play().catch(e => console.warn('Native audio play error:', e));
+      if (coachNativeBtn) {
+        coachNativeBtn.classList.remove('bg-white', 'text-black');
+        coachNativeBtn.classList.add('bg-badge-cobalt', 'text-white');
+      }
+      playAudio(`${import.meta.env.BASE_URL}${audioSrc}`, {
+        playbackRate: targetSpeed,
+        onEnded: () => {
+          if (playNativeBtn) {
+            playNativeBtn.classList.remove('bg-badge-cobalt');
+            playNativeBtn.classList.add('bg-black', 'text-white');
+          }
+          if (coachNativeBtn) {
+            coachNativeBtn.classList.remove('bg-badge-cobalt', 'text-white');
+            coachNativeBtn.classList.add('bg-white', 'text-black');
+          }
+        }
+      });
     }
   }
 
-  // Dual-Track UI State Controller & Real-Time Rescoring
   function updateAudioTrackUI() {
     const ttsBtn = document.getElementById('audio-track-tts-btn');
     const humanBtn = document.getElementById('audio-track-human-btn');
     const humanSpeedControls = document.getElementById('human-speed-controls');
     const speed1xBtn = document.getElementById('audio-speed-1x-btn');
     const speed065xBtn = document.getElementById('audio-speed-065x-btn');
-    const speed08xBtn = document.getElementById('audio-speed-08x-btn');
 
     if (ttsBtn && humanBtn) {
       if (audioTrackMode === 'tts') {
-        ttsBtn.className = 'px-2 py-0.5 rounded text-[10px] font-mono font-black uppercase transition-all bg-black text-white shadow-xs cursor-pointer';
-        humanBtn.className = 'px-2 py-0.5 rounded text-[10px] font-mono font-black uppercase transition-all bg-transparent text-black hover:bg-black/10 cursor-pointer';
+        ttsBtn.className = 'flex-1 min-h-[44px] px-3 py-2 rounded-xl text-xs font-mono font-black transition-all bg-black text-white border-2 border-black shadow-hard-black cursor-pointer';
+        humanBtn.className = 'flex-1 min-h-[44px] px-3 py-2 rounded-xl text-xs font-mono font-black transition-all bg-white text-black border-2 border-black hover:bg-slate-50 cursor-pointer';
         if (humanSpeedControls) humanSpeedControls.classList.add('hidden');
       } else {
-        ttsBtn.className = 'px-2 py-0.5 rounded text-[10px] font-mono font-black uppercase transition-all bg-transparent text-black hover:bg-black/10 cursor-pointer';
-        humanBtn.className = 'px-2 py-0.5 rounded text-[10px] font-mono font-black uppercase transition-all bg-black text-white shadow-xs cursor-pointer';
+        ttsBtn.className = 'flex-1 min-h-[44px] px-3 py-2 rounded-xl text-xs font-mono font-black transition-all bg-white text-black border-2 border-black hover:bg-slate-50 cursor-pointer';
+        humanBtn.className = 'flex-1 min-h-[44px] px-3 py-2 rounded-xl text-xs font-mono font-black transition-all bg-black text-white border-2 border-black shadow-hard-black cursor-pointer';
         if (humanSpeedControls) humanSpeedControls.classList.remove('hidden');
       }
     }
 
     const isSlow = (humanPlaybackSpeed === 0.65 || humanPlaybackSpeed === 0.8);
-    if (speed1xBtn && (speed065xBtn || speed08xBtn)) {
+    if (speed1xBtn && speed065xBtn) {
       if (isSlow) {
-        speed1xBtn.className = 'px-1.5 py-0.5 rounded text-[10px] font-mono font-black uppercase transition-all bg-transparent text-black hover:bg-black/10 cursor-pointer';
+        speed1xBtn.className = 'flex-1 min-h-[44px] px-3 py-2 rounded-xl text-xs font-mono font-black transition-all bg-white text-black border-2 border-black hover:bg-slate-50 cursor-pointer';
+        speed065xBtn.className = 'flex-1 min-h-[44px] px-3 py-2 rounded-xl text-xs font-mono font-black transition-all bg-black text-white border-2 border-black shadow-hard-black cursor-pointer';
       } else {
-        speed1xBtn.className = 'px-1.5 py-0.5 rounded text-[10px] font-mono font-black uppercase transition-all bg-black text-white shadow-xs cursor-pointer';
+        speed1xBtn.className = 'flex-1 min-h-[44px] px-3 py-2 rounded-xl text-xs font-mono font-black transition-all bg-black text-white border-2 border-black shadow-hard-black cursor-pointer';
+        speed065xBtn.className = 'flex-1 min-h-[44px] px-3 py-2 rounded-xl text-xs font-mono font-black transition-all bg-white text-black border-2 border-black hover:bg-slate-50 cursor-pointer';
       }
     }
 
-    [speed065xBtn, speed08xBtn].forEach(btn => {
-      if (btn) {
-        if (isSlow) {
-          btn.className = 'px-1.5 py-0.5 rounded text-[10px] font-mono font-black uppercase transition-all bg-black text-white shadow-xs cursor-pointer';
-        } else {
-          btn.className = 'px-1.5 py-0.5 rounded text-[10px] font-mono font-black uppercase transition-all bg-transparent text-black hover:bg-black/10 cursor-pointer';
-        }
-      }
-    });
+    updateEngineSettingsSummary();
   }
 
   function reevaluateUtteranceAgainstProfile(result, wordData, profile) {
     if (!result || !result.syllables) return;
+    stopUserPlayback();
 
     result.syllables.forEach((syl, i) => {
       let refContour = null;
@@ -2327,8 +2542,7 @@ function setupEnginePlaceholders() {
         const ptsPerSyl = Math.floor(fullRef.length / result.syllables.length);
         const sliceStart = i * ptsPerSyl;
         const sliceEnd = i === result.syllables.length - 1 ? fullRef.length : (i + 1) * ptsPerSyl;
-        const sylSlice = fullRef.slice(sliceStart, sliceEnd);
-        refContour = PitchTracker.resampleContour(sylSlice, 30);
+        refContour = PitchTracker.resampleContour(fullRef.slice(sliceStart, sliceEnd), 30);
       }
       if (!refContour || refContour.length < 2) {
         refContour = DTWComparator.getCanonicalContour(syl.tone, 30);
@@ -2343,21 +2557,46 @@ function setupEnginePlaceholders() {
         syl.toneScore = Math.round(0.60 * dtwResult.score + 0.40 * evalResult.score);
         syl.status = evalResult.status;
         syl.comment = evalResult.comment;
+        syl.diagnosticCode = evalResult.diagnosticCode;
         syl.advice = evalResult.advice;
 
         if (syl.toneResult) {
           syl.toneResult.score = syl.toneScore;
           syl.toneResult.dtwScore = dtwResult.score;
           syl.toneResult.slopeScore = evalResult.score;
-          syl.toneResult.sublabel = evalResult.comment || "✓ Exact";
-          syl.toneResult.tier = syl.toneScore >= 85 ? "EMERALD" : (syl.toneScore >= 65 ? "AMBER" : "ROSE");
-          syl.toneResult.advice = evalResult.advice || "";
+          syl.toneResult.sublabel = evalResult.comment || '✓ Exact';
+          syl.toneResult.diagnosticCode = evalResult.diagnosticCode;
+          syl.toneResult.tier = syl.toneScore >= 85 ? 'EMERALD' : (syl.toneScore >= 65 ? 'AMBER' : 'ROSE');
+          syl.toneResult.advice = evalResult.advice || '';
         }
 
         const initialScore = syl.initial?.score !== undefined ? syl.initial.score : 90;
         const finalScore = syl.final?.score !== undefined ? syl.final.score : 85;
         syl.finalScore = Math.round(0.50 * syl.toneScore + 0.30 * finalScore + 0.20 * initialScore);
         syl.overallScore = syl.finalScore;
+
+        if (syl.toneScore < 65) {
+          syl.coachingPriority = 'TONE';
+          syl.coachingAdvice = evalResult.advice || `Tone ${syl.tone} pitch contour shifted. Adjust pitch direction.`;
+        } else if (finalScore < 65) {
+          syl.coachingPriority = 'FINAL';
+          syl.coachingAdvice = syl.final?.advice || 'Open or shape your vowel clearly.';
+        } else if (initialScore < 65) {
+          syl.coachingPriority = 'INITIAL';
+          syl.coachingAdvice = syl.initial?.advice || 'Check breath release on the starting consonant.';
+        } else if (syl.toneScore < 85) {
+          syl.coachingPriority = 'TONE';
+          syl.coachingAdvice = evalResult.advice || 'Good tone contour. Keep pitch steady.';
+        } else if (finalScore < 85) {
+          syl.coachingPriority = 'FINAL';
+          syl.coachingAdvice = syl.final?.advice || 'Almost clear vowel. Fine-tune lip and jaw shape.';
+        } else if (initialScore < 85) {
+          syl.coachingPriority = 'INITIAL';
+          syl.coachingAdvice = syl.initial?.advice || 'Good starting consonant.';
+        } else {
+          syl.coachingPriority = 'PERFECT';
+          syl.coachingAdvice = 'Everything sounded clear.';
+        }
       }
     });
 
@@ -2365,13 +2604,42 @@ function setupEnginePlaceholders() {
       ? Math.round(result.syllables.reduce((acc, s) => acc + s.finalScore, 0) / result.syllables.length)
       : 0;
 
+    let utterancePriority = 'PERFECT';
+    let primaryAdvice = '';
+    const criticalTone = result.syllables.find(s => s.toneScore < 65);
+    if (criticalTone) {
+      utterancePriority = 'TONE';
+      primaryAdvice = criticalTone.advice || criticalTone.coachingAdvice;
+    } else {
+      const criticalFinal = result.syllables.find(s => s.final?.score < 65);
+      if (criticalFinal) {
+        utterancePriority = 'FINAL';
+        primaryAdvice = criticalFinal.final?.advice || criticalFinal.coachingAdvice;
+      } else {
+        const criticalInit = result.syllables.find(s => s.initial?.score < 65);
+        if (criticalInit) {
+          utterancePriority = 'INITIAL';
+          primaryAdvice = criticalInit.initial?.advice || criticalInit.coachingAdvice;
+        } else {
+          const amberSyl = result.syllables.find(s => s.finalScore < 85 && s.coachingAdvice);
+          if (amberSyl) {
+            utterancePriority = amberSyl.coachingPriority;
+            primaryAdvice = amberSyl.coachingAdvice;
+          }
+        }
+      }
+    }
+    result.coachingPriority = utterancePriority;
+    result.coachingAdvice = primaryAdvice;
+
+    selectedSyllableIdx = Math.max(0, Math.min(selectedSyllableIdx, result.syllables.length - 1));
     renderUserPitchOnChart(result, wordData, profile);
     renderDynamicAudit(result, wordData, profile);
   }
 
   function setAudioTrackMode(mode) {
-    audioTrackMode = mode;
-    localStorage.setItem('tone_trainer_track_mode', mode);
+    audioTrackMode = mode === 'human' ? 'human' : 'tts';
+    localStorage.setItem('tone_trainer_track_mode', audioTrackMode);
     updateAudioTrackUI();
 
     if (currentTargetWord) {
@@ -2394,49 +2662,65 @@ function setupEnginePlaceholders() {
   const trackHumanBtn = document.getElementById('audio-track-human-btn');
   const speed1xBtn = document.getElementById('audio-speed-1x-btn');
   const speed065xBtn = document.getElementById('audio-speed-065x-btn');
-  const speed08xBtn = document.getElementById('audio-speed-08x-btn');
 
   if (trackTtsBtn) trackTtsBtn.addEventListener('click', () => setAudioTrackMode('tts'));
   if (trackHumanBtn) trackHumanBtn.addEventListener('click', () => setAudioTrackMode('human'));
   if (speed1xBtn) speed1xBtn.addEventListener('click', () => setHumanPlaybackSpeed(1.0));
   if (speed065xBtn) speed065xBtn.addEventListener('click', () => setHumanPlaybackSpeed(0.65));
-  if (speed08xBtn) speed08xBtn.addEventListener('click', () => setHumanPlaybackSpeed(0.65));
 
-  // Initialize UI buttons state on load
   updateAudioTrackUI();
 
   if (playNativeBtn) playNativeBtn.addEventListener('click', playCurrentNativeAudio);
+  if (coachNativeBtn) coachNativeBtn.addEventListener('click', playCurrentNativeAudio);
   if (hanziDisplay) hanziDisplay.addEventListener('click', playCurrentNativeAudio);
   if (pinyinDisplay) pinyinDisplay.addEventListener('click', playCurrentNativeAudio);
 
-  // Playback My Voice
   if (coachPlayBtn) {
     coachPlayBtn.addEventListener('click', () => {
-      if (!lastUserAudioBlob) {
-        alert("Please record your voice first!");
+      if (!lastUserAudioBlob) return;
+      stopGlobalAudio();
+
+      if (activeUserAudio && !activeUserAudio.paused) {
+        stopUserPlayback();
         return;
       }
-      if (lastUserAudioUrl) {
-        URL.revokeObjectURL(lastUserAudioUrl);
+
+      if (!lastUserAudioUrl) {
+        lastUserAudioUrl = URL.createObjectURL(lastUserAudioBlob);
       }
-      lastUserAudioUrl = URL.createObjectURL(lastUserAudioBlob);
-      const userAudio = new Audio(lastUserAudioUrl);
-      const originalHtml = coachPlayBtn.innerHTML;
-      coachPlayBtn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">volume_up</span> PLAYING YOUR RECORDING...';
-      coachPlayBtn.classList.add('bg-badge-tangerine', 'text-white');
-      userAudio.onended = () => {
-        coachPlayBtn.innerHTML = originalHtml;
-        coachPlayBtn.classList.remove('bg-badge-tangerine', 'text-white');
+      if (!activeUserAudio || activeUserAudio.src !== lastUserAudioUrl) {
+        activeUserAudio = new Audio(lastUserAudioUrl);
+      }
+      activeUserAudio.currentTime = 0;
+
+      const stepFrame = () => {
+        if (!activeUserAudio || activeUserAudio.paused) return;
+        const total = (Number.isFinite(activeUserAudio.duration) && activeUserAudio.duration > 0)
+          ? activeUserAudio.duration
+          : getActiveDurationSec();
+        const frac = total > 0 ? Math.min(1, activeUserAudio.currentTime / total) : 0;
+        updateTimelineProgressUI(frac, total, true);
+        userAudioRafId = requestAnimationFrame(stepFrame);
       };
-      userAudio.onerror = () => {
-        coachPlayBtn.innerHTML = originalHtml;
-        coachPlayBtn.classList.remove('bg-badge-tangerine', 'text-white');
+
+      activeUserAudio.onended = () => {
+        stopUserPlayback({ resetCursor: false });
+        updateTimelineProgressUI(1, getActiveDurationSec(), true);
       };
-      userAudio.play();
+      activeUserAudio.onerror = () => {
+        stopUserPlayback();
+      };
+
+      setCoachPlayButtonState(true);
+      updateTimelineProgressUI(0, getActiveDurationSec(), true);
+      activeUserAudio.play()
+        .then(() => {
+          userAudioRafId = requestAnimationFrame(stepFrame);
+        })
+        .catch(() => stopUserPlayback());
     });
   }
 
-  // Tap-to-Record / Try Again
   if (recordBtn) {
     recordBtn.addEventListener('click', () => {
       if (currentEngineState === 2) {
@@ -2447,7 +2731,6 @@ function setupEnginePlaceholders() {
     });
   }
 
-  // Exposed API on window for future backend / DSP agent
   window.PronunciationEngine = {
     setRevealState(state) {
       currentEngineState = state;
@@ -2460,42 +2743,53 @@ function setupEnginePlaceholders() {
       const waveform = document.getElementById('engine-live-waveform-group');
       const auditSec = document.getElementById('phonetic-audit-section');
       const coachCard = document.getElementById('articulatory-coach-card');
-
-      // Audit section and Coach Card always remain visible in layout to maintain constant vertical height
-      if (auditSec) auditSec.classList.remove('hidden');
-      if (coachCard) coachCard.classList.remove('hidden');
+      const timelineWrap = document.getElementById('pitch-timeline-wrap');
+      const state1Hint = document.getElementById('engine-state1-hint');
+      const cursor = document.getElementById('pitch-playback-cursor');
 
       if (state === 1) {
         if (userTrack) userTrack.classList.add('hidden');
         if (waveform) waveform.classList.add('hidden');
-        renderEmptyAudit();
+        if (auditSec) auditSec.classList.add('hidden');
+        if (coachCard) coachCard.classList.add('hidden');
+        if (timelineWrap) timelineWrap.classList.add('hidden');
+        if (cursor) cursor.classList.add('hidden');
+        if (state1Hint) state1Hint.classList.remove('hidden');
         if (recordBtn) {
-          recordBtn.className = 'flex-1 py-3.5 sm:py-4 px-3 sm:px-6 bg-badge-tangerine text-white hover:bg-[#ff4800] border-[3.5px] border-black rounded-2xl shadow-hard-black flex items-center justify-center gap-2 sm:gap-3 active-collapse cursor-pointer';
+          recordBtn.className = 'flex-1 min-h-[52px] py-3 sm:py-3.5 px-4 sm:px-6 bg-badge-tangerine text-white hover:bg-[#ff4800] border-[3px] border-black rounded-2xl shadow-hard-black flex items-center justify-center gap-2 sm:gap-3 active-collapse cursor-pointer';
           recordBtn.innerHTML = `
-            <span class="w-4 h-4 rounded-full bg-white animate-pulse border border-black shrink-0"></span>
-            <span class="font-speed font-black italic text-base sm:text-xl uppercase tracking-tight sm:tracking-wide">RECORD</span>
+            <span class="w-3.5 h-3.5 rounded-full bg-white animate-pulse border border-black shrink-0"></span>
+            <span class="font-speed font-black italic text-base sm:text-xl uppercase tracking-tight">Record</span>
             <span class="font-mono text-[10px] bg-black text-white px-1.5 py-0.5 rounded hidden sm:inline">[SPACE]</span>
           `;
         }
       } else if (state === 2) {
         if (userTrack) userTrack.classList.add('hidden');
         if (waveform) waveform.classList.remove('hidden');
+        if (auditSec) auditSec.classList.add('hidden');
+        if (coachCard) coachCard.classList.add('hidden');
+        if (timelineWrap) timelineWrap.classList.add('hidden');
+        if (cursor) cursor.classList.add('hidden');
+        if (state1Hint) state1Hint.classList.add('hidden');
         if (recordBtn) {
-          recordBtn.className = 'flex-1 py-3.5 sm:py-4 px-3 sm:px-6 bg-black text-badge-tangerine border-[3.5px] border-black rounded-2xl shadow-hard-black flex items-center justify-center gap-2 sm:gap-3 active-collapse cursor-pointer';
+          recordBtn.className = 'flex-1 min-h-[52px] py-3 sm:py-3.5 px-4 sm:px-6 bg-black text-badge-tangerine border-[3px] border-black rounded-2xl shadow-hard-black flex items-center justify-center gap-2 sm:gap-3 active-collapse cursor-pointer';
           recordBtn.innerHTML = `
-            <span class="w-4 h-4 rounded-full bg-badge-tangerine animate-ping border border-black shrink-0"></span>
-            <span class="font-speed font-black italic text-base sm:text-xl uppercase tracking-tight sm:tracking-wide">RECORDING... (<span id="record-countdown-val">${countdownSeconds}</span>s)</span>
-            <span class="font-mono text-[10px] bg-badge-tangerine text-black px-1.5 py-0.5 rounded hidden sm:inline">[STOP]</span>
+            <span class="w-3.5 h-3.5 rounded-full bg-badge-tangerine animate-ping border border-black shrink-0"></span>
+            <span class="font-speed font-black italic text-base sm:text-xl uppercase tracking-tight">Stop Recording (<span id="record-countdown-val">${countdownSeconds}</span>s)</span>
           `;
         }
       } else {
         if (userTrack) userTrack.classList.remove('hidden');
         if (waveform) waveform.classList.add('hidden');
+        if (state1Hint) state1Hint.classList.add('hidden');
+        if (auditSec) auditSec.classList.remove('hidden');
+        if (coachCard) coachCard.classList.remove('hidden');
+        if (timelineWrap) timelineWrap.classList.remove('hidden');
         if (recordBtn) {
-          recordBtn.className = 'flex-1 py-3.5 sm:py-4 px-3 sm:px-6 bg-badge-tangerine text-white hover:bg-[#ff4800] border-[3.5px] border-black rounded-2xl shadow-hard-black flex items-center justify-center gap-2 sm:gap-3 active-collapse cursor-pointer';
+          recordBtn.className = 'flex-1 min-h-[52px] py-3 sm:py-3.5 px-4 sm:px-6 bg-badge-tangerine text-white hover:bg-[#ff4800] border-[3px] border-black rounded-2xl shadow-hard-black flex items-center justify-center gap-2 sm:gap-3 active-collapse cursor-pointer';
           recordBtn.innerHTML = `
-            <span class="w-4 h-4 rounded-full bg-white animate-pulse border border-black shrink-0"></span>
-            <span class="font-speed font-black italic text-base sm:text-xl uppercase tracking-tight sm:tracking-wide">TRY AGAIN</span>
+            <span class="w-3.5 h-3.5 rounded-full bg-white animate-pulse border border-black shrink-0"></span>
+            <span class="font-speed font-black italic text-base sm:text-xl uppercase tracking-tight">Record Again</span>
             <span class="font-mono text-[10px] bg-black text-white px-1.5 py-0.5 rounded hidden sm:inline">[SPACE]</span>
           `;
         }
@@ -2526,6 +2820,7 @@ function setupEnginePlaceholders() {
 
     setDeckFilter(filter) {
       currentDeckFilter = filter;
+      updateDeckFilterBtnsUI();
       initShuffleBag();
       pickRandomWord();
     },
@@ -2544,49 +2839,43 @@ function setupEnginePlaceholders() {
     },
 
     updateUserCurves({ pathS1, pathS2, pathS3, pathS4 }) {
-      if (pathS1) {
-        const p1 = document.getElementById('user-pitch-path-s1');
-        if (p1) p1.setAttribute('d', pathS1);
-      }
-      if (pathS2) {
-        const p2 = document.getElementById('user-pitch-path-s2');
-        if (p2) p2.setAttribute('d', pathS2);
-      }
-      if (pathS3) {
-        const p3 = document.getElementById('user-pitch-path-s3');
-        if (p3) p3.setAttribute('d', pathS3);
-      }
-      if (pathS4) {
-        const p4 = document.getElementById('user-pitch-path-s4');
-        if (p4) p4.setAttribute('d', pathS4);
-      }
+      const updates = [
+        ['user-pitch-path-s1', pathS1],
+        ['user-pitch-path-s2', pathS2],
+        ['user-pitch-path-s3', pathS3],
+        ['user-pitch-path-s4', pathS4]
+      ];
+      updates.forEach(([id, path]) => {
+        if (path) {
+          const el = document.getElementById(id);
+          if (el) el.setAttribute('d', path);
+        }
+      });
     },
 
     updateTargetRibbons({ pointsS1, pointsS2, pointsS3, pointsS4 }) {
-      if (pointsS1) {
-        const r1 = document.getElementById('target-ribbon-s1');
-        if (r1) r1.setAttribute('points', pointsS1);
-      }
-      if (pointsS2) {
-        const r2 = document.getElementById('target-ribbon-s2');
-        if (r2) r2.setAttribute('points', pointsS2);
-      }
-      if (pointsS3) {
-        const r3 = document.getElementById('target-ribbon-s3');
-        if (r3) r3.setAttribute('points', pointsS3);
-      }
-      if (pointsS4) {
-        const r4 = document.getElementById('target-ribbon-s4');
-        if (r4) r4.setAttribute('points', pointsS4);
-      }
+      const updates = [
+        ['target-ribbon-s1', pointsS1],
+        ['target-ribbon-s2', pointsS2],
+        ['target-ribbon-s3', pointsS3],
+        ['target-ribbon-s4', pointsS4]
+      ];
+      updates.forEach(([id, pts]) => {
+        if (pts) {
+          const el = document.getElementById(id);
+          if (el) el.setAttribute('points', pts);
+        }
+      });
     },
 
     setCoachingAdvice(adviceHtml) {
       const coachText = document.getElementById('coach-advice-text');
-      if (coachText) coachText.innerHTML = adviceHtml;
+      if (coachText) coachText.textContent = stripHtmlTags(adviceHtml);
     },
 
     reset() {
+      stopUserPlayback();
+      closeSettingsModal();
       if (countdownInterval) {
         clearInterval(countdownInterval);
         countdownInterval = null;
@@ -2604,187 +2893,27 @@ function setupEnginePlaceholders() {
 }
 
 // ========================================================
-// WORD TRAINER MODULE: UI HOOKS, DRAWING ENGINE & VALIDATION
-// Celadon Jade & Seal Vermilion Palette | Multisensory Lab
+// WORD TRAINER CANVAS & BUILDER INITIALIZATION BRIDGE
+// All Word Trainer UI state, validation & controls live in WordTrainerEngine
 // ========================================================
-function setupWordTrainerUI() {
-  const scaffoldToggleBtn = document.getElementById('scaffold-toggle-btn');
-  const clearCanvasBtn = document.getElementById('clear-canvas-btn');
-  const toneBtns = document.querySelectorAll('.tone-choice-btn');
-  const submitBtn = document.getElementById('submit-word-btn');
-  const phaseBtns = document.querySelectorAll('.phase-btn');
-  const audioReplayBtn = document.getElementById('audio-replay-btn');
-  
-  const cardRevealModal = document.getElementById('card-reveal-modal');
-  const modalNextBtn = document.getElementById('modal-next-btn');
-  const modalReplayBtn = document.getElementById('modal-replay-btn');
-  
-  const phaseCompleteModal = document.getElementById('phase-complete-modal');
-  const advancePhaseBtn = document.getElementById('advance-phase-btn');
-  const stayPhaseBtn = document.getElementById('stay-phase-btn');
-
-  const paintCanvas = document.getElementById('hanzi-paint-canvas');
-  const feedbackBanner = document.getElementById('validation-feedback-banner');
-  const feedbackIcon = document.getElementById('validation-feedback-icon');
-  const feedbackText = document.getElementById('validation-feedback-text');
-  const attemptPips = document.getElementById('attempt-pips');
-  
-  let isScaffoldOn = true;
-  let selectedTone = null;
-  let attemptsLeft = 3;
-  const targetTone = 4; // '日' rì (Tone 4 - falling)
-
-  // ----------------------------------------------------
-  // A. NATIVE HTML5 CANVAS DRAWING ENGINE (MOUSE + TOUCH)
-  // ----------------------------------------------------
-  let isDrawing = false;
-  let lastX = 0;
-  let lastY = 0;
-  let strokeCount = 0;
-  let currentStrokeLength = 0;
-  let totalDrawnLength = 0;
-  let ctx = null;
-
-  if (paintCanvas) {
-    ctx = paintCanvas.getContext('2d');
+function initWordTrainerCanvas() {
+  if (window.WordTrainerEngine && typeof window.WordTrainerEngine.syncCanvasDimensions === 'function') {
+    window.WordTrainerEngine.syncCanvasDimensions();
   }
+}
 
-  function initWordTrainerCanvas() {
-    if (window.WordTrainerEngine && typeof window.WordTrainerEngine.syncCanvasDimensions === 'function') {
-      window.WordTrainerEngine.syncCanvasDimensions();
+function initComponentBuilderArena() {
+  if (window.WordTrainerEngine && window.WordTrainerEngine.componentBuilder) {
+    window.WordTrainerEngine.componentBuilder.initDom();
+    if (window.WordTrainerEngine.activeWord) {
+      window.WordTrainerEngine.componentBuilder.mountWord(window.WordTrainerEngine.activeWord);
     }
   }
+}
+
+if (typeof window !== 'undefined') {
   window.initWordTrainerCanvas = initWordTrainerCanvas;
-
-  // Canvas drawing events & high-DPI scaling are managed exclusively by WordTrainerEngineController
-  // to support high-DPI retina rendering, order-agnostic vector matching, and full-character snap.
-
-  function clearPaintCanvas() {
-    if (window.WordTrainerEngine && typeof window.WordTrainerEngine.clearCanvas === 'function') {
-      window.WordTrainerEngine.clearCanvas();
-    } else if (paintCanvas && ctx) {
-      ctx.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
-    }
-    strokeCount = 0;
-    currentStrokeLength = 0;
-    totalDrawnLength = 0;
-  }
-
-  // ----------------------------------------------------
-  // B. VALIDATION FEEDBACK BANNER CONTROLLER
-  // ----------------------------------------------------
-  function updateFeedback(status, message) {
-    if (!feedbackBanner || !feedbackText) return;
-    feedbackText.textContent = message;
-
-    // Reset styles
-    feedbackBanner.className = 'order-3 lg:order-3 w-full rounded-xl p-2.5 sm:p-3 border-2 transition-all font-mono text-xs font-bold shadow-xs flex items-center gap-2.5';
-
-    if (status === 'hanzi-error') {
-      feedbackBanner.classList.add('bg-amber-50', 'border-amber-500', 'text-amber-950');
-      if (feedbackIcon) {
-        feedbackIcon.className = 'material-symbols-outlined text-amber-600 text-lg shrink-0';
-        feedbackIcon.textContent = 'draw';
-      }
-    } else if (status === 'tone-error') {
-      feedbackBanner.classList.add('bg-rose-50', 'border-rose-500', 'text-rose-950');
-      if (feedbackIcon) {
-        feedbackIcon.className = 'material-symbols-outlined text-rose-600 text-lg shrink-0';
-        feedbackIcon.textContent = 'music_off';
-      }
-    } else if (status === 'both-error') {
-      feedbackBanner.classList.add('bg-rose-50', 'border-rose-600', 'text-rose-950');
-      if (feedbackIcon) {
-        feedbackIcon.className = 'material-symbols-outlined text-rose-600 text-lg shrink-0';
-        feedbackIcon.textContent = 'error';
-      }
-    } else if (status === 'correct') {
-      feedbackBanner.classList.add('bg-emerald-50', 'border-emerald-600', 'text-emerald-950');
-      if (feedbackIcon) {
-        feedbackIcon.className = 'material-symbols-outlined text-emerald-600 text-lg shrink-0';
-        feedbackIcon.textContent = 'check_circle';
-      }
-    } else {
-      feedbackBanner.classList.add('bg-white', 'border-black/20', 'text-black/70');
-      if (feedbackIcon) {
-        feedbackIcon.className = 'material-symbols-outlined text-black/50 text-lg shrink-0';
-        feedbackIcon.textContent = 'lightbulb';
-      }
-    }
-  }
-
-  function shakeElement(id) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.classList.remove('shake-error');
-    void el.offsetWidth; // Force CSS reflow to re-trigger keyframe
-    el.classList.add('shake-error');
-  }
-
-  function updateAttemptPips() {
-    if (!attemptPips) return;
-    if (attemptsLeft === 3) {
-      attemptPips.innerHTML = '<span class="pip text-[#D97706]">●</span><span class="pip text-[#D97706]">●</span><span class="pip text-[#D97706]">●</span>';
-    } else if (attemptsLeft === 2) {
-      attemptPips.innerHTML = '<span class="pip text-[#D97706]">●</span><span class="pip text-[#D97706]">●</span><span class="pip text-black/30">○</span>';
-    } else if (attemptsLeft === 1) {
-      attemptPips.innerHTML = '<span class="pip text-red-500 animate-pulse">●</span><span class="pip text-black/30">○</span><span class="pip text-black/30">○</span>';
-    } else {
-      attemptPips.innerHTML = '<span class="pip text-black/30">○</span><span class="pip text-black/30">○</span><span class="pip text-black/30">○</span>';
-    }
-  }
-
-  // ----------------------------------------------------
-  // C. COMPONENT BUILDER ARENA & DRAG CONTROLLER
-  // ----------------------------------------------------
-  function initComponentBuilderArena() {
-    if (window.WordTrainerEngine && window.WordTrainerEngine.componentBuilder) {
-      window.WordTrainerEngine.componentBuilder.initDom();
-      if (window.WordTrainerEngine.activeWord) {
-        window.WordTrainerEngine.componentBuilder.mountWord(window.WordTrainerEngine.activeWord);
-      }
-    }
-  }
-
-  // ----------------------------------------------------
-  // D. MULTI-CHARACTER SINGLE CANVAS WATERMARK HELPER
-  // ----------------------------------------------------
-  function setupComponentBuilderCharacters(characters = []) {
-    const multiGrid = document.getElementById('multi-character-grid');
-    const watermark = document.getElementById('placement-ghost-watermark');
-
-    if (watermark && characters && characters.length > 0) {
-      watermark.textContent = characters.join('');
-    }
-
-    // Unified single canvas with zero visible divider lines
-    if (multiGrid) {
-      multiGrid.classList.add('hidden');
-      multiGrid.innerHTML = '';
-    }
-  }
-
   window.initComponentBuilderArena = initComponentBuilderArena;
-  window.setupComponentBuilderCharacters = setupComponentBuilderCharacters;
-
-  // ----------------------------------------------------
-  // E. CANVAS & ENGINE DELEGATION
-  // ----------------------------------------------------
-  // All Word Trainer controls (scaffold guide toggle, undo stroke, clear canvas,
-  // demo stroke order, tone selection, dual verification submit, and modals)
-  // are coordinated exclusively by WordTrainerEngine to prevent conflicting listeners.
-
-  // Export helper methods on window for tests and backward compatibility
-  window.WordTrainerDrawing = {
-    getStrokeCount: () => strokeCount,
-    getTotalLength: () => totalDrawnLength,
-    setStrokeStats: (count, len) => {
-      strokeCount = count || 0;
-      totalDrawnLength = len || 0;
-    },
-    clear: clearPaintCanvas,
-    init: initWordTrainerCanvas
-  };
 }
 
 // Initialize the app
@@ -2793,5 +2922,4 @@ setupButtons();
 setupMenu();
 setupAudioSourceToggles();
 setupEnginePlaceholders();
-setupWordTrainerUI();
 init();

@@ -13,11 +13,23 @@
  */
 
 import { StrokeMatcher, getHanziPositioner, classifyDrawing, gradeCalligraphyDrawing } from './strokeMatcher.js';
-import { ComponentPlacementController, gradeComponentBuilder } from './componentBuilderEngine.js';
+import { ComponentPlacementController, gradeComponentBuilder, resolveWordDecompositions } from './componentBuilderEngine.js';
 
 const STORAGE_KEY_CALLIGRAPHY = 'mandarin_trainer_word_progress_calligraphy';
 const STORAGE_KEY_BUILDER = 'mandarin_trainer_word_progress_builder';
 const STORAGE_KEY_LEGACY = 'mandarin_trainer_word_progress';
+
+const GUIDE_KEY_CALLIGRAPHY = 'mandarin_trainer_guide_calligraphy';
+const GUIDE_KEY_BUILDER = 'mandarin_trainer_guide_builder';
+const GUIDE_KEY_LEGACY = 'mandarin_trainer_guide_mode';
+
+const PHASE_META_MAP = {
+  1: { title: 'Phase 1: Roots', mobileTitle: 'Roots', short: 'Roots', count: 55 },
+  2: { title: 'Phase 2: Compounds', mobileTitle: 'Compounds', short: 'Compounds', count: 80 },
+  3: { title: 'Phase 3: Word Pairs', mobileTitle: 'Word Pairs', short: 'Word Pairs', count: 115 },
+  4: { title: 'Phase 4: Topics', mobileTitle: 'Topics', short: 'Topics', count: 120 },
+  5: { title: 'Phase 5: Phrases', mobileTitle: 'Phrases', short: 'Phrases', count: 127 },
+};
 
 export const CONCISE_ENGLISH_OVERRIDES = {
   '了': 'completed action (particle)',
@@ -120,6 +132,35 @@ export function getConciseEnglish(word) {
   return out;
 }
 
+export function getModeMasteryCounts() {
+  const countFromKey = (primaryKey, fallbackKey = null) => {
+    try {
+      if (typeof localStorage === 'undefined') return 0;
+      let raw = localStorage.getItem(primaryKey);
+      if (!raw && fallbackKey) raw = localStorage.getItem(fallbackKey);
+      if (!raw) return 0;
+      const parsed = JSON.parse(raw);
+      if (!parsed || !parsed.phases) return 0;
+      const seen = new Set();
+      Object.values(parsed.phases).forEach(phaseObj => {
+        if (phaseObj && Array.isArray(phaseObj.completedWordIds)) {
+          phaseObj.completedWordIds.forEach(id => seen.add(id));
+        }
+      });
+      return seen.size;
+    } catch (_) {
+      return 0;
+    }
+  };
+  const totalWords = (typeof window !== 'undefined' && window.WordTrainerEngine && Array.isArray(window.WordTrainerEngine.corpus) && window.WordTrainerEngine.corpus.length > 0)
+    ? window.WordTrainerEngine.corpus.length
+    : 497;
+  return {
+    builder: { mastered: countFromKey(STORAGE_KEY_BUILDER), total: totalWords },
+    calligraphy: { mastered: countFromKey(STORAGE_KEY_CALLIGRAPHY, STORAGE_KEY_LEGACY), total: totalWords }
+  };
+}
+
 export class WordTrainerEngineController {
   constructor() {
     this.corpus = [];
@@ -153,8 +194,7 @@ export class WordTrainerEngineController {
     this.charRecognized = []; // True character recognition flags per character
     this.charSpatialDrift = []; // Spatial translation drift per character slot
     this.attemptsLeft = 3;
-    const savedGuide = (typeof localStorage !== 'undefined') ? localStorage.getItem('mandarin_trainer_guide_mode') : null;
-    this.isScaffoldOn = (savedGuide !== null) ? (savedGuide === 'on') : (this.state.scaffoldDefault !== undefined ? this.state.scaffoldDefault : true);
+    this.isScaffoldOn = this.readSavedGuidePreference(this.getMode(), true);
     this.effectiveGuideOn = this.isScaffoldOn;
 
     // Order-Agnostic Geometric Stroke Matchers & Handwriting Persistence
@@ -188,6 +228,33 @@ export class WordTrainerEngineController {
   getStorageKey() {
     const mode = this.getMode();
     return (mode === 'builder') ? STORAGE_KEY_BUILDER : STORAGE_KEY_CALLIGRAPHY;
+  }
+
+  getGuideStorageKey(mode = this.getMode()) {
+    return (mode === 'builder') ? GUIDE_KEY_BUILDER : GUIDE_KEY_CALLIGRAPHY;
+  }
+
+  readSavedGuidePreference(mode = this.getMode(), fallbackDefault = true) {
+    try {
+      if (typeof localStorage === 'undefined') {
+        return (this.state && this.state.scaffoldDefault !== undefined) ? Boolean(this.state.scaffoldDefault) : fallbackDefault;
+      }
+      const modeKey = this.getGuideStorageKey(mode);
+      let saved = localStorage.getItem(modeKey);
+      if (saved === null) {
+        const legacy = localStorage.getItem(GUIDE_KEY_LEGACY);
+        if (legacy === 'on' || legacy === 'off') {
+          saved = legacy;
+          localStorage.setItem(modeKey, legacy);
+        }
+      }
+      if (saved === 'on') return true;
+      if (saved === 'off') return false;
+      if (this.state && this.state.scaffoldDefault !== undefined) {
+        return Boolean(this.state.scaffoldDefault);
+      }
+    } catch (_) {}
+    return fallbackDefault;
   }
 
   getDefaultState() {
@@ -234,7 +301,7 @@ export class WordTrainerEngineController {
       this.state.scaffoldDefault = this.isScaffoldOn;
       const key = this.getStorageKey();
       localStorage.setItem(key, JSON.stringify(this.state));
-      localStorage.setItem('mandarin_trainer_guide_mode', this.isScaffoldOn ? 'on' : 'off');
+      localStorage.setItem(this.getGuideStorageKey(), this.isScaffoldOn ? 'on' : 'off');
     } catch (e) {
       console.warn('WordTrainerEngine: Failed to save state to localStorage', e);
     }
@@ -264,17 +331,17 @@ export class WordTrainerEngineController {
         // Mode registered; init() will load batch once data is fully ready
         return;
       }
-      // Load independent progress state for the newly selected mode
+      // Load independent progress & guide preferences for the newly selected mode
       this.closeMobilePhaseBar();
       this.hidePhaseCompleteModal();
       this._completedModalPhase = null;
-      if (this.dom.cardRevealModal) this.dom.cardRevealModal.classList.add('hidden');
       this.clearResultShowcase();
-      if (this.dom.screen) this.dom.screen.classList.remove('mobile-result-active');
+      if (this.dom.screen) {
+        this.dom.screen.classList.remove('mobile-result-active', 'mobile-result-peek');
+      }
       this.state = this.loadState();
       this.activePhase = this.state.activePhase || 1;
-      const savedGuide = (typeof localStorage !== 'undefined') ? localStorage.getItem('mandarin_trainer_guide_mode') : null;
-      this.isScaffoldOn = (savedGuide !== null) ? (savedGuide === 'on') : (this.state.scaffoldDefault !== undefined ? this.state.scaffoldDefault : true);
+      this.isScaffoldOn = this.readSavedGuidePreference(mode, true);
       this.setGuideMode(this.isScaffoldOn);
       this.updatePhaseStepperUI();
       this.updateProgressBar();
@@ -299,7 +366,7 @@ export class WordTrainerEngineController {
       this.isScaffoldOn = effectiveOn;
       try {
         if (typeof localStorage !== 'undefined') {
-          localStorage.setItem('mandarin_trainer_guide_mode', effectiveOn ? 'on' : 'off');
+          localStorage.setItem(this.getGuideStorageKey(), effectiveOn ? 'on' : 'off');
         }
       } catch (_) {}
     }
@@ -347,6 +414,17 @@ export class WordTrainerEngineController {
       }
       this.componentBuilder.onHintToggle = (isActive) => {
         this.toggleScaffolding(isActive);
+      };
+      this.componentBuilder.onReset = () => {
+        this.updateFeedback('neutral', 'Pieces cleared. Place pieces on the grid.');
+        this.updateSubmitIdleState();
+      };
+      this.componentBuilder.onUndo = (didUndo) => {
+        this.updateFeedback('neutral', didUndo ? 'Removed last piece.' : 'Nothing to undo.');
+        this.updateSubmitIdleState();
+      };
+      this.componentBuilder.onPlacedChange = () => {
+        this.updateSubmitIdleState();
       };
       this.componentBuilder.initDom();
       this.isInitialized = true;
@@ -402,17 +480,13 @@ export class WordTrainerEngineController {
       overallProgressLabel: document.getElementById('overall-progress-label'),
       overallProgressBar: document.getElementById('overall-progress-bar'),
       progressBarFill: document.getElementById('progress-bar-fill'),
-      batchIndicatorLabel: document.getElementById('batch-indicator-label'),
-      passBadge: document.getElementById('pass-badge'),
       promptArena: document.getElementById('prompt-arena'),
       audioReplayBtn: document.getElementById('audio-replay-btn'),
-      promptModeSubtitle: document.getElementById('prompt-mode-subtitle'),
-      promptPassBadge: document.getElementById('prompt-pass-badge'),
       promptLexicalBox: document.getElementById('prompt-lexical-box'),
       promptPinyin: document.getElementById('prompt-pinyin-line'),
       promptMeaning: document.getElementById('prompt-meaning-line'),
       drawingCanvasWrapper: document.getElementById('drawing-canvas-wrapper'),
-      canvasGhostChar: document.getElementById('canvas-ghost-char'),
+      canvasCharCarousel: document.getElementById('canvas-char-carousel'),
       hanziTargetCanvas: document.getElementById('hanzi-target-canvas'),
       paintCanvas: document.getElementById('hanzi-paint-canvas'),
       scaffoldToggleBtn: document.getElementById('scaffold-toggle-btn'),
@@ -425,21 +499,21 @@ export class WordTrainerEngineController {
       feedbackToast: document.getElementById('drawing-feedback-toast'),
       toastFeedbackIcon: document.getElementById('toast-feedback-icon'),
       toastFeedbackText: document.getElementById('toast-feedback-text'),
-      promptTaskBadge: document.getElementById('prompt-task-badge'),
-      interactionTaskBadge: document.getElementById('interaction-task-badge'),
       resultFeedbackPanel: document.getElementById('result-feedback-panel'),
       resultShowcaseGrid: document.getElementById('result-showcase-grid'),
       resultHanzi: document.getElementById('result-hanzi'),
       resultPinyin: document.getElementById('result-pinyin'),
       resultMeaning: document.getElementById('result-meaning'),
+      resultMoreNotesBtn: document.getElementById('result-more-notes-btn'),
+      resultFullNotes: document.getElementById('result-full-notes'),
       resultDecomposition: document.getElementById('result-decomposition'),
       resultAudioReplayBtn: document.getElementById('result-audio-replay-btn'),
+      resultPeekCanvasBtn: document.getElementById('result-peek-canvas-btn'),
+      resultBackFromPeekBtn: document.getElementById('result-back-from-peek-btn'),
       feedbackDrawingCard: document.getElementById('feedback-drawing-card'),
       resultFeedbackIcon: document.getElementById('result-feedback-icon'),
-      resultFeedbackTitle: document.getElementById('result-feedback-title'),
       drawingTierBadge: document.getElementById('drawing-tier-badge'),
       resultFeedbackText: document.getElementById('result-feedback-text'),
-      resultDemoOrderBtn: document.getElementById('result-demo-order-btn'),
       resultTryAgainBtn: document.getElementById('result-try-again-btn'),
       resultNextBtn: document.getElementById('result-next-btn'),
       resultNextBtnText: document.getElementById('result-next-btn-text'),
@@ -449,22 +523,14 @@ export class WordTrainerEngineController {
       strokeGuideModal: document.getElementById('stroke-guide-modal'),
       closeStrokeGuideBtn: document.getElementById('close-stroke-guide-btn'),
       guideModalCloseBtn: document.getElementById('guide-modal-close-btn'),
-      feedbackBanner: document.getElementById('validation-feedback-banner'),
-      feedbackIcon: document.getElementById('validation-feedback-icon'),
-      feedbackText: document.getElementById('validation-feedback-text'),
+      guideModalBadgeChar: document.getElementById('guide-modal-badge-char'),
+      guideModalTitle: document.getElementById('guide-modal-title'),
+      guideModalSubtitle: document.getElementById('guide-modal-subtitle'),
+      guideCalligraphyContent: document.getElementById('guide-calligraphy-content'),
+      guideBuilderContent: document.getElementById('guide-builder-content'),
       prevCharBtn: document.getElementById('canvas-prev-char-btn'),
       nextCharBtn: document.getElementById('canvas-next-char-btn'),
       charPills: document.getElementById('canvas-char-pills'),
-      cardRevealModal: document.getElementById('card-reveal-modal'),
-      revealModalBadge: document.getElementById('reveal-modal-badge'),
-      revealHanzi: document.getElementById('reveal-hanzi'),
-      revealPinyin: document.getElementById('reveal-pinyin'),
-      revealMeaning: document.getElementById('reveal-meaning'),
-      revealDecomposition: document.getElementById('reveal-decomposition'),
-      revealSentenceHanzi: document.getElementById('reveal-sentence-hanzi'),
-      revealSentenceEn: document.getElementById('reveal-sentence-en'),
-      modalReplayBtn: document.getElementById('modal-replay-btn'),
-      modalNextBtn: document.getElementById('modal-next-btn'),
       phaseCompleteModal: document.getElementById('phase-complete-modal'),
       phaseCompleteTitle: document.getElementById('phase-complete-title'),
       phaseCompleteSummary: document.getElementById('phase-complete-summary'),
@@ -526,46 +592,22 @@ export class WordTrainerEngineController {
     if (this.isCarouselEventsBound) return;
     this.isCarouselEventsBound = true;
 
+    if (this.dom.prevCharBtn) {
+      this.dom.prevCharBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.prevChar();
+      });
+    }
+
+    if (this.dom.nextCharBtn) {
+      this.dom.nextCharBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.nextChar();
+      });
+    }
+
     const wrapper = this.dom.drawingCanvasWrapper;
     if (wrapper) {
-      if (!this.dom.prevCharBtn) {
-        const prevBtn = document.createElement('button');
-        prevBtn.id = 'canvas-prev-char-btn';
-        prevBtn.type = 'button';
-        prevBtn.className = 'hidden absolute left-2 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-black/70 hover:bg-black text-white flex items-center justify-center cursor-pointer transition-all active:scale-90 shadow-md select-none';
-        prevBtn.innerHTML = '<span class="material-symbols-outlined text-lg">chevron_left</span>';
-        prevBtn.title = 'Previous character';
-        prevBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          this.prevChar();
-        });
-        wrapper.appendChild(prevBtn);
-        this.dom.prevCharBtn = prevBtn;
-      }
-
-      if (!this.dom.nextCharBtn) {
-        const nextBtn = document.createElement('button');
-        nextBtn.id = 'canvas-next-char-btn';
-        nextBtn.type = 'button';
-        nextBtn.className = 'hidden absolute right-2 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-black/70 hover:bg-black text-white flex items-center justify-center cursor-pointer transition-all active:scale-90 shadow-md select-none';
-        nextBtn.innerHTML = '<span class="material-symbols-outlined text-lg">chevron_right</span>';
-        nextBtn.title = 'Next character';
-        nextBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          this.nextChar();
-        });
-        wrapper.appendChild(nextBtn);
-        this.dom.nextCharBtn = nextBtn;
-      }
-
-      if (!this.dom.charPills) {
-        const pills = document.createElement('div');
-        pills.id = 'canvas-char-pills';
-        pills.className = 'hidden absolute top-2 right-2 z-30 flex items-center gap-1 font-mono text-[10px] font-bold bg-white/90 border border-black/30 px-2.5 py-0.5 rounded-full shadow-xs select-none';
-        wrapper.appendChild(pills);
-        this.dom.charPills = pills;
-      }
-
       // Touch swipe detection for mobile character carousel
       let touchStartX = 0;
       let touchStartY = 0;
@@ -663,9 +705,13 @@ export class WordTrainerEngineController {
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
           this.closeMobilePhaseBar();
+          if (this.dom.strokeGuideModal && !this.dom.strokeGuideModal.classList.contains('hidden')) {
+            this.closeStrokeGuideModal();
+          }
           if (this.dom.phaseCompleteModal && !this.dom.phaseCompleteModal.classList.contains('hidden')) {
             this.stayInCompletedPhase();
           }
+          this.setMobileResultPeek(false);
         }
       });
       document.addEventListener('click', (e) => {
@@ -731,10 +777,28 @@ export class WordTrainerEngineController {
       });
     }
 
-    if (this.dom.resultDemoOrderBtn) {
-      this.dom.resultDemoOrderBtn.addEventListener('click', (e) => {
+    if (this.dom.resultPeekCanvasBtn) {
+      this.dom.resultPeekCanvasBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        this.demoStrokeOrder();
+        this.setMobileResultPeek(true);
+      });
+    }
+
+    if (this.dom.resultBackFromPeekBtn) {
+      this.dom.resultBackFromPeekBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.setMobileResultPeek(false);
+      });
+    }
+
+    if (this.dom.resultMoreNotesBtn) {
+      this.dom.resultMoreNotesBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!this.dom.resultFullNotes) return;
+        const isCurrentlyHidden = this.dom.resultFullNotes.classList.contains('hidden');
+        this.dom.resultFullNotes.classList.toggle('hidden', !isCurrentlyHidden);
+        this.dom.resultMoreNotesBtn.textContent = isCurrentlyHidden ? 'Hide notes ⌄' : 'More notes ›';
+        this.dom.resultMoreNotesBtn.setAttribute('aria-expanded', isCurrentlyHidden ? 'true' : 'false');
       });
     }
 
@@ -770,21 +834,6 @@ export class WordTrainerEngineController {
       });
     }
 
-    if (this.dom.modalNextBtn) {
-      this.dom.modalNextBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (this.dom.cardRevealModal) this.dom.cardRevealModal.classList.add('hidden');
-        this.advanceToNextWord();
-      });
-    }
-
-    if (this.dom.modalReplayBtn) {
-      this.dom.modalReplayBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.playActiveWordAudio();
-      });
-    }
-
     if (this.dom.advancePhaseBtn) {
       this.dom.advancePhaseBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -798,6 +847,12 @@ export class WordTrainerEngineController {
         this.stayInCompletedPhase();
       });
     }
+  }
+
+  setMobileResultPeek(isPeek) {
+    const screen = this.dom && this.dom.screen;
+    if (!screen || !screen.classList) return;
+    screen.classList.toggle('mobile-result-peek', Boolean(isPeek));
   }
 
   setMobilePhaseBarOpen(isOpen) {
@@ -824,6 +879,27 @@ export class WordTrainerEngineController {
 
   openStrokeGuideModal() {
     this.closeMobilePhaseBar();
+    const isBuilder = this.getMode() === 'builder';
+    if (this.dom.guideCalligraphyContent) {
+      this.dom.guideCalligraphyContent.classList.toggle('hidden', isBuilder);
+    }
+    if (this.dom.guideBuilderContent) {
+      this.dom.guideBuilderContent.classList.toggle('hidden', !isBuilder);
+    }
+    if (this.dom.guideModalBadgeChar) {
+      this.dom.guideModalBadgeChar.textContent = isBuilder ? '构' : '永';
+    }
+    if (this.dom.guideModalTitle) {
+      this.dom.guideModalTitle.textContent = isBuilder ? 'Character Structure Guide' : 'Chinese Stroke Guide';
+    }
+    if (this.dom.guideModalSubtitle) {
+      this.dom.guideModalSubtitle.textContent = isBuilder
+        ? 'Layouts • Radicals • Scaling Tips'
+        : '8 Strokes • Compound Forms • 7 Rules';
+    }
+    if (this.dom.guideModalCloseBtn) {
+      this.dom.guideModalCloseBtn.textContent = 'Close Guide';
+    }
     if (this.dom.strokeGuideModal) {
       this.dom.strokeGuideModal.classList.remove('hidden');
     }
@@ -1049,7 +1125,9 @@ export class WordTrainerEngineController {
 
       // No intrusive error or premature feedback while drawing.
       // Full evaluation with spatial normalization is performed upon submission.
-      this.updateFeedback('neutral', 'Draw the character strokes on the grid to verify.');
+      this.updateCharCarouselDots();
+      this.updateFeedback('neutral', 'Trace or draw the character.');
+      this.updateSubmitIdleState();
     };
 
     // Modern Pointer Events handle mouse, trackpad, pen, and touch with sub-pixel pointer capture
@@ -1148,13 +1226,9 @@ export class WordTrainerEngineController {
   renderCanvasLayers() {
     const isGuideActive = (this.effectiveGuideOn !== undefined) ? Boolean(this.effectiveGuideOn) : Boolean(this.isScaffoldOn);
 
-    // Toggle demo order button visibility
+    // Toggle demo order button visibility (lives in bottom utility strip when Guide ON)
     if (this.dom.demoOrderBtn) {
-      if (isGuideActive) {
-        this.dom.demoOrderBtn.classList.remove('hidden');
-      } else {
-        this.dom.demoOrderBtn.classList.add('hidden');
-      }
+      this.dom.demoOrderBtn.classList.toggle('hidden', !isGuideActive);
     }
 
     if (!this.dom.drawingCanvasWrapper) return;
@@ -1270,23 +1344,79 @@ export class WordTrainerEngineController {
     const chars = word.characters || Array.from(word.hanzi_simp || '');
     if (chars.length === 0) return;
 
+    // Builder View B: render structural radical equation / decomposition chips with NO stroke animation (Mirror Bug #11 fix)
+    if (mode === 'builder') {
+      grid.className = 'flex flex-wrap items-center justify-center gap-2 py-0.5 shrink-0';
+      const decomps = resolveWordDecompositions(word, this.decompositions);
+
+      decomps.forEach((d) => {
+        const card = document.createElement('div');
+        card.className = 'bg-slate-50 border border-black/15 rounded-xl px-2.5 py-1.5 flex items-center gap-1.5 font-chinese text-sm sm:text-base font-bold text-[#1E1B2E]';
+        const pieces = Array.isArray(d.targetComponents) ? d.targetComponents.map(tc => tc.glyph).filter(Boolean) : [];
+        if (pieces.length > 1) {
+          pieces.forEach((g, idx) => {
+            const pSpan = document.createElement('span');
+            pSpan.className = 'inline-flex items-center justify-center min-w-[26px] h-[26px] px-1 rounded-lg bg-white border border-black/15 font-chinese font-bold text-base leading-none';
+            pSpan.textContent = g;
+            card.appendChild(pSpan);
+            if (idx < pieces.length - 1) {
+              const plus = document.createElement('span');
+              plus.className = 'font-mono text-xs font-bold text-black/45';
+              plus.textContent = '+';
+              card.appendChild(plus);
+            }
+          });
+          const eq = document.createElement('span');
+          eq.className = 'font-mono text-xs font-bold text-black/45';
+          eq.textContent = '=';
+          card.appendChild(eq);
+          const out = document.createElement('span');
+          out.className = 'inline-flex items-center justify-center min-w-[30px] h-[30px] px-1.5 rounded-lg font-chinese font-black text-lg leading-none wt-accent-text';
+          out.style.backgroundColor = 'var(--wt-accent-tint)';
+          out.textContent = d.char || '';
+          card.appendChild(out);
+        } else {
+          const out = document.createElement('span');
+          out.className = 'font-chinese font-black text-lg leading-none wt-accent-text';
+          out.textContent = d.char || '';
+          const tag = document.createElement('span');
+          tag.className = 'font-mono text-[11px] font-bold text-black/60';
+          tag.textContent = '• Root';
+          card.appendChild(out);
+          card.appendChild(tag);
+        }
+        grid.appendChild(card);
+      });
+      return;
+    }
+
+    // Calligraphy View B: compact replayable Mi Zi Ge boxes on mobile (strokes play cleanly on tap)
+    grid.className = 'flex lg:hidden items-center justify-center gap-2 py-0.5 shrink-0';
+
     let boxSize = 84;
     if (chars.length === 2) boxSize = 74;
     else if (chars.length === 3) boxSize = 64;
-    else if (chars.length >= 4) boxSize = 54;
+    else if (chars.length >= 4) boxSize = 56;
 
     const padding = Math.max(4, Math.round(boxSize * 0.08));
-    const gridStrokeColor = (mode === 'builder') ? 'rgba(6, 95, 70, 0.22)' : 'rgba(76, 29, 149, 0.22)';
-    const innerRectColor = (mode === 'builder') ? 'rgba(6, 95, 70, 0.14)' : 'rgba(76, 29, 149, 0.14)';
+    let gridStrokeColor = 'rgba(76, 29, 149, 0.18)';
+    let innerRectColor = 'rgba(76, 29, 149, 0.12)';
+    let accentColor = '#4C1D95';
+    if (typeof window !== 'undefined' && this.dom.screen) {
+      const cs = window.getComputedStyle(this.dom.screen);
+      gridStrokeColor = cs.getPropertyValue('--wt-grid-stroke').trim() || gridStrokeColor;
+      innerRectColor = cs.getPropertyValue('--wt-grid-inner').trim() || innerRectColor;
+      accentColor = cs.getPropertyValue('--wt-accent').trim() || accentColor;
+    }
 
     chars.forEach((ch) => {
       const box = document.createElement('button');
       box.type = 'button';
-      box.className = 'result-showcase-box relative bg-[#fffdf9] border-2 border-black rounded-xl shadow-xs flex items-center justify-center overflow-hidden select-none cursor-pointer active:scale-95 transition-transform shrink-0';
+      box.className = 'result-showcase-box relative bg-[#fffdf9] border-2 border-black/25 rounded-xl flex items-center justify-center overflow-hidden select-none cursor-pointer active:scale-95 transition-transform shrink-0';
       box.style.width = `${boxSize}px`;
       box.style.height = `${boxSize}px`;
-      box.title = `Tap to replay strokes for ${ch}`;
-      box.setAttribute('aria-label', `Replay strokes for ${ch}`);
+      box.title = `Play strokes for ${ch}`;
+      box.setAttribute('aria-label', `Play strokes for ${ch}`);
 
       const gridSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       gridSvg.setAttribute('class', 'absolute inset-0 w-full h-full pointer-events-none');
@@ -1311,6 +1441,11 @@ export class WordTrainerEngineController {
       targetDiv.className = 'absolute inset-0 w-full h-full pointer-events-none z-10';
       box.appendChild(targetDiv);
 
+      const playBadge = document.createElement('span');
+      playBadge.className = 'absolute bottom-1 right-1 z-20 w-5 h-5 rounded-full bg-white/95 border border-black/20 flex items-center justify-center pointer-events-none';
+      playBadge.innerHTML = `<span class="material-symbols-outlined text-[13px] leading-none" style="color: ${accentColor}">play_arrow</span>`;
+      box.appendChild(playBadge);
+
       grid.appendChild(box);
 
       if (typeof window !== 'undefined' && window.HanziWriter) {
@@ -1324,7 +1459,7 @@ export class WordTrainerEngineController {
             strokeAnimationSpeed: 1.5,
             delayBetweenStrokes: 100,
             strokeColor: '#1E1B2E',
-            radicalColor: (mode === 'builder') ? '#065F46' : '#4C1D95',
+            radicalColor: accentColor,
             outlineColor: gridStrokeColor,
             charDataLoader: (char, onComplete, onFail) => {
               this.fetchCharacterData(char).then(data => {
@@ -1379,7 +1514,7 @@ export class WordTrainerEngineController {
     if (this.activeWriter) {
       try {
         this.activeWriter.animateCharacter();
-        this.updateFeedback('neutral', 'Demonstrating canonical stroke order...');
+        this.updateFeedback('neutral', 'Playing stroke order…');
       } catch (e) {
         console.warn('WordTrainerEngine: demoStrokeOrder notice', e);
       }
@@ -1387,7 +1522,8 @@ export class WordTrainerEngineController {
   }
 
   undoLastStroke() {
-    if (this.userDrawnStrokes.length > 0) {
+    const hadStroke = this.userDrawnStrokes.length > 0;
+    if (hadStroke) {
       this.userDrawnStrokes.pop();
     }
     if (this.charUserStrokes && this.charUserStrokes[this.activeCharIndex]) {
@@ -1403,7 +1539,29 @@ export class WordTrainerEngineController {
 
     this.redrawUserStrokes();
     this.renderCanvasLayers();
-    this.updateFeedback('neutral', 'Undid stroke.');
+    this.updateCharCarouselDots();
+    this.updateFeedback('neutral', hadStroke ? 'Removed last stroke.' : 'Nothing to undo.');
+    this.updateSubmitIdleState();
+  }
+
+  updateCharCarouselDots() {
+    if (!this.activeWord || !this.dom.charPills) return;
+    const chars = this.activeWord.characters || Array.from(this.activeWord.hanzi_simp || '');
+    const isMulti = chars.length > 1;
+    if (!isMulti) {
+      this.dom.charPills.classList.add('hidden');
+      return;
+    }
+    const index = this.activeCharIndex;
+    this.dom.charPills.classList.remove('hidden');
+    const dots = chars.map((_, i) => {
+      const hasWork = (i === index
+        ? this.userDrawnStrokes.length > 0
+        : (this.charUserStrokes[i] && this.charUserStrokes[i].length > 0))
+        || Boolean(this.charRecognized[i]);
+      return hasWork ? '●' : '○';
+    }).join('');
+    this.dom.charPills.textContent = `Char ${index + 1} of ${chars.length} • ${dots}`;
   }
 
   // ----------------------------------------------------
@@ -1412,10 +1570,8 @@ export class WordTrainerEngineController {
   switchPhase(phaseId) {
     if (phaseId < 1 || phaseId > 5) phaseId = 1;
     this.hidePhaseCompleteModal();
+    this.setMobileResultPeek(false);
     this._completedModalPhase = null;
-    if (this.dom && this.dom.cardRevealModal) {
-      this.dom.cardRevealModal.classList.add('hidden');
-    }
     this.activePhase = phaseId;
 
     if (!this.state.phases[phaseId]) {
@@ -1438,35 +1594,26 @@ export class WordTrainerEngineController {
       const pData = this.state.phases[p];
       const isComp = pData && pData.status === 'completed';
 
-      btn.classList.remove('phase-active', 'bg-[#4C1D95]', 'text-white', 'shadow-hard-black',
-        'phase-completed', 'bg-emerald-100', 'text-emerald-900', 'border-emerald-600',
-        'phase-available', 'bg-white', 'text-black', 'shadow-sm');
+      btn.classList.remove('phase-active', 'phase-completed', 'phase-available', 'bg-white', 'text-black', 'shadow-sm');
 
       if (isCur) {
-        btn.classList.add('phase-active', 'bg-[#4C1D95]', 'text-white', 'shadow-hard-black');
+        btn.classList.add('phase-active');
       } else if (isComp) {
-        btn.classList.add('phase-completed', 'bg-emerald-100', 'text-emerald-900', 'border-emerald-600');
+        btn.classList.add('phase-completed');
       } else {
         btn.classList.add('phase-available', 'bg-white', 'text-black', 'shadow-sm');
       }
     });
 
-    const phaseMetaMap = {
-      1: { title: 'Phase 1: Elemental Atoms', mobileTitle: 'Elemental Atoms', short: 'ATOMS', count: 55 },
-      2: { title: 'Phase 2: Compound Characters', mobileTitle: 'Compound Characters', short: 'COMPOUND', count: 80 },
-      3: { title: 'Phase 3: Core Binary Compounds', mobileTitle: 'Binary Compounds', short: 'BINARY', count: 115 },
-      4: { title: 'Phase 4: Semantic Networks', mobileTitle: 'Semantic Networks', short: 'NETWORKS', count: 120 },
-      5: { title: 'Phase 5: Idiomatic & Poly-Syllabic', mobileTitle: 'Idiomatic Phrases', short: 'IDIOMS', count: 127 },
-    };
-    const phaseMeta = phaseMetaMap[this.activePhase] || phaseMetaMap[1];
+    const phaseMeta = PHASE_META_MAP[this.activePhase] || PHASE_META_MAP[1];
     const mappedTotal = (this.phaseWordsMap && this.phaseWordsMap[this.activePhase])
       ? this.phaseWordsMap[this.activePhase].length
       : 0;
     const displayTotal = mappedTotal > 0 ? mappedTotal : phaseMeta.count;
 
     if (this.dom.phaseTitle) this.dom.phaseTitle.textContent = phaseMeta.title;
-    if (this.dom.mobilePhaseTitle) this.dom.mobilePhaseTitle.textContent = phaseMeta.mobileTitle;
-    if (this.dom.mobilePhaseTriggerSub) this.dom.mobilePhaseTriggerSub.textContent = `P${this.activePhase} • ${displayTotal}W`;
+    if (this.dom.mobilePhaseTitle) this.dom.mobilePhaseTitle.textContent = `Phase ${this.activePhase} • ${phaseMeta.short}`;
+    if (this.dom.mobilePhaseTriggerSub) this.dom.mobilePhaseTriggerSub.textContent = `${displayTotal} Words`;
     if (this.dom.mobilePhaseTriggerName) this.dom.mobilePhaseTriggerName.textContent = phaseMeta.short;
     this.updateProgressBar();
   }
@@ -1477,7 +1624,7 @@ export class WordTrainerEngineController {
     const totalWords = (this.phaseWordsMap[this.activePhase] || []).length || 55;
 
     if (this.dom.overallProgressLabel) {
-      this.dom.overallProgressLabel.textContent = `Progress: ${completedCount} / ${totalWords} Words`;
+      this.dom.overallProgressLabel.textContent = `${completedCount} / ${totalWords} Mastered`;
     }
     if (this.dom.mobileProgressLabel) {
       this.dom.mobileProgressLabel.textContent = `${completedCount} / ${totalWords}`;
@@ -1490,6 +1637,20 @@ export class WordTrainerEngineController {
     if (this.dom.mobileProgressFill) {
       this.dom.mobileProgressFill.style.width = `${pct}%`;
     }
+  }
+
+  updateSubmitIdleState() {
+    if (!this.dom.submitBtn) return;
+    const mode = this.getMode();
+    let hasWork = false;
+    if (mode === 'builder') {
+      hasWork = Boolean(this.componentBuilder && this.componentBuilder.getTotalPlacedCount() > 0);
+    } else {
+      hasWork = (this.userDrawnStrokes && this.userDrawnStrokes.length > 0)
+        || (this.charUserStrokes || []).some(list => Array.isArray(list) && list.length > 0)
+        || (this.charRecognized || []).some(Boolean);
+    }
+    this.dom.submitBtn.classList.toggle('opacity-65', !hasWork);
   }
 
   loadBatchForActivePhase() {
@@ -1563,11 +1724,8 @@ export class WordTrainerEngineController {
     this.attemptsLeft = 3;
     this.flashingStrokeIndex = null;
 
-    // Toggle guide mode: strictly forced OFF on delayed reappearance; otherwise honor user's persistent preference
-    const savedGuide = (typeof localStorage !== 'undefined') ? localStorage.getItem('mandarin_trainer_guide_mode') : null;
-    if (savedGuide !== null) {
-      this.isScaffoldOn = (savedGuide === 'on');
-    }
+    // Toggle guide mode: strictly forced OFF on delayed reappearance; otherwise honor mode-specific saved preference
+    this.isScaffoldOn = this.readSavedGuidePreference(this.getMode(), true);
     const shouldGuideBeOn = this.isReappearanceStage ? false : this.isScaffoldOn;
     this.setGuideMode(shouldGuideBeOn, !this.isReappearanceStage);
 
@@ -1576,7 +1734,6 @@ export class WordTrainerEngineController {
     this.charMatchers = new Array(charCount).fill(null);
     this.charRecognized = new Array(charCount).fill(false);
     this.charSpatialDrift = new Array(charCount).fill(null);
-    this.selectedTones = new Array(charCount).fill(null);
     this.userDrawnStrokes = [];
     this.charUserStrokes = new Array(charCount).fill(null).map(() => []);
 
@@ -1596,40 +1753,36 @@ export class WordTrainerEngineController {
       });
     }
 
-    // Update Header labels & prompt display
-    this.updateBatchLabels();
+    // Update prompt display, attempt pips & character slot
     this.updatePromptDisplay(shouldGuideBeOn);
     this.updateAttemptPips();
     this.mountCharacter(0);
 
-    // Update Component Builder multi-character layout if active
-    if (typeof window.setupComponentBuilderCharacters === 'function') {
-      window.setupComponentBuilderCharacters(chars);
-    }
-
-    // Mount Component Builder if mode is 'builder'
+    // Mount Component Builder if mode is 'builder' (stepped 1-char-per-canvas assembly)
     if (this.getMode() === 'builder' && this.componentBuilder) {
       this.componentBuilder.mountWord(word);
       this.componentBuilder.toggleGhostHint(shouldGuideBeOn);
     }
 
     if (this.getMode() === 'builder') {
-      this.updateFeedback('neutral', 'Drag components from the dock to assemble the character.');
+      this.updateFeedback('neutral', 'Place pieces on the grid.');
     } else {
-      this.updateFeedback('neutral', 'Draw the character strokes on the grid to verify.');
+      this.updateFeedback('neutral', 'Trace or draw the character.');
     }
 
     // Reset panels: Switch back to View A on mobile, close phase tray, show exercise inputs, hide result panel
     this.closeMobilePhaseBar();
+    this.setMobileResultPeek(false);
     this.clearResultShowcase();
-    if (this.dom.screen) this.dom.screen.classList.remove('mobile-result-active');
+    if (this.dom.screen) this.dom.screen.classList.remove('mobile-result-active', 'mobile-result-peek');
     if (this.dom.promptArena) this.dom.promptArena.classList.remove('hidden');
     if (this.dom.interactionFooter) this.dom.interactionFooter.classList.remove('hidden');
     if (this.dom.resultFeedbackPanel) this.dom.resultFeedbackPanel.classList.add('hidden');
-    if (this.dom.resultDemoOrderBtn) this.dom.resultDemoOrderBtn.classList.add('hidden');
     if (this.dom.drawingCanvasWrapper) this.dom.drawingCanvasWrapper.style.boxShadow = '';
     const placementCanvas = (typeof document !== 'undefined') ? document.getElementById('open-placement-canvas') : null;
     if (placementCanvas) placementCanvas.style.boxShadow = '';
+
+    this.updateSubmitIdleState();
 
     if (this.getMode() !== 'builder' && typeof requestAnimationFrame === 'function') {
       requestAnimationFrame(() => this.syncCanvasDimensions());
@@ -1639,35 +1792,9 @@ export class WordTrainerEngineController {
     this.playActiveWordAudio();
   }
 
-  updateBatchLabels() {
-    const pData = this.state.phases[this.activePhase];
-    const words = this.phaseWordsMap[this.activePhase] || [];
-    const completedCount = (pData && pData.completedWordIds) ? pData.completedWordIds.length : 0;
-    const totalWords = words.length || 55;
-
-    // Keep badge uniform with zero visual hint of test or reappearance
-    if (this.dom.passBadge) {
-      this.dom.passBadge.className = 'px-2 py-0.5 rounded-full bg-[#4C1D95] text-[#FDE68A] border border-black uppercase font-black text-[9px] shadow-xs';
-      this.dom.passBadge.textContent = 'Practice';
-    }
-
-    if (this.dom.batchIndicatorLabel) {
-      this.dom.batchIndicatorLabel.textContent = `Phase ${this.activePhase} • Mastered ${completedCount}/${totalWords} Words`;
-    }
-  }
-
   updatePromptDisplay(isGuideVisible = this.effectiveGuideOn) {
-    const mode = this.getMode();
-    if (this.dom.promptModeSubtitle) {
-      this.dom.promptModeSubtitle.textContent = (mode === 'builder') ? 'LISTEN & BUILD' : 'LISTEN & WRITE';
-    }
-
     const word = this.activeWord;
     if (!word) return;
-
-    if (this.dom.promptPassBadge) {
-      this.dom.promptPassBadge.textContent = `${word.hsk_level || 'HSK'} • PHASE ${this.activePhase}`;
-    }
 
     const showPinyin = Boolean(isGuideVisible);
     if (this.dom.promptPinyin) {
@@ -1691,7 +1818,7 @@ export class WordTrainerEngineController {
     if (index < 0 || index >= chars.length) return;
 
     // Save previous character's handwriting
-    if (this.charUserStrokes) {
+    if (this.charUserStrokes && this.activeCharIndex >= 0 && this.activeCharIndex < this.charUserStrokes.length) {
       this.charUserStrokes[this.activeCharIndex] = [...this.userDrawnStrokes];
     }
 
@@ -1738,32 +1865,27 @@ export class WordTrainerEngineController {
     // Render SVG layers (calligraphy if complete, or badges if guide ON)
     this.renderCanvasLayers();
 
-    // Carousel Navigation visibility
+    // Carousel Navigation visibility (Mirrored outside Mi Zi Ge square)
     const isMulti = chars.length > 1;
+    if (this.dom.canvasCharCarousel) {
+      this.dom.canvasCharCarousel.classList.toggle('hidden', !isMulti);
+    }
     if (this.dom.prevCharBtn) {
-      if (isMulti && index > 0) {
-        this.dom.prevCharBtn.classList.remove('hidden');
-      } else {
-        this.dom.prevCharBtn.classList.add('hidden');
-      }
+      const canPrev = isMulti && index > 0;
+      this.dom.prevCharBtn.disabled = !canPrev;
+      this.dom.prevCharBtn.classList.toggle('opacity-30', !canPrev);
+      this.dom.prevCharBtn.classList.toggle('pointer-events-none', !canPrev);
+      this.dom.prevCharBtn.classList.toggle('hidden', !isMulti);
     }
     if (this.dom.nextCharBtn) {
-      if (isMulti && index < chars.length - 1) {
-        this.dom.nextCharBtn.classList.remove('hidden');
-      } else {
-        this.dom.nextCharBtn.classList.add('hidden');
-      }
+      const canNext = isMulti && index < chars.length - 1;
+      this.dom.nextCharBtn.disabled = !canNext;
+      this.dom.nextCharBtn.classList.toggle('opacity-30', !canNext);
+      this.dom.nextCharBtn.classList.toggle('pointer-events-none', !canNext);
+      this.dom.nextCharBtn.classList.toggle('hidden', !isMulti);
     }
-    if (this.dom.charPills) {
-      if (isMulti) {
-        this.dom.charPills.classList.remove('hidden');
-        this.dom.charPills.textContent = `Char ${index + 1} of ${chars.length}: ${targetChar}`;
-      } else {
-        this.dom.charPills.classList.add('hidden');
-      }
-    }
-
-    // 6. Update Tone selector slot active state
+    this.updateCharCarouselDots();
+    this.updateSubmitIdleState();
   }
 
   mountHanziWriterQuiz(targetChar, index) {
@@ -1775,6 +1897,14 @@ export class WordTrainerEngineController {
     const isGuideActive = (this.effectiveGuideOn !== undefined) ? Boolean(this.effectiveGuideOn) : Boolean(this.isScaffoldOn);
     targetEl.style.opacity = isGuideActive ? '1' : '0';
     targetEl.style.visibility = isGuideActive ? 'visible' : 'hidden';
+
+    let highlightColor = '#D97706';
+    let outlineColor = 'rgba(76, 29, 149, 0.18)';
+    if (typeof window !== 'undefined' && this.dom.screen) {
+      const cs = window.getComputedStyle(this.dom.screen);
+      highlightColor = cs.getPropertyValue('--wt-highlight').trim() || highlightColor;
+      outlineColor = cs.getPropertyValue('--wt-grid-stroke').trim() || outlineColor;
+    }
 
     const rect = this.dom.drawingCanvasWrapper ? this.dom.drawingCanvasWrapper.getBoundingClientRect() : null;
     const actualW = rect ? Math.round(rect.width) : 0;
@@ -1789,9 +1919,9 @@ export class WordTrainerEngineController {
         showCharacter: false,
         strokeAnimationSpeed: 1.5,
         delayBetweenStrokes: 120,
-        radicalColor: '#D97706',
+        radicalColor: highlightColor,
         strokeColor: '#1E1B2E',
-        outlineColor: 'rgba(76, 29, 149, 0.18)',
+        outlineColor,
         charDataLoader: (char, onComplete, onFail) => {
           this.fetchCharacterData(char).then(data => {
             if (data) onComplete(data);
@@ -1838,7 +1968,7 @@ export class WordTrainerEngineController {
     this.state.scaffoldDefault = nextState;
     try {
       if (typeof localStorage !== 'undefined') {
-        localStorage.setItem('mandarin_trainer_guide_mode', nextState ? 'on' : 'off');
+        localStorage.setItem(this.getGuideStorageKey(), nextState ? 'on' : 'off');
       }
     } catch (_) {}
     this.updateScaffoldBtnUI();
@@ -1870,11 +2000,11 @@ export class WordTrainerEngineController {
     if (!btn) return;
     const isGuideActive = (this.effectiveGuideOn !== undefined) ? Boolean(this.effectiveGuideOn) : Boolean(this.isScaffoldOn);
     if (isGuideActive) {
-      btn.className = 'scaffold-on flex-1 py-1.5 lg:py-2.5 px-2 sm:px-3 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white border-2 border-black font-mono text-[10px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1 sm:gap-1.5 shadow-sm active-collapse cursor-pointer transition-all';
-      btn.innerHTML = '<span class="material-symbols-outlined text-sm sm:text-base">visibility</span><span>GUIDE: ON</span>';
+      btn.className = 'scaffold-on flex-1 min-h-[44px] py-2 lg:py-2.5 px-2 sm:px-3 rounded-xl bg-[#D97706] hover:bg-[#B45309] text-white border-2 border-black font-mono text-[10px] sm:text-xs font-black uppercase tracking-wider whitespace-nowrap flex items-center justify-center gap-1 sm:gap-1.5 shadow-sm active-collapse cursor-pointer transition-all';
+      btn.innerHTML = '<span class="material-symbols-outlined text-sm sm:text-base shrink-0">visibility</span><span>Guide: On</span>';
     } else {
-      btn.className = 'scaffold-off flex-1 py-1.5 lg:py-2.5 px-2 sm:px-3 rounded-xl bg-[#18181b] hover:bg-[#27272a] text-white/80 border-2 border-black font-mono text-[10px] sm:text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1 sm:gap-1.5 shadow-sm active-collapse cursor-pointer transition-all';
-      btn.innerHTML = '<span class="material-symbols-outlined text-sm sm:text-base">visibility_off</span><span>GUIDE: OFF</span>';
+      btn.className = 'scaffold-off flex-1 min-h-[44px] py-2 lg:py-2.5 px-2 sm:px-3 rounded-xl bg-[#18181b] hover:bg-[#27272a] text-white/90 border-2 border-black font-mono text-[10px] sm:text-xs font-black uppercase tracking-wider whitespace-nowrap flex items-center justify-center gap-1 sm:gap-1.5 shadow-sm active-collapse cursor-pointer transition-all';
+      btn.innerHTML = '<span class="material-symbols-outlined text-sm sm:text-base shrink-0">visibility_off</span><span>Guide: Off</span>';
     }
   }
 
@@ -1901,7 +2031,154 @@ export class WordTrainerEngineController {
       }
     }
     this.renderCanvasLayers();
-    this.updateFeedback('neutral', 'Canvas cleared. Draw strokes to verify.');
+    this.updateCharCarouselDots();
+    this.updateFeedback('neutral', 'Canvas cleared. Trace or draw the character.');
+    this.updateSubmitIdleState();
+  }
+
+  humanizeGradeResult(grade, mode = this.getMode()) {
+    if (!grade) {
+      return {
+        status: 'CLEAN_PASS',
+        tier: 1,
+        badge: mode === 'builder' ? '🎯 Clean Assembly!' : '🎯 Perfect Form!',
+        detail: mode === 'builder'
+          ? 'All pieces snapped cleanly into place.'
+          : 'Clean strokes and accurate order.',
+        isPass: true
+      };
+    }
+
+    const tierNum = typeof grade.tier === 'number' ? grade.tier : (grade.success ? 1 : 3);
+    const tierName = grade.tierName || (typeof grade.tier === 'string' ? grade.tier : '');
+
+    if (mode === 'builder') {
+      if (tierNum === 1 || grade.status === 'CLEAN_PASS') {
+        return {
+          ...grade,
+          tier: 1,
+          badge: '🎯 Clean Assembly!',
+          detail: 'All pieces snapped cleanly into place.',
+          isPass: true
+        };
+      }
+      if (tierNum === 2 || grade.status === 'SOFT_PASS') {
+        return {
+          ...grade,
+          tier: 2,
+          badge: grade.badge || '✓ Recognized!',
+          detail: (grade.detail || 'Good placement! Center pieces neatly inside the square.').replace(/^💡\s*(Pro Tip|Tip):\s*/i, ''),
+          isPass: true
+        };
+      }
+      const cleanFail = String(grade.detail || 'Check the pieces on the grid and try again.')
+        .replace(/No components placed yet\.?/i, 'Place at least one piece on the grid first.')
+        .replace(/^📖\s*/, '');
+      return {
+        ...grade,
+        tier: 3,
+        badge: grade.badge || '⚠️ Almost There!',
+        detail: cleanFail,
+        isPass: false
+      };
+    }
+
+    // Calligraphy plain-English mapping
+    if (tierName === 'TIER_1_CLEAN_PASS' || (tierNum === 1 && grade.success)) {
+      return {
+        ...grade,
+        tier: 1,
+        badge: '🎯 Perfect Form!',
+        detail: 'Clean strokes and accurate order.',
+        isPass: true
+      };
+    }
+    if (tierName === 'TIER_2_SOFT_PASS_ORDER') {
+      return {
+        ...grade,
+        tier: 2,
+        badge: '✓ Recognized!',
+        detail: 'Good shape! Next time start top-to-bottom, left-to-right.',
+        isPass: true
+      };
+    }
+    if (tierName === 'TIER_2_SOFT_PASS_KERNING') {
+      return {
+        ...grade,
+        tier: 2,
+        badge: '✓ Recognized!',
+        detail: 'Good shape! Keep the left and right sides closer together.',
+        isPass: true
+      };
+    }
+    if (tierName === 'TIER_2_SOFT_PASS_CURSIVE') {
+      return {
+        ...grade,
+        tier: 2,
+        badge: '✓ Recognized!',
+        detail: 'Good flow! Split corners into separate horizontal and vertical strokes for standard writing.',
+        isPass: true
+      };
+    }
+    if (tierName === 'TIER_2_SOFT_PASS_CENTERING') {
+      return {
+        ...grade,
+        tier: 2,
+        badge: '✓ Recognized!',
+        detail: 'Good shape! Center the character inside the grid.',
+        isPass: true
+      };
+    }
+    if (tierName === 'TIER_2_SOFT_PASS_TOLERANCE' || (tierNum === 2 && grade.success)) {
+      const rawDetail = String(grade.detail || '');
+      const detail = rawDetail.includes('filling more of the grid')
+        ? 'Good shape! Draw slightly larger to fill the grid.'
+        : 'Good shape! Keep lines straight and steady inside the grid.';
+      return {
+        ...grade,
+        tier: 2,
+        badge: '✓ Recognized!',
+        detail,
+        isPass: true
+      };
+    }
+    if (tierName === 'TIER_3_EXTRA_STROKE') {
+      return {
+        ...grade,
+        tier: 3,
+        badge: '⚠️ Extra Stroke',
+        detail: String(grade.detail || 'Too many strokes. Use Undo to remove extras.').replace('Target has', 'Needs'),
+        isPass: false
+      };
+    }
+    if (tierName === 'TIER_3_WRONG_ANGLE') {
+      return {
+        ...grade,
+        tier: 3,
+        badge: '⚠️ Check Stroke Angle',
+        detail: 'One stroke went the wrong direction. Turn on Guide to check the starting numbers.',
+        isPass: false
+      };
+    }
+    if (tierName === 'TIER_3_MISSING_STROKE') {
+      const cleanMissing = String(grade.detail || 'A stroke is missing.')
+        .replace(/\(highlighted in orange above\)/gi, '(shown in amber on the grid)')
+        .replace(/\(highlighted above\)/gi, '(shown on the grid)');
+      return {
+        ...grade,
+        tier: 3,
+        badge: '⚠️ Missing Stroke',
+        detail: cleanMissing,
+        isPass: false
+      };
+    }
+    return {
+      ...grade,
+      tier: 3,
+      badge: '❓ Shape Unclear',
+      detail: 'Turn on Guide: On to trace the strokes step by step.',
+      isPass: false
+    };
   }
 
   // ----------------------------------------------------
@@ -1920,18 +2197,21 @@ export class WordTrainerEngineController {
     if (!this.activeWord) return;
 
     const count = this.activeWord.characterCount || this.activeWord.hanzi_simp.length;
-    const chars = this.activeWord.characters || Array.from(this.activeWord.hanzi_simp || '');
 
     // Grade each character using gradeCalligraphyDrawing
     let allPassed = true;
     let worstGrade = null;
     let firstIncompleteIdx = -1;
+    const perCharGrades = [];
+    const perCharStrokeCounts = [];
 
     for (let i = 0; i < count; i++) {
       const matcher = this.charMatchers[i];
       const userStrokes = this.charUserStrokes[i] || (i === this.activeCharIndex ? this.userDrawnStrokes : []);
+      perCharStrokeCounts.push(Array.isArray(userStrokes) ? userStrokes.length : 0);
       const spatialDrift = (this.charSpatialDrift && this.charSpatialDrift[i]) || null;
       const grade = gradeCalligraphyDrawing(matcher, userStrokes, spatialDrift, this.getCanvasSize());
+      perCharGrades.push(grade);
 
       if (!grade.success) {
         allPassed = false;
@@ -1941,6 +2221,18 @@ export class WordTrainerEngineController {
         }
       } else if (!worstGrade || (grade.tier > worstGrade.tier)) {
         worstGrade = grade;
+      }
+    }
+
+    // Stepped multi-char advance without consuming an attempt (mirrors Builder auto-advance)
+    if (!allPassed && count > 1 && perCharGrades[this.activeCharIndex] && perCharGrades[this.activeCharIndex].success) {
+      const nextEmptyIdx = perCharStrokeCounts.findIndex((len, idx) => idx !== this.activeCharIndex && len === 0);
+      if (nextEmptyIdx !== -1) {
+        this.flashElement('drawing-canvas-wrapper', 'success');
+        this.mountCharacter(nextEmptyIdx);
+        this.updateFeedback('neutral', `Nice! Now draw character ${nextEmptyIdx + 1} of ${count}.`);
+        this.updateSubmitIdleState();
+        return;
       }
     }
 
@@ -1962,13 +2254,11 @@ export class WordTrainerEngineController {
       this.renderCanvasLayers();
       this.redrawUserStrokes();
 
-      // Actionable feedback & audio replay
+      const humanizedFail = this.humanizeGradeResult(worstGrade, 'calligraphy');
       this.playActiveWordAudio();
-      const failDetail = worstGrade ? worstGrade.detail : 'Character drawing is incomplete.';
-      this.updateFeedback('error', `${failDetail} Tries left: ${this.attemptsLeft}`);
+      this.updateFeedback('error', `${humanizedFail.detail} Tries left: ${this.attemptsLeft}`);
 
       if (this.attemptsLeft === 0) {
-        // Attempts exhausted: graceful reveal & re-queue to retry queue
         this.charRecognized[this.activeCharIndex] = true;
         this.snapCharacterToCalligraphy();
         const failedWord = this.isReappearanceStage ? this.anchorWord : this.activeWord;
@@ -1980,11 +2270,11 @@ export class WordTrainerEngineController {
         const sessionToken = this._wordSessionToken;
         setTimeout(() => {
           if (this._wordSessionToken !== sessionToken) return;
-          this.showResultFeedbackPanel(false, worstGrade || {
+          this.showResultFeedbackPanel(false, {
             status: 'DIAGNOSTIC_FAIL',
             tier: 3,
-            badge: '📖 Solution Revealed',
-            detail: 'All 3 attempts used. Study the canonical strokes above before continuing.',
+            badge: '📖 Solution Shown',
+            detail: 'Out of tries. Review the character above before continuing.',
             isPass: false
           });
         }, 400);
@@ -1993,8 +2283,9 @@ export class WordTrainerEngineController {
     }
 
     // Pass! (Tier 1 Clean Pass or Tier 2 Soft Pass)
-    const passGrade = worstGrade || { tier: 1, badge: '🎯 Perfect Form!', detail: 'Canonical stroke order and accurate angles confirmed.' };
+    const passGrade = this.humanizeGradeResult(worstGrade, 'calligraphy');
     this.charRecognized[this.activeCharIndex] = true;
+    this.updateCharCarouselDots();
     this.snapCharacterToCalligraphy();
     this.flashElement('drawing-canvas-wrapper', 'success');
     this.updateFeedback('success', passGrade.detail);
@@ -2030,22 +2321,36 @@ export class WordTrainerEngineController {
   validateBuilderSubmission() {
     if (!this.activeWord) return;
 
-    // 1. Evaluate Component Placement via 3-Tier RST Grading Engine
+    // 1. Evaluate Component Placement via stepped 1-char-per-canvas grading
     const gradeResult = this.componentBuilder
       ? this.componentBuilder.evaluateActivePlacement(this.decompositions, this.corpus, this.attemptsLeft)
-      : { status: 'DIAGNOSTIC_FAIL', tier: 3, success: false, badge: '⚠️ Not Ready', detail: 'Component builder not ready.' };
+      : { status: 'DIAGNOSTIC_FAIL', tier: 3, success: false, badge: '⚠️ Not Ready', detail: 'Place pieces on the grid first.' };
+
+    // Stepped multi-char advance without consuming an attempt
+    if (gradeResult && gradeResult.noPenalty && gradeResult.autoAdvanceToChar !== undefined) {
+      this.flashElement('open-placement-canvas', 'success');
+      if (this.componentBuilder) {
+        this.componentBuilder.mountCharacter(gradeResult.autoAdvanceToChar);
+      }
+      this.updateFeedback('neutral', gradeResult.detail || `Nice! Now build character ${gradeResult.autoAdvanceToChar + 1}.`);
+      this.updateSubmitIdleState();
+      return;
+    }
 
     if (!gradeResult.success) {
       this.attemptsLeft = Math.max(0, this.attemptsLeft - 1);
       this.updateAttemptPips();
+      if (gradeResult.charIndex !== undefined && this.componentBuilder && this.componentBuilder.activeCharIndex !== gradeResult.charIndex) {
+        this.componentBuilder.mountCharacter(gradeResult.charIndex);
+      }
       this.shakeElement('open-placement-canvas');
       this.flashElement('open-placement-canvas', 'error');
       this.playActiveWordAudio();
 
       if (this.attemptsLeft === 0) {
-        this.updateFeedback('error', '📖 All 3 attempts used. Study the canonical components above before continuing.');
+        const failMsg = 'Out of tries. Review the character above before continuing.';
+        this.updateFeedback('error', failMsg);
 
-        // Attempts exhausted: graceful reveal & re-queue word
         if (this.componentBuilder && typeof this.componentBuilder.revealCanonicalSolution === 'function') {
           this.componentBuilder.revealCanonicalSolution();
         }
@@ -2061,20 +2366,22 @@ export class WordTrainerEngineController {
           this.showResultFeedbackPanel(false, {
             status: 'DIAGNOSTIC_FAIL',
             tier: 3,
-            badge: '📖 Solution Revealed',
-            detail: 'All 3 attempts used. Study the canonical components above before continuing.',
+            badge: '📖 Solution Shown',
+            detail: failMsg,
             isPass: false
           });
         }, 400);
       } else {
-        this.updateFeedback('error', `${gradeResult.detail} Tries left: ${this.attemptsLeft}`);
+        const humanizedFail = this.humanizeGradeResult(gradeResult, 'builder');
+        this.updateFeedback('error', `${humanizedFail.detail} Tries left: ${this.attemptsLeft}`);
       }
       return;
     }
 
-    // Pass! (Tier 1 Clean Pass or Tier 2 Soft Pass)
+    // Pass!
+    const humanizedPass = this.humanizeGradeResult(gradeResult, 'builder');
     this.flashElement('open-placement-canvas', 'success');
-    this.updateFeedback('success', gradeResult.detail);
+    this.updateFeedback('success', humanizedPass.detail);
 
     // Cement progress if completed with Guide OFF (unassisted recall) or during delayed reappearance
     const wordToCement = (!this.isScaffoldOn) ? this.activeWord : (this.isReappearanceStage ? this.anchorWord : null);
@@ -2101,12 +2408,12 @@ export class WordTrainerEngineController {
     if (this.componentBuilder) {
       this.componentBuilder.playCrystallizationAnimation(() => {
         if (this._wordSessionToken !== sessionToken) return;
-        this.showResultFeedbackPanel(true, gradeResult);
+        this.showResultFeedbackPanel(true, humanizedPass);
       });
     } else {
       setTimeout(() => {
         if (this._wordSessionToken !== sessionToken) return;
-        this.showResultFeedbackPanel(true, gradeResult);
+        this.showResultFeedbackPanel(true, humanizedPass);
       }, 400);
     }
   }
@@ -2115,52 +2422,41 @@ export class WordTrainerEngineController {
     if (!this.activeWord) return;
 
     const mode = this.getMode();
+    const conciseMeaning = getConciseEnglish(this.activeWord);
+    const rawMeaning = String(this.activeWord.english || '').trim();
+    const showMoreNotes = Boolean(rawMeaning && rawMeaning !== conciseMeaning && rawMeaning.length > 35);
 
-    // 1. Populate Word Result Header & Mobile Inline Mi Zi Ge Showcase (Decision B)
+    // 1. Populate Unified Word Result Header & Showcase
     if (this.dom.resultHanzi) this.dom.resultHanzi.textContent = this.activeWord.hanzi_simp;
     if (this.dom.resultPinyin) this.dom.resultPinyin.textContent = this.activeWord.pinyin;
-    if (this.dom.resultMeaning) this.dom.resultMeaning.textContent = this.activeWord.english;
+    if (this.dom.resultMeaning) this.dom.resultMeaning.textContent = conciseMeaning;
+    if (this.dom.resultFullNotes) {
+      this.dom.resultFullNotes.textContent = rawMeaning;
+      this.dom.resultFullNotes.classList.add('hidden');
+    }
+    if (this.dom.resultMoreNotesBtn) {
+      this.dom.resultMoreNotesBtn.classList.toggle('hidden', !showMoreNotes);
+      this.dom.resultMoreNotesBtn.textContent = 'More notes ›';
+      this.dom.resultMoreNotesBtn.setAttribute('aria-expanded', 'false');
+    }
     if (this.dom.resultDecomposition) {
-      this.dom.resultDecomposition.textContent = this.activeWord.radical_decomposition || 'Indivisible root';
+      const rawDecomp = this.activeWord.radical_decomposition ? String(this.activeWord.radical_decomposition).trim() : '';
+      this.dom.resultDecomposition.textContent = rawDecomp ? `Roots: ${rawDecomp}` : 'Single root';
     }
     this.renderResultShowcase(this.activeWord, mode);
 
-    // Defensive check: If not mastered, strictly prevent any success template leakage!
-    let grade = gradeResult;
+    // 2. Normalize feedback into plain learner-friendly copy
+    let grade;
     if (!isMastered) {
-      if (!grade || grade.tier < 3 || grade.success) {
-        grade = {
-          status: 'DIAGNOSTIC_FAIL',
-          tier: 3,
-          badge: '📖 Solution Revealed',
-          detail: 'All 3 attempts used. Study the canonical form above before continuing.',
-          isPass: false
-        };
-      } else {
-        grade = {
-          ...grade,
-          tier: 3,
-          badge: grade.badge || '📖 Solution Revealed',
-          detail: grade.detail || 'All 3 attempts used. Study the canonical form above before continuing.'
-        };
-      }
-    }
-
-    if (!grade) {
       grade = {
-        status: 'CLEAN_PASS',
-        tier: 1,
-        badge: mode === 'builder' ? '🎯 Flawless Assembly!' : '🎯 Perfect Form!',
-        detail: mode === 'builder'
-          ? 'Flawless execution! Spatial assembly and radical positioning verified.'
-          : 'Canonical stroke order and accurate angles confirmed.',
-        isPass: true
+        status: 'DIAGNOSTIC_FAIL',
+        tier: 3,
+        badge: '📖 Solution Shown',
+        detail: 'Out of tries. Review the character above before continuing.',
+        isPass: false
       };
-    }
-
-    // 2. Populate Single Detailed Diagnostic Feedback Card
-    if (this.dom.resultFeedbackTitle) {
-      this.dom.resultFeedbackTitle.textContent = mode === 'builder' ? 'COMPONENT ASSEMBLY' : 'HANZI EVALUATION';
+    } else {
+      grade = this.humanizeGradeResult(gradeResult, mode);
     }
 
     if (this.dom.drawingTierBadge && this.dom.resultFeedbackText && this.dom.feedbackDrawingCard) {
@@ -2169,53 +2465,39 @@ export class WordTrainerEngineController {
 
       if (isMastered) {
         if (grade.tier === 1) {
-          this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] leading-tight max-w-full whitespace-normal text-center bg-emerald-100 text-emerald-800 border border-emerald-600';
-          this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-2.5 sm:p-3 border-2 transition-all font-mono text-xs shadow-xs bg-emerald-50 border-emerald-500 text-emerald-950 flex flex-col gap-1.5 min-w-0 shrink-0';
+          this.dom.drawingTierBadge.className = 'font-black text-xs sm:text-[13px] leading-tight text-emerald-900';
+          this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-2.5 sm:p-3 border transition-all font-mono text-xs bg-emerald-50 border-emerald-400 text-emerald-950 flex flex-col gap-1 min-w-0 shrink-0';
           if (this.dom.resultFeedbackIcon) {
             this.dom.resultFeedbackIcon.className = 'material-symbols-outlined text-emerald-600 text-base shrink-0';
             this.dom.resultFeedbackIcon.textContent = 'verified';
           }
         } else {
-          // Tier 2 Soft Pass
-          this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] leading-tight max-w-full whitespace-normal text-center bg-teal-100 text-teal-900 border border-teal-600';
-          this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-2.5 sm:p-3 border-2 transition-all font-mono text-xs shadow-xs bg-teal-50 border-teal-500 text-teal-950 flex flex-col gap-1.5 min-w-0 shrink-0';
+          this.dom.drawingTierBadge.className = 'font-black text-xs sm:text-[13px] leading-tight text-teal-900';
+          this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-2.5 sm:p-3 border transition-all font-mono text-xs bg-teal-50 border-teal-400 text-teal-950 flex flex-col gap-1 min-w-0 shrink-0';
           if (this.dom.resultFeedbackIcon) {
             this.dom.resultFeedbackIcon.className = 'material-symbols-outlined text-teal-600 text-base shrink-0';
             this.dom.resultFeedbackIcon.textContent = 'lightbulb';
           }
         }
-        if (this.dom.resultDemoOrderBtn) {
-          if (mode !== 'builder' && grade.showOrderReplay) {
-            this.dom.resultDemoOrderBtn.classList.remove('hidden');
-          } else {
-            this.dom.resultDemoOrderBtn.classList.add('hidden');
-          }
-        }
       } else {
-        // Attempts exhausted / Review Mode
-        this.dom.drawingTierBadge.className = 'px-2 py-0.5 rounded-full font-black text-[10px] leading-tight max-w-full whitespace-normal text-center bg-amber-100 text-amber-900 border border-amber-600';
-        this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-2.5 sm:p-3 border-2 transition-all font-mono text-xs shadow-xs bg-amber-50 border-amber-500 text-amber-950 flex flex-col gap-1.5 min-w-0 shrink-0';
+        this.dom.drawingTierBadge.className = 'font-black text-xs sm:text-[13px] leading-tight text-amber-900';
+        this.dom.feedbackDrawingCard.className = 'w-full rounded-xl p-2.5 sm:p-3 border transition-all font-mono text-xs bg-amber-50 border-amber-400 text-amber-950 flex flex-col gap-1 min-w-0 shrink-0';
         if (this.dom.resultFeedbackIcon) {
           this.dom.resultFeedbackIcon.className = 'material-symbols-outlined text-amber-600 text-base shrink-0';
           this.dom.resultFeedbackIcon.textContent = 'auto_stories';
         }
-        if (this.dom.resultDemoOrderBtn) {
-          if (mode !== 'builder') {
-            this.dom.resultDemoOrderBtn.classList.remove('hidden');
-          } else {
-            this.dom.resultDemoOrderBtn.classList.add('hidden');
-          }
-        }
       }
     }
 
-    // 3. Update Next Word Button label (concise for dual button row on mobile)
+    // 3. Concise stationary CTA label
     if (this.dom.resultNextBtnText) {
-      this.dom.resultNextBtnText.textContent = isMastered ? 'NEXT WORD' : 'REVIEW NEXT';
+      this.dom.resultNextBtnText.textContent = 'Continue';
     }
 
-    // 4. Switch to Feedback View: Close phase tray, hide interaction footer, show result feedback panel, lock View B on mobile
+    // 4. Desktop & Mobile View B Deduplication: Prompt collapses so Pinyin, English & Speaker appear strictly once
     this.closeMobilePhaseBar();
+    this.setMobileResultPeek(false);
+    if (this.dom.promptArena) this.dom.promptArena.classList.add('hidden');
     if (this.dom.interactionFooter) this.dom.interactionFooter.classList.add('hidden');
     if (this.dom.resultFeedbackPanel) this.dom.resultFeedbackPanel.classList.remove('hidden');
     if (this.dom.screen) this.dom.screen.classList.add('mobile-result-active');
@@ -2226,25 +2508,22 @@ export class WordTrainerEngineController {
     this._wordSessionToken = (this._wordSessionToken || 0) + 1;
 
     this.closeMobilePhaseBar();
+    this.setMobileResultPeek(false);
     this.clearResultShowcase();
     this.attemptsLeft = 3;
     this.flashingStrokeIndex = null;
     this.updateAttemptPips();
 
     // Return to View A on Mobile and restore Prompt + Canvas/Builder + Footer
-    if (this.dom.screen) this.dom.screen.classList.remove('mobile-result-active');
+    if (this.dom.screen) this.dom.screen.classList.remove('mobile-result-active', 'mobile-result-peek');
     if (this.dom.promptArena) this.dom.promptArena.classList.remove('hidden');
     if (this.dom.interactionFooter) this.dom.interactionFooter.classList.remove('hidden');
     if (this.dom.resultFeedbackPanel) this.dom.resultFeedbackPanel.classList.add('hidden');
-    if (this.dom.resultDemoOrderBtn) this.dom.resultDemoOrderBtn.classList.add('hidden');
     if (this.dom.drawingCanvasWrapper) this.dom.drawingCanvasWrapper.style.boxShadow = '';
     const placementCanvas = (typeof document !== 'undefined') ? document.getElementById('open-placement-canvas') : null;
     if (placementCanvas) placementCanvas.style.boxShadow = '';
 
-    const savedGuide = (typeof localStorage !== 'undefined') ? localStorage.getItem('mandarin_trainer_guide_mode') : null;
-    if (savedGuide !== null) {
-      this.isScaffoldOn = (savedGuide === 'on');
-    }
+    this.isScaffoldOn = this.readSavedGuidePreference(this.getMode(), true);
     const shouldGuideBeOn = this.isReappearanceStage ? false : this.isScaffoldOn;
     this.setGuideMode(shouldGuideBeOn, !this.isReappearanceStage);
     const mode = this.getMode();
@@ -2257,7 +2536,7 @@ export class WordTrainerEngineController {
           requestAnimationFrame(() => this.componentBuilder.updateWatermarkSizing());
         }
       }
-      this.updateFeedback('neutral', 'Drag components from the dock to assemble the character.');
+      this.updateFeedback('neutral', 'Place pieces on the grid.');
     } else {
       const chars = this.activeWord.characters || Array.from(this.activeWord.hanzi_simp || '');
       const charCount = chars.length;
@@ -2273,9 +2552,10 @@ export class WordTrainerEngineController {
       if (typeof requestAnimationFrame === 'function') {
         requestAnimationFrame(() => this.syncCanvasDimensions());
       }
-      this.updateFeedback('neutral', 'Draw the character strokes on the grid to verify.');
+      this.updateFeedback('neutral', 'Trace or draw the character.');
     }
 
+    this.updateSubmitIdleState();
     this.playActiveWordAudio();
   }
 
@@ -2300,13 +2580,13 @@ export class WordTrainerEngineController {
     const pipsEl = this.dom.attemptPips;
     if (!pipsEl) return;
     if (this.attemptsLeft === 3) {
-      pipsEl.innerHTML = '<span class="pip text-[#D97706]">●</span><span class="pip text-[#D97706]">●</span><span class="pip text-[#D97706]">●</span>';
+      pipsEl.innerHTML = '<span class="pip pip-active">●</span><span class="pip pip-active">●</span><span class="pip pip-active">●</span>';
     } else if (this.attemptsLeft === 2) {
-      pipsEl.innerHTML = '<span class="pip text-[#D97706]">●</span><span class="pip text-[#D97706]">●</span><span class="pip text-black/30">○</span>';
+      pipsEl.innerHTML = '<span class="pip pip-active">●</span><span class="pip pip-active">●</span><span class="pip pip-spent text-black/25">○</span>';
     } else if (this.attemptsLeft === 1) {
-      pipsEl.innerHTML = '<span class="pip text-red-500 animate-pulse">●</span><span class="pip text-black/30">○</span><span class="pip text-black/30">○</span>';
+      pipsEl.innerHTML = '<span class="pip pip-danger text-rose-600 animate-pulse">●</span><span class="pip pip-spent text-black/25">○</span><span class="pip pip-spent text-black/25">○</span>';
     } else {
-      pipsEl.innerHTML = '<span class="pip text-black/30">○</span><span class="pip text-black/30">○</span><span class="pip text-black/30">○</span>';
+      pipsEl.innerHTML = '<span class="pip pip-spent text-black/25">○</span><span class="pip pip-spent text-black/25">○</span><span class="pip pip-spent text-black/25">○</span>';
     }
   }
 
@@ -2317,19 +2597,22 @@ export class WordTrainerEngineController {
     if (!banner || !text) return;
 
     text.textContent = message;
-    banner.classList.remove('shake-subtle', 'bg-slate-50', 'bg-white', 'border-black/20', 'text-black/70', 'text-black/80',
-      'bg-emerald-50', 'border-emerald-500', 'border-emerald-600', 'text-emerald-950',
-      'bg-amber-50', 'border-amber-500', 'border-amber-600', 'text-amber-950',
-      'bg-rose-50', 'border-rose-500', 'border-rose-600', 'text-rose-950');
+    banner.classList.remove(
+      'shake-subtle', 'toast-idle-compact',
+      'bg-slate-50', 'bg-white', 'border-black/15', 'border-black/20', 'text-black/70', 'text-black/75', 'text-black/80',
+      'bg-emerald-50', 'border-emerald-400', 'border-emerald-500', 'border-emerald-600', 'text-emerald-950',
+      'bg-amber-50', 'border-amber-400', 'border-amber-500', 'border-amber-600', 'text-amber-950',
+      'bg-rose-50', 'border-rose-500', 'border-rose-600', 'text-rose-950'
+    );
 
     if (status === 'correct' || status === 'success') {
-      banner.classList.add('bg-emerald-50', 'border-emerald-500', 'text-emerald-950');
+      banner.classList.add('bg-emerald-50', 'border-emerald-400', 'text-emerald-950');
       if (icon) {
         icon.className = 'material-symbols-outlined text-emerald-600 text-base lg:text-lg leading-none shrink-0';
         icon.textContent = 'verified';
       }
     } else if (status === 'error' || status === 'hanzi-error' || status === 'tone-error' || status === 'both-error') {
-      banner.classList.add('bg-amber-50', 'border-amber-500', 'text-amber-950');
+      banner.classList.add('bg-amber-50', 'border-amber-400', 'text-amber-950');
       void banner.offsetWidth;
       banner.classList.add('shake-subtle');
       if (icon) {
@@ -2337,9 +2620,9 @@ export class WordTrainerEngineController {
         icon.textContent = 'warning';
       }
     } else {
-      banner.classList.add('bg-white', 'border-black/20', 'text-black/70');
+      banner.classList.add('toast-idle-compact', 'bg-slate-50', 'border-black/15', 'text-black/75');
       if (icon) {
-        icon.className = 'material-symbols-outlined text-black/50 text-base lg:text-lg leading-none shrink-0';
+        icon.className = 'material-symbols-outlined text-black/45 text-base lg:text-lg leading-none shrink-0';
         icon.textContent = 'info';
       }
     }
@@ -2348,35 +2631,6 @@ export class WordTrainerEngineController {
   // ----------------------------------------------------
   // 8. MODAL CONTROLLERS & QUEUE ADVANCEMENT
   // ----------------------------------------------------
-  openRevealModal(isMastered) {
-    this.closeMobilePhaseBar();
-    const modal = this.dom.cardRevealModal;
-    const word = this.activeWord;
-    if (!modal || !word) return;
-
-    if (this.dom.revealModalBadge) {
-      if (isMastered) {
-        this.dom.revealModalBadge.className = 'font-mono text-xs font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-600 px-2.5 py-0.5 rounded-full flex items-center gap-1';
-        this.dom.revealModalBadge.innerHTML = '🎉 正确 (CORRECT!)';
-      } else {
-        this.dom.revealModalBadge.className = 'font-mono text-xs font-black uppercase bg-amber-100 text-amber-900 border border-amber-600 px-2.5 py-0.5 rounded-full flex items-center gap-1';
-        this.dom.revealModalBadge.innerHTML = '📖 答案解析 (REVIEW)';
-      }
-    }
-
-    if (this.dom.revealHanzi) this.dom.revealHanzi.textContent = word.hanzi_simp;
-    if (this.dom.revealPinyin) {
-      const toneDesc = (word.tones || []).map(t => `Tone ${t}`).join(', ');
-      this.dom.revealPinyin.textContent = `${word.pinyin} (${toneDesc})`;
-    }
-    if (this.dom.revealMeaning) this.dom.revealMeaning.textContent = word.english;
-    if (this.dom.revealDecomposition) this.dom.revealDecomposition.textContent = word.radical_decomposition || 'Indivisible root';
-    if (this.dom.revealSentenceHanzi) this.dom.revealSentenceHanzi.textContent = word.sentence_hanzi || '';
-    if (this.dom.revealSentenceEn) this.dom.revealSentenceEn.textContent = word.sentence_english ? `"${word.sentence_english}"` : '';
-
-    modal.classList.remove('hidden');
-  }
-
   advanceToNextWord() {
     const pData = this.state.phases[this.activePhase];
     const completedSet = new Set((pData && pData.completedWordIds) || []);
@@ -2428,15 +2682,17 @@ export class WordTrainerEngineController {
     this._completedModalPhase = targetPhase;
 
     const words = this.phaseWordsMap[targetPhase] || [];
+    const phaseMeta = PHASE_META_MAP[targetPhase] || PHASE_META_MAP[1];
+    const nextMeta = PHASE_META_MAP[targetPhase + 1] || null;
     if (this.dom.phaseCompleteTitle) {
       this.dom.phaseCompleteTitle.textContent = `🎉 Phase ${targetPhase} Complete!`;
     }
     if (this.dom.phaseCompleteSummary) {
-      this.dom.phaseCompleteSummary.textContent = `You have mastered all ${words.length} vocabulary words in this phase.`;
+      this.dom.phaseCompleteSummary.textContent = `You mastered all ${words.length} words in ${phaseMeta.title}!`;
     }
     if (this.dom.advancePhaseBtn) {
-      if (targetPhase < 5) {
-        this.dom.advancePhaseBtn.innerHTML = `<span>Advance to Phase ${targetPhase + 1}</span><span class="material-symbols-outlined text-base">arrow_forward</span>`;
+      if (targetPhase < 5 && nextMeta) {
+        this.dom.advancePhaseBtn.innerHTML = `<span>Advance to Phase ${targetPhase + 1}: ${nextMeta.short}</span><span class="material-symbols-outlined text-base">arrow_forward</span>`;
         this.dom.advancePhaseBtn.classList.remove('hidden');
       } else {
         this.dom.advancePhaseBtn.classList.add('hidden');
