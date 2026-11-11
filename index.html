@@ -464,9 +464,11 @@
       <!-- [04] PRONUNCIATION LAB SCREEN (#engine-screen) -->
       <!-- ELSA 3-Tier Progressive Disclosure | Settings Drawer | Scroll-Safe -->
       <!-- ======================================================== -->
-      <div id="engine-screen" class="relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto h-full max-h-full p-3 sm:p-4 lg:px-8 lg:py-5 flex flex-col justify-between overflow-hidden lg:overflow-y-auto hidden">
-        <!-- Single Low-Opacity Watermark -->
-        <div class="absolute -bottom-8 -left-6 pointer-events-none z-0 font-chinese font-black text-black/[0.04] text-9xl select-none">音</div>
+      <div id="engine-screen" class="relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto h-full max-h-full p-3 sm:p-4 lg:px-8 lg:py-5 flex flex-col justify-between overflow-hidden lg:overflow-y-auto no-scrollbar hidden">
+        <!-- Single Low-Opacity Watermark (contained so it never expands scrollHeight) -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none z-0" aria-hidden="true">
+          <div class="absolute -bottom-8 -left-6 font-chinese font-black text-black/[0.04] text-9xl select-none">音</div>
+        </div>
 
         <!-- [1] Top 3-Region Navigation Bar -->
         <header class="w-full flex items-center justify-between gap-2 shrink-0 mb-2 relative z-10">
@@ -749,10 +751,12 @@
       <!-- [04.5] INTERMEDIATE MODE SELECTION SCREEN (#mode-selection-screen) -->
       <!-- Scroll-Safe Gateway | Single Back Control | Mastery Progress -->
       <!-- ======================================================== -->
-      <div id="mode-selection-screen" class="mode-select-container relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto h-full max-h-full p-4 sm:p-7 lg:px-8 lg:py-6 flex flex-col justify-between overflow-y-auto overscroll-contain hidden select-none">
+      <div id="mode-selection-screen" class="mode-select-container relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto h-full max-h-full p-4 sm:p-7 lg:px-8 lg:py-6 flex flex-col justify-between overflow-y-auto no-scrollbar overscroll-contain hidden select-none">
 
-        <!-- Single Subtle Corner Watermark -->
-        <div class="absolute -bottom-6 -left-6 pointer-events-none z-0 font-chinese font-black text-white/[0.06] text-8xl sm:text-9xl select-none">格</div>
+        <!-- Single Subtle Corner Watermark (contained so it never triggers scrollbars) -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none z-0" aria-hidden="true">
+          <div class="absolute -bottom-6 -left-6 font-chinese font-black text-white/[0.06] text-8xl sm:text-9xl select-none">格</div>
+        </div>
 
         <!-- Desktop Widescreen 2-Column Split -->
         <div class="w-full my-auto flex-1 flex flex-col justify-center gap-3 lg:grid lg:grid-cols-12 lg:gap-16 xl:gap-24 lg:items-center py-1.5 relative z-10">
@@ -837,9 +841,11 @@
       <!-- [05] WORD TRAINER SCREEN (#word-trainer-screen) -->
       <!-- Strict CSS-Variable Dual Theme | Zero Non-Canvas Drift -->
       <!-- ======================================================== -->
-      <div id="word-trainer-screen" class="theme-calligraphy relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto h-full max-h-full lg:h-full lg:max-h-none p-2 sm:p-3 lg:px-8 lg:py-3 flex flex-col justify-between overflow-hidden lg:overflow-y-auto hidden">
-        <!-- Single Theme-Linked Watermark -->
-        <div id="word-trainer-watermark" class="absolute -bottom-8 -left-6 pointer-events-none z-0 font-chinese font-black text-9xl select-none">字</div>
+      <div id="word-trainer-screen" class="theme-calligraphy relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto h-full max-h-full lg:h-full lg:max-h-none p-2 sm:p-3 lg:px-8 lg:py-3 flex flex-col justify-between overflow-hidden lg:overflow-y-auto no-scrollbar hidden">
+        <!-- Single Theme-Linked Watermark (contained so it never triggers desktop scrollbars) -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none z-0" aria-hidden="true">
+          <div id="word-trainer-watermark" class="absolute -bottom-8 -left-6 font-chinese font-black text-9xl select-none">字</div>
+        </div>
 
         <!-- [1] Unified 3-Region Top Navigation Bar -->
         <header class="w-full flex items-center justify-between shrink-0 mb-1.5 relative z-10 gap-1.5">
@@ -949,7 +955,7 @@
 
               <!-- Square Mi Zi Ge Canvas Slot -->
               <div class="canvas-fit-slot w-full flex-1 min-h-0 flex items-center justify-center">
-                <div id="drawing-canvas-wrapper" class="relative canvas-fit-square lg:w-[360px] lg:h-[360px] xl:w-[380px] xl:h-[380px] bg-[#fffdf9] border-2 border-black rounded-2xl flex items-center justify-center overflow-hidden select-none">
+                <div id="drawing-canvas-wrapper" class="relative canvas-fit-square lg:w-[min(360px,46dvh)] lg:h-[min(360px,46dvh)] xl:w-[min(380px,48dvh)] xl:h-[min(380px,48dvh)] bg-[#fffdf9] border-2 border-black rounded-2xl flex items-center justify-center overflow-hidden select-none">
                   <!-- Traditional 8-Quadrant Asterisk Grid (米字格) themed via CSS tokens -->
                   <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
                     <line x1="50" y1="0" x2="50" y2="100" class="wt-grid-stroke" stroke-width="1.5" stroke-dasharray="3,3" />
@@ -1006,7 +1012,7 @@
 
               <!-- Square Builder Drop Surface -->
               <div id="open-placement-canvas-container" class="canvas-fit-slot w-full flex-1 min-h-0 flex items-center justify-center select-none">
-                <div id="open-placement-canvas" class="relative canvas-fit-square lg:w-[360px] lg:h-[360px] xl:w-[380px] xl:h-[380px] bg-[#fffdf9] border-2 border-black rounded-2xl flex items-center justify-center overflow-hidden select-none touch-none">
+                <div id="open-placement-canvas" class="relative canvas-fit-square lg:w-[min(360px,46dvh)] lg:h-[min(360px,46dvh)] xl:w-[min(380px,48dvh)] xl:h-[min(380px,48dvh)] bg-[#fffdf9] border-2 border-black rounded-2xl flex items-center justify-center overflow-hidden select-none touch-none">
                   <svg id="placement-grid-svg" class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
                     <line x1="50" y1="0" x2="50" y2="100" class="wt-grid-stroke" stroke-width="1.5" stroke-dasharray="3,3" />
                     <line x1="0" y1="50" x2="100" y2="50" class="wt-grid-stroke" stroke-width="1.5" stroke-dasharray="3,3" />
