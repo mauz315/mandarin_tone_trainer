@@ -9,6 +9,7 @@
  */
 
 import { PitchTracker } from "./pitchTracker.js";
+import { PinyinUtils } from "./pinyinUtils.js";
 
 export class AlignerClient {
   constructor() {
@@ -93,7 +94,7 @@ export class AlignerClient {
 
         const result = await promise;
         if (result && result.syllables && result.syllables.length === n) {
-          return result.syllables;
+          return this._applyContextualTones(result.syllables, word, pinyin);
         }
       } catch (err) {
         console.warn("[AlignerClient] Neural alignment fell back to VAD:", err.message);
@@ -101,7 +102,33 @@ export class AlignerClient {
     }
 
     // High-accuracy VAD Fallback
-    return this._fallbackVadAlignment(pcmFloat32, sampleRate, pinyin);
+    return this._applyContextualTones(
+      this._fallbackVadAlignment(pcmFloat32, sampleRate, pinyin),
+      word,
+      pinyin
+    );
+  }
+
+  /**
+   * Enriches aligned syllables with contextual sandhi targets (T3, 一, 不) and position metadata.
+   */
+  _applyContextualTones(syllableItems, word, pinyin) {
+    const resolved = PinyinUtils.resolveContextualTones(word, pinyin);
+    return syllableItems.map((syl, i) => {
+      const ctx = resolved[i];
+      if (!ctx) return syl;
+      return {
+        ...syl,
+        syllable: syl.syllable || ctx.syllable,
+        tone: ctx.expectedTone,
+        citationTone: ctx.citationTone,
+        expectedTone: ctx.expectedTone,
+        sandhiRule: ctx.sandhiRule,
+        syllableIndex: ctx.syllableIndex,
+        totalSyllables: ctx.totalSyllables,
+        position: ctx.position,
+      };
+    });
   }
 
   /**

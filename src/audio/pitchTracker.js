@@ -17,7 +17,183 @@ const DEFAULT_F0_MIN = 60.0;   // Deep male voice lower bound (Hz)
 const DEFAULT_F0_MAX = 500.0;  // High child/female voice upper bound (Hz)
 const DEFAULT_THRESHOLD = 0.12;
 
+function exactMedian(arr) {
+  if (!arr || arr.length === 0) return 0;
+  const s = [...arr].sort((a, b) => a - b);
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 === 1 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+}
+
+function getVoicedIslands(track) {
+  const islands = [];
+  let start = -1;
+  for (let i = 0; i < track.length; i++) {
+    if (track[i] > 0) {
+      if (start === -1) start = i;
+    } else if (start !== -1) {
+      islands.push([start, i - 1]);
+      start = -1;
+    }
+  }
+  if (start !== -1) {
+    islands.push([start, track.length - 1]);
+  }
+  return islands;
+}
+
 export class PitchTracker {
+  /**
+   * Remove boundary clicks, isolated spikes, and octave-doubling/halving artifacts
+   * from a raw Hz F0 track.
+   *
+   * @param {number[]} f0Array
+   * @returns {number[]}
+   */
+  static cleanF0Track(f0Array) {
+    if (!Array.isArray(f0Array) || f0Array.length === 0) return [];
+    const cleaned = [...f0Array];
+
+    // 1. Prune 1-frame spikes first, then isolated subharmonic micro-islands (> 10 st jump vs adjacent syllable)
+    for (const [s, e] of getVoicedIslands(cleaned)) {
+      if (s === e) cleaned[s] = 0.0;
+    }
+    const islands1 = getVoicedIslands(cleaned);
+    for (let i = 0; i < islands1.length; i++) {
+      const [s, e] = islands1[i];
+      const len = e - s + 1;
+      if (len <= 3) {
+        const vals = [];
+        for (let k = s; k <= e; k++) if (cleaned[k] > 0) vals.push(cleaned[k]);
+        if (vals.length === 0) continue;
+        const subMed = exactMedian(vals);
+        const adjBounds = [];
+        if (i > 0) {
+          const pe = islands1[i - 1][1];
+          if (cleaned[pe] > 0) adjBounds.push(cleaned[pe]);
+        }
+        if (i + 1 < islands1.length) {
+          const ns = islands1[i + 1][0];
+          if (cleaned[ns] > 0) adjBounds.push(cleaned[ns]);
+        }
+        if (adjBounds.length > 0 && Math.min(...adjBounds.map((nb) => Math.abs(12 * Math.log2(subMed / nb)))) > 10.5) {
+          for (let idx = s; idx <= e; idx++) cleaned[idx] = 0.0;
+        }
+      }
+    }
+
+    // 2. Octave-error folding (> 7.5 st) using 5-pt neighborhood + upward octave-doubling guard
+    const allVoiced = cleaned.filter((v) => v > 0);
+    const globalMed = allVoiced.length > 0 ? exactMedian(allVoiced) : 0;
+    const folded = [...cleaned];
+    for (const [s, e] of getVoicedIslands(cleaned)) {
+      if (s === e) {
+        folded[s] = 0.0;
+        continue;
+      }
+      for (let idx = s; idx <= e; idx++) {
+        const win = [];
+        for (let j = Math.max(s, idx - 2); j <= Math.min(e, idx + 2); j++) {
+          if (cleaned[j] > 0) win.push(cleaned[j]);
+        }
+        if (win.length === 0) continue;
+        const med = exactMedian(win);
+        const cur = cleaned[idx];
+        if (med <= 0 || cur <= 0) continue;
+
+        if (globalMed > 0 && 12 * Math.log2(cur / globalMed) > 9.5) {
+          const dn = cur * 0.5;
+          if (Math.abs(12 * Math.log2(dn / globalMed)) <= 3.5) {
+            folded[idx] = dn;
+            continue;
+          }
+        }
+        if (Math.abs(12 * Math.log2(cur / med)) > 7.5) {
+          const up = cur * 2.0;
+          const dn = cur * 0.5;
+          const dUp = Math.abs(12 * Math.log2(up / med));
+          const dDn = Math.abs(12 * Math.log2(dn / med));
+          if (Math.min(dUp, dDn) <= 3.5) {
+            folded[idx] = dUp <= dDn ? up : dn;
+          } else {
+            folded[idx] = 0.0;
+          }
+        }
+      }
+    }
+
+    // 3. Trim boundary cliffs (> 6.0 st vs adjacent interior median)
+    const trimmed = [...folded];
+    for (const [s, e] of getVoicedIslands(folded)) {
+      const len = e - s + 1;
+      if (len === 1) {
+        trimmed[s] = 0.0;
+      } else if (len === 3) {
+        const midVal = folded[s + 1];
+        if (midVal > 0) {
+          for (const idx of [s, e]) {
+            if (trimmed[idx] > 0 && Math.abs(12 * Math.log2(trimmed[idx] / midVal)) > 6.0) {
+              trimmed[idx] = 0.0;
+            }
+          }
+        }
+      } else if (len >= 4) {
+        const leftWin = [];
+        for (let j = s + 2; j <= Math.min(e, s + 4); j++) {
+          if (folded[j] > 0) leftWin.push(folded[j]);
+        }
+        const leftRef = leftWin.length > 0 ? exactMedian(leftWin) : folded[s + 2];
+        for (const idx of [s, s + 1]) {
+          if (leftRef > 0 && trimmed[idx] > 0 && Math.abs(12 * Math.log2(trimmed[idx] / leftRef)) > 6.0) {
+            trimmed[idx] = 0.0;
+          }
+        }
+        const rightWin = [];
+        for (let j = Math.max(s, e - 4); j <= e - 2; j++) {
+          if (folded[j] > 0) rightWin.push(folded[j]);
+        }
+        const rightRef = rightWin.length > 0 ? exactMedian(rightWin) : folded[e - 2];
+        for (const idx of [e - 1, e]) {
+          if (rightRef > 0 && trimmed[idx] > 0 && Math.abs(12 * Math.log2(trimmed[idx] / rightRef)) > 6.0) {
+            trimmed[idx] = 0.0;
+          }
+        }
+        if (len >= 8) {
+          const deepRight = [];
+          for (let j = Math.max(s, e - 5); j <= e - 3; j++) {
+            if (folded[j] > 0) deepRight.push(folded[j]);
+          }
+          const deepRef = deepRight.length > 0 ? exactMedian(deepRight) : folded[e - 3];
+          if (
+            deepRef > 0 &&
+            [e - 2, e - 1, e].every((idx) => folded[idx] > 0 && folded[idx] < 115.0 && Math.abs(12 * Math.log2(folded[idx] / deepRef)) > 8.0)
+          ) {
+            for (const idx of [e - 2, e - 1, e]) trimmed[idx] = 0.0;
+          }
+        }
+      }
+    }
+
+    // 4. 3-point within-island median smoother
+    const smoothed = [...trimmed];
+    for (const [s, e] of getVoicedIslands(trimmed)) {
+      if (s === e) {
+        smoothed[s] = 0.0;
+        continue;
+      }
+      for (let idx = s; idx <= e; idx++) {
+        const win = [];
+        for (let j = Math.max(s, idx - 1); j <= Math.min(e, idx + 1); j++) {
+          if (trimmed[j] > 0) win.push(trimmed[j]);
+        }
+        if (win.length > 0) {
+          smoothed[idx] = exactMedian(win);
+        }
+      }
+    }
+
+    return smoothed;
+  }
+
   /**
    * Run YIN pitch tracking on a Float32Array PCM buffer.
    *
@@ -31,6 +207,7 @@ export class PitchTracker {
     const f0Max = options.f0Max || DEFAULT_F0_MAX;
     const threshold = options.threshold || DEFAULT_THRESHOLD;
     const frameMs = options.frameMs || 10.0;
+    const useEnergyGate = options.energyGate !== false;
 
     const frameSize = Math.floor(sampleRate * 0.025); // 25ms window
     const hopSize = Math.floor((sampleRate * frameMs) / 1000);
@@ -40,8 +217,8 @@ export class PitchTracker {
 
     const n = pcm.length;
     const times = [];
-    const f0 = [];
-    const voiced = [];
+    const rawF0 = [];
+    const rmsArr = [];
 
     // Pre-allocated difference buffers
     const d = new Float64Array(tauMax + 1);
@@ -49,6 +226,13 @@ export class PitchTracker {
 
     let t = 0;
     while (t + frameSize <= n) {
+      let sumSq = 0.0;
+      for (let j = 0; j < frameSize; j++) {
+        const s = pcm[t + j];
+        sumSq += s * s;
+      }
+      rmsArr.push(Math.sqrt(sumSq / frameSize));
+
       // Step 1: Difference function
       for (let tau = 1; tau <= tauMax; tau++) {
         let sum = 0.0;
@@ -99,20 +283,31 @@ export class PitchTracker {
 
       const isVoiced = pitchHz >= f0Min && pitchHz <= f0Max;
       times.push(t / sampleRate);
-      f0.push(isVoiced ? pitchHz : 0.0);
-      voiced.push(isVoiced);
+      rawF0.push(isVoiced ? pitchHz : 0.0);
 
       t += hopSize;
     }
 
-    // Compute speaker median Hz across voiced frames
-    const voicedF0 = f0.filter((v) => v > 0);
-    let medianHz = 0;
-    if (voicedF0.length > 0) {
-      const sorted = [...voicedF0].sort((a, b) => a - b);
-      medianHz = sorted[Math.floor(sorted.length / 2)];
+    // Adaptive RMS energy gate (silence/breath floor)
+    if (useEnergyGate && rmsArr.length > 0) {
+      const sortedRms = [...rmsArr].sort((a, b) => a - b);
+      const p95Idx = Math.min(sortedRms.length - 1, Math.floor(0.95 * (sortedRms.length - 1)));
+      const peakRms = sortedRms[p95Idx];
+      const absFloor = options.absRmsFloor !== undefined ? options.absRmsFloor : 0.002;
+      const gate = Math.max(absFloor, 0.05 * peakRms);
+      for (let i = 0; i < rawF0.length; i++) {
+        if (rmsArr[i] < gate) {
+          rawF0[i] = 0.0;
+        }
+      }
     }
 
+    const f0 = PitchTracker.cleanF0Track(rawF0);
+    const voiced = f0.map((v) => v > 0);
+
+    // Compute speaker median Hz across cleaned voiced frames
+    const voicedF0 = f0.filter((v) => v > 0);
+    const medianHz = voicedF0.length > 0 ? exactMedian(voicedF0) : 0;
     const voicedRatio = f0.length > 0 ? voicedF0.length / f0.length : 0;
 
     return {
@@ -232,23 +427,61 @@ export class PitchTracker {
 
     // Pad slightly (50ms before/after)
     const padFrames = Math.floor(0.05 / 0.01);
-    const startSec = Math.max(0, (firstSpeech - padFrames) * (hopSize / sampleRate));
-    const endSec = Math.min(pcm.length / sampleRate, (lastSpeech + padFrames) * (hopSize / sampleRate));
-    const totalDuration = endSec - startSec;
+    const startFrame = Math.max(0, firstSpeech - padFrames);
+    const endFrame = Math.min(numFrames - 1, lastSpeech + padFrames);
+    const frameSec = hopSize / sampleRate;
+    const startSec = startFrame * frameSec;
+    const endSec = Math.min(pcm.length / sampleRate, endFrame * frameSec);
 
     // Single syllable
     if (expectedSyllables <= 1) {
       return [{ start: startSec, end: endSec }];
     }
 
-    // Multi-syllable fallback: split voiced speech into equal chunks or local energy minima
+    // Multi-syllable RMS valley search (5-frame moving average smoothing)
+    const smoothRms = new Float32Array(numFrames);
+    for (let i = 0; i < numFrames; i++) {
+      let acc = 0;
+      let cnt = 0;
+      for (let j = Math.max(0, i - 2); j <= Math.min(numFrames - 1, i + 2); j++) {
+        acc += energies[j];
+        cnt++;
+      }
+      smoothRms[i] = cnt > 0 ? acc / cnt : energies[i];
+    }
+
+    const stepFrames = (lastSpeech - firstSpeech) / expectedSyllables;
+    const halfWin = Math.max(2, Math.round(stepFrames * 0.35));
+    const minSylFrames = 8; // 80ms minimum syllable duration
+
+    const cutFrames = [startFrame];
+    let prevFrame = startFrame;
+    for (let k = 1; k < expectedSyllables; k++) {
+      const nom = firstSpeech + Math.round(((lastSpeech - firstSpeech) * k) / expectedSyllables);
+      const lo = Math.max(prevFrame + minSylFrames, nom - halfWin);
+      const hi = Math.min(lastSpeech - (expectedSyllables - k) * minSylFrames, nom + halfWin);
+
+      let cutFrame = Math.max(prevFrame + 1, Math.min(endFrame - 1, nom));
+      if (hi > lo) {
+        let minVal = Infinity;
+        cutFrame = lo;
+        for (let fIdx = lo; fIdx <= hi; fIdx++) {
+          if (smoothRms[fIdx] < minVal) {
+            minVal = smoothRms[fIdx];
+            cutFrame = fIdx;
+          }
+        }
+      }
+      cutFrames.push(cutFrame);
+      prevFrame = cutFrame;
+    }
+    cutFrames.push(endFrame);
+
     const result = [];
-    const step = totalDuration / expectedSyllables;
     for (let k = 0; k < expectedSyllables; k++) {
-      result.push({
-        start: startSec + k * step,
-        end: startSec + (k + 1) * step,
-      });
+      const sSec = k === 0 ? startSec : cutFrames[k] * frameSec;
+      const eSec = k === expectedSyllables - 1 ? endSec : Math.max(sSec + 0.02, cutFrames[k + 1] * frameSec);
+      result.push({ start: sSec, end: eSec });
     }
 
     return result;

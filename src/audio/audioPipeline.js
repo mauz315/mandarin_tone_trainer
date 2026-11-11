@@ -22,10 +22,14 @@ import { AudioRecorder } from "./recorder.js";
 import { PitchTracker } from "./pitchTracker.js";
 import { AlignerClient } from "./alignerClient.js";
 import { DTWComparator } from "./dtwComparator.js";
-import { ToneClassifier } from "./toneClassifier.js";
 import { PinyinUtils } from "./pinyinUtils.js";
 import { InitialEvaluator } from "./initialEvaluator.js";
 import { FormantTracker } from "./formantTracker.js";
+import {
+  scoreSyllableTone,
+  computeSyllableCoaching,
+  computeUtterancePriority,
+} from "./toneGrading.js";
 
 export class AudioPipeline {
   constructor(options = {}) {
@@ -78,11 +82,7 @@ export class AudioPipeline {
 
     const { pcmFloat32, sampleRate, duration, audioBlob } = recordResult;
 
-    // Step 1: Overall utterance pitch extraction
-    const overallPitch = PitchTracker.extractF0(pcmFloat32, sampleRate);
-    const userMedianHz = overallPitch.medianHz;
-
-    // Step 2: Temporal syllable alignment (Sherpa-ONNX Worker or VAD)
+    // Step 1: Temporal syllable alignment (Sherpa-ONNX Worker or Energy-Valley VAD) BEFORE baseline calculation
     const alignedSyllables = await this.aligner.align({
       pcmFloat32,
       sampleRate,
@@ -90,22 +90,54 @@ export class AudioPipeline {
       pinyin,
     });
 
-    // Step 3: Per-syllable pitch extraction & normalization
-    const processedSyllables = alignedSyllables.map((syl, i) => {
+    // Step 2: Per-syllable cleaned YIN pitch extraction & aligned-window speaker medianHz
+    const perSyllableAudio = alignedSyllables.map((syl) => {
       const startSample = Math.max(0, Math.floor(syl.start * sampleRate));
       const endSample = Math.min(pcmFloat32.length, Math.floor(syl.end * sampleRate));
       const syllablePcm = pcmFloat32.slice(startSample, endSample);
+      const syllablePitch = syllablePcm.length > 0
+        ? PitchTracker.extractF0(syllablePcm, sampleRate)
+        : { f0: [], voiced: [], voicedRatio: 0 };
+      return { syl, syllablePcm, syllablePitch };
+    });
 
-      let syllablePitch = { f0: [], voiced: [] };
+    const alignedVoicedHz = [];
+    let totalAlignedFrames = 0;
+    for (const item of perSyllableAudio) {
+      totalAlignedFrames += item.syllablePitch.f0.length;
+      for (const hz of item.syllablePitch.f0) {
+        if (hz > 0) alignedVoicedHz.push(hz);
+      }
+    }
+
+    let userMedianHz = 0;
+    let voicedRatio = totalAlignedFrames > 0
+      ? Math.round((alignedVoicedHz.length / totalAlignedFrames) * 1000) / 1000
+      : 0;
+    if (alignedVoicedHz.length >= 3) {
+      alignedVoicedHz.sort((a, b) => a - b);
+      const mid = Math.floor(alignedVoicedHz.length / 2);
+      userMedianHz = alignedVoicedHz.length % 2 === 1
+        ? alignedVoicedHz[mid]
+        : (alignedVoicedHz[mid - 1] + alignedVoicedHz[mid]) / 2;
+      userMedianHz = Math.round(userMedianHz * 10) / 10;
+    } else {
+      const overallPitch = PitchTracker.extractF0(pcmFloat32, sampleRate);
+      userMedianHz = overallPitch.medianHz;
+      voicedRatio = overallPitch.voicedRatio;
+    }
+
+    // Step 3: Per-syllable contour normalization & unified context-aware tone grading
+    const processedSyllables = perSyllableAudio.map(({ syl, syllablePcm, syllablePitch }, i) => {
       let userNormContour = null;
-
-      if (syllablePcm.length > 0) {
-        syllablePitch = PitchTracker.extractF0(syllablePcm, sampleRate);
+      if (syllablePitch.f0.length > 0 && userMedianHz > 0) {
         const { semitones } = PitchTracker.normalizeToSemitones(syllablePitch.f0, userMedianHz);
         userNormContour = PitchTracker.resampleContour(semitones, 30);
       }
 
-      // Grab matching reference contour from precalculated tone_profiles.json
+      const targetTone = syl.expectedTone ?? syl.tone ?? 1;
+
+      // Grab matching reference contour from precalculated tone_profiles*.json
       let refContour = null;
       if (referenceProfile?.syllables?.[i]?.f0_norm && referenceProfile.syllables[i].f0_norm.length >= 2) {
         refContour = PitchTracker.resampleContour(referenceProfile.syllables[i].f0_norm, 30);
@@ -118,16 +150,18 @@ export class AudioPipeline {
         refContour = PitchTracker.resampleContour(sylSlice, 30);
       }
       if (!refContour || refContour.length < 2) {
-        refContour = DTWComparator.getCanonicalContour(syl.tone, 30);
+        refContour = DTWComparator.getCanonicalContour(targetTone, 30);
       }
 
-      // Phase 4: DTW Trajectory Matching & Directional Slope Classification (Tone)
-      const dtwResult = DTWComparator.compare(userNormContour, refContour);
-      const evalResult = ToneClassifier.evaluate(userNormContour, syl.tone, syl.syllable);
-      const toneScore = userNormContour
-        ? Math.round(0.60 * dtwResult.score + 0.40 * evalResult.score)
-        : 35;
-      const toneTier = toneScore >= 85 ? "EMERALD" : (toneScore >= 65 ? "AMBER" : "ROSE");
+      // Context-Aware Tone Classifier + Permissive Corridor DTW
+      const {
+        toneScore,
+        toneTier,
+        evalResult,
+        dtwResult,
+        effectiveDtwScore,
+        registerShiftSt,
+      } = scoreSyllableTone(userNormContour, refContour, syl);
 
       // Phonetic Triad: Pinyin linguistic decomposition
       const rawSylPinyin = syl.syllable || syl.pinyin || (pinyin ? pinyin.trim().split(/\s+/)[i] : "") || "";
@@ -150,34 +184,21 @@ export class AudioPipeline {
         ? Math.round(0.50 * toneScore + 0.30 * finalResult.score + 0.20 * initialResult.score)
         : 35;
 
-      // The "One Critical Fix" Feedback Hierarchy per syllable: Tone (<65%) -> Final (<65%) -> Initial (<65%)
-      let sylPriority = "PERFECT";
-      let sylAdvice = "Excellent pronunciation! All phonemic targets verified.";
-
-      if (toneScore < 65) {
-        sylPriority = "TONE";
-        sylAdvice = evalResult.advice || `Tone ${syl.tone} pitch contour collapsed. Adjust your pitch direction.`;
-      } else if (finalResult.score < 65) {
-        sylPriority = "FINAL";
-        sylAdvice = finalResult.advice || `Vowel resonance muffled. Adjust your mouth opening.`;
-      } else if (initialResult.score < 65) {
-        sylPriority = "INITIAL";
-        sylAdvice = initialResult.advice || `Consonant burst timing off. Adjust your breath puff.`;
-      } else if (toneScore < 85) {
-        sylPriority = "TONE";
-        sylAdvice = evalResult.advice || `Good tone contour. Polish your pitch stability.`;
-      } else if (finalResult.score < 85) {
-        sylPriority = "FINAL";
-        sylAdvice = finalResult.advice || `Almost clear vowel. Fine-tune your lip and jaw position.`;
-      } else if (initialResult.score < 85) {
-        sylPriority = "INITIAL";
-        sylAdvice = initialResult.advice || `Good consonant attack. Keep the release crisp.`;
-      }
+      const { coachingPriority: sylPriority, coachingAdvice: sylAdvice } = computeSyllableCoaching(
+        toneScore,
+        evalResult,
+        finalResult,
+        initialResult,
+        targetTone
+      );
 
       const toneResultObj = {
-        tone: syl.tone,
+        tone: targetTone,
+        citationTone: syl.citationTone ?? targetTone,
+        expectedTone: targetTone,
+        sandhiRule: syl.sandhiRule ?? null,
         score: toneScore,
-        dtwScore: dtwResult.score,
+        dtwScore: effectiveDtwScore,
         slopeScore: evalResult.score,
         sublabel: evalResult.comment || "✓ Exact",
         status: evalResult.status,
@@ -188,14 +209,21 @@ export class AudioPipeline {
 
       return {
         syllable: syl.syllable,
-        tone: syl.tone,
+        tone: targetTone,
+        citationTone: syl.citationTone ?? targetTone,
+        expectedTone: targetTone,
+        sandhiRule: syl.sandhiRule ?? null,
+        syllableIndex: syl.syllableIndex ?? i,
+        totalSyllables: syl.totalSyllables ?? alignedSyllables.length,
+        position: syl.position || (alignedSyllables.length === 1 ? "single" : (i === 0 ? "initial" : (i === alignedSyllables.length - 1 ? "final" : "medial"))),
         timeRange: [syl.start, syl.end],
         confidence: syl.confidence,
         userF0Raw: syllablePitch.f0,
         userF0Norm: userNormContour, // 30-point normalized semitone array (null if unvoiced)
         referenceF0Norm: refContour, // 30-point native reference array
+        registerShiftSt,
         dtwDistance: dtwResult.distance,
-        dtwScore: dtwResult.score,
+        dtwScore: effectiveDtwScore,
         slopeScore: evalResult.score,
         finalScore: compositeScore, // Triad composite score
         toneScore: toneScore,
@@ -223,36 +251,7 @@ export class AudioPipeline {
       : 0;
 
     // Utterance-level "One Critical Fix" selection across all syllables
-    let utterancePriority = "PERFECT";
-    let primaryAdvice = "Outstanding pronunciation! All phonemic targets verified.";
-
-    // 1. Any critical Tone failure (<65%) across all syllables
-    const criticalToneSyl = processedSyllables.find(s => s.toneScore < 65);
-    if (criticalToneSyl) {
-      utterancePriority = "TONE";
-      primaryAdvice = criticalToneSyl.advice || criticalToneSyl.coachingAdvice;
-    } else {
-      // 2. Any critical Final failure (<65%)
-      const criticalFinalSyl = processedSyllables.find(s => s.final?.score < 65);
-      if (criticalFinalSyl) {
-        utterancePriority = "FINAL";
-        primaryAdvice = criticalFinalSyl.final?.advice || criticalFinalSyl.coachingAdvice;
-      } else {
-        // 3. Any critical Initial failure (<65%)
-        const criticalInitialSyl = processedSyllables.find(s => s.initial?.score < 65);
-        if (criticalInitialSyl) {
-          utterancePriority = "INITIAL";
-          primaryAdvice = criticalInitialSyl.initial?.advice || criticalInitialSyl.coachingAdvice;
-        } else {
-          // 4. Amber polish tips (<85%)
-          const amberSyl = processedSyllables.find(s => s.finalScore < 85 && s.coachingAdvice);
-          if (amberSyl) {
-            utterancePriority = amberSyl.coachingPriority;
-            primaryAdvice = amberSyl.coachingAdvice;
-          }
-        }
-      }
-    }
+    const { coachingPriority: utterancePriority, coachingAdvice: primaryAdvice } = computeUtterancePriority(processedSyllables);
 
     return {
       word,
@@ -262,7 +261,7 @@ export class AudioPipeline {
       userAudioBlob: audioBlob,
       userPcm: pcmFloat32,
       userMedianHz,
-      voicedRatio: overallPitch.voicedRatio,
+      voicedRatio,
       overallScore,
       coachingPriority: utterancePriority,
       coachingAdvice: primaryAdvice,

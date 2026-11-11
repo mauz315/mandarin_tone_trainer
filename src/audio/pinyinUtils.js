@@ -164,4 +164,82 @@ export class PinyinUtils {
       isApicalI
     };
   }
+
+  /**
+   * Resolves contextual Mandarin tone sandhi (3+3, 一 yī, 不 bù) over a word/pinyin pair.
+   * Keeps display diacritics unchanged while emitting expectedTone for grading.
+   *
+   * @param {string} word    Hanzi string, e.g. "你好", "不要", "一点儿"
+   * @param {string} pinyin  Space-separated pinyin, e.g. "nǐ hǎo", "bù yào"
+   * @returns {Array<{
+   *   syllable: string,
+   *   plain: string,
+   *   citationTone: number,
+   *   expectedTone: number,
+   *   sandhiRule: 'T3_SANDHI' | 'YI_SANDHI' | 'BU_SANDHI' | null,
+   *   position: 'single' | 'initial' | 'medial' | 'final',
+   *   syllableIndex: number,
+   *   totalSyllables: number
+   * }>}
+   */
+  static resolveContextualTones(word, pinyin) {
+    const rawTokens = String(pinyin || "").trim().split(/\s+/).filter(Boolean);
+    const totalSyllables = rawTokens.length;
+    if (totalSyllables === 0) return [];
+
+    const parsed = rawTokens.map((tok) => {
+      const { plain, tone } = this.extractToneAndPlain(tok);
+      return { syllable: tok, plain, citationTone: tone };
+    });
+
+    const chars = Array.from(String(word || "").replace(/\s+/g, ""));
+    const hasCharAlign = chars.length === totalSyllables;
+
+    return parsed.map((item, i) => {
+      const ch = hasCharAlign ? chars[i] : "";
+      let expectedTone = item.citationTone;
+      let sandhiRule = null;
+      const next = i + 1 < totalSyllables ? parsed[i + 1] : null;
+
+      // Rule 1: 不 Sandhi (bù -> bú before Tone 4; excludes neutral 'bu' in 对不起)
+      const isBu = ch === "不" || (!hasCharAlign && item.plain === "bu" && item.citationTone === 4);
+      if (isBu && item.citationTone === 4 && next && next.citationTone === 4) {
+        expectedTone = 2;
+        sandhiRule = "BU_SANDHI";
+      } else {
+        // Rule 2: 一 Sandhi (yī -> yí before T4, yī -> yì before T1/T2/T3; skip isolated 一)
+        const isYi = ch === "一" || (!hasCharAlign && item.plain === "yi" && totalSyllables > 1);
+        if (isYi && next) {
+          if (next.citationTone === 4) {
+            expectedTone = 2;
+            sandhiRule = "YI_SANDHI";
+          } else if ([1, 2, 3].includes(next.citationTone)) {
+            expectedTone = 4;
+            sandhiRule = "YI_SANDHI";
+          }
+        }
+      }
+
+      // Rule 3: Consecutive Tone 3 (3+3 -> 2+3)
+      if (!sandhiRule && item.citationTone === 3 && next && next.citationTone === 3) {
+        expectedTone = 2;
+        sandhiRule = "T3_SANDHI";
+      }
+
+      const position = totalSyllables === 1
+        ? "single"
+        : (i === 0 ? "initial" : (i === totalSyllables - 1 ? "final" : "medial"));
+
+      return {
+        syllable: item.syllable,
+        plain: item.plain,
+        citationTone: item.citationTone,
+        expectedTone,
+        sandhiRule,
+        position,
+        syllableIndex: i,
+        totalSyllables,
+      };
+    });
+  }
 }

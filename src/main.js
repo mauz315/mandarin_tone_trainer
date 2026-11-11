@@ -4,7 +4,7 @@ import KS from 'keen-slider';
 import { AudioPipeline } from './audio/audioPipeline.js';
 import { PitchTracker } from './audio/pitchTracker.js';
 import { DTWComparator } from './audio/dtwComparator.js';
-import { ToneClassifier } from './audio/toneClassifier.js';
+import { scoreSyllableTone, computeSyllableCoaching, computeUtterancePriority } from './audio/toneGrading.js';
 import { WordTrainerEngine, getConciseEnglish, getModeMasteryCounts } from './wordTrainerEngine.js';
 
 const KeenSlider = KS.default || KS;
@@ -1431,7 +1431,9 @@ function setupEnginePlaceholders() {
       5: 'Light neutral tone'
     },
     UNVOICED: 'No clear pitch detected',
-    DROPPED: 'Pitch drifted down at the end — hold it level',
+    DROPPED: 'Pitch dropped in the second half — hold it level',
+    HALF_THIRD_PASS: 'Clean low Tone 3 (natural half-3rd)',
+    HALF_THIRD_SOLO: 'Clean low Tone 3 (tip: can add light rise when spoken solo)',
     CLIMBED: 'Pitch rose at the end — hold it flat',
     TOO_LOW: 'Flat pitch, but start higher',
     FLAT_RISE: 'Needs a stronger upward lift',
@@ -1476,7 +1478,15 @@ function setupEnginePlaceholders() {
       if (tone === 4 && score < 85) return 'Soft drop — make the fall sharper';
       return TONE_PLAIN.EXACT[tone] || 'Accurate tone contour';
     }
-    return TONE_PLAIN[code] || 'Adjust tone contour';
+    const baseText = TONE_PLAIN[code] || 'Adjust tone contour';
+    const isPass = syl?.isAccurate !== undefined ? Boolean(syl.isAccurate) : score >= 85;
+    if (!isPass && syl?.sandhiRule) {
+      const ruleNote = syl.sandhiRule === 'T3_SANDHI'
+        ? 'Shifts to Tone 2 before a 3rd tone'
+        : 'Tone shifts before the next syllable';
+      return `${baseText} (${ruleNote})`;
+    }
+    return baseText;
   }
 
   function getFinalPlain(fin) {
@@ -2174,11 +2184,13 @@ function setupEnginePlaceholders() {
         return;
       }
 
+      const shift = syl.registerShiftSt || 0;
       const pts = [];
       const numPts = syl.userF0Norm.length;
       for (let k = 0; k < numPts; k++) {
         const x = span.xMin + (k / (numPts - 1)) * (span.xMax - span.xMin);
-        const st = syl.userF0Norm[k];
+        // Align plotted curve & milestone dots into the same register space as the target ribbon
+        const st = syl.userF0Norm[k] - shift;
         const y = Math.max(12, Math.min(140, 78 - st * 16));
         pts.push({ x, y, st });
       }
@@ -2201,16 +2213,22 @@ function setupEnginePlaceholders() {
         const pt = pts[idx];
         if (!pt) return;
         let color = '#10B981';
+        let diff = 0;
         if (syl.referenceF0Norm && syl.referenceF0Norm.length > 0) {
           const t = numPts > 1 ? idx / (numPts - 1) : 0;
           const refIdx = Math.min(syl.referenceF0Norm.length - 1, Math.round(t * (syl.referenceF0Norm.length - 1)));
           const refVal = syl.referenceF0Norm[refIdx];
           if (refVal !== undefined && refVal !== null) {
             const refY = Math.max(12, Math.min(140, 78 - refVal * 16));
-            const diff = Math.abs(pt.y - refY);
-            if (diff > 35) color = '#FF5C1C';
-            else if (diff > 20) color = '#FBBF24';
+            diff = Math.abs(pt.y - refY);
+            if (diff > 38) color = '#FF5C1C';
+            else if (diff > 22) color = '#FBBF24';
           }
+        }
+        const isEdge = idx === 0 || idx === numPts - 1;
+        if (isEdge && syl.isAccurate && (syl.toneScore ?? 0) >= 85) {
+          if (color === '#FF5C1C') color = '#FBBF24';
+          if (diff <= 28) color = '#10B981';
         }
         sylPointsHtml += `<circle cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="4.5" fill="${color}" stroke="#000" stroke-width="2" />`;
       });
@@ -2300,6 +2318,11 @@ function setupEnginePlaceholders() {
     const toneMetric = `Shape match ${toneDtw}%`;
     const finMetric = (fin.f1Hz && fin.f2Hz) ? `F1 ${fin.f1Hz} Hz • F2 ${fin.f2Hz} Hz` : 'Formants nominal';
 
+    const effTone = Number(syl.expectedTone ?? syl.tone) || 1;
+    const toneHeaderLabel = (syl.sandhiRule && syl.citationTone && syl.citationTone !== effTone)
+      ? `Tone (T${syl.citationTone}→T${effTone})`
+      : `Tone (T${effTone})`;
+
     detailWrap.innerHTML = `
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
         <div class="rounded-xl p-2.5 ${getCellSurfaceClass(init.score)}">
@@ -2312,7 +2335,7 @@ function setupEnginePlaceholders() {
 
         <div class="rounded-xl p-2.5 ${getCellSurfaceClass(toneScore)}">
           <div class="flex items-center justify-between gap-2 mb-1">
-            <span class="font-mono text-[11px] font-black text-black/75">Tone (T${Number(syl.tone) || 1})</span>
+            <span class="font-mono text-[11px] font-black text-black/75">${escapeHtml(toneHeaderLabel)}</span>
             <span class="font-speed font-black text-sm ${getScoreColorClass(toneScore)}">${toneScore}%</span>
           </div>
           <p class="font-mono text-xs font-bold leading-snug text-black/85">${escapeHtml(toneDesc)}</p>
@@ -2561,53 +2584,52 @@ function setupEnginePlaceholders() {
 
       syl.referenceF0Norm = refContour;
       if (syl.userF0Norm && syl.userF0Norm.length >= 3) {
-        const dtwResult = DTWComparator.compare(syl.userF0Norm, refContour);
-        const evalResult = ToneClassifier.evaluate(syl.userF0Norm, syl.tone, syl.syllable);
-        syl.dtwScore = dtwResult.score;
+        const targetTone = syl.expectedTone ?? syl.tone ?? 1;
+        const {
+          toneScore,
+          toneTier,
+          evalResult,
+          effectiveDtwScore,
+          registerShiftSt,
+        } = scoreSyllableTone(syl.userF0Norm, refContour, syl);
+
+        syl.dtwScore = effectiveDtwScore;
         syl.slopeScore = evalResult.score;
-        syl.toneScore = Math.round(0.60 * dtwResult.score + 0.40 * evalResult.score);
+        syl.toneScore = toneScore;
+        syl.registerShiftSt = registerShiftSt;
+        syl.isAccurate = evalResult.isAccurate;
+        syl.metrics = evalResult.metrics;
+        syl.detectedTone = evalResult.detectedTone;
         syl.status = evalResult.status;
         syl.comment = evalResult.comment;
         syl.diagnosticCode = evalResult.diagnosticCode;
         syl.advice = evalResult.advice;
 
         if (syl.toneResult) {
-          syl.toneResult.score = syl.toneScore;
-          syl.toneResult.dtwScore = dtwResult.score;
+          syl.toneResult.tone = targetTone;
+          syl.toneResult.score = toneScore;
+          syl.toneResult.dtwScore = effectiveDtwScore;
           syl.toneResult.slopeScore = evalResult.score;
           syl.toneResult.sublabel = evalResult.comment || '✓ Exact';
           syl.toneResult.diagnosticCode = evalResult.diagnosticCode;
-          syl.toneResult.tier = syl.toneScore >= 85 ? 'EMERALD' : (syl.toneScore >= 65 ? 'AMBER' : 'ROSE');
+          syl.toneResult.tier = toneTier;
           syl.toneResult.advice = evalResult.advice || '';
         }
 
         const initialScore = syl.initial?.score !== undefined ? syl.initial.score : 90;
         const finalScore = syl.final?.score !== undefined ? syl.final.score : 85;
-        syl.finalScore = Math.round(0.50 * syl.toneScore + 0.30 * finalScore + 0.20 * initialScore);
+        syl.finalScore = Math.round(0.50 * toneScore + 0.30 * finalScore + 0.20 * initialScore);
         syl.overallScore = syl.finalScore;
 
-        if (syl.toneScore < 65) {
-          syl.coachingPriority = 'TONE';
-          syl.coachingAdvice = evalResult.advice || `Tone ${syl.tone} pitch contour shifted. Adjust pitch direction.`;
-        } else if (finalScore < 65) {
-          syl.coachingPriority = 'FINAL';
-          syl.coachingAdvice = syl.final?.advice || 'Open or shape your vowel clearly.';
-        } else if (initialScore < 65) {
-          syl.coachingPriority = 'INITIAL';
-          syl.coachingAdvice = syl.initial?.advice || 'Check breath release on the starting consonant.';
-        } else if (syl.toneScore < 85) {
-          syl.coachingPriority = 'TONE';
-          syl.coachingAdvice = evalResult.advice || 'Good tone contour. Keep pitch steady.';
-        } else if (finalScore < 85) {
-          syl.coachingPriority = 'FINAL';
-          syl.coachingAdvice = syl.final?.advice || 'Almost clear vowel. Fine-tune lip and jaw shape.';
-        } else if (initialScore < 85) {
-          syl.coachingPriority = 'INITIAL';
-          syl.coachingAdvice = syl.initial?.advice || 'Good starting consonant.';
-        } else {
-          syl.coachingPriority = 'PERFECT';
-          syl.coachingAdvice = 'Everything sounded clear.';
-        }
+        const { coachingPriority, coachingAdvice } = computeSyllableCoaching(
+          toneScore,
+          evalResult,
+          syl.final,
+          syl.initial,
+          targetTone
+        );
+        syl.coachingPriority = coachingPriority;
+        syl.coachingAdvice = coachingAdvice;
       }
     });
 
@@ -2615,31 +2637,7 @@ function setupEnginePlaceholders() {
       ? Math.round(result.syllables.reduce((acc, s) => acc + s.finalScore, 0) / result.syllables.length)
       : 0;
 
-    let utterancePriority = 'PERFECT';
-    let primaryAdvice = '';
-    const criticalTone = result.syllables.find(s => s.toneScore < 65);
-    if (criticalTone) {
-      utterancePriority = 'TONE';
-      primaryAdvice = criticalTone.advice || criticalTone.coachingAdvice;
-    } else {
-      const criticalFinal = result.syllables.find(s => s.final?.score < 65);
-      if (criticalFinal) {
-        utterancePriority = 'FINAL';
-        primaryAdvice = criticalFinal.final?.advice || criticalFinal.coachingAdvice;
-      } else {
-        const criticalInit = result.syllables.find(s => s.initial?.score < 65);
-        if (criticalInit) {
-          utterancePriority = 'INITIAL';
-          primaryAdvice = criticalInit.initial?.advice || criticalInit.coachingAdvice;
-        } else {
-          const amberSyl = result.syllables.find(s => s.finalScore < 85 && s.coachingAdvice);
-          if (amberSyl) {
-            utterancePriority = amberSyl.coachingPriority;
-            primaryAdvice = amberSyl.coachingAdvice;
-          }
-        }
-      }
-    }
+    const { coachingPriority: utterancePriority, coachingAdvice: primaryAdvice } = computeUtterancePriority(result.syllables);
     result.coachingPriority = utterancePriority;
     result.coachingAdvice = primaryAdvice;
 

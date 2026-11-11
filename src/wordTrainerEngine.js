@@ -196,6 +196,7 @@ export class WordTrainerEngineController {
     this.attemptsLeft = 3;
     this.isScaffoldOn = this.readSavedGuidePreference(this.getMode(), true);
     this.effectiveGuideOn = this.isScaffoldOn;
+    this.usedGuideInAttempt = Boolean(this.effectiveGuideOn);
 
     // Order-Agnostic Geometric Stroke Matchers & Handwriting Persistence
     this.charMatchers = [];
@@ -362,6 +363,10 @@ export class WordTrainerEngineController {
   setGuideMode(isOn, persistState = true) {
     const effectiveOn = Boolean(isOn);
     this.effectiveGuideOn = effectiveOn;
+    if (effectiveOn) {
+      // One-way per-attempt latch: seeing the guide disqualifies this attempt from cementing progress
+      this.usedGuideInAttempt = true;
+    }
     if (persistState) {
       this.isScaffoldOn = effectiveOn;
       try {
@@ -1513,6 +1518,7 @@ export class WordTrainerEngineController {
 
     if (this.activeWriter) {
       try {
+        this.usedGuideInAttempt = true;
         this.activeWriter.animateCharacter();
         this.updateFeedback('neutral', 'Playing stroke order…');
       } catch (e) {
@@ -1727,6 +1733,7 @@ export class WordTrainerEngineController {
     // Toggle guide mode: strictly forced OFF on delayed reappearance; otherwise honor mode-specific saved preference
     this.isScaffoldOn = this.readSavedGuidePreference(this.getMode(), true);
     const shouldGuideBeOn = this.isReappearanceStage ? false : this.isScaffoldOn;
+    this.usedGuideInAttempt = Boolean(shouldGuideBeOn);
     this.setGuideMode(shouldGuideBeOn, !this.isReappearanceStage);
 
     const chars = word.characters || Array.from(word.hanzi_simp || '');
@@ -1965,6 +1972,9 @@ export class WordTrainerEngineController {
     const nextState = (forcedState !== undefined) ? Boolean(forcedState) : !currentEffective;
     this.isScaffoldOn = nextState;
     this.effectiveGuideOn = nextState;
+    if (nextState) {
+      this.usedGuideInAttempt = true;
+    }
     this.state.scaffoldDefault = nextState;
     try {
       if (typeof localStorage !== 'undefined') {
@@ -2193,6 +2203,53 @@ export class WordTrainerEngineController {
     }
   }
 
+  /**
+   * Queues an unassisted/reappearance failed word for delayed recall retry.
+   */
+  queueUnassistedFailure() {
+    const failedWord = this.isReappearanceStage ? this.anchorWord : this.activeWord;
+    if ((!this.usedGuideInAttempt || this.isReappearanceStage) && failedWord) {
+      if (!this.reappearanceRetryQueue.some(w => w.id === failedWord.id)) {
+        this.reappearanceRetryQueue.push(failedWord);
+      }
+    }
+  }
+
+  /**
+   * Cements phase mastery ONLY if the guide was never used at any point during this attempt.
+   * Returns true if the attempt was purely unassisted and eligible for mastery.
+   */
+  cementWordIfUnassisted() {
+    const isPureUnassisted = !this.usedGuideInAttempt && !this.effectiveGuideOn;
+    if (!isPureUnassisted) {
+      if (this.isReappearanceStage && this.anchorWord && !this.reappearanceRetryQueue.some(w => w.id === this.anchorWord.id)) {
+        this.reappearanceRetryQueue.push(this.anchorWord);
+      }
+      return false;
+    }
+
+    const wordToCement = this.isReappearanceStage ? (this.anchorWord || this.activeWord) : this.activeWord;
+    if (!wordToCement) return false;
+
+    if (Array.isArray(this.reappearanceRetryQueue)) {
+      this.reappearanceRetryQueue = this.reappearanceRetryQueue.filter(w => w.id !== wordToCement.id);
+    }
+    const pData = this.state.phases[this.activePhase];
+    if (pData && !pData.completedWordIds.includes(wordToCement.id)) {
+      pData.completedWordIds.push(wordToCement.id);
+      this.saveState();
+      this.updateProgressBar();
+      const totalPhaseWords = (this.phaseWordsMap[this.activePhase] || []).length;
+      if (pData.completedWordIds.length >= totalPhaseWords && totalPhaseWords > 0) {
+        pData.status = 'completed';
+        this.saveState();
+        this.updatePhaseStepperUI();
+        this.triggerPhaseCompleteModal(this.activePhase);
+      }
+    }
+    return true;
+  }
+
   validateCalligraphySubmission() {
     if (!this.activeWord) return;
 
@@ -2261,12 +2318,7 @@ export class WordTrainerEngineController {
       if (this.attemptsLeft === 0) {
         this.charRecognized[this.activeCharIndex] = true;
         this.snapCharacterToCalligraphy();
-        const failedWord = this.isReappearanceStage ? this.anchorWord : this.activeWord;
-        if ((!this.isScaffoldOn || this.isReappearanceStage) && failedWord) {
-          if (!this.reappearanceRetryQueue.some(w => w.id === failedWord.id)) {
-            this.reappearanceRetryQueue.push(failedWord);
-          }
-        }
+        this.queueUnassistedFailure();
         const sessionToken = this._wordSessionToken;
         setTimeout(() => {
           if (this._wordSessionToken !== sessionToken) return;
@@ -2288,33 +2340,19 @@ export class WordTrainerEngineController {
     this.updateCharCarouselDots();
     this.snapCharacterToCalligraphy();
     this.flashElement('drawing-canvas-wrapper', 'success');
-    this.updateFeedback('success', passGrade.detail);
 
-    // Cement progress if completed with Guide OFF (unassisted recall) or during delayed reappearance
-    const wordToCement = (!this.isScaffoldOn) ? this.activeWord : (this.isReappearanceStage ? this.anchorWord : null);
-    if (wordToCement) {
-      if (Array.isArray(this.reappearanceRetryQueue)) {
-        this.reappearanceRetryQueue = this.reappearanceRetryQueue.filter(w => w.id !== wordToCement.id);
-      }
-      const pData = this.state.phases[this.activePhase];
-      if (pData && !pData.completedWordIds.includes(wordToCement.id)) {
-        pData.completedWordIds.push(wordToCement.id);
-        this.saveState();
-        this.updateProgressBar();
-        const totalPhaseWords = (this.phaseWordsMap[this.activePhase] || []).length;
-        if (pData.completedWordIds.length >= totalPhaseWords && totalPhaseWords > 0) {
-          pData.status = 'completed';
-          this.saveState();
-          this.updatePhaseStepperUI();
-          this.triggerPhaseCompleteModal(this.activePhase);
-        }
-      }
-    }
+    // Cement progress ONLY if completed purely unassisted (guide never active during this attempt)
+    const wasCemented = this.cementWordIfUnassisted();
+    const practiceNote = (!wasCemented && !this.effectiveGuideOn && this.usedGuideInAttempt)
+      ? '(Practice only — guide was used on this word.)'
+      : '';
+    const feedbackGrade = practiceNote ? { ...passGrade, practiceNote } : passGrade;
+    this.updateFeedback('success', practiceNote ? `${passGrade.detail} ${practiceNote}` : passGrade.detail);
 
     const sessionToken = this._wordSessionToken;
     setTimeout(() => {
       if (this._wordSessionToken !== sessionToken) return;
-      this.showResultFeedbackPanel(true, passGrade);
+      this.showResultFeedbackPanel(true, feedbackGrade);
     }, 400);
   }
 
@@ -2354,12 +2392,7 @@ export class WordTrainerEngineController {
         if (this.componentBuilder && typeof this.componentBuilder.revealCanonicalSolution === 'function') {
           this.componentBuilder.revealCanonicalSolution();
         }
-        const failedWord = this.isReappearanceStage ? this.anchorWord : this.activeWord;
-        if ((!this.isScaffoldOn || this.isReappearanceStage) && failedWord) {
-          if (!this.reappearanceRetryQueue.some(w => w.id === failedWord.id)) {
-            this.reappearanceRetryQueue.push(failedWord);
-          }
-        }
+        this.queueUnassistedFailure();
         const sessionToken = this._wordSessionToken;
         setTimeout(() => {
           if (this._wordSessionToken !== sessionToken) return;
@@ -2381,39 +2414,25 @@ export class WordTrainerEngineController {
     // Pass!
     const humanizedPass = this.humanizeGradeResult(gradeResult, 'builder');
     this.flashElement('open-placement-canvas', 'success');
-    this.updateFeedback('success', humanizedPass.detail);
 
-    // Cement progress if completed with Guide OFF (unassisted recall) or during delayed reappearance
-    const wordToCement = (!this.isScaffoldOn) ? this.activeWord : (this.isReappearanceStage ? this.anchorWord : null);
-    if (wordToCement) {
-      if (Array.isArray(this.reappearanceRetryQueue)) {
-        this.reappearanceRetryQueue = this.reappearanceRetryQueue.filter(w => w.id !== wordToCement.id);
-      }
-      const pData = this.state.phases[this.activePhase];
-      if (pData && !pData.completedWordIds.includes(wordToCement.id)) {
-        pData.completedWordIds.push(wordToCement.id);
-        this.saveState();
-        this.updateProgressBar();
-        const totalPhaseWords = (this.phaseWordsMap[this.activePhase] || []).length;
-        if (pData.completedWordIds.length >= totalPhaseWords && totalPhaseWords > 0) {
-          pData.status = 'completed';
-          this.saveState();
-          this.updatePhaseStepperUI();
-          this.triggerPhaseCompleteModal(this.activePhase);
-        }
-      }
-    }
+    // Cement progress ONLY if completed purely unassisted (guide never active during this attempt)
+    const wasCemented = this.cementWordIfUnassisted();
+    const practiceNote = (!wasCemented && !this.effectiveGuideOn && this.usedGuideInAttempt)
+      ? '(Practice only — guide was used on this word.)'
+      : '';
+    const feedbackGrade = practiceNote ? { ...humanizedPass, practiceNote } : humanizedPass;
+    this.updateFeedback('success', practiceNote ? `${humanizedPass.detail} ${practiceNote}` : humanizedPass.detail);
 
     const sessionToken = this._wordSessionToken;
     if (this.componentBuilder) {
       this.componentBuilder.playCrystallizationAnimation(() => {
         if (this._wordSessionToken !== sessionToken) return;
-        this.showResultFeedbackPanel(true, humanizedPass);
+        this.showResultFeedbackPanel(true, feedbackGrade);
       });
     } else {
       setTimeout(() => {
         if (this._wordSessionToken !== sessionToken) return;
-        this.showResultFeedbackPanel(true, humanizedPass);
+        this.showResultFeedbackPanel(true, feedbackGrade);
       }, 400);
     }
   }
@@ -2457,6 +2476,9 @@ export class WordTrainerEngineController {
       };
     } else {
       grade = this.humanizeGradeResult(gradeResult, mode);
+      if (gradeResult && gradeResult.practiceNote) {
+        grade = { ...grade, detail: `${grade.detail} ${gradeResult.practiceNote}` };
+      }
     }
 
     if (this.dom.drawingTierBadge && this.dom.resultFeedbackText && this.dom.feedbackDrawingCard) {
@@ -2523,6 +2545,8 @@ export class WordTrainerEngineController {
     const placementCanvas = (typeof document !== 'undefined') ? document.getElementById('open-placement-canvas') : null;
     if (placementCanvas) placementCanvas.style.boxShadow = '';
 
+    // Strict mastery gate: View B already revealed the character/solution, so retrying stays practice-only
+    this.usedGuideInAttempt = true;
     this.isScaffoldOn = this.readSavedGuidePreference(this.getMode(), true);
     const shouldGuideBeOn = this.isReappearanceStage ? false : this.isScaffoldOn;
     this.setGuideMode(shouldGuideBeOn, !this.isReappearanceStage);
