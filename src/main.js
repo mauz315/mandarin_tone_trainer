@@ -6,6 +6,7 @@ import { PitchTracker } from './audio/pitchTracker.js';
 import { DTWComparator } from './audio/dtwComparator.js';
 import { scoreSyllableTone, computeSyllableCoaching, computeUtterancePriority } from './audio/toneGrading.js';
 import { WordTrainerEngine, getConciseEnglish, getModeMasteryCounts } from './wordTrainerEngine.js';
+import { contextLabEngine } from './contextLabEngine.js';
 import {
   navigateScreens,
   swapViews,
@@ -369,7 +370,8 @@ const CANVAS_COLOR_HEX = {
   'bg-canvas-mint': '#8EF48A',
   'bg-canvas-celadon': '#064E3B',
   'bg-canvas-builder': '#F0FDF4',
-  'bg-canvas-calligraphy': '#F5F3FF'
+  'bg-canvas-calligraphy': '#F5F3FF',
+  'bg-canvas-context': '#E6FBF0'
 };
 
 function resolveCanvasColorHex(colorClass) {
@@ -465,6 +467,9 @@ function setupMenu() {
   const backFromWordsBtn = document.getElementById('back-from-words-btn');
   const wtModeBuilderBtn = document.getElementById('wt-mode-builder-btn');
   const wtModeCalligraphyBtn = document.getElementById('wt-mode-calligraphy-btn');
+  const startContextLabBtn = document.getElementById('start-context-lab-btn');
+  const contextLabScreen = document.getElementById('context-lab-screen');
+  const contextBackToMenuBtn = document.getElementById('context-back-to-menu-btn');
   const gatewayBuilderProgress = document.getElementById('gateway-builder-progress');
   const gatewayCalligraphyProgress = document.getElementById('gateway-calligraphy-progress');
 
@@ -778,6 +783,36 @@ function setupMenu() {
     });
   });
 
+  if (startContextLabBtn) {
+    startContextLabBtn.addEventListener('click', () => {
+      stopGlobalAudio();
+      navigateScreens(menuScreen, contextLabScreen, {
+        direction: 'forward',
+        heroCard: startContextLabBtn,
+        targetHeroEl: contextLabScreen ? contextLabScreen.querySelector('header') : null,
+        onBeforeIn: () => {
+          resetMenuSubmenuState();
+          setAppBackground('bg-canvas-context');
+          contextLabEngine.startExercise();
+        }
+      });
+    });
+  }
+
+  if (contextBackToMenuBtn) {
+    contextBackToMenuBtn.addEventListener('click', () => {
+      stopGlobalAudio();
+      contextLabEngine.stopAudio();
+      navigateScreens(contextLabScreen, menuScreen, {
+        direction: 'back',
+        onBeforeIn: () => {
+          resetMenuSubmenuState();
+          setAppBackground('bg-canvas-acid');
+        }
+      });
+    });
+  }
+
   startTonesBtn.addEventListener('click', () => startGame('tones', startTonesBtn));
   startInitialsBtn.addEventListener('click', () => startGame('initials', startInitialsBtn));
   startEndingsBtn.addEventListener('click', () => startGame('endings', startEndingsBtn));
@@ -907,6 +942,7 @@ async function init() {
 
     setupAudioLibrary();
     setupAudioSourceToggles();
+    await contextLabEngine.init(fetchJsonSafe);
   } catch (err) {
     console.error('Initialization error:', err);
   }

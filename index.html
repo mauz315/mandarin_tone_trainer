@@ -131,29 +131,37 @@
                   </div>
                 </button>
 
-                <!-- 3. #open-library-btn -->
-                <button id="open-library-btn" class="col-span-1 sm:col-span-6 w-full flex text-left relative group -rotate-[1deg] hover:rotate-0 transition-transform duration-200 active-collapse cursor-pointer">
-                  <div class="w-full bg-badge-cobalt text-white border-[3px] border-black rounded-2xl p-2.5 sm:p-5 shadow-hard-black group-hover:bg-[#1f5bff] transition-colors h-full flex flex-col justify-between">
+                <!-- 3. #start-context-lab-btn: Context Lab Entry Badge with Unit Stepper -->
+                <div class="col-span-1 sm:col-span-6 w-full flex text-left relative group -rotate-[1deg] hover:rotate-0 transition-transform duration-200">
+                  <div id="start-context-lab-btn" class="w-full bg-badge-mint text-black border-[3px] border-black rounded-2xl p-2.5 sm:p-5 shadow-hard-black group-hover:bg-[#a8ffd1] transition-colors h-full flex flex-col justify-between relative overflow-hidden active-collapse cursor-pointer">
+                    <!-- Subtle watermark -->
+                    <div class="absolute -right-3 -bottom-5 font-chinese font-black text-6xl text-black/15 pointer-events-none select-none">话</div>
                     <div>
-                      <div class="flex items-center justify-between gap-1 mb-1 sm:mb-2">
-                        <span class="bg-canvas-acid text-black font-mono text-[8.5px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded border border-black truncate">
-                          COMBINATORIAL
+                      <div class="flex items-center justify-between gap-1 mb-1 sm:mb-2 relative z-10">
+                        <span class="bg-black text-badge-mint font-mono text-[8px] sm:text-[9.5px] font-black px-1.5 sm:px-2 py-0.5 rounded border border-black truncate">
+                          04 // CONTEXT LAB
                         </span>
-                        <span class="material-symbols-outlined text-canvas-acid text-base sm:text-xl shrink-0">dataset</span>
+                        <span class="material-symbols-outlined text-black text-base sm:text-lg shrink-0">forum</span>
                       </div>
-                      <h3 class="font-speed font-black italic text-[15px] xs:text-base sm:text-2xl text-white uppercase leading-[1.05] mb-0.5 sm:mb-1">
-                        Audio Library
+                      <h3 class="font-speed font-black italic text-[15px] xs:text-base sm:text-2xl text-black uppercase leading-[1.05] mb-1 relative z-10">
+                        Context Lab
                       </h3>
-                      <p class="font-mono text-[10px] sm:text-xs text-white/90 font-bold leading-tight">
-                        Explore all Pinyin sound combinations.
-                      </p>
+                      <!-- Unit Stepper Row: "keep only Active Unit # as the button from menu to choose from. the topic will show up only in the menu." -->
+                      <div class="flex items-center justify-between gap-1 mt-0.5 sm:mt-1 bg-white/75 border border-black rounded-lg px-1.5 py-0.5 relative z-10" onclick="event.stopPropagation()">
+                        <button id="context-unit-prev-btn" type="button" class="text-black hover:bg-black/15 rounded px-1.5 py-0.5 text-xs font-mono font-black active:scale-90 transition-transform" title="Previous Unit">◄</button>
+                        <div class="text-center truncate px-1 min-w-0">
+                          <span id="context-menu-unit-label" class="font-mono text-[9px] sm:text-[10.5px] font-black text-black">UNIT 1</span>:
+                          <span id="context-menu-topic-label" class="font-mono text-[9px] sm:text-[10.5px] font-bold text-black/80 truncate">FOOD</span>
+                        </div>
+                        <button id="context-unit-next-btn" type="button" class="text-black hover:bg-black/15 rounded px-1.5 py-0.5 text-xs font-mono font-black active:scale-90 transition-transform" title="Next Unit">►</button>
+                      </div>
                     </div>
-                    <div class="mt-1.5 sm:mt-3 pt-1.5 sm:pt-2 border-t-2 border-white/20 flex items-center justify-between gap-1 text-[9.5px] sm:text-[11px] font-mono font-bold text-canvas-acid">
-                      <span class="whitespace-nowrap">OPEN MATRIX ✦</span>
-                      <span class="text-white/60 whitespace-nowrap"><span class="sm:hidden">1,300+</span><span class="hidden sm:inline">1,300+ SYLLABLES</span></span>
+                    <div class="mt-1.5 sm:mt-3 pt-1.5 sm:pt-2 border-t-2 border-black/20 flex items-center justify-between gap-1 text-[9px] sm:text-[10.5px] font-mono font-black text-black relative z-10">
+                      <span class="whitespace-nowrap">START DRILL ➔</span>
+                      <span class="text-black/60 truncate">SITUATIONS</span>
                     </div>
                   </div>
-                </button>
+                </div>
               </div>
 
               <!-- 4. #start-words-btn: Redesigned Single Eyebrow & Truthful Copy -->
@@ -221,12 +229,18 @@
 
         </div>
 
-        <!-- Bottom Footer Strip with Consumer-Ready 44px Pronunciation Lab CTA -->
-        <footer class="w-full shrink-0 pt-1.5 pb-1 sm:pt-3 sm:pb-1 flex items-center justify-between gap-2 font-mono text-[10px] sm:text-[11px] font-bold text-black/60 border-t-2 border-black/15 relative z-10">
-          <span class="hidden sm:inline">[TONE DRILLS &amp; PHONOLOGY]</span>
-          <button id="open-engine-btn" type="button" class="min-h-[44px] px-4 py-2 font-mono text-xs font-black uppercase tracking-wide bg-black text-canvas-acid hover:bg-badge-pink hover:text-white rounded-full border-2 border-black shadow-hard-black flex items-center gap-1.5 transition-all active-collapse cursor-pointer min-w-0" title="Practice speaking &amp; pitch accuracy">
-            <span class="whitespace-nowrap">Pronunciation Lab ➔</span>
-          </button>
+        <!-- Bottom Footer Strip with Audio Library & Pronunciation Lab CTAs -->
+        <footer class="w-full shrink-0 pt-1.5 pb-1 sm:pt-3 sm:pb-1 flex items-center justify-between gap-1.5 sm:gap-2 font-mono text-[10px] sm:text-[11px] font-bold text-black/60 border-t-2 border-black/15 relative z-10">
+          <span class="hidden md:inline">[TONE DRILLS &amp; PHONOLOGY]</span>
+          <div class="flex items-center gap-1.5 sm:gap-2">
+            <button id="open-library-btn" type="button" class="min-h-[44px] px-3 sm:px-4 py-1.5 font-mono text-[11px] sm:text-xs font-black uppercase tracking-wide bg-badge-cobalt text-white hover:bg-[#1f5bff] rounded-full border-2 border-black shadow-hard-black flex items-center gap-1 sm:gap-1.5 transition-all active-collapse cursor-pointer min-w-0" title="Explore all sound combinations">
+              <span class="material-symbols-outlined text-sm leading-none">dataset</span>
+              <span class="whitespace-nowrap"><span class="sm:hidden">Library ✦</span><span class="hidden sm:inline">Audio Library ✦</span></span>
+            </button>
+            <button id="open-engine-btn" type="button" class="min-h-[44px] px-3 sm:px-4 py-1.5 font-mono text-[11px] sm:text-xs font-black uppercase tracking-wide bg-black text-canvas-acid hover:bg-badge-pink hover:text-white rounded-full border-2 border-black shadow-hard-black flex items-center gap-1 sm:gap-1.5 transition-all active-collapse cursor-pointer min-w-0" title="Practice speaking &amp; pitch accuracy">
+              <span class="whitespace-nowrap"><span class="sm:hidden">Pronunciation ➔</span><span class="hidden sm:inline">Pronunciation Lab ➔</span></span>
+            </button>
+          </div>
           <span class="flex items-center gap-1 font-chinese text-black shrink-0 whitespace-nowrap">
             声调训练器 ✦
           </span>
@@ -1494,6 +1508,96 @@
               </button>
             </div>
           </div>
+        </div>
+
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- [06] CONTEXT LAB SCREEN (#context-lab-screen) -->
+      <!-- Ultra-Clean, Non-Scrollable Mobile Screen | Dialogue in Context -->
+      <!-- ======================================================== -->
+      <div id="context-lab-screen" class="relative z-10 w-full max-w-4xl mx-auto h-full max-h-full p-3 sm:p-6 lg:px-8 lg:py-6 flex flex-col justify-between overflow-hidden hidden select-none">
+
+        <!-- Subtle Corner Accent Watermark (contained so it never triggers scrollbars) -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none z-0" aria-hidden="true">
+          <div class="absolute -bottom-8 -right-6 font-chinese font-black text-[#064E3B]/[0.05] text-9xl select-none">话</div>
+        </div>
+
+        <!-- [1] Minimalist Top Bar: Back to Menu & Active Unit Button Only (No Streak, No Topic) -->
+        <header class="w-full flex items-center justify-between shrink-0 mb-2 relative z-10">
+          <button id="context-back-to-menu-btn" type="button" class="bg-black text-white hover:bg-badge-pink min-h-[44px] px-3.5 py-1.5 rounded-full border-2 border-black font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-hard-black transition-colors active-collapse cursor-pointer">
+            <span class="material-symbols-outlined text-sm">arrow_back</span>
+            <span>MENU</span>
+          </button>
+
+          <!-- Active Unit Indicator / Button -->
+          <div id="context-header-unit-btn" class="bg-white border-2 border-black px-3.5 py-1.5 rounded-full font-mono text-xs font-black shadow-hard-black uppercase text-[#064E3B] shrink-0">
+            UNIT 1
+          </div>
+        </header>
+
+        <!-- [2] Dialogue Text Arena (No boxes, pure typographic script lines) -->
+        <section class="w-full flex-1 min-h-0 flex flex-col justify-center py-1 sm:py-3 relative z-10">
+          <div class="w-full max-w-2xl mx-auto flex flex-col gap-2 sm:gap-4">
+
+            <!-- Audio Play Control Strip (Compact & Clean) -->
+            <div class="flex items-center justify-between mb-0.5 sm:mb-1">
+              <button id="context-play-audio-btn" type="button" class="min-h-[38px] px-3 py-1 bg-white hover:bg-[#7EF1BE] text-[#064E3B] font-mono text-xs font-black uppercase rounded-full border-2 border-black shadow-hard-black flex items-center gap-1.5 transition-all active-collapse cursor-pointer" title="Play Spoken Dialogue">
+                <span class="material-symbols-outlined text-base">volume_up</span>
+                <span>Play Dialogue</span>
+              </button>
+              <span class="font-mono text-[10px] sm:text-xs text-[#064E3B]/60 font-bold uppercase tracking-wider">
+                SPOKEN DIALOGUE
+              </span>
+            </div>
+
+            <!-- Dialogue Lines Container (Rendered dynamically by ContextLabEngine without boxes) -->
+            <div id="context-dialogue-lines" class="space-y-1.5 sm:space-y-3">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </section>
+
+        <!-- [3] Interactive Exercise Stages (Swapped between Stage 1 & Stage 2) -->
+        <div class="w-full max-w-2xl mx-auto shrink-0 pt-1 pb-1 relative z-10">
+
+          <!-- STAGE 1: Pinyin Input (Only dialogue + input box, keyboard-safe) -->
+          <div id="context-stage-pinyin" class="w-full flex flex-col gap-2">
+            <div class="flex items-center justify-between px-1">
+              <label for="context-pinyin-input" class="font-mono text-xs sm:text-sm font-bold text-[#064E3B]">
+                Type Pinyin with tone numbers <span class="text-[#064E3B]/60">(e.g. ka1 fei1)</span>:
+              </label>
+              <span id="context-pinyin-preview" class="font-mono text-xs font-bold text-[#064E3B]/70 tracking-wide"></span>
+            </div>
+            <div class="relative w-full">
+              <input id="context-pinyin-input" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Type pinyin here..." class="w-full bg-white text-black font-mono text-base sm:text-lg font-black px-4 py-2.5 sm:py-3 rounded-xl border-[2.5px] border-black shadow-hard-black focus:outline-none focus:ring-2 focus:ring-[#7EF1BE] transition-colors" />
+            </div>
+          </div>
+
+          <!-- STAGE 2: Centered Pinyin Spotlight + 2x2 Character Distractor Grid -->
+          <div id="context-stage-distractor" class="w-full flex flex-col items-center gap-3 hidden">
+            <!-- Hero Spotlight Pinyin in Center -->
+            <div class="flex flex-col items-center justify-center">
+              <span class="font-mono text-[10px] sm:text-xs font-bold text-[#064E3B]/70 uppercase tracking-widest mb-0.5">
+                Target Pinyin
+              </span>
+              <div id="context-hero-pinyin" class="font-speed font-black italic text-3xl sm:text-4xl text-[#064E3B] tracking-tight bg-[#7EF1BE] border-2 border-black px-5 py-1 rounded-2xl shadow-hard-black">
+                kā fēi
+              </div>
+            </div>
+
+            <!-- Distractor Grid (2x2) -->
+            <div id="context-distractor-grid" class="grid grid-cols-2 gap-2 sm:gap-3 w-full">
+              <!-- Dynamically populated: 4 buttons with shortcuts 1, 2, 3, 4 -->
+            </div>
+
+            <!-- Next Dialogue Action Button (Revealed on correct selection) -->
+            <button id="context-next-btn" type="button" class="w-full min-h-[46px] sm:min-h-[52px] bg-[#B8F526] hover:bg-[#a8ffd1] text-black font-speed font-black italic text-base sm:text-lg uppercase border-[2.5px] border-black rounded-xl shadow-hard-black transition-all active-collapse cursor-pointer flex items-center justify-center gap-2 hidden">
+              <span>Next Dialogue</span>
+              <span class="material-symbols-outlined text-lg">arrow_forward</span>
+            </button>
+          </div>
+
         </div>
 
       </div>
