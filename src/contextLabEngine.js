@@ -114,9 +114,8 @@ export class ContextLabEngine {
       this.dialogues = [this.getFallbackDialogue()];
     }
 
-    this.bindMenuUI();
     this.bindCockpitUI();
-    this.updateMenuUnitDisplay();
+    this.updateUnitDisplay();
   }
 
   getFallbackDialogue() {
@@ -187,20 +186,20 @@ export class ContextLabEngine {
     if (newUnitIdx > this.totalUnits) newUnitIdx = 1;
     this.currentUnitIndex = newUnitIdx;
     localStorage.setItem('context_lab_active_unit', String(newUnitIdx));
-    this.updateMenuUnitDisplay();
+    this.updateUnitDisplay();
+
+    // If currently inside the exercise screen, refresh immediately with the new unit
+    const screen = document.getElementById('context-lab-screen');
+    if (screen && !screen.classList.contains('hidden')) {
+      this.startExercise();
+    }
   }
 
-  updateMenuUnitDisplay() {
-    const unitLabel = document.getElementById('context-menu-unit-label');
-    const topicLabel = document.getElementById('context-menu-topic-label');
-    const headerUnitBadge = document.getElementById('context-header-unit-btn');
-
-    const topic = this.getUnitTopic(this.currentUnitIndex);
-    const text = `UNIT ${this.currentUnitIndex}: ${topic.toUpperCase()}`;
-
-    if (unitLabel) unitLabel.textContent = `UNIT ${this.currentUnitIndex}`;
-    if (topicLabel) topicLabel.textContent = topic.toUpperCase();
-    if (headerUnitBadge) headerUnitBadge.textContent = `UNIT ${this.currentUnitIndex}`;
+  updateUnitDisplay() {
+    const headerLabel = document.getElementById('context-header-unit-label');
+    if (headerLabel) {
+      headerLabel.textContent = `UNIT ${this.currentUnitIndex}`;
+    }
   }
 
   // =========================================================================
@@ -358,6 +357,36 @@ export class ContextLabEngine {
 
     if (isMatch) {
       this.onPinyinSuccess(diacritic || this.activeSlot.word_pinyin);
+    }
+  }
+
+  submitPinyinInput() {
+    if (this.currentStage !== 1 || !this.activeSlot) return;
+    const pinyinInput = document.getElementById('context-pinyin-input');
+    if (!pinyinInput) return;
+
+    const rawVal = pinyinInput.value.trim();
+    if (!rawVal) return;
+
+    const diacritic = convertNumericToDiacritic(rawVal);
+    const acceptedList = this.activeSlot.accepted_numeric_pinyin || [];
+    const normalizedInput = normalizePinyinForCompare(rawVal).replace(/\s+/g, '');
+    const normalizedDiacritic = normalizePinyinForCompare(diacritic).replace(/\s+/g, '');
+
+    const isMatch = acceptedList.some(item => {
+      const norm = normalizePinyinForCompare(item).replace(/\s+/g, '');
+      const itemDiacritic = normalizePinyinForCompare(convertNumericToDiacritic(item)).replace(/\s+/g, '');
+      return norm === normalizedInput || itemDiacritic === normalizedDiacritic;
+    });
+
+    if (isMatch) {
+      this.onPinyinSuccess(diacritic || this.activeSlot.word_pinyin);
+    } else {
+      triggerDampedShake(pinyinInput);
+      pinyinInput.classList.add('bg-[#FEE2E2]', 'border-[#DC2626]');
+      setTimeout(() => {
+        pinyinInput.classList.remove('bg-[#FEE2E2]', 'border-[#DC2626]');
+      }, 500);
     }
   }
 
@@ -550,34 +579,41 @@ export class ContextLabEngine {
   // DOM EVENT BINDING
   // =========================================================================
 
-  bindMenuUI() {
-    const prevBtn = document.getElementById('context-unit-prev-btn');
-    const nextBtn = document.getElementById('context-unit-next-btn');
-    const startCard = document.getElementById('start-context-lab-btn');
+  bindCockpitUI() {
+    const pinyinInput = document.getElementById('context-pinyin-input');
+    const submitBtn = document.getElementById('context-pinyin-submit-btn');
+    const playAudioBtn = document.getElementById('context-play-audio-btn');
+    const nextBtn = document.getElementById('context-next-btn');
+    const prevUnitBtn = document.getElementById('context-unit-prev-btn');
+    const nextUnitBtn = document.getElementById('context-unit-next-btn');
 
-    if (prevBtn) {
-      prevBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
+    if (prevUnitBtn) {
+      prevUnitBtn.addEventListener('click', () => {
         this.setUnit(this.currentUnitIndex - 1);
       });
     }
 
-    if (nextBtn) {
-      nextBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
+    if (nextUnitBtn) {
+      nextUnitBtn.addEventListener('click', () => {
         this.setUnit(this.currentUnitIndex + 1);
       });
     }
-  }
-
-  bindCockpitUI() {
-    const pinyinInput = document.getElementById('context-pinyin-input');
-    const playAudioBtn = document.getElementById('context-play-audio-btn');
-    const nextBtn = document.getElementById('context-next-btn');
 
     if (pinyinInput) {
       pinyinInput.addEventListener('input', (e) => {
         this.handlePinyinInput(e.target.value);
+      });
+      pinyinInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          this.submitPinyinInput();
+        }
+      });
+    }
+
+    if (submitBtn) {
+      submitBtn.addEventListener('click', () => {
+        this.submitPinyinInput();
       });
     }
 
