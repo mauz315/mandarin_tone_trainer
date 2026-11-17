@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=overlays-content" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -27,8 +27,8 @@
         document.write('<script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"><\/script>');
       }
     </script>
-    <script type="module" crossorigin src="/mandarin_tone_trainer/assets/index-ChMp0UOI.js"></script>
-    <link rel="stylesheet" crossorigin href="/mandarin_tone_trainer/assets/index-DMM_xDa9.css">
+    <script type="module" crossorigin src="/mandarin_tone_trainer/assets/index-yRMsCy-9.js"></script>
+    <link rel="stylesheet" crossorigin href="/mandarin_tone_trainer/assets/index-BGviS4Kk.css">
   </head>
   <body class="text-slate-900 font-grotesk h-full lg:min-h-[100dvh] antialiased selection:bg-badge-pink selection:text-white p-0 m-0 flex flex-col items-center justify-center overflow-hidden lg:overflow-x-hidden bg-canvas-acid">
 
@@ -1563,16 +1563,21 @@
 
           <!-- STAGE 1: Pinyin Input (Positioned higher, with Submit Button next to input) -->
           <div id="context-stage-pinyin" class="w-full flex flex-col gap-1.5 mt-1 sm:mt-2">
+            <!-- Hidden top-anchored proxy input at y=0 so OS keyboard opens with 0px viewport movement -->
+            <input id="context-pinyin-proxy-input" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" autocorrect="off" aria-label="Pinyin input" class="fixed top-0 left-0 w-px h-4 opacity-0 pointer-events-none z-[-1]" style="font-size: 16px !important;" />
+
             <div class="flex items-center justify-between px-1">
-              <label for="context-pinyin-input" class="font-mono text-xs sm:text-sm font-bold text-[#064E3B]">
+              <label id="context-pinyin-label" for="context-pinyin-box" class="font-mono text-xs sm:text-sm font-bold text-[#064E3B] cursor-pointer">
                 Type Pinyin with tone numbers <span class="text-[#064E3B]/60">(e.g. ka1 fei1)</span>:
               </label>
               <span id="context-pinyin-preview" class="font-mono text-xs font-bold text-[#064E3B]/70 tracking-wide"></span>
             </div>
             <!-- Input + Submit Button Row -->
             <div class="flex items-stretch gap-2 w-full">
-              <div class="relative flex-1 min-w-0">
-                <input id="context-pinyin-input" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="e.g. ka1 fei1" class="w-full bg-white text-black font-mono text-base sm:text-lg font-black px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl border-[2.5px] border-black shadow-hard-black focus:outline-none focus:ring-2 focus:ring-[#7EF1BE] transition-colors" />
+              <div id="context-pinyin-box" role="textbox" tabindex="0" class="relative flex-1 min-w-0 bg-white text-black font-mono text-base sm:text-lg font-black px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl border-[2.5px] border-black shadow-hard-black flex items-center cursor-text select-none min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#7EF1BE] transition-colors">
+                <span id="context-pinyin-text" class="text-black font-black whitespace-pre"></span>
+                <span id="context-pinyin-caret" class="w-0.5 h-5 bg-black inline-block pinyin-caret-active ml-0.5 hidden"></span>
+                <span id="context-pinyin-placeholder" class="text-black/40 font-normal">e.g. ka1 fei1</span>
               </div>
               <button id="context-pinyin-submit-btn" type="button" class="min-h-[44px] px-4 sm:px-5 bg-[#7EF1BE] hover:bg-[#6ee7b7] text-[#064E3B] font-mono text-xs sm:text-sm font-black uppercase rounded-xl border-[2.5px] border-black shadow-hard-black active-collapse cursor-pointer shrink-0 flex items-center justify-center gap-1.5">
                 <span>Submit</span>
@@ -1598,8 +1603,8 @@
               <!-- Dynamically populated: 4 buttons with shortcuts 1, 2, 3, 4 -->
             </div>
 
-            <!-- Next Dialogue Action Button (Revealed on correct selection) -->
-            <button id="context-next-btn" type="button" class="w-full min-h-[46px] sm:min-h-[52px] bg-[#B8F526] hover:bg-[#a8ffd1] text-black font-speed font-black italic text-base sm:text-lg uppercase border-[2.5px] border-black rounded-xl shadow-hard-black transition-all active-collapse cursor-pointer flex items-center justify-center gap-2 hidden">
+            <!-- Next Dialogue Action Button (Revealed on correct selection without layout shift) -->
+            <button id="context-next-btn" type="button" class="w-full min-h-[46px] sm:min-h-[52px] bg-[#B8F526] hover:bg-[#a8ffd1] text-black font-speed font-black italic text-base sm:text-lg uppercase border-[2.5px] border-black rounded-xl shadow-hard-black transition-all active-collapse cursor-pointer flex items-center justify-center gap-2 invisible opacity-0 pointer-events-none">
               <span>Next Dialogue</span>
               <span class="material-symbols-outlined text-lg">arrow_forward</span>
             </button>

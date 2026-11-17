@@ -3187,27 +3187,6 @@ if (typeof window !== 'undefined') {
   window.initComponentBuilderArena = initComponentBuilderArena;
 }
 
-// ========================================================
-// UNIVERSAL MOBILE VIEWPORT HEIGHT SYNCHRONIZATION
-// Adapts dynamically to virtual keyboard (Gboard, Samsung, iOS) on all mobile devices
-// ========================================================
-function syncMobileViewportHeight() {
-  if (typeof window === 'undefined') return;
-  const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-  if (document.documentElement) {
-    document.documentElement.style.setProperty('--app-viewport-height', `${vh}px`);
-  }
-}
-
-if (typeof window !== 'undefined') {
-  syncMobileViewportHeight();
-  window.addEventListener('resize', syncMobileViewportHeight);
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', syncMobileViewportHeight);
-    window.visualViewport.addEventListener('scroll', syncMobileViewportHeight);
-  }
-}
-
 // Initialize the app
 setAppBackground('bg-canvas-acid');
 setupButtons();

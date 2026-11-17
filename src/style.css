@@ -476,11 +476,6 @@ button:focus-visible {
 @media (max-width: 1023px) {
   html,
   body {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
     width: 100%;
     height: 100%;
     margin: 0;
@@ -493,13 +488,10 @@ button:focus-visible {
 
   #app {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     width: 100%;
-    height: var(--app-viewport-height, 100dvh);
-    max-height: var(--app-viewport-height, 100dvh);
+    height: 100%;
+    max-height: 100%;
     min-height: 0;
     overflow: hidden;
     overscroll-behavior: none;
@@ -814,7 +806,7 @@ button:focus-visible {
 }
 
 /* ======================================================== */
-/* CONTEXT LAB UNIVERSAL MOBILE VIEWPORT & KEYBOARD STABILITY */
+/* CONTEXT LAB UNIVERSAL MOBILE VIEWPORT & PROXY INPUT LOCK */
 /* ======================================================== */
 #context-lab-screen {
   overflow: hidden !important;
@@ -825,18 +817,37 @@ button:focus-visible {
   min-height: 0 !important;
 }
 
-#context-pinyin-input {
-  font-size: 16px !important; /* Strictly >= 16px prevents mobile browser auto-zoom */
+/* Pinned at y=0 so WebKit focus-scroll detects element at top and shifts 0px */
+#context-pinyin-proxy-input {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 1px !important;
+  height: 16px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  font-size: 16px !important;
+  z-index: -1 !important;
+}
+
+/* Blinking caret in visible mirrored input box */
+@keyframes pinyin-caret-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.pinyin-caret-active {
+  animation: pinyin-caret-blink 1s ease-in-out infinite;
 }
 
 @media (max-width: 640px) {
   #context-lab-screen {
-    padding-top: max(8px, env(safe-area-inset-top, 8px)) !important;
+    padding-top: max(6px, env(safe-area-inset-top, 6px)) !important;
     padding-bottom: max(6px, env(safe-area-inset-bottom, 6px)) !important;
     padding-left: 10px !important;
     padding-right: 10px !important;
     justify-content: flex-start !important;
-    gap: 6px !important;
+    gap: 5px !important;
   }
 
   #context-lab-screen header {
@@ -844,37 +855,29 @@ button:focus-visible {
     margin-bottom: 2px !important;
   }
 
-  /* Compact mode when mobile keyboard (Gboard, Samsung, iOS, etc.) is active */
-  #context-lab-screen.keyboard-active {
-    padding-top: max(4px, env(safe-area-inset-top, 4px)) !important;
+  .context-turn-line {
+    padding-top: 2px !important;
     padding-bottom: 2px !important;
-    gap: 3px !important;
   }
 
-  #context-lab-screen.keyboard-active header {
-    margin-bottom: 1px !important;
+  .context-turn-line p.font-chinese {
+    font-size: 1.125rem !important;
+    line-height: 1.45 !important;
   }
 
-  #context-lab-screen.keyboard-active .context-turn-line {
-    padding-top: 1px !important;
-    padding-bottom: 1px !important;
+  .context-translation {
+    min-height: 1.125rem;
+    line-height: 1.35;
   }
 
-  #context-lab-screen.keyboard-active .context-turn-line p.font-chinese {
-    font-size: 1.05rem !important;
-    line-height: 1.35 !important;
-  }
-
-  #context-lab-screen.keyboard-active #context-stage-pinyin {
+  #context-stage-pinyin {
     margin-top: 2px !important;
-    gap: 3px !important;
+    gap: 4px !important;
   }
 
-  #context-lab-screen.keyboard-active #context-pinyin-input,
-  #context-lab-screen.keyboard-active #context-pinyin-submit-btn {
-    min-height: 40px !important;
-    padding-top: 6px !important;
-    padding-bottom: 6px !important;
+  #context-pinyin-box,
+  #context-pinyin-submit-btn {
+    min-height: 42px !important;
   }
 }
 

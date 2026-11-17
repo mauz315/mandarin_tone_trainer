@@ -506,8 +506,8 @@ export class ContextLabEngine {
           const before = hanziContent.slice(0, charRange[0]);
           const after = hanziContent.slice(charRange[1]);
           const pinyinSegs = this.activeSlot.pinyin_segments || [this.activeSlot.word_pinyin || ''];
-          const pinyinInput = document.getElementById('context-pinyin-input');
-          const currentVal = pinyinInput ? pinyinInput.value : '';
+          const proxyInput = document.getElementById('context-pinyin-proxy-input');
+          const currentVal = proxyInput ? proxyInput.value : '';
           const currentTokens = segmentPinyinInput(currentVal, pinyinSegs.length);
 
           const dashSegments = pinyinSegs.map((seg, idx) => {
@@ -536,15 +536,15 @@ export class ContextLabEngine {
         : 'py-1 transition-all duration-200';
 
       html += `
-        <div class="context-turn-line flex items-baseline gap-2.5 sm:gap-3 text-left ${activeGlowClass} ${isTargetTurn ? 'opacity-100' : 'opacity-85'}">
-          <span class="inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full ${speakerColor} font-mono font-black text-xs shrink-0 select-none border border-black/40">
+        <div class="context-turn-line flex items-start gap-2.5 sm:gap-3 text-left ${activeGlowClass} ${isTargetTurn ? 'opacity-100' : 'opacity-85'}">
+          <span class="inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full ${speakerColor} font-mono font-black text-xs shrink-0 select-none border border-black/40 mt-0.5 sm:mt-1">
             ${speakerTag}
           </span>
           <div class="flex-1 min-w-0">
             <p class="font-chinese text-base sm:text-xl lg:text-2xl text-[#064E3B] font-bold leading-relaxed select-text">
               ${hanziContent}
             </p>
-            <p class="context-translation font-mono text-xs sm:text-sm text-[#064E3B]/75 mt-0.5 font-medium transition-all duration-300 ${revealTranslations ? 'opacity-100 visible' : 'opacity-0 invisible select-none pointer-events-none'}">
+            <p class="context-translation font-mono text-xs sm:text-sm text-[#064E3B]/75 mt-0.5 font-medium transition-opacity duration-200 ${revealTranslations ? 'opacity-100 visible' : 'opacity-0 invisible select-none pointer-events-none'}">
               ${turn.english || ''}
             </p>
           </div>
@@ -573,19 +573,26 @@ export class ContextLabEngine {
     this.currentStage = 1;
     const stagePinyin = document.getElementById('context-stage-pinyin');
     const stageDistractor = document.getElementById('context-stage-distractor');
-    const pinyinInput = document.getElementById('context-pinyin-input');
+    const proxyInput = document.getElementById('context-pinyin-proxy-input');
+    const pinyinBox = document.getElementById('context-pinyin-box');
+    const pinyinText = document.getElementById('context-pinyin-text');
+    const pinyinPlaceholder = document.getElementById('context-pinyin-placeholder');
+    const pinyinCaret = document.getElementById('context-pinyin-caret');
     const preview = document.getElementById('context-pinyin-preview');
 
     if (stagePinyin) stagePinyin.classList.remove('hidden');
     if (stageDistractor) stageDistractor.classList.add('hidden');
 
-    if (pinyinInput) {
-      pinyinInput.value = '';
-      pinyinInput.disabled = false;
-      pinyinInput.className = 'w-full bg-white text-black font-mono text-base sm:text-lg font-black px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl border-[2.5px] border-black shadow-hard-black focus:outline-none focus:ring-2 focus:ring-[#7EF1BE] transition-colors';
-      setTimeout(() => {
-        try { pinyinInput.focus({ preventScroll: true }); } catch (_) {}
-      }, 100);
+    if (proxyInput) {
+      proxyInput.value = '';
+      proxyInput.disabled = false;
+    }
+
+    if (pinyinText) pinyinText.textContent = '';
+    if (pinyinPlaceholder) pinyinPlaceholder.classList.remove('hidden');
+    if (pinyinCaret) pinyinCaret.classList.add('hidden');
+    if (pinyinBox) {
+      pinyinBox.className = 'relative flex-1 min-w-0 bg-white text-black font-mono text-base sm:text-lg font-black px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl border-[2.5px] border-black shadow-hard-black flex items-center cursor-text select-none min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#7EF1BE] transition-colors';
     }
 
     if (preview) {
@@ -658,10 +665,11 @@ export class ContextLabEngine {
 
   submitPinyinInput() {
     if (this.currentStage !== 1 || !this.activeSlot) return;
-    const pinyinInput = document.getElementById('context-pinyin-input');
-    if (!pinyinInput) return;
+    const proxyInput = document.getElementById('context-pinyin-proxy-input');
+    const pinyinBox = document.getElementById('context-pinyin-box');
+    if (!proxyInput) return;
 
-    const rawVal = pinyinInput.value.trim();
+    const rawVal = proxyInput.value.trim();
     if (!rawVal) return;
 
     const diacritic = convertNumericToDiacritic(rawVal);
@@ -671,11 +679,13 @@ export class ContextLabEngine {
     if (isMatch) {
       this.onPinyinSuccess(diacritic || this.activeSlot.word_pinyin);
     } else {
-      triggerDampedShake(pinyinInput);
-      pinyinInput.classList.add('bg-[#FEE2E2]', 'border-[#DC2626]');
-      setTimeout(() => {
-        pinyinInput.classList.remove('bg-[#FEE2E2]', 'border-[#DC2626]');
-      }, 450);
+      if (pinyinBox) {
+        triggerDampedShake(pinyinBox);
+        pinyinBox.classList.add('bg-[#FEE2E2]', 'border-[#DC2626]');
+        setTimeout(() => {
+          pinyinBox.classList.remove('bg-[#FEE2E2]', 'border-[#DC2626]');
+        }, 450);
+      }
     }
   }
 
@@ -683,12 +693,19 @@ export class ContextLabEngine {
     this.isPinyinSolved = true;
     this.updateRevealEnglishBtn();
 
-    const pinyinInput = document.getElementById('context-pinyin-input');
-    if (pinyinInput) {
-      pinyinInput.disabled = true;
-      pinyinInput.classList.remove('border-black');
-      pinyinInput.classList.add('bg-[#D1FAE5]', 'border-[#059669]', 'text-[#064E3B]');
+    const proxyInput = document.getElementById('context-pinyin-proxy-input');
+    if (proxyInput) {
+      proxyInput.disabled = true;
+      try { proxyInput.blur(); } catch (_) {}
     }
+
+    const pinyinBox = document.getElementById('context-pinyin-box');
+    if (pinyinBox) {
+      pinyinBox.classList.remove('border-black', 'focus:ring-[#7EF1BE]');
+      pinyinBox.classList.add('bg-[#D1FAE5]', 'border-[#059669]', 'text-[#064E3B]');
+    }
+    const pinyinCaret = document.getElementById('context-pinyin-caret');
+    if (pinyinCaret) pinyinCaret.classList.add('hidden');
 
     // Highlight all dash slots in emerald green success boxes
     const dashSlots = document.querySelectorAll('.context-dash-slot');
@@ -718,7 +735,8 @@ export class ContextLabEngine {
     }
 
     if (nextBtn) {
-      nextBtn.classList.add('hidden');
+      nextBtn.classList.remove('hidden', 'visible', 'opacity-100');
+      nextBtn.classList.add('invisible', 'opacity-0', 'pointer-events-none');
     }
 
     // Render 4 Distractor Options
@@ -793,7 +811,8 @@ export class ContextLabEngine {
       // Reveal NEXT button
       const nextBtn = document.getElementById('context-next-btn');
       if (nextBtn) {
-        nextBtn.classList.remove('hidden');
+        nextBtn.classList.remove('invisible', 'opacity-0', 'pointer-events-none', 'hidden');
+        nextBtn.classList.add('visible', 'opacity-100');
         if (!prefersReducedMotion()) {
           animateSpringPop(nextBtn);
         }
@@ -901,10 +920,17 @@ export class ContextLabEngine {
 
     this.isEnglishRevealed = !this.isEnglishRevealed;
     this.updateRevealEnglishBtn();
-    this.renderDialogueText({
-      revealTarget: this.currentStage === 'complete',
-      revealTranslations: this.isEnglishRevealed || this.currentStage === 'complete',
-      activeTurnIndex: this.activeTurnHighlightIndex
+
+    const translations = document.querySelectorAll('.context-translation');
+    const shouldShow = this.isEnglishRevealed || this.currentStage === 'complete';
+    translations.forEach(el => {
+      if (shouldShow) {
+        el.classList.remove('opacity-0', 'invisible', 'pointer-events-none');
+        el.classList.add('opacity-100', 'visible');
+      } else {
+        el.classList.remove('opacity-100', 'visible');
+        el.classList.add('opacity-0', 'invisible', 'pointer-events-none');
+      }
     });
   }
 
@@ -1082,7 +1108,12 @@ export class ContextLabEngine {
   // =========================================================================
 
   bindCockpitUI() {
-    const pinyinInput = document.getElementById('context-pinyin-input');
+    const proxyInput = document.getElementById('context-pinyin-proxy-input');
+    const pinyinBox = document.getElementById('context-pinyin-box');
+    const pinyinText = document.getElementById('context-pinyin-text');
+    const pinyinPlaceholder = document.getElementById('context-pinyin-placeholder');
+    const pinyinCaret = document.getElementById('context-pinyin-caret');
+    const pinyinLabel = document.getElementById('context-pinyin-label');
     const submitBtn = document.getElementById('context-pinyin-submit-btn');
     const playAudioBtn = document.getElementById('context-play-audio-btn');
     const revealEnglishBtn = document.getElementById('context-reveal-english-btn');
@@ -1102,36 +1133,57 @@ export class ContextLabEngine {
       });
     }
 
-    const forceScrollReset = () => {
-      window.scrollTo(0, 0);
-      if (document.documentElement) document.documentElement.scrollTop = 0;
-      if (document.body) document.body.scrollTop = 0;
+    const focusProxy = () => {
+      if (proxyInput && !proxyInput.disabled) {
+        proxyInput.focus({ preventScroll: true });
+      }
     };
 
-    if (pinyinInput) {
-      pinyinInput.addEventListener('focus', () => {
-        const screen = document.getElementById('context-lab-screen');
-        if (screen) screen.classList.add('keyboard-active');
+    if (pinyinBox) {
+      pinyinBox.addEventListener('click', focusProxy);
+    }
+    if (pinyinLabel) {
+      pinyinLabel.addEventListener('click', (e) => {
+        e.preventDefault();
+        focusProxy();
+      });
+    }
 
-        forceScrollReset();
-        requestAnimationFrame(forceScrollReset);
-        setTimeout(forceScrollReset, 40);
-        setTimeout(forceScrollReset, 150);
-        setTimeout(forceScrollReset, 350);
+    if (proxyInput) {
+      proxyInput.addEventListener('focus', () => {
+        if (pinyinBox) {
+          pinyinBox.classList.add('ring-2', 'ring-[#7EF1BE]');
+        }
+        if (pinyinCaret) {
+          pinyinCaret.classList.remove('hidden');
+        }
       });
 
-      pinyinInput.addEventListener('blur', () => {
-        const screen = document.getElementById('context-lab-screen');
-        if (screen) screen.classList.remove('keyboard-active');
-
-        forceScrollReset();
-        setTimeout(forceScrollReset, 50);
+      proxyInput.addEventListener('blur', () => {
+        if (pinyinBox) {
+          pinyinBox.classList.remove('ring-2', 'ring-[#7EF1BE]');
+        }
+        if (pinyinCaret) {
+          pinyinCaret.classList.add('hidden');
+        }
       });
 
-      pinyinInput.addEventListener('input', (e) => {
-        this.handlePinyinInput(e.target.value);
+      proxyInput.addEventListener('input', (e) => {
+        const val = e.target.value;
+        if (pinyinText) {
+          pinyinText.textContent = val;
+        }
+        if (pinyinPlaceholder) {
+          if (val && val.length > 0) {
+            pinyinPlaceholder.classList.add('hidden');
+          } else {
+            pinyinPlaceholder.classList.remove('hidden');
+          }
+        }
+        this.handlePinyinInput(val);
       });
-      pinyinInput.addEventListener('keydown', (e) => {
+
+      proxyInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
           this.submitPinyinInput();
