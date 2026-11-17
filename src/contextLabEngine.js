@@ -275,6 +275,11 @@ export class ContextLabEngine {
     this.audioRafId = null;
     this.keyListenerAttached = false;
     this.activeTurnHighlightIndex = null;
+    this.audioPlayCount = 0;
+    this.isEnglishRevealed = false;
+    this.isPinyinSolved = false;
+    this.lastPlayTimestamp = 0;
+    this.hasPoppedUnlock = false;
   }
 
   async init(fetchJsonFn) {
@@ -441,6 +446,13 @@ export class ContextLabEngine {
     }
     this.shuffledDistractors = originalOptions;
 
+    this.audioPlayCount = 0;
+    this.isEnglishRevealed = false;
+    this.isPinyinSolved = false;
+    this.lastPlayTimestamp = 0;
+    this.hasPoppedUnlock = false;
+    this.updateRevealEnglishBtn();
+
     this.currentStage = 1;
     this.renderDialogueText({ revealTarget: false, revealTranslations: false, activeTurnIndex: null });
     this.renderStage1();
@@ -450,7 +462,7 @@ export class ContextLabEngine {
       setTimeout(() => {
         const screen = document.getElementById('context-lab-screen');
         if (screen && !screen.classList.contains('hidden')) {
-          this.playDialogueAudio();
+          this.playDialogueAudio({ isAutoplay: true });
         }
       }, 200);
     }
@@ -460,7 +472,12 @@ export class ContextLabEngine {
   // DOM RENDERING: DIALOGUE TEXT & TIME-SYNCHRONIZED HIGHLIGHTING
   // =========================================================================
 
-  renderDialogueText({ revealTarget = false, revealTranslations = false, activeTurnIndex = null, partialPinyin = '' } = {}) {
+  renderDialogueText({
+    revealTarget = (this.currentStage === 'complete'),
+    revealTranslations = (this.isEnglishRevealed || this.currentStage === 'complete'),
+    activeTurnIndex = null,
+    partialPinyin = ''
+  } = {}) {
     const container = document.getElementById('context-dialogue-lines');
     if (!container || !this.currentDialogue) return;
 
@@ -663,6 +680,9 @@ export class ContextLabEngine {
   }
 
   onPinyinSuccess(resolvedPinyin) {
+    this.isPinyinSolved = true;
+    this.updateRevealEnglishBtn();
+
     const pinyinInput = document.getElementById('context-pinyin-input');
     if (pinyinInput) {
       pinyinInput.disabled = true;
@@ -710,7 +730,7 @@ export class ContextLabEngine {
             <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-black text-[#7EF1BE] font-mono font-black text-xs shrink-0 select-none">
               ${idx + 1}
             </span>
-            <span class="font-chinese font-black text-2xl sm:text-3xl text-black flex-1 text-center truncate">
+            <span class="font-chinese font-medium text-xl sm:text-2xl text-black flex-1 text-center truncate">
               ${opt.character}
             </span>
             <span class="w-6 shrink-0"></span>
@@ -768,6 +788,7 @@ export class ContextLabEngine {
         revealTranslations: true,
         activeTurnIndex: this.activeTurnHighlightIndex
       });
+      this.updateRevealEnglishBtn();
 
       // Reveal NEXT button
       const nextBtn = document.getElementById('context-next-btn');
@@ -831,11 +852,79 @@ export class ContextLabEngine {
   }
 
   // =========================================================================
+  // REVEAL ENGLISH CONTROLS (3-LISTEN GATED REPLAY LOGIC)
+  // =========================================================================
+
+  updateRevealEnglishBtn() {
+    const btn = document.getElementById('context-reveal-english-btn');
+    if (!btn) return;
+
+    const count = this.audioPlayCount || 0;
+    const isUnlocked = count >= 3 || this.isPinyinSolved || this.currentStage === 'complete';
+    const textSpan = document.getElementById('context-reveal-english-text');
+    const iconSpan = btn.querySelector('.material-symbols-outlined');
+
+    if (!isUnlocked) {
+      btn.disabled = true;
+      btn.className = 'min-h-[38px] px-3 py-1 bg-black/5 text-[#064E3B]/40 font-mono text-xs font-black uppercase rounded-full border-2 border-black/20 flex items-center gap-1.5 cursor-not-allowed transition-all select-none';
+      btn.title = `Listen to dialogue 3 times or solve Pinyin to unlock English translation (${count}/3)`;
+      if (iconSpan) iconSpan.textContent = 'lock';
+      if (textSpan) textSpan.textContent = `Reveal English (${count}/3)`;
+    } else {
+      btn.disabled = false;
+      const isShowing = this.isEnglishRevealed || this.currentStage === 'complete';
+      if (isShowing) {
+        btn.className = 'min-h-[38px] px-3 py-1 bg-[#7EF1BE] text-[#064E3B] font-mono text-xs font-black uppercase rounded-full border-2 border-black shadow-hard-black flex items-center gap-1.5 transition-all active-collapse cursor-pointer';
+        btn.title = 'Click to hide English translations';
+        if (iconSpan) iconSpan.textContent = 'visibility_off';
+        if (textSpan) textSpan.textContent = 'Hide English';
+      } else {
+        btn.className = 'min-h-[38px] px-3 py-1 bg-white hover:bg-[#7EF1BE] text-[#064E3B] font-mono text-xs font-black uppercase rounded-full border-2 border-black shadow-hard-black flex items-center gap-1.5 transition-all active-collapse cursor-pointer';
+        btn.title = 'Click to reveal English translations';
+        if (iconSpan) iconSpan.textContent = 'visibility';
+        if (textSpan) textSpan.textContent = 'Reveal English';
+      }
+
+      // Subtle pop animation at the exact moment of unlocking
+      if (isUnlocked && !this.hasPoppedUnlock && !isShowing) {
+        this.hasPoppedUnlock = true;
+        if (!prefersReducedMotion()) {
+          animateSpringPop(btn);
+        }
+      }
+    }
+  }
+
+  toggleEnglishReveal() {
+    const isUnlocked = (this.audioPlayCount || 0) >= 3 || this.isPinyinSolved || this.currentStage === 'complete';
+    if (!isUnlocked) return;
+
+    this.isEnglishRevealed = !this.isEnglishRevealed;
+    this.updateRevealEnglishBtn();
+    this.renderDialogueText({
+      revealTarget: this.currentStage === 'complete',
+      revealTranslations: this.isEnglishRevealed || this.currentStage === 'complete',
+      activeTurnIndex: this.activeTurnHighlightIndex
+    });
+  }
+
+  // =========================================================================
   // AUDIO PIPELINE: TIME-SYNCHRONIZED TURN GLOW & MOBILE-SAFE PLAYBACK
   // =========================================================================
 
-  playDialogueAudio() {
+  playDialogueAudio({ isAutoplay = false } = {}) {
     if (!this.currentDialogue) return;
+
+    if (!isAutoplay) {
+      // Track user play / replay count (with 600ms debounce to prevent rapid spam clicks)
+      const now = Date.now();
+      if (!this.lastPlayTimestamp || now - this.lastPlayTimestamp > 600) {
+        this.lastPlayTimestamp = now;
+        this.audioPlayCount = (this.audioPlayCount || 0) + 1;
+        this.updateRevealEnglishBtn();
+      }
+    }
+
     const playBtn = document.getElementById('context-play-audio-btn');
 
     // UI pulse
@@ -875,7 +964,7 @@ export class ContextLabEngine {
           this.activeTurnHighlightIndex = null;
           this.renderDialogueText({
             revealTarget: this.currentStage === 'complete',
-            revealTranslations: this.currentStage === 'complete',
+            revealTranslations: this.isEnglishRevealed || this.currentStage === 'complete',
             activeTurnIndex: null
           });
           return;
@@ -896,7 +985,7 @@ export class ContextLabEngine {
           this.activeTurnHighlightIndex = activeIdx;
           this.renderDialogueText({
             revealTarget: this.currentStage === 'complete',
-            revealTranslations: this.currentStage === 'complete',
+            revealTranslations: this.isEnglishRevealed || this.currentStage === 'complete',
             activeTurnIndex: activeIdx
           });
         }
@@ -915,7 +1004,7 @@ export class ContextLabEngine {
         if (this.audioRafId) cancelAnimationFrame(this.audioRafId);
         this.renderDialogueText({
           revealTarget: this.currentStage === 'complete',
-          revealTranslations: this.currentStage === 'complete',
+          revealTranslations: this.isEnglishRevealed || this.currentStage === 'complete',
           activeTurnIndex: null
         });
       };
@@ -949,7 +1038,7 @@ export class ContextLabEngine {
     }
     this.renderDialogueText({
       revealTarget: this.currentStage === 'complete',
-      revealTranslations: this.currentStage === 'complete',
+      revealTranslations: this.isEnglishRevealed || this.currentStage === 'complete',
       activeTurnIndex: null
     });
   }
@@ -996,6 +1085,7 @@ export class ContextLabEngine {
     const pinyinInput = document.getElementById('context-pinyin-input');
     const submitBtn = document.getElementById('context-pinyin-submit-btn');
     const playAudioBtn = document.getElementById('context-play-audio-btn');
+    const revealEnglishBtn = document.getElementById('context-reveal-english-btn');
     const nextBtn = document.getElementById('context-next-btn');
     const prevUnitBtn = document.getElementById('context-unit-prev-btn');
     const nextUnitBtn = document.getElementById('context-unit-next-btn');
@@ -1033,6 +1123,12 @@ export class ContextLabEngine {
     if (playAudioBtn) {
       playAudioBtn.addEventListener('click', () => {
         this.playDialogueAudio();
+      });
+    }
+
+    if (revealEnglishBtn) {
+      revealEnglishBtn.addEventListener('click', () => {
+        this.toggleEnglishReveal();
       });
     }
 
