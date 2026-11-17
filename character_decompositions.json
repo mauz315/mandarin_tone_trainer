@@ -1,0 +1,7982 @@
+{
+  "一": {
+    "char": "一",
+    "strokeCount": 1,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_yi",
+        "glyph": "一",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "二",
+      "三",
+      "十",
+      "丨"
+    ]
+  },
+  "七": {
+    "char": "七",
+    "strokeCount": 2,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_qi",
+        "glyph": "七",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "十",
+      "匕",
+      "乜",
+      "九"
+    ]
+  },
+  "万": {
+    "char": "万",
+    "strokeCount": 3,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_wan",
+        "glyph": "万",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "方",
+      "力",
+      "刀",
+      "七"
+    ]
+  },
+  "丈": {
+    "char": "丈",
+    "strokeCount": 3,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_zhang",
+        "glyph": "丈",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "十",
+      "大",
+      "又",
+      "文"
+    ]
+  },
+  "三": {
+    "char": "三",
+    "strokeCount": 3,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_san",
+        "glyph": "三",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "二",
+      "一",
+      "王",
+      "丰"
+    ]
+  },
+  "上": {
+    "char": "上",
+    "strokeCount": 3,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_shang",
+        "glyph": "上",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "下",
+      "止",
+      "土",
+      "正"
+    ]
+  },
+  "下": {
+    "char": "下",
+    "strokeCount": 3,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_xia",
+        "glyph": "下",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "上",
+      "不",
+      "卜",
+      "个"
+    ]
+  },
+  "不": {
+    "char": "不",
+    "strokeCount": 4,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_bu",
+        "glyph": "不",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "木",
+      "本",
+      "下",
+      "太"
+    ]
+  },
+  "东": {
+    "char": "东",
+    "strokeCount": 5,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_dong",
+        "glyph": "东",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "车",
+      "乐",
+      "本",
+      "栋"
+    ]
+  },
+  "两": {
+    "char": "两",
+    "strokeCount": 7,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_liang",
+        "glyph": "两",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "雨",
+      "西",
+      "而",
+      "丙"
+    ]
+  },
+  "个": {
+    "char": "个",
+    "strokeCount": 3,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_ge_ge",
+        "glyph": "个",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "人",
+      "十",
+      "介",
+      "从"
+    ]
+  },
+  "中": {
+    "char": "中",
+    "strokeCount": 4,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_zhong",
+        "glyph": "中",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "申",
+      "由",
+      "甲",
+      "田"
+    ]
+  },
+  "为": {
+    "char": "为",
+    "strokeCount": 4,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_wei_for",
+        "glyph": "为",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "办",
+      "刃",
+      "勾",
+      "允"
+    ]
+  },
+  "么": {
+    "char": "么",
+    "strokeCount": 3,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_me",
+        "glyph": "么",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "厶",
+      "公",
+      "去",
+      "云"
+    ]
+  },
+  "乐": {
+    "char": "乐",
+    "strokeCount": 5,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_le",
+        "glyph": "乐",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "东",
+      "禾",
+      "木",
+      "本"
+    ]
+  },
+  "九": {
+    "char": "九",
+    "strokeCount": 2,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_jiu",
+        "glyph": "九",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "几",
+      "乙",
+      "力",
+      "七"
+    ]
+  },
+  "也": {
+    "char": "也",
+    "strokeCount": 3,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_ye",
+        "glyph": "也",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "乙",
+      "乜",
+      "七",
+      "巴"
+    ]
+  },
+  "习": {
+    "char": "习",
+    "strokeCount": 3,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_xi",
+        "glyph": "习",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "羽",
+      "刁",
+      "刃",
+      "飞"
+    ]
+  },
+  "书": {
+    "char": "书",
+    "strokeCount": 4,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_shu",
+        "glyph": "书",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "韦",
+      "尹",
+      "尺",
+      "尽"
+    ]
+  },
+  "买": {
+    "char": "买",
+    "strokeCount": 6,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_mai",
+        "glyph": "买",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "实",
+      "头",
+      "关",
+      "农"
+    ]
+  },
+  "了": {
+    "char": "了",
+    "strokeCount": 2,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_le",
+        "glyph": "了",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "子",
+      "孑",
+      "丁",
+      "乙"
+    ]
+  },
+  "事": {
+    "char": "事",
+    "strokeCount": 8,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_shi_thing",
+        "glyph": "事",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "吏",
+      "争",
+      "尹",
+      "史"
+    ]
+  },
+  "二": {
+    "char": "二",
+    "strokeCount": 2,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_er",
+        "glyph": "二",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "一",
+      "三",
+      "十",
+      "八"
+    ]
+  },
+  "五": {
+    "char": "五",
+    "strokeCount": 4,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_wu",
+        "glyph": "五",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "二",
+      "三",
+      "正",
+      "立"
+    ]
+  },
+  "些": {
+    "char": "些",
+    "strokeCount": 8,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_ci",
+        "glyph": "此",
+        "role": "top"
+      },
+      {
+        "id": "comp_er",
+        "glyph": "二",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "柴",
+      "止",
+      "匕",
+      "三"
+    ]
+  },
+  "交": {
+    "char": "交",
+    "strokeCount": 6,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_tou",
+        "glyph": "亠",
+        "role": "top"
+      },
+      {
+        "id": "comp_fu",
+        "glyph": "父",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "六",
+      "文",
+      "立",
+      "木"
+    ]
+  },
+  "亮": {
+    "char": "亮",
+    "strokeCount": 9,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_liang_bright",
+        "glyph": "亮",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "高",
+      "京",
+      "亭",
+      "亢"
+    ]
+  },
+  "人": {
+    "char": "人",
+    "strokeCount": 2,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_ren",
+        "glyph": "人",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "八",
+      "入",
+      "几",
+      "卜"
+    ]
+  },
+  "什": {
+    "char": "什",
+    "strokeCount": 4,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_ren",
+        "glyph": "亻",
+        "role": "left"
+      },
+      {
+        "id": "comp_shi",
+        "glyph": "十",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "计",
+      "千",
+      "木",
+      "日"
+    ]
+  },
+  "今": {
+    "char": "今",
+    "strokeCount": 4,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_jin",
+        "glyph": "今",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "令",
+      "会",
+      "从",
+      "介"
+    ]
+  },
+  "介": {
+    "char": "介",
+    "strokeCount": 4,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_jie",
+        "glyph": "介",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "个",
+      "从",
+      "今",
+      "什"
+    ]
+  },
+  "从": {
+    "char": "从",
+    "strokeCount": 4,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_ren1",
+        "glyph": "人",
+        "role": "left"
+      },
+      {
+        "id": "comp_ren2",
+        "glyph": "人",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "众",
+      "大",
+      "木",
+      "日"
+    ]
+  },
+  "他": {
+    "char": "他",
+    "strokeCount": 5,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_ren",
+        "glyph": "亻",
+        "role": "left"
+      },
+      {
+        "id": "comp_ye",
+        "glyph": "也",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "女",
+      "氵",
+      "门",
+      "土"
+    ]
+  },
+  "以": {
+    "char": "以",
+    "strokeCount": 4,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_yi",
+        "glyph": "以",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "从",
+      "认",
+      "似",
+      "队"
+    ]
+  },
+  "们": {
+    "char": "们",
+    "strokeCount": 5,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_ren",
+        "glyph": "亻",
+        "role": "left"
+      },
+      {
+        "id": "comp_men",
+        "glyph": "门",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "也",
+      "口",
+      "尔",
+      "女"
+    ]
+  },
+  "件": {
+    "char": "件",
+    "strokeCount": 6,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_ren",
+        "glyph": "亻",
+        "role": "left"
+      },
+      {
+        "id": "comp_niu",
+        "glyph": "牛",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "午",
+      "半",
+      "手",
+      "木"
+    ]
+  },
+  "休": {
+    "char": "休",
+    "strokeCount": 6,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_ren",
+        "glyph": "亻",
+        "role": "left"
+      },
+      {
+        "id": "comp_mu",
+        "glyph": "木",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "本",
+      "林",
+      "禾",
+      "日"
+    ]
+  },
+  "会": {
+    "char": "会",
+    "strokeCount": 6,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_ren",
+        "glyph": "人",
+        "role": "top"
+      },
+      {
+        "id": "comp_yun",
+        "glyph": "云",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "天",
+      "大",
+      "二",
+      "去"
+    ]
+  },
+  "但": {
+    "char": "但",
+    "strokeCount": 7,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_ren",
+        "glyph": "亻",
+        "role": "left"
+      },
+      {
+        "id": "comp_dan",
+        "glyph": "旦",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "日",
+      "胆",
+      "坦",
+      "木"
+    ]
+  },
+  "位": {
+    "char": "位",
+    "strokeCount": 7,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_ren",
+        "glyph": "亻",
+        "role": "left"
+      },
+      {
+        "id": "comp_li",
+        "glyph": "立",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "正",
+      "住",
+      "作",
+      "木"
+    ]
+  },
+  "住": {
+    "char": "住",
+    "strokeCount": 7,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_ren",
+        "glyph": "亻",
+        "role": "left"
+      },
+      {
+        "id": "comp_zhu",
+        "glyph": "主",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "氵",
+      "木",
+      "讠",
+      "女"
+    ]
+  },
+  "体": {
+    "char": "体",
+    "strokeCount": 7,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_ren",
+        "glyph": "亻",
+        "role": "left"
+      },
+      {
+        "id": "comp_ben",
+        "glyph": "本",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "木",
+      "休",
+      "大",
+      "日"
+    ]
+  },
+  "作": {
+    "char": "作",
+    "strokeCount": 7,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_ren",
+        "glyph": "亻",
+        "role": "left"
+      },
+      {
+        "id": "comp_zha",
+        "glyph": "乍",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "故",
+      "女",
+      "口",
+      "木"
+    ]
+  },
+  "你": {
+    "char": "你",
+    "strokeCount": 7,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_ren",
+        "glyph": "亻",
+        "role": "left"
+      },
+      {
+        "id": "comp_er",
+        "glyph": "尔",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "也",
+      "门",
+      "主",
+      "木"
+    ]
+  },
+  "便": {
+    "char": "便",
+    "strokeCount": 9,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_ren",
+        "glyph": "亻",
+        "role": "left"
+      },
+      {
+        "id": "comp_geng",
+        "glyph": "更",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "使",
+      "吏",
+      "硬",
+      "木"
+    ]
+  },
+  "候": {
+    "char": "候",
+    "strokeCount": 10,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_ren",
+        "glyph": "亻",
+        "role": "left"
+      },
+      {
+        "id": "comp_hou",
+        "glyph": "侯",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "矢",
+      "何",
+      "木",
+      "日"
+    ]
+  },
+  "做": {
+    "char": "做",
+    "strokeCount": 11,
+    "topology": "LEFT_MID_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_ren",
+        "glyph": "亻",
+        "role": "left"
+      },
+      {
+        "id": "comp_gu",
+        "glyph": "古",
+        "role": "mid"
+      },
+      {
+        "id": "comp_pu",
+        "glyph": "攵",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "女",
+      "木",
+      "手",
+      "口",
+      "日"
+    ]
+  },
+  "儿": {
+    "char": "儿",
+    "strokeCount": 2,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_er",
+        "glyph": "儿",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "几",
+      "八",
+      "人",
+      "匕"
+    ]
+  },
+  "元": {
+    "char": "元",
+    "strokeCount": 4,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_er",
+        "glyph": "二",
+        "role": "top"
+      },
+      {
+        "id": "comp_er_legs",
+        "glyph": "儿",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "无",
+      "天",
+      "云",
+      "木"
+    ]
+  },
+  "先": {
+    "char": "先",
+    "strokeCount": 6,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_niu",
+        "glyph": "⺧",
+        "role": "top"
+      },
+      {
+        "id": "comp_er",
+        "glyph": "儿",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "生",
+      "牛",
+      "光",
+      "兄"
+    ]
+  },
+  "八": {
+    "char": "八",
+    "strokeCount": 2,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_ba",
+        "glyph": "八",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "人",
+      "入",
+      "几",
+      "个"
+    ]
+  },
+  "公": {
+    "char": "公",
+    "strokeCount": 4,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_ba",
+        "glyph": "八",
+        "role": "top"
+      },
+      {
+        "id": "comp_si",
+        "glyph": "厶",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "分",
+      "去",
+      "木",
+      "日"
+    ]
+  },
+  "六": {
+    "char": "六",
+    "strokeCount": 4,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_tou",
+        "glyph": "亠",
+        "role": "top"
+      },
+      {
+        "id": "comp_ba",
+        "glyph": "八",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "大",
+      "天",
+      "文",
+      "立"
+    ]
+  },
+  "关": {
+    "char": "关",
+    "strokeCount": 6,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_ba_d",
+        "glyph": "丷",
+        "role": "top"
+      },
+      {
+        "id": "comp_tian",
+        "glyph": "天",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "开",
+      "美",
+      "羊",
+      "木"
+    ]
+  },
+  "兴": {
+    "char": "兴",
+    "strokeCount": 6,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_xiao",
+        "glyph": "⺌",
+        "role": "top"
+      },
+      {
+        "id": "comp_liu",
+        "glyph": "六",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "举",
+      "誉",
+      "光",
+      "关"
+    ]
+  },
+  "再": {
+    "char": "再",
+    "strokeCount": 6,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_zai_again",
+        "glyph": "再",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "冉",
+      "肉",
+      "内",
+      "丙"
+    ]
+  },
+  "写": {
+    "char": "写",
+    "strokeCount": 5,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_bao_g",
+        "glyph": "冖",
+        "role": "top"
+      },
+      {
+        "id": "comp_yu",
+        "glyph": "与",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "宀",
+      "马",
+      "子",
+      "号"
+    ]
+  },
+  "冷": {
+    "char": "冷",
+    "strokeCount": 7,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_bing",
+        "glyph": "冫",
+        "role": "left"
+      },
+      {
+        "id": "comp_ling",
+        "glyph": "令",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "氵",
+      "今",
+      "热",
+      "冰"
+    ]
+  },
+  "准": {
+    "char": "准",
+    "strokeCount": 10,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_bing",
+        "glyph": "冫",
+        "role": "left"
+      },
+      {
+        "id": "comp_zhui",
+        "glyph": "隹",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "氵",
+      "谁",
+      "推",
+      "木"
+    ]
+  },
+  "几": {
+    "char": "几",
+    "strokeCount": 2,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_ji",
+        "glyph": "几",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "儿",
+      "九",
+      "风",
+      "凡"
+    ]
+  },
+  "出": {
+    "char": "出",
+    "strokeCount": 5,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_shan1",
+        "glyph": "山",
+        "role": "top"
+      },
+      {
+        "id": "comp_shan2",
+        "glyph": "山",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "击",
+      "岔",
+      "岳",
+      "木"
+    ]
+  },
+  "分": {
+    "char": "分",
+    "strokeCount": 4,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_ba",
+        "glyph": "八",
+        "role": "top"
+      },
+      {
+        "id": "comp_dao",
+        "glyph": "刀",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "公",
+      "力",
+      "木",
+      "日"
+    ]
+  },
+  "别": {
+    "char": "别",
+    "strokeCount": 7,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_ling",
+        "glyph": "另",
+        "role": "left"
+      },
+      {
+        "id": "comp_dao",
+        "glyph": "刂",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "口",
+      "到",
+      "刮",
+      "木"
+    ]
+  },
+  "到": {
+    "char": "到",
+    "strokeCount": 8,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_zhi",
+        "glyph": "至",
+        "role": "left"
+      },
+      {
+        "id": "comp_dao",
+        "glyph": "刂",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "土",
+      "别",
+      "倒",
+      "木"
+    ]
+  },
+  "前": {
+    "char": "前",
+    "strokeCount": 9,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_qian",
+        "glyph": "前",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "首",
+      "面",
+      "单",
+      "南"
+    ]
+  },
+  "动": {
+    "char": "动",
+    "strokeCount": 6,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_yun",
+        "glyph": "云",
+        "role": "left"
+      },
+      {
+        "id": "comp_li",
+        "glyph": "力",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "运",
+      "劝",
+      "木",
+      "日"
+    ]
+  },
+  "包": {
+    "char": "包",
+    "strokeCount": 5,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_bao",
+        "glyph": "勹",
+        "role": "outer"
+      },
+      {
+        "id": "comp_si",
+        "glyph": "巳",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "句",
+      "旬",
+      "抱",
+      "饱"
+    ]
+  },
+  "医": {
+    "char": "医",
+    "strokeCount": 7,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_fang",
+        "glyph": "匚",
+        "role": "outer"
+      },
+      {
+        "id": "comp_shi",
+        "glyph": "矢",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "大",
+      "区",
+      "巨",
+      "木"
+    ]
+  },
+  "十": {
+    "char": "十",
+    "strokeCount": 2,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_shi",
+        "glyph": "十",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "一",
+      "二",
+      "土",
+      "干"
+    ]
+  },
+  "千": {
+    "char": "千",
+    "strokeCount": 3,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_qian",
+        "glyph": "千",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "干",
+      "于",
+      "十",
+      "午"
+    ]
+  },
+  "午": {
+    "char": "午",
+    "strokeCount": 4,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_wu",
+        "glyph": "午",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "牛",
+      "年",
+      "半",
+      "千"
+    ]
+  },
+  "半": {
+    "char": "半",
+    "strokeCount": 5,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_ban",
+        "glyph": "半",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "牛",
+      "平",
+      "羊",
+      "午"
+    ]
+  },
+  "卖": {
+    "char": "卖",
+    "strokeCount": 8,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_shi",
+        "glyph": "十",
+        "role": "top"
+      },
+      {
+        "id": "comp_mai",
+        "glyph": "买",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "头",
+      "大",
+      "日",
+      "木"
+    ]
+  },
+  "去": {
+    "char": "去",
+    "strokeCount": 5,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_tu",
+        "glyph": "土",
+        "role": "top"
+      },
+      {
+        "id": "comp_si",
+        "glyph": "厶",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "云",
+      "会",
+      "公",
+      "台"
+    ]
+  },
+  "友": {
+    "char": "友",
+    "strokeCount": 4,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_you",
+        "glyph": "友",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "又",
+      "反",
+      "发",
+      "支"
+    ]
+  },
+  "口": {
+    "char": "口",
+    "strokeCount": 3,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "日",
+      "目",
+      "田",
+      "甘"
+    ]
+  },
+  "只": {
+    "char": "只",
+    "strokeCount": 5,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "top"
+      },
+      {
+        "id": "comp_ba",
+        "glyph": "八",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "兄",
+      "叭",
+      "贝",
+      "木"
+    ]
+  },
+  "叫": {
+    "char": "叫",
+    "strokeCount": 5,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "left"
+      },
+      {
+        "id": "comp_jiu",
+        "glyph": "丩",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "十",
+      "木",
+      "人",
+      "女"
+    ]
+  },
+  "可": {
+    "char": "可",
+    "strokeCount": 5,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_ding",
+        "glyph": "丁",
+        "role": "outer"
+      },
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "司",
+      "叵",
+      "石",
+      "木"
+    ]
+  },
+  "右": {
+    "char": "右",
+    "strokeCount": 5,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_you_r",
+        "glyph": "右",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "左",
+      "友",
+      "石",
+      "口"
+    ]
+  },
+  "号": {
+    "char": "号",
+    "strokeCount": 5,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "top"
+      },
+      {
+        "id": "comp_kao",
+        "glyph": "丂",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "亏",
+      "叫",
+      "句",
+      "木"
+    ]
+  },
+  "司": {
+    "char": "司",
+    "strokeCount": 5,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_si",
+        "glyph": "司",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "同",
+      "句",
+      "可",
+      "向"
+    ]
+  },
+  "吃": {
+    "char": "吃",
+    "strokeCount": 6,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "left"
+      },
+      {
+        "id": "comp_qi",
+        "glyph": "乞",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "氵",
+      "讠",
+      "曷",
+      "丩"
+    ]
+  },
+  "同": {
+    "char": "同",
+    "strokeCount": 6,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_tong",
+        "glyph": "同",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "司",
+      "周",
+      "向",
+      "问"
+    ]
+  },
+  "名": {
+    "char": "名",
+    "strokeCount": 6,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_xi",
+        "glyph": "夕",
+        "role": "top"
+      },
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "各",
+      "多",
+      "木",
+      "日"
+    ]
+  },
+  "后": {
+    "char": "后",
+    "strokeCount": 6,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_hou",
+        "glyph": "后",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "右",
+      "左",
+      "石",
+      "司"
+    ]
+  },
+  "吗": {
+    "char": "吗",
+    "strokeCount": 6,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "left"
+      },
+      {
+        "id": "comp_ma",
+        "glyph": "马",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "女",
+      "妈",
+      "骂",
+      "码"
+    ]
+  },
+  "吧": {
+    "char": "吧",
+    "strokeCount": 7,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "left"
+      },
+      {
+        "id": "comp_ba",
+        "glyph": "巴",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "扌",
+      "父",
+      "氵",
+      "女"
+    ]
+  },
+  "听": {
+    "char": "听",
+    "strokeCount": 7,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "left"
+      },
+      {
+        "id": "comp_jin",
+        "glyph": "斤",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "手",
+      "言",
+      "耳",
+      "木"
+    ]
+  },
+  "告": {
+    "char": "告",
+    "strokeCount": 7,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_niu",
+        "glyph": "⺧",
+        "role": "top"
+      },
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "牛",
+      "吉",
+      "造",
+      "木"
+    ]
+  },
+  "呢": {
+    "char": "呢",
+    "strokeCount": 8,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "left"
+      },
+      {
+        "id": "comp_ni",
+        "glyph": "尼",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "尸",
+      "匕",
+      "泥",
+      "木"
+    ]
+  },
+  "周": {
+    "char": "周",
+    "strokeCount": 8,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_tong",
+        "glyph": "冂",
+        "role": "outer"
+      },
+      {
+        "id": "comp_ji",
+        "glyph": "吉",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "同",
+      "司",
+      "问",
+      "木"
+    ]
+  },
+  "和": {
+    "char": "和",
+    "strokeCount": 8,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_he",
+        "glyph": "禾",
+        "role": "left"
+      },
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "木",
+      "知",
+      "日",
+      "月"
+    ]
+  },
+  "咖": {
+    "char": "咖",
+    "strokeCount": 8,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "left"
+      },
+      {
+        "id": "comp_jia",
+        "glyph": "加",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "力",
+      "啡",
+      "贺",
+      "木"
+    ]
+  },
+  "哥": {
+    "char": "哥",
+    "strokeCount": 10,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_ke1",
+        "glyph": "可",
+        "role": "top"
+      },
+      {
+        "id": "comp_ke2",
+        "glyph": "可",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "奇",
+      "柬",
+      "束",
+      "口"
+    ]
+  },
+  "哪": {
+    "char": "哪",
+    "strokeCount": 9,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "left"
+      },
+      {
+        "id": "comp_na",
+        "glyph": "那",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "阝",
+      "啊",
+      "木",
+      "日"
+    ]
+  },
+  "唱": {
+    "char": "唱",
+    "strokeCount": 11,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "left"
+      },
+      {
+        "id": "comp_chang",
+        "glyph": "昌",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "日",
+      "晶",
+      "喝",
+      "木"
+    ]
+  },
+  "商": {
+    "char": "商",
+    "strokeCount": 11,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_shang_shop",
+        "glyph": "商",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "摘",
+      "滴",
+      "适",
+      "敌"
+    ]
+  },
+  "啊": {
+    "char": "啊",
+    "strokeCount": 10,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "left"
+      },
+      {
+        "id": "comp_a",
+        "glyph": "阿",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "阝",
+      "可",
+      "呵",
+      "木"
+    ]
+  },
+  "啡": {
+    "char": "啡",
+    "strokeCount": 11,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "left"
+      },
+      {
+        "id": "comp_fei",
+        "glyph": "非",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "咖",
+      "排",
+      "悲",
+      "木"
+    ]
+  },
+  "喂": {
+    "char": "喂",
+    "strokeCount": 12,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "left"
+      },
+      {
+        "id": "comp_wei",
+        "glyph": "畏",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "田",
+      "偎",
+      "煨",
+      "木"
+    ]
+  },
+  "喜": {
+    "char": "喜",
+    "strokeCount": 12,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_xi_joy",
+        "glyph": "喜",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "吉",
+      "嘉",
+      "鼓",
+      "善"
+    ]
+  },
+  "喝": {
+    "char": "喝",
+    "strokeCount": 12,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "left"
+      },
+      {
+        "id": "comp_he",
+        "glyph": "曷",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "日",
+      "目",
+      "水",
+      "人"
+    ]
+  },
+  "四": {
+    "char": "四",
+    "strokeCount": 5,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_si_4",
+        "glyph": "四",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "西",
+      "回",
+      "日",
+      "目"
+    ]
+  },
+  "回": {
+    "char": "回",
+    "strokeCount": 6,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_wei",
+        "glyph": "囗",
+        "role": "outer"
+      },
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "日",
+      "目",
+      "田",
+      "门"
+    ]
+  },
+  "因": {
+    "char": "因",
+    "strokeCount": 6,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_wei",
+        "glyph": "囗",
+        "role": "outer"
+      },
+      {
+        "id": "comp_da",
+        "glyph": "大",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "天",
+      "困",
+      "团",
+      "木"
+    ]
+  },
+  "国": {
+    "char": "国",
+    "strokeCount": 8,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_wei",
+        "glyph": "囗",
+        "role": "outer"
+      },
+      {
+        "id": "comp_yu",
+        "glyph": "玉",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "日",
+      "王",
+      "主",
+      "田"
+    ]
+  },
+  "在": {
+    "char": "在",
+    "strokeCount": 6,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_zai",
+        "glyph": "在",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "存",
+      "左",
+      "有",
+      "土"
+    ]
+  },
+  "地": {
+    "char": "地",
+    "strokeCount": 6,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_tu",
+        "glyph": "土",
+        "role": "left"
+      },
+      {
+        "id": "comp_ye",
+        "glyph": "也",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "场",
+      "坏",
+      "块",
+      "坡"
+    ]
+  },
+  "场": {
+    "char": "场",
+    "strokeCount": 6,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_chang_field",
+        "glyph": "场",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "汤",
+      "扬",
+      "畅",
+      "阳"
+    ]
+  },
+  "坏": {
+    "char": "坏",
+    "strokeCount": 7,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_tu",
+        "glyph": "土",
+        "role": "left"
+      },
+      {
+        "id": "comp_bu",
+        "glyph": "不",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "环",
+      "杯",
+      "还",
+      "木"
+    ]
+  },
+  "坐": {
+    "char": "坐",
+    "strokeCount": 7,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_cong",
+        "glyph": "从",
+        "role": "top"
+      },
+      {
+        "id": "comp_tu",
+        "glyph": "土",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "人",
+      "大",
+      "木",
+      "工"
+    ]
+  },
+  "块": {
+    "char": "块",
+    "strokeCount": 7,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_tu",
+        "glyph": "土",
+        "role": "left"
+      },
+      {
+        "id": "comp_guai",
+        "glyph": "夬",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "快",
+      "决",
+      "缺",
+      "木"
+    ]
+  },
+  "士": {
+    "char": "士",
+    "strokeCount": 3,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_shi_scholar",
+        "glyph": "士",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "土",
+      "干",
+      "王",
+      "工"
+    ]
+  },
+  "备": {
+    "char": "备",
+    "strokeCount": 8,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_zhi",
+        "glyph": "夂",
+        "role": "top"
+      },
+      {
+        "id": "comp_tian",
+        "glyph": "田",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "各",
+      "条",
+      "奋",
+      "木"
+    ]
+  },
+  "外": {
+    "char": "外",
+    "strokeCount": 5,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_xi",
+        "glyph": "夕",
+        "role": "left"
+      },
+      {
+        "id": "comp_bu",
+        "glyph": "卜",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "处",
+      "名",
+      "木",
+      "日"
+    ]
+  },
+  "多": {
+    "char": "多",
+    "strokeCount": 6,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_xi1",
+        "glyph": "夕",
+        "role": "top"
+      },
+      {
+        "id": "comp_xi2",
+        "glyph": "夕",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "月",
+      "日",
+      "名",
+      "外"
+    ]
+  },
+  "大": {
+    "char": "大",
+    "strokeCount": 3,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_da",
+        "glyph": "大",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "木",
+      "火",
+      "土",
+      "人"
+    ]
+  },
+  "天": {
+    "char": "天",
+    "strokeCount": 4,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_tian",
+        "glyph": "天",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "夫",
+      "大",
+      "太",
+      "矢"
+    ]
+  },
+  "太": {
+    "char": "太",
+    "strokeCount": 4,
+    "topology": "CROSSING",
+    "targetComponents": [
+      {
+        "id": "comp_da",
+        "glyph": "大",
+        "role": "base"
+      },
+      {
+        "id": "comp_dian",
+        "glyph": "丶",
+        "role": "marker_lower"
+      }
+    ],
+    "distractorComponents": [
+      "犬",
+      "天",
+      "夫",
+      "木"
+    ]
+  },
+  "夫": {
+    "char": "夫",
+    "strokeCount": 4,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_fu",
+        "glyph": "夫",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "天",
+      "大",
+      "太",
+      "失"
+    ]
+  },
+  "头": {
+    "char": "头",
+    "strokeCount": 5,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_tou_head",
+        "glyph": "头",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "买",
+      "实",
+      "关",
+      "太"
+    ]
+  },
+  "女": {
+    "char": "女",
+    "strokeCount": 3,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_nv",
+        "glyph": "女",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "子",
+      "母",
+      "弓",
+      "幺"
+    ]
+  },
+  "奶": {
+    "char": "奶",
+    "strokeCount": 5,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_nv",
+        "glyph": "女",
+        "role": "left"
+      },
+      {
+        "id": "comp_nai",
+        "glyph": "乃",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "及",
+      "妈",
+      "姐",
+      "木"
+    ]
+  },
+  "她": {
+    "char": "她",
+    "strokeCount": 6,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_nv",
+        "glyph": "女",
+        "role": "left"
+      },
+      {
+        "id": "comp_ye",
+        "glyph": "也",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "亻",
+      "氵",
+      "纟",
+      "口"
+    ]
+  },
+  "好": {
+    "char": "好",
+    "strokeCount": 6,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_nv",
+        "glyph": "女",
+        "role": "left"
+      },
+      {
+        "id": "comp_zi",
+        "glyph": "子",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "马",
+      "也",
+      "亻",
+      "木"
+    ]
+  },
+  "妈": {
+    "char": "妈",
+    "strokeCount": 6,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_nv",
+        "glyph": "女",
+        "role": "left"
+      },
+      {
+        "id": "comp_ma",
+        "glyph": "马",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "子",
+      "也",
+      "口",
+      "日"
+    ]
+  },
+  "妹": {
+    "char": "妹",
+    "strokeCount": 8,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_nv",
+        "glyph": "女",
+        "role": "left"
+      },
+      {
+        "id": "comp_wei",
+        "glyph": "未",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "末",
+      "姐",
+      "木",
+      "日"
+    ]
+  },
+  "妻": {
+    "char": "妻",
+    "strokeCount": 8,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_qi_wife",
+        "glyph": "妻",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "凄",
+      "妾",
+      "安",
+      "母"
+    ]
+  },
+  "始": {
+    "char": "始",
+    "strokeCount": 8,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_nv",
+        "glyph": "女",
+        "role": "left"
+      },
+      {
+        "id": "comp_tai",
+        "glyph": "台",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "口",
+      "治",
+      "怡",
+      "木"
+    ]
+  },
+  "姐": {
+    "char": "姐",
+    "strokeCount": 8,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_nv",
+        "glyph": "女",
+        "role": "left"
+      },
+      {
+        "id": "comp_qie",
+        "glyph": "且",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "目",
+      "妹",
+      "妈",
+      "木"
+    ]
+  },
+  "姓": {
+    "char": "姓",
+    "strokeCount": 8,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_nv",
+        "glyph": "女",
+        "role": "left"
+      },
+      {
+        "id": "comp_sheng",
+        "glyph": "生",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "牛",
+      "性",
+      "星",
+      "木"
+    ]
+  },
+  "子": {
+    "char": "子",
+    "strokeCount": 3,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_zi",
+        "glyph": "子",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "了",
+      "孑",
+      "丁",
+      "女"
+    ]
+  },
+  "字": {
+    "char": "字",
+    "strokeCount": 6,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_bao",
+        "glyph": "宀",
+        "role": "top"
+      },
+      {
+        "id": "comp_zi",
+        "glyph": "子",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "家",
+      "女",
+      "好",
+      "安"
+    ]
+  },
+  "学": {
+    "char": "学",
+    "strokeCount": 8,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_xue",
+        "glyph": "学",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "字",
+      "觉",
+      "孝",
+      "子"
+    ]
+  },
+  "孩": {
+    "char": "孩",
+    "strokeCount": 9,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_zi",
+        "glyph": "子",
+        "role": "left"
+      },
+      {
+        "id": "comp_hai",
+        "glyph": "亥",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "该",
+      "刻",
+      "核",
+      "木"
+    ]
+  },
+  "它": {
+    "char": "它",
+    "strokeCount": 5,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_bao",
+        "glyph": "宀",
+        "role": "top"
+      },
+      {
+        "id": "comp_bi",
+        "glyph": "匕",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "安",
+      "宅",
+      "木",
+      "日"
+    ]
+  },
+  "完": {
+    "char": "完",
+    "strokeCount": 7,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_bao",
+        "glyph": "宀",
+        "role": "top"
+      },
+      {
+        "id": "comp_yuan",
+        "glyph": "元",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "定",
+      "宗",
+      "宝",
+      "字"
+    ]
+  },
+  "宜": {
+    "char": "宜",
+    "strokeCount": 8,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_bao",
+        "glyph": "宀",
+        "role": "top"
+      },
+      {
+        "id": "comp_qie",
+        "glyph": "且",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "宣",
+      "谊",
+      "木",
+      "日"
+    ]
+  },
+  "客": {
+    "char": "客",
+    "strokeCount": 9,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_bao",
+        "glyph": "宀",
+        "role": "top"
+      },
+      {
+        "id": "comp_ge",
+        "glyph": "各",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "口",
+      "容",
+      "额",
+      "木"
+    ]
+  },
+  "室": {
+    "char": "室",
+    "strokeCount": 9,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_bao",
+        "glyph": "宀",
+        "role": "top"
+      },
+      {
+        "id": "comp_zhi",
+        "glyph": "至",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "土",
+      "屋",
+      "到",
+      "木"
+    ]
+  },
+  "家": {
+    "char": "家",
+    "strokeCount": 10,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_bao",
+        "glyph": "宀",
+        "role": "top"
+      },
+      {
+        "id": "comp_shi",
+        "glyph": "豕",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "子",
+      "犬",
+      "女",
+      "木"
+    ]
+  },
+  "对": {
+    "char": "对",
+    "strokeCount": 5,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_you",
+        "glyph": "又",
+        "role": "left"
+      },
+      {
+        "id": "comp_cun",
+        "glyph": "寸",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "树",
+      "难",
+      "木",
+      "日"
+    ]
+  },
+  "小": {
+    "char": "小",
+    "strokeCount": 3,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_xiao",
+        "glyph": "小",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "水",
+      "木",
+      "不",
+      "丁"
+    ]
+  },
+  "少": {
+    "char": "少",
+    "strokeCount": 4,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_shao",
+        "glyph": "少",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "小",
+      "水",
+      "不",
+      "木"
+    ]
+  },
+  "就": {
+    "char": "就",
+    "strokeCount": 12,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_jing",
+        "glyph": "京",
+        "role": "left"
+      },
+      {
+        "id": "comp_you",
+        "glyph": "尤",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "龙",
+      "木",
+      "日",
+      "月"
+    ]
+  },
+  "岁": {
+    "char": "岁",
+    "strokeCount": 6,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_shan",
+        "glyph": "山",
+        "role": "top"
+      },
+      {
+        "id": "comp_xi",
+        "glyph": "夕",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "多",
+      "罗",
+      "木",
+      "日"
+    ]
+  },
+  "工": {
+    "char": "工",
+    "strokeCount": 3,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_gong",
+        "glyph": "工",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "土",
+      "士",
+      "王",
+      "干"
+    ]
+  },
+  "左": {
+    "char": "左",
+    "strokeCount": 5,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_zuo",
+        "glyph": "左",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "右",
+      "友",
+      "在",
+      "工"
+    ]
+  },
+  "己": {
+    "char": "己",
+    "strokeCount": 3,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_ji",
+        "glyph": "己",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "已",
+      "巳",
+      "乙",
+      "弓"
+    ]
+  },
+  "已": {
+    "char": "已",
+    "strokeCount": 3,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_yi",
+        "glyph": "已",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "己",
+      "巳",
+      "乙",
+      "弓"
+    ]
+  },
+  "市": {
+    "char": "市",
+    "strokeCount": 5,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_tou",
+        "glyph": "亠",
+        "role": "top"
+      },
+      {
+        "id": "comp_jin",
+        "glyph": "巾",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "沛",
+      "闹",
+      "木",
+      "日"
+    ]
+  },
+  "师": {
+    "char": "师",
+    "strokeCount": 6,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_shi",
+        "glyph": "师",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "帅",
+      "巾",
+      "币",
+      "归"
+    ]
+  },
+  "希": {
+    "char": "希",
+    "strokeCount": 7,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_yao",
+        "glyph": "乂",
+        "role": "top"
+      },
+      {
+        "id": "comp_bu",
+        "glyph": "布",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "巾",
+      "杀",
+      "稀",
+      "木"
+    ]
+  },
+  "帮": {
+    "char": "帮",
+    "strokeCount": 9,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_bang",
+        "glyph": "邦",
+        "role": "top"
+      },
+      {
+        "id": "comp_jin",
+        "glyph": "巾",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "绑",
+      "梆",
+      "木",
+      "日"
+    ]
+  },
+  "常": {
+    "char": "常",
+    "strokeCount": 11,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_shang",
+        "glyph": "尚",
+        "role": "top"
+      },
+      {
+        "id": "comp_jin",
+        "glyph": "巾",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "堂",
+      "尝",
+      "木",
+      "日"
+    ]
+  },
+  "年": {
+    "char": "年",
+    "strokeCount": 6,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_nian",
+        "glyph": "年",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "午",
+      "牛",
+      "生",
+      "丰"
+    ]
+  },
+  "床": {
+    "char": "床",
+    "strokeCount": 7,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_guang",
+        "glyph": "广",
+        "role": "outer"
+      },
+      {
+        "id": "comp_mu",
+        "glyph": "木",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "厂",
+      "店",
+      "房",
+      "日"
+    ]
+  },
+  "店": {
+    "char": "店",
+    "strokeCount": 8,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_guang",
+        "glyph": "广",
+        "role": "outer"
+      },
+      {
+        "id": "comp_zhan",
+        "glyph": "占",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "点",
+      "口",
+      "卜",
+      "床"
+    ]
+  },
+  "开": {
+    "char": "开",
+    "strokeCount": 4,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_kai",
+        "glyph": "开",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "井",
+      "并",
+      "升",
+      "关"
+    ]
+  },
+  "弟": {
+    "char": "弟",
+    "strokeCount": 7,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_di_bro",
+        "glyph": "弟",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "弓",
+      "予",
+      "丂",
+      "弗"
+    ]
+  },
+  "影": {
+    "char": "影",
+    "strokeCount": 15,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_jing",
+        "glyph": "景",
+        "role": "left"
+      },
+      {
+        "id": "comp_shan",
+        "glyph": "彡",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "彰",
+      "彭",
+      "木",
+      "日"
+    ]
+  },
+  "往": {
+    "char": "往",
+    "strokeCount": 8,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_chi",
+        "glyph": "彳",
+        "role": "left"
+      },
+      {
+        "id": "comp_zhu",
+        "glyph": "主",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "住",
+      "狂",
+      "木",
+      "日"
+    ]
+  },
+  "很": {
+    "char": "很",
+    "strokeCount": 9,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_chi",
+        "glyph": "彳",
+        "role": "left"
+      },
+      {
+        "id": "comp_gen",
+        "glyph": "艮",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "跟",
+      "狠",
+      "木",
+      "日"
+    ]
+  },
+  "得": {
+    "char": "得",
+    "strokeCount": 11,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_de",
+        "glyph": "得",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "德",
+      "待",
+      "彳",
+      "寸"
+    ]
+  },
+  "忘": {
+    "char": "忘",
+    "strokeCount": 7,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_wang",
+        "glyph": "亡",
+        "role": "top"
+      },
+      {
+        "id": "comp_xin",
+        "glyph": "心",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "忙",
+      "妄",
+      "木",
+      "日"
+    ]
+  },
+  "忙": {
+    "char": "忙",
+    "strokeCount": 6,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_xin",
+        "glyph": "忄",
+        "role": "left"
+      },
+      {
+        "id": "comp_wang",
+        "glyph": "亡",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "忘",
+      "盲",
+      "木",
+      "日"
+    ]
+  },
+  "快": {
+    "char": "快",
+    "strokeCount": 7,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_xin",
+        "glyph": "忄",
+        "role": "left"
+      },
+      {
+        "id": "comp_guai",
+        "glyph": "夬",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "块",
+      "决",
+      "木",
+      "日"
+    ]
+  },
+  "怎": {
+    "char": "怎",
+    "strokeCount": 9,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_zha",
+        "glyph": "乍",
+        "role": "top"
+      },
+      {
+        "id": "comp_xin",
+        "glyph": "心",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "作",
+      "昨",
+      "木",
+      "日"
+    ]
+  },
+  "思": {
+    "char": "思",
+    "strokeCount": 9,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_tian",
+        "glyph": "田",
+        "role": "top"
+      },
+      {
+        "id": "comp_xin",
+        "glyph": "心",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "想",
+      "恩",
+      "木",
+      "日"
+    ]
+  },
+  "息": {
+    "char": "息",
+    "strokeCount": 10,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_zi",
+        "glyph": "自",
+        "role": "top"
+      },
+      {
+        "id": "comp_xin",
+        "glyph": "心",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "媳",
+      "熄",
+      "木",
+      "日"
+    ]
+  },
+  "您": {
+    "char": "您",
+    "strokeCount": 11,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_ni",
+        "glyph": "你",
+        "role": "top"
+      },
+      {
+        "id": "comp_xin",
+        "glyph": "心",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "想",
+      "念",
+      "木",
+      "日"
+    ]
+  },
+  "情": {
+    "char": "情",
+    "strokeCount": 11,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_xin",
+        "glyph": "忄",
+        "role": "left"
+      },
+      {
+        "id": "comp_qing",
+        "glyph": "青",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "清",
+      "请",
+      "木",
+      "日"
+    ]
+  },
+  "想": {
+    "char": "想",
+    "strokeCount": 13,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_xiang",
+        "glyph": "相",
+        "role": "top"
+      },
+      {
+        "id": "comp_xin",
+        "glyph": "心",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "木",
+      "目",
+      "日",
+      "月"
+    ]
+  },
+  "意": {
+    "char": "意",
+    "strokeCount": 13,
+    "topology": "TOP_MID_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_li",
+        "glyph": "立",
+        "role": "top"
+      },
+      {
+        "id": "comp_ri",
+        "glyph": "日",
+        "role": "mid"
+      },
+      {
+        "id": "comp_xin",
+        "glyph": "心",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "音",
+      "思",
+      "想",
+      "言",
+      "口"
+    ]
+  },
+  "慢": {
+    "char": "慢",
+    "strokeCount": 14,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_xin",
+        "glyph": "忄",
+        "role": "left"
+      },
+      {
+        "id": "comp_man",
+        "glyph": "曼",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "漫",
+      "蔓",
+      "木",
+      "日"
+    ]
+  },
+  "懂": {
+    "char": "懂",
+    "strokeCount": 15,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_xin",
+        "glyph": "忄",
+        "role": "left"
+      },
+      {
+        "id": "comp_dong",
+        "glyph": "董",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "重",
+      "草",
+      "木",
+      "日"
+    ]
+  },
+  "我": {
+    "char": "我",
+    "strokeCount": 7,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_wo",
+        "glyph": "我",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "找",
+      "戈",
+      "手",
+      "成"
+    ]
+  },
+  "房": {
+    "char": "房",
+    "strokeCount": 8,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_hu",
+        "glyph": "户",
+        "role": "outer"
+      },
+      {
+        "id": "comp_fang",
+        "glyph": "方",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "门",
+      "店",
+      "广",
+      "木"
+    ]
+  },
+  "所": {
+    "char": "所",
+    "strokeCount": 8,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_hu",
+        "glyph": "户",
+        "role": "left"
+      },
+      {
+        "id": "comp_jin",
+        "glyph": "斤",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "近",
+      "听",
+      "木",
+      "日"
+    ]
+  },
+  "手": {
+    "char": "手",
+    "strokeCount": 4,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_shou",
+        "glyph": "手",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "毛",
+      "丰",
+      "扌",
+      "半"
+    ]
+  },
+  "打": {
+    "char": "打",
+    "strokeCount": 5,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_shou",
+        "glyph": "扌",
+        "role": "left"
+      },
+      {
+        "id": "comp_ding",
+        "glyph": "丁",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "手",
+      "灯",
+      "木",
+      "日"
+    ]
+  },
+  "找": {
+    "char": "找",
+    "strokeCount": 7,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_shou",
+        "glyph": "扌",
+        "role": "left"
+      },
+      {
+        "id": "comp_ge",
+        "glyph": "戈",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "我",
+      "伐",
+      "丁",
+      "木"
+    ]
+  },
+  "拿": {
+    "char": "拿",
+    "strokeCount": 10,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_he",
+        "glyph": "合",
+        "role": "top"
+      },
+      {
+        "id": "comp_shou",
+        "glyph": "手",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "掌",
+      "摩",
+      "木",
+      "日"
+    ]
+  },
+  "教": {
+    "char": "教",
+    "strokeCount": 11,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_xiao",
+        "glyph": "孝",
+        "role": "left"
+      },
+      {
+        "id": "comp_pu",
+        "glyph": "攵",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "孜",
+      "故",
+      "木",
+      "日"
+    ]
+  },
+  "文": {
+    "char": "文",
+    "strokeCount": 4,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_tou",
+        "glyph": "亠",
+        "role": "top"
+      },
+      {
+        "id": "comp_you",
+        "glyph": "乂",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "六",
+      "父",
+      "交",
+      "立"
+    ]
+  },
+  "新": {
+    "char": "新",
+    "strokeCount": 13,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_qin",
+        "glyph": "亲",
+        "role": "left"
+      },
+      {
+        "id": "comp_jin",
+        "glyph": "斤",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "斩",
+      "听",
+      "木",
+      "日"
+    ]
+  },
+  "旁": {
+    "char": "旁",
+    "strokeCount": 10,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_pang",
+        "glyph": "旁",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "傍",
+      "榜",
+      "帝",
+      "方"
+    ]
+  },
+  "旅": {
+    "char": "旅",
+    "strokeCount": 10,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_lv",
+        "glyph": "旅",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "旋",
+      "旗",
+      "放",
+      "族"
+    ]
+  },
+  "日": {
+    "char": "日",
+    "strokeCount": 4,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_ri",
+        "glyph": "日",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "目",
+      "曰",
+      "田",
+      "月"
+    ]
+  },
+  "早": {
+    "char": "早",
+    "strokeCount": 6,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_ri",
+        "glyph": "日",
+        "role": "top"
+      },
+      {
+        "id": "comp_shi",
+        "glyph": "十",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "草",
+      "旱",
+      "木",
+      "月"
+    ]
+  },
+  "时": {
+    "char": "时",
+    "strokeCount": 7,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_ri",
+        "glyph": "日",
+        "role": "left"
+      },
+      {
+        "id": "comp_cun",
+        "glyph": "寸",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "明",
+      "晴",
+      "木",
+      "月"
+    ]
+  },
+  "明": {
+    "char": "明",
+    "strokeCount": 8,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_ri",
+        "glyph": "日",
+        "role": "left"
+      },
+      {
+        "id": "comp_yue",
+        "glyph": "月",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "目",
+      "乍",
+      "白",
+      "田"
+    ]
+  },
+  "星": {
+    "char": "星",
+    "strokeCount": 9,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_ri",
+        "glyph": "日",
+        "role": "top"
+      },
+      {
+        "id": "comp_sheng",
+        "glyph": "生",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "晴",
+      "晨",
+      "木",
+      "月"
+    ]
+  },
+  "昨": {
+    "char": "昨",
+    "strokeCount": 9,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_ri",
+        "glyph": "日",
+        "role": "left"
+      },
+      {
+        "id": "comp_zha",
+        "glyph": "乍",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "月",
+      "目",
+      "白",
+      "田"
+    ]
+  },
+  "是": {
+    "char": "是",
+    "strokeCount": 9,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_ri",
+        "glyph": "日",
+        "role": "top"
+      },
+      {
+        "id": "comp_pi",
+        "glyph": "疋",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "走",
+      "匙",
+      "木",
+      "月"
+    ]
+  },
+  "晚": {
+    "char": "晚",
+    "strokeCount": 11,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_ri",
+        "glyph": "日",
+        "role": "left"
+      },
+      {
+        "id": "comp_mian",
+        "glyph": "免",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "晴",
+      "晓",
+      "木",
+      "月"
+    ]
+  },
+  "晴": {
+    "char": "晴",
+    "strokeCount": 12,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_ri",
+        "glyph": "日",
+        "role": "left"
+      },
+      {
+        "id": "comp_qing",
+        "glyph": "青",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "清",
+      "情",
+      "木",
+      "月"
+    ]
+  },
+  "最": {
+    "char": "最",
+    "strokeCount": 12,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_ri",
+        "glyph": "日",
+        "role": "top"
+      },
+      {
+        "id": "comp_qu",
+        "glyph": "取",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "耳",
+      "又",
+      "木",
+      "月"
+    ]
+  },
+  "月": {
+    "char": "月",
+    "strokeCount": 4,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_yue",
+        "glyph": "月",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "日",
+      "目",
+      "用",
+      "同"
+    ]
+  },
+  "有": {
+    "char": "有",
+    "strokeCount": 6,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_you_have",
+        "glyph": "有",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "友",
+      "右",
+      "朋",
+      "月"
+    ]
+  },
+  "朋": {
+    "char": "朋",
+    "strokeCount": 8,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_yue1",
+        "glyph": "月",
+        "role": "left"
+      },
+      {
+        "id": "comp_yue2",
+        "glyph": "月",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "日",
+      "明",
+      "用",
+      "木"
+    ]
+  },
+  "服": {
+    "char": "服",
+    "strokeCount": 8,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_fu",
+        "glyph": "服",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "朋",
+      "报",
+      "肥",
+      "股"
+    ]
+  },
+  "望": {
+    "char": "望",
+    "strokeCount": 11,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_wang_hope",
+        "glyph": "望",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "忘",
+      "亡",
+      "忙",
+      "芒"
+    ]
+  },
+  "期": {
+    "char": "期",
+    "strokeCount": 12,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_qi",
+        "glyph": "其",
+        "role": "left"
+      },
+      {
+        "id": "comp_yue",
+        "glyph": "月",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "欺",
+      "旗",
+      "木",
+      "日"
+    ]
+  },
+  "本": {
+    "char": "本",
+    "strokeCount": 5,
+    "topology": "CROSSING",
+    "targetComponents": [
+      {
+        "id": "comp_mu",
+        "glyph": "木",
+        "role": "base"
+      },
+      {
+        "id": "comp_yi",
+        "glyph": "一",
+        "role": "marker_lower"
+      }
+    ],
+    "distractorComponents": [
+      "禾",
+      "未",
+      "末",
+      "大"
+    ]
+  },
+  "机": {
+    "char": "机",
+    "strokeCount": 6,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_mu",
+        "glyph": "木",
+        "role": "left"
+      },
+      {
+        "id": "comp_ji",
+        "glyph": "几",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "儿",
+      "九",
+      "飞",
+      "日"
+    ]
+  },
+  "条": {
+    "char": "条",
+    "strokeCount": 7,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_zhi",
+        "glyph": "夂",
+        "role": "top"
+      },
+      {
+        "id": "comp_mu",
+        "glyph": "木",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "备",
+      "各",
+      "日",
+      "月"
+    ]
+  },
+  "来": {
+    "char": "来",
+    "strokeCount": 7,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_lai",
+        "glyph": "来",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "未",
+      "末",
+      "米",
+      "夹"
+    ]
+  },
+  "杯": {
+    "char": "杯",
+    "strokeCount": 8,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_mu",
+        "glyph": "木",
+        "role": "left"
+      },
+      {
+        "id": "comp_bu",
+        "glyph": "不",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "下",
+      "禾",
+      "口",
+      "日"
+    ]
+  },
+  "果": {
+    "char": "果",
+    "strokeCount": 8,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_tian",
+        "glyph": "田",
+        "role": "top"
+      },
+      {
+        "id": "comp_mu",
+        "glyph": "木",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "里",
+      "呆",
+      "日",
+      "月"
+    ]
+  },
+  "校": {
+    "char": "校",
+    "strokeCount": 10,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_mu",
+        "glyph": "木",
+        "role": "left"
+      },
+      {
+        "id": "comp_jiao",
+        "glyph": "交",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "父",
+      "六",
+      "机",
+      "日"
+    ]
+  },
+  "样": {
+    "char": "样",
+    "strokeCount": 10,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_mu",
+        "glyph": "木",
+        "role": "left"
+      },
+      {
+        "id": "comp_yang",
+        "glyph": "羊",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "美",
+      "群",
+      "日",
+      "月"
+    ]
+  },
+  "桌": {
+    "char": "桌",
+    "strokeCount": 10,
+    "topology": "TOP_MID_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_bu",
+        "glyph": "卜",
+        "role": "top"
+      },
+      {
+        "id": "comp_ri",
+        "glyph": "日",
+        "role": "mid"
+      },
+      {
+        "id": "comp_mu",
+        "glyph": "木",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "艹",
+      "人",
+      "禾",
+      "口",
+      "十"
+    ]
+  },
+  "椅": {
+    "char": "椅",
+    "strokeCount": 12,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_mu",
+        "glyph": "木",
+        "role": "left"
+      },
+      {
+        "id": "comp_qi",
+        "glyph": "奇",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "大",
+      "可",
+      "子",
+      "日"
+    ]
+  },
+  "楼": {
+    "char": "楼",
+    "strokeCount": 13,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_mu",
+        "glyph": "木",
+        "role": "left"
+      },
+      {
+        "id": "comp_lou",
+        "glyph": "娄",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "数",
+      "米",
+      "日",
+      "月"
+    ]
+  },
+  "次": {
+    "char": "次",
+    "strokeCount": 6,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_bing",
+        "glyph": "冫",
+        "role": "left"
+      },
+      {
+        "id": "comp_qian",
+        "glyph": "欠",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "欢",
+      "吹",
+      "木",
+      "日"
+    ]
+  },
+  "欢": {
+    "char": "欢",
+    "strokeCount": 6,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_you",
+        "glyph": "又",
+        "role": "left"
+      },
+      {
+        "id": "comp_qian",
+        "glyph": "欠",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "次",
+      "吹",
+      "木",
+      "日"
+    ]
+  },
+  "歌": {
+    "char": "歌",
+    "strokeCount": 14,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_ge",
+        "glyph": "哥",
+        "role": "left"
+      },
+      {
+        "id": "comp_qian",
+        "glyph": "欠",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "欢",
+      "吹",
+      "木",
+      "日"
+    ]
+  },
+  "正": {
+    "char": "正",
+    "strokeCount": 5,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_zheng",
+        "glyph": "正",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "止",
+      "上",
+      "立",
+      "主"
+    ]
+  },
+  "步": {
+    "char": "步",
+    "strokeCount": 7,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_zhi",
+        "glyph": "止",
+        "role": "top"
+      },
+      {
+        "id": "comp_shao",
+        "glyph": "少",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "涉",
+      "岁",
+      "木",
+      "日"
+    ]
+  },
+  "每": {
+    "char": "每",
+    "strokeCount": 7,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_mei",
+        "glyph": "每",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "母",
+      "舟",
+      "丹",
+      "生"
+    ]
+  },
+  "比": {
+    "char": "比",
+    "strokeCount": 4,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_bi1",
+        "glyph": "匕",
+        "role": "left"
+      },
+      {
+        "id": "comp_bi2",
+        "glyph": "匕",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "北",
+      "此",
+      "皆",
+      "木"
+    ]
+  },
+  "气": {
+    "char": "气",
+    "strokeCount": 4,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_qi",
+        "glyph": "气",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "飞",
+      "风",
+      "乞",
+      "欠"
+    ]
+  },
+  "水": {
+    "char": "水",
+    "strokeCount": 4,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_shui",
+        "glyph": "水",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "小",
+      "少",
+      "木",
+      "火"
+    ]
+  },
+  "汉": {
+    "char": "汉",
+    "strokeCount": 5,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_shui",
+        "glyph": "氵",
+        "role": "left"
+      },
+      {
+        "id": "comp_you",
+        "glyph": "又",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "叹",
+      "难",
+      "木",
+      "日"
+    ]
+  },
+  "没": {
+    "char": "没",
+    "strokeCount": 7,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_shui",
+        "glyph": "氵",
+        "role": "left"
+      },
+      {
+        "id": "comp_shu",
+        "glyph": "殳",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "几",
+      "又",
+      "波",
+      "木"
+    ]
+  },
+  "泳": {
+    "char": "泳",
+    "strokeCount": 8,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_shui",
+        "glyph": "氵",
+        "role": "left"
+      },
+      {
+        "id": "comp_yong",
+        "glyph": "永",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "水",
+      "波",
+      "木",
+      "日"
+    ]
+  },
+  "洗": {
+    "char": "洗",
+    "strokeCount": 9,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_shui",
+        "glyph": "氵",
+        "role": "left"
+      },
+      {
+        "id": "comp_xian",
+        "glyph": "先",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "光",
+      "泳",
+      "木",
+      "日"
+    ]
+  },
+  "游": {
+    "char": "游",
+    "strokeCount": 12,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_shui",
+        "glyph": "氵",
+        "role": "left"
+      },
+      {
+        "id": "comp_you",
+        "glyph": "斿",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "方",
+      "子",
+      "漂",
+      "木"
+    ]
+  },
+  "漂": {
+    "char": "漂",
+    "strokeCount": 14,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_shui",
+        "glyph": "氵",
+        "role": "left"
+      },
+      {
+        "id": "comp_piao",
+        "glyph": "票",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "西",
+      "示",
+      "木",
+      "日"
+    ]
+  },
+  "火": {
+    "char": "火",
+    "strokeCount": 4,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_huo",
+        "glyph": "火",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "水",
+      "木",
+      "人",
+      "大"
+    ]
+  },
+  "点": {
+    "char": "点",
+    "strokeCount": 9,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_zhan",
+        "glyph": "占",
+        "role": "top"
+      },
+      {
+        "id": "comp_sidian",
+        "glyph": "灬",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "口",
+      "卜",
+      "黑",
+      "热"
+    ]
+  },
+  "热": {
+    "char": "热",
+    "strokeCount": 10,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_zhi",
+        "glyph": "执",
+        "role": "top"
+      },
+      {
+        "id": "comp_sidian",
+        "glyph": "灬",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "点",
+      "冷",
+      "黑",
+      "火"
+    ]
+  },
+  "然": {
+    "char": "然",
+    "strokeCount": 12,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_ran",
+        "glyph": "肰",
+        "role": "top"
+      },
+      {
+        "id": "comp_sidian",
+        "glyph": "灬",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "月",
+      "犬",
+      "点",
+      "木"
+    ]
+  },
+  "爱": {
+    "char": "爱",
+    "strokeCount": 10,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_ai",
+        "glyph": "爱",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "受",
+      "妥",
+      "友",
+      "暖"
+    ]
+  },
+  "爷": {
+    "char": "爷",
+    "strokeCount": 6,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_fu",
+        "glyph": "父",
+        "role": "top"
+      },
+      {
+        "id": "comp_jie",
+        "glyph": "卩",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "爸",
+      "木",
+      "日",
+      "月"
+    ]
+  },
+  "爸": {
+    "char": "爸",
+    "strokeCount": 8,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_fu",
+        "glyph": "父",
+        "role": "top"
+      },
+      {
+        "id": "comp_ba",
+        "glyph": "巴",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "子",
+      "女",
+      "人",
+      "口"
+    ]
+  },
+  "牛": {
+    "char": "牛",
+    "strokeCount": 4,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_niu",
+        "glyph": "牛",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "午",
+      "生",
+      "半",
+      "干"
+    ]
+  },
+  "狗": {
+    "char": "狗",
+    "strokeCount": 8,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_quan",
+        "glyph": "犭",
+        "role": "left"
+      },
+      {
+        "id": "comp_ju",
+        "glyph": "句",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "猫",
+      "口",
+      "包",
+      "鸟"
+    ]
+  },
+  "猫": {
+    "char": "猫",
+    "strokeCount": 11,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_quan",
+        "glyph": "犭",
+        "role": "left"
+      },
+      {
+        "id": "comp_miao",
+        "glyph": "苗",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "狗",
+      "田",
+      "草",
+      "木"
+    ]
+  },
+  "玩": {
+    "char": "玩",
+    "strokeCount": 8,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_wang",
+        "glyph": "王",
+        "role": "left"
+      },
+      {
+        "id": "comp_yuan",
+        "glyph": "元",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "完",
+      "现",
+      "木",
+      "日"
+    ]
+  },
+  "现": {
+    "char": "现",
+    "strokeCount": 8,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_wang",
+        "glyph": "王",
+        "role": "left"
+      },
+      {
+        "id": "comp_jian",
+        "glyph": "见",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "玉",
+      "玩",
+      "理",
+      "木"
+    ]
+  },
+  "班": {
+    "char": "班",
+    "strokeCount": 10,
+    "topology": "LEFT_MID_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_wang1",
+        "glyph": "王",
+        "role": "left"
+      },
+      {
+        "id": "comp_dao",
+        "glyph": "刀",
+        "role": "mid"
+      },
+      {
+        "id": "comp_wang2",
+        "glyph": "王",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "玉",
+      "土",
+      "力",
+      "工",
+      "干"
+    ]
+  },
+  "球": {
+    "char": "球",
+    "strokeCount": 11,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_wang",
+        "glyph": "王",
+        "role": "left"
+      },
+      {
+        "id": "comp_qiu",
+        "glyph": "求",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "救",
+      "现",
+      "木",
+      "日"
+    ]
+  },
+  "生": {
+    "char": "生",
+    "strokeCount": 5,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_sheng",
+        "glyph": "生",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "牛",
+      "年",
+      "主",
+      "丰"
+    ]
+  },
+  "电": {
+    "char": "电",
+    "strokeCount": 5,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_dian",
+        "glyph": "电",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "田",
+      "甲",
+      "申",
+      "由"
+    ]
+  },
+  "男": {
+    "char": "男",
+    "strokeCount": 7,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_tian",
+        "glyph": "田",
+        "role": "top"
+      },
+      {
+        "id": "comp_li",
+        "glyph": "力",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "界",
+      "果",
+      "木",
+      "日"
+    ]
+  },
+  "画": {
+    "char": "画",
+    "strokeCount": 8,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_hua_draw",
+        "glyph": "画",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "由",
+      "田",
+      "亩",
+      "鱼"
+    ]
+  },
+  "疼": {
+    "char": "疼",
+    "strokeCount": 10,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_bing",
+        "glyph": "疒",
+        "role": "outer"
+      },
+      {
+        "id": "comp_dong",
+        "glyph": "冬",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "病",
+      "木",
+      "日",
+      "月"
+    ]
+  },
+  "病": {
+    "char": "病",
+    "strokeCount": 10,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_bing",
+        "glyph": "疒",
+        "role": "outer"
+      },
+      {
+        "id": "comp_bing2",
+        "glyph": "丙",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "疼",
+      "痛",
+      "木",
+      "日"
+    ]
+  },
+  "白": {
+    "char": "白",
+    "strokeCount": 5,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_bai",
+        "glyph": "白",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "日",
+      "自",
+      "目",
+      "田"
+    ]
+  },
+  "百": {
+    "char": "百",
+    "strokeCount": 6,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_bai_100",
+        "glyph": "百",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "白",
+      "日",
+      "自",
+      "目"
+    ]
+  },
+  "的": {
+    "char": "的",
+    "strokeCount": 8,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_bai",
+        "glyph": "白",
+        "role": "left"
+      },
+      {
+        "id": "comp_shao",
+        "glyph": "勺",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "约",
+      "豹",
+      "木",
+      "日"
+    ]
+  },
+  "看": {
+    "char": "看",
+    "strokeCount": 9,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_shou",
+        "glyph": "手",
+        "role": "top"
+      },
+      {
+        "id": "comp_mu",
+        "glyph": "目",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "日",
+      "口",
+      "木",
+      "自"
+    ]
+  },
+  "真": {
+    "char": "真",
+    "strokeCount": 10,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_shi",
+        "glyph": "十",
+        "role": "top"
+      },
+      {
+        "id": "comp_ju",
+        "glyph": "具",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "直",
+      "县",
+      "填",
+      "木"
+    ]
+  },
+  "眼": {
+    "char": "眼",
+    "strokeCount": 11,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_mu",
+        "glyph": "目",
+        "role": "left"
+      },
+      {
+        "id": "comp_gen",
+        "glyph": "艮",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "睛",
+      "很",
+      "木",
+      "日"
+    ]
+  },
+  "着": {
+    "char": "着",
+    "strokeCount": 11,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_yang",
+        "glyph": "羊",
+        "role": "top"
+      },
+      {
+        "id": "comp_mu",
+        "glyph": "目",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "看",
+      "差",
+      "木",
+      "日"
+    ]
+  },
+  "睛": {
+    "char": "睛",
+    "strokeCount": 13,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_mu",
+        "glyph": "目",
+        "role": "left"
+      },
+      {
+        "id": "comp_qing",
+        "glyph": "青",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "晴",
+      "清",
+      "木",
+      "日"
+    ]
+  },
+  "睡": {
+    "char": "睡",
+    "strokeCount": 13,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_mu",
+        "glyph": "目",
+        "role": "left"
+      },
+      {
+        "id": "comp_chui",
+        "glyph": "垂",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "眼",
+      "看",
+      "木",
+      "日"
+    ]
+  },
+  "知": {
+    "char": "知",
+    "strokeCount": 8,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_shi",
+        "glyph": "矢",
+        "role": "left"
+      },
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "短",
+      "医",
+      "日",
+      "木"
+    ]
+  },
+  "票": {
+    "char": "票",
+    "strokeCount": 11,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_xi",
+        "glyph": "覀",
+        "role": "top"
+      },
+      {
+        "id": "comp_shi",
+        "glyph": "示",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "要",
+      "西",
+      "小",
+      "木"
+    ]
+  },
+  "离": {
+    "char": "离",
+    "strokeCount": 10,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_li_leave",
+        "glyph": "离",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "禽",
+      "禹",
+      "高",
+      "京"
+    ]
+  },
+  "租": {
+    "char": "租",
+    "strokeCount": 10,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_he",
+        "glyph": "禾",
+        "role": "left"
+      },
+      {
+        "id": "comp_qie",
+        "glyph": "且",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "粗",
+      "祖",
+      "木",
+      "日"
+    ]
+  },
+  "穿": {
+    "char": "穿",
+    "strokeCount": 9,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_xue",
+        "glyph": "穴",
+        "role": "top"
+      },
+      {
+        "id": "comp_ya",
+        "glyph": "牙",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "空",
+      "窗",
+      "木",
+      "日"
+    ]
+  },
+  "站": {
+    "char": "站",
+    "strokeCount": 10,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_li",
+        "glyph": "立",
+        "role": "left"
+      },
+      {
+        "id": "comp_zhan",
+        "glyph": "占",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "口",
+      "卜",
+      "木",
+      "日"
+    ]
+  },
+  "笑": {
+    "char": "笑",
+    "strokeCount": 10,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_zhu",
+        "glyph": "⺮",
+        "role": "top"
+      },
+      {
+        "id": "comp_yao",
+        "glyph": "夭",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "笔",
+      "第",
+      "木",
+      "日"
+    ]
+  },
+  "笔": {
+    "char": "笔",
+    "strokeCount": 10,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_zhu",
+        "glyph": "⺮",
+        "role": "top"
+      },
+      {
+        "id": "comp_mao",
+        "glyph": "毛",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "笑",
+      "等",
+      "木",
+      "日"
+    ]
+  },
+  "第": {
+    "char": "第",
+    "strokeCount": 11,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_zhu",
+        "glyph": "⺮",
+        "role": "top"
+      },
+      {
+        "id": "comp_di",
+        "glyph": "弟",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "等",
+      "竹",
+      "木",
+      "日"
+    ]
+  },
+  "等": {
+    "char": "等",
+    "strokeCount": 12,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_zhu",
+        "glyph": "⺮",
+        "role": "top"
+      },
+      {
+        "id": "comp_si",
+        "glyph": "寺",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "诗",
+      "待",
+      "木",
+      "日"
+    ]
+  },
+  "篮": {
+    "char": "篮",
+    "strokeCount": 16,
+    "topology": "TOP_MID_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_zhu",
+        "glyph": "⺮",
+        "role": "top"
+      },
+      {
+        "id": "comp_chen",
+        "glyph": "臣",
+        "role": "mid"
+      },
+      {
+        "id": "comp_min",
+        "glyph": "皿",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "茶",
+      "菜",
+      "监",
+      "血",
+      "目"
+    ]
+  },
+  "米": {
+    "char": "米",
+    "strokeCount": 6,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_mi_rice",
+        "glyph": "米",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "木",
+      "禾",
+      "来",
+      "粒"
+    ]
+  },
+  "系": {
+    "char": "系",
+    "strokeCount": 7,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_xi_tie",
+        "glyph": "系",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "糸",
+      "累",
+      "索",
+      "紧"
+    ]
+  },
+  "累": {
+    "char": "累",
+    "strokeCount": 11,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_tian",
+        "glyph": "田",
+        "role": "top"
+      },
+      {
+        "id": "comp_si",
+        "glyph": "糸",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "系",
+      "思",
+      "木",
+      "日"
+    ]
+  },
+  "红": {
+    "char": "红",
+    "strokeCount": 6,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_mi",
+        "glyph": "纟",
+        "role": "left"
+      },
+      {
+        "id": "comp_gong",
+        "glyph": "工",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "江",
+      "功",
+      "土",
+      "绿"
+    ]
+  },
+  "绍": {
+    "char": "绍",
+    "strokeCount": 8,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_mi",
+        "glyph": "纟",
+        "role": "left"
+      },
+      {
+        "id": "comp_zhao",
+        "glyph": "召",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "刀",
+      "口",
+      "木",
+      "日"
+    ]
+  },
+  "经": {
+    "char": "经",
+    "strokeCount": 8,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_mi",
+        "glyph": "纟",
+        "role": "left"
+      },
+      {
+        "id": "comp_sheng",
+        "glyph": "圣",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "又",
+      "土",
+      "怪",
+      "木"
+    ]
+  },
+  "给": {
+    "char": "给",
+    "strokeCount": 9,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_mi",
+        "glyph": "纟",
+        "role": "left"
+      },
+      {
+        "id": "comp_he",
+        "glyph": "合",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "工",
+      "录",
+      "人",
+      "口"
+    ]
+  },
+  "绿": {
+    "char": "绿",
+    "strokeCount": 11,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_mi",
+        "glyph": "纟",
+        "role": "left"
+      },
+      {
+        "id": "comp_lu",
+        "glyph": "录",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "红",
+      "线",
+      "水",
+      "木"
+    ]
+  },
+  "网": {
+    "char": "网",
+    "strokeCount": 6,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_tong",
+        "glyph": "冂",
+        "role": "outer"
+      },
+      {
+        "id": "comp_yao",
+        "glyph": "爻",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "冈",
+      "同",
+      "木",
+      "日"
+    ]
+  },
+  "老": {
+    "char": "老",
+    "strokeCount": 6,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_lao",
+        "glyph": "耂",
+        "role": "top"
+      },
+      {
+        "id": "comp_bi",
+        "glyph": "匕",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "考",
+      "者",
+      "木",
+      "日"
+    ]
+  },
+  "考": {
+    "char": "考",
+    "strokeCount": 6,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_lao",
+        "glyph": "耂",
+        "role": "top"
+      },
+      {
+        "id": "comp_kao",
+        "glyph": "丂",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "老",
+      "号",
+      "木",
+      "日"
+    ]
+  },
+  "肉": {
+    "char": "肉",
+    "strokeCount": 6,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_rou",
+        "glyph": "肉",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "内",
+      "月",
+      "丙",
+      "冈"
+    ]
+  },
+  "能": {
+    "char": "能",
+    "strokeCount": 10,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_neng",
+        "glyph": "能",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "态",
+      "罢",
+      "龙",
+      "鹿"
+    ]
+  },
+  "脑": {
+    "char": "脑",
+    "strokeCount": 10,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_nao",
+        "glyph": "脑",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "月",
+      "胸",
+      "离",
+      "肥"
+    ]
+  },
+  "自": {
+    "char": "自",
+    "strokeCount": 6,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_zi_self",
+        "glyph": "自",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "目",
+      "日",
+      "白",
+      "且"
+    ]
+  },
+  "舒": {
+    "char": "舒",
+    "strokeCount": 12,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_she",
+        "glyph": "舍",
+        "role": "left"
+      },
+      {
+        "id": "comp_yu",
+        "glyph": "予",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "野",
+      "序",
+      "木",
+      "日"
+    ]
+  },
+  "舞": {
+    "char": "舞",
+    "strokeCount": 14,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_wu",
+        "glyph": "舞",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "舛",
+      "夕",
+      "年",
+      "降"
+    ]
+  },
+  "色": {
+    "char": "色",
+    "strokeCount": 6,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_se",
+        "glyph": "色",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "巴",
+      "包",
+      "危",
+      "角"
+    ]
+  },
+  "花": {
+    "char": "花",
+    "strokeCount": 7,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_cao",
+        "glyph": "艹",
+        "role": "top"
+      },
+      {
+        "id": "comp_hua",
+        "glyph": "化",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "匕",
+      "亻",
+      "木",
+      "日"
+    ]
+  },
+  "苹": {
+    "char": "苹",
+    "strokeCount": 8,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_cao",
+        "glyph": "艹",
+        "role": "top"
+      },
+      {
+        "id": "comp_ping",
+        "glyph": "平",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "干",
+      "十",
+      "木",
+      "日"
+    ]
+  },
+  "茶": {
+    "char": "茶",
+    "strokeCount": 9,
+    "topology": "TOP_MID_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_cao",
+        "glyph": "艹",
+        "role": "top"
+      },
+      {
+        "id": "comp_ren",
+        "glyph": "人",
+        "role": "mid"
+      },
+      {
+        "id": "comp_mu",
+        "glyph": "木",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "禾",
+      "日",
+      "手",
+      "口",
+      "宀"
+    ]
+  },
+  "药": {
+    "char": "药",
+    "strokeCount": 9,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_cao",
+        "glyph": "艹",
+        "role": "top"
+      },
+      {
+        "id": "comp_yue",
+        "glyph": "约",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "纟",
+      "勺",
+      "木",
+      "日"
+    ]
+  },
+  "菜": {
+    "char": "菜",
+    "strokeCount": 11,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_cao",
+        "glyph": "艹",
+        "role": "top"
+      },
+      {
+        "id": "comp_cai",
+        "glyph": "采",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "茶",
+      "木",
+      "米",
+      "日"
+    ]
+  },
+  "虽": {
+    "char": "虽",
+    "strokeCount": 9,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "top"
+      },
+      {
+        "id": "comp_chong",
+        "glyph": "虫",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "独",
+      "浊",
+      "木",
+      "日"
+    ]
+  },
+  "蛋": {
+    "char": "蛋",
+    "strokeCount": 11,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_pi",
+        "glyph": "疋",
+        "role": "top"
+      },
+      {
+        "id": "comp_chong",
+        "glyph": "虫",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "口",
+      "日",
+      "木",
+      "月"
+    ]
+  },
+  "衣": {
+    "char": "衣",
+    "strokeCount": 6,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_yi",
+        "glyph": "衣",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "农",
+      "表",
+      "衰",
+      "哀"
+    ]
+  },
+  "表": {
+    "char": "表",
+    "strokeCount": 8,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_biao",
+        "glyph": "表",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "青",
+      "麦",
+      "袁",
+      "奏"
+    ]
+  },
+  "裤": {
+    "char": "裤",
+    "strokeCount": 12,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_yi",
+        "glyph": "衤",
+        "role": "left"
+      },
+      {
+        "id": "comp_ku",
+        "glyph": "库",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "广",
+      "车",
+      "礻",
+      "木"
+    ]
+  },
+  "西": {
+    "char": "西",
+    "strokeCount": 6,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_xi_west",
+        "glyph": "西",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "酉",
+      "面",
+      "四",
+      "两"
+    ]
+  },
+  "要": {
+    "char": "要",
+    "strokeCount": 9,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_xi",
+        "glyph": "覀",
+        "role": "top"
+      },
+      {
+        "id": "comp_nv",
+        "glyph": "女",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "子",
+      "票",
+      "西",
+      "日"
+    ]
+  },
+  "见": {
+    "char": "见",
+    "strokeCount": 4,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_jian_see",
+        "glyph": "见",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "贝",
+      "页",
+      "兄",
+      "兀"
+    ]
+  },
+  "视": {
+    "char": "视",
+    "strokeCount": 8,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_shi",
+        "glyph": "礻",
+        "role": "left"
+      },
+      {
+        "id": "comp_jian",
+        "glyph": "见",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "目",
+      "衤",
+      "木",
+      "日"
+    ]
+  },
+  "觉": {
+    "char": "觉",
+    "strokeCount": 9,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_jue",
+        "glyph": "觉",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "学",
+      "见",
+      "党",
+      "堂"
+    ]
+  },
+  "认": {
+    "char": "认",
+    "strokeCount": 4,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_yan",
+        "glyph": "讠",
+        "role": "left"
+      },
+      {
+        "id": "comp_ren",
+        "glyph": "人",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "入",
+      "队",
+      "木",
+      "日"
+    ]
+  },
+  "让": {
+    "char": "让",
+    "strokeCount": 5,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_yan",
+        "glyph": "讠",
+        "role": "left"
+      },
+      {
+        "id": "comp_shang",
+        "glyph": "上",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "止",
+      "正",
+      "木",
+      "日"
+    ]
+  },
+  "记": {
+    "char": "记",
+    "strokeCount": 5,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_yan",
+        "glyph": "讠",
+        "role": "left"
+      },
+      {
+        "id": "comp_ji",
+        "glyph": "己",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "已",
+      "巳",
+      "木",
+      "日"
+    ]
+  },
+  "识": {
+    "char": "识",
+    "strokeCount": 7,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_yan",
+        "glyph": "讠",
+        "role": "left"
+      },
+      {
+        "id": "comp_zhi",
+        "glyph": "只",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "八",
+      "口",
+      "木",
+      "日"
+    ]
+  },
+  "诉": {
+    "char": "诉",
+    "strokeCount": 7,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_yan",
+        "glyph": "讠",
+        "role": "left"
+      },
+      {
+        "id": "comp_chi",
+        "glyph": "斥",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "斤",
+      "听",
+      "拆",
+      "折"
+    ]
+  },
+  "词": {
+    "char": "词",
+    "strokeCount": 7,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_yan",
+        "glyph": "讠",
+        "role": "left"
+      },
+      {
+        "id": "comp_si",
+        "glyph": "司",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "同",
+      "语",
+      "木",
+      "日"
+    ]
+  },
+  "试": {
+    "char": "试",
+    "strokeCount": 8,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_yan",
+        "glyph": "讠",
+        "role": "left"
+      },
+      {
+        "id": "comp_shi",
+        "glyph": "式",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "弋",
+      "武",
+      "木",
+      "日"
+    ]
+  },
+  "话": {
+    "char": "话",
+    "strokeCount": 8,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_yan",
+        "glyph": "讠",
+        "role": "left"
+      },
+      {
+        "id": "comp_she",
+        "glyph": "舌",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "兑",
+      "口",
+      "青",
+      "千"
+    ]
+  },
+  "语": {
+    "char": "语",
+    "strokeCount": 9,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_yan",
+        "glyph": "讠",
+        "role": "left"
+      },
+      {
+        "id": "comp_wu",
+        "glyph": "吾",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "五",
+      "口",
+      "木",
+      "日"
+    ]
+  },
+  "说": {
+    "char": "说",
+    "strokeCount": 9,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_yan",
+        "glyph": "讠",
+        "role": "left"
+      },
+      {
+        "id": "comp_dui",
+        "glyph": "兑",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "舌",
+      "青",
+      "口",
+      "卖"
+    ]
+  },
+  "请": {
+    "char": "请",
+    "strokeCount": 10,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_yan",
+        "glyph": "讠",
+        "role": "left"
+      },
+      {
+        "id": "comp_qing",
+        "glyph": "青",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "日",
+      "月",
+      "情",
+      "清"
+    ]
+  },
+  "读": {
+    "char": "读",
+    "strokeCount": 10,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_yan",
+        "glyph": "讠",
+        "role": "left"
+      },
+      {
+        "id": "comp_mai",
+        "glyph": "卖",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "口",
+      "门",
+      "买",
+      "书"
+    ]
+  },
+  "课": {
+    "char": "课",
+    "strokeCount": 10,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_yan",
+        "glyph": "讠",
+        "role": "left"
+      },
+      {
+        "id": "comp_guo",
+        "glyph": "果",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "木",
+      "田",
+      "日",
+      "月"
+    ]
+  },
+  "谁": {
+    "char": "谁",
+    "strokeCount": 10,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_yan",
+        "glyph": "讠",
+        "role": "left"
+      },
+      {
+        "id": "comp_zhui",
+        "glyph": "隹",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "言",
+      "主",
+      "亻",
+      "木"
+    ]
+  },
+  "谢": {
+    "char": "谢",
+    "strokeCount": 12,
+    "topology": "LEFT_MID_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_yan",
+        "glyph": "讠",
+        "role": "left"
+      },
+      {
+        "id": "comp_shen",
+        "glyph": "身",
+        "role": "mid"
+      },
+      {
+        "id": "comp_cun",
+        "glyph": "寸",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "木",
+      "又",
+      "口",
+      "亻",
+      "日"
+    ]
+  },
+  "贵": {
+    "char": "贵",
+    "strokeCount": 9,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_gui",
+        "glyph": "贵",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "遗",
+      "买",
+      "贝",
+      "费"
+    ]
+  },
+  "走": {
+    "char": "走",
+    "strokeCount": 7,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_tu",
+        "glyph": "土",
+        "role": "top"
+      },
+      {
+        "id": "comp_zhi",
+        "glyph": "止",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "足",
+      "正",
+      "上",
+      "人"
+    ]
+  },
+  "起": {
+    "char": "起",
+    "strokeCount": 10,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_zou",
+        "glyph": "走",
+        "role": "outer"
+      },
+      {
+        "id": "comp_ji",
+        "glyph": "己",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "已",
+      "足",
+      "木",
+      "日"
+    ]
+  },
+  "超": {
+    "char": "超",
+    "strokeCount": 12,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_zou",
+        "glyph": "走",
+        "role": "outer"
+      },
+      {
+        "id": "comp_zhao",
+        "glyph": "召",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "刀",
+      "足",
+      "木",
+      "日"
+    ]
+  },
+  "足": {
+    "char": "足",
+    "strokeCount": 7,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "top"
+      },
+      {
+        "id": "comp_zhi",
+        "glyph": "止",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "疋",
+      "走",
+      "木",
+      "日"
+    ]
+  },
+  "跑": {
+    "char": "跑",
+    "strokeCount": 12,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_zu",
+        "glyph": "足",
+        "role": "left"
+      },
+      {
+        "id": "comp_bao",
+        "glyph": "包",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "勹",
+      "跳",
+      "木",
+      "日"
+    ]
+  },
+  "跟": {
+    "char": "跟",
+    "strokeCount": 13,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_zu",
+        "glyph": "足",
+        "role": "left"
+      },
+      {
+        "id": "comp_gen",
+        "glyph": "艮",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "目",
+      "很",
+      "木",
+      "日"
+    ]
+  },
+  "路": {
+    "char": "路",
+    "strokeCount": 13,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_zu",
+        "glyph": "足",
+        "role": "left"
+      },
+      {
+        "id": "comp_ge",
+        "glyph": "各",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "口",
+      "夂",
+      "跳",
+      "跑"
+    ]
+  },
+  "跳": {
+    "char": "跳",
+    "strokeCount": 13,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_zu",
+        "glyph": "足",
+        "role": "left"
+      },
+      {
+        "id": "comp_zhao",
+        "glyph": "兆",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "儿",
+      "跑",
+      "木",
+      "日"
+    ]
+  },
+  "踢": {
+    "char": "踢",
+    "strokeCount": 15,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_zu",
+        "glyph": "足",
+        "role": "left"
+      },
+      {
+        "id": "comp_yi",
+        "glyph": "易",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "日",
+      "勿",
+      "木",
+      "月"
+    ]
+  },
+  "身": {
+    "char": "身",
+    "strokeCount": 7,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_shen",
+        "glyph": "身",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "自",
+      "舟",
+      "冉",
+      "角"
+    ]
+  },
+  "车": {
+    "char": "车",
+    "strokeCount": 4,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_che",
+        "glyph": "车",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "东",
+      "连",
+      "中",
+      "申"
+    ]
+  },
+  "边": {
+    "char": "边",
+    "strokeCount": 5,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_chuo",
+        "glyph": "辶",
+        "role": "outer"
+      },
+      {
+        "id": "comp_li",
+        "glyph": "力",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "刀",
+      "过",
+      "木",
+      "日"
+    ]
+  },
+  "过": {
+    "char": "过",
+    "strokeCount": 6,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_chuo",
+        "glyph": "辶",
+        "role": "outer"
+      },
+      {
+        "id": "comp_cun",
+        "glyph": "寸",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "进",
+      "送",
+      "木",
+      "日"
+    ]
+  },
+  "运": {
+    "char": "运",
+    "strokeCount": 7,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_chuo",
+        "glyph": "辶",
+        "role": "outer"
+      },
+      {
+        "id": "comp_yun",
+        "glyph": "云",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "会",
+      "动",
+      "木",
+      "日"
+    ]
+  },
+  "近": {
+    "char": "近",
+    "strokeCount": 7,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_chuo",
+        "glyph": "辶",
+        "role": "outer"
+      },
+      {
+        "id": "comp_jin",
+        "glyph": "斤",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "反",
+      "远",
+      "木",
+      "日"
+    ]
+  },
+  "还": {
+    "char": "还",
+    "strokeCount": 7,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_chuo",
+        "glyph": "辶",
+        "role": "outer"
+      },
+      {
+        "id": "comp_bu",
+        "glyph": "不",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "下",
+      "进",
+      "木",
+      "日"
+    ]
+  },
+  "这": {
+    "char": "这",
+    "strokeCount": 7,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_chuo",
+        "glyph": "辶",
+        "role": "outer"
+      },
+      {
+        "id": "comp_wen",
+        "glyph": "文",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "父",
+      "那",
+      "木",
+      "日"
+    ]
+  },
+  "进": {
+    "char": "进",
+    "strokeCount": 7,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_chuo",
+        "glyph": "辶",
+        "role": "outer"
+      },
+      {
+        "id": "comp_jing",
+        "glyph": "井",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "二",
+      "过",
+      "木",
+      "日"
+    ]
+  },
+  "远": {
+    "char": "远",
+    "strokeCount": 7,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_chuo",
+        "glyph": "辶",
+        "role": "outer"
+      },
+      {
+        "id": "comp_yuan",
+        "glyph": "元",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "儿",
+      "近",
+      "木",
+      "日"
+    ]
+  },
+  "送": {
+    "char": "送",
+    "strokeCount": 9,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_chuo",
+        "glyph": "辶",
+        "role": "outer"
+      },
+      {
+        "id": "comp_guan",
+        "glyph": "关",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "天",
+      "前",
+      "木",
+      "日"
+    ]
+  },
+  "道": {
+    "char": "道",
+    "strokeCount": 12,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_chuo",
+        "glyph": "辶",
+        "role": "outer"
+      },
+      {
+        "id": "comp_shou",
+        "glyph": "首",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "自",
+      "过",
+      "木",
+      "日"
+    ]
+  },
+  "那": {
+    "char": "那",
+    "strokeCount": 6,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_na",
+        "glyph": "那",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "都",
+      "邦",
+      "邪",
+      "部"
+    ]
+  },
+  "都": {
+    "char": "都",
+    "strokeCount": 10,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_zhe",
+        "glyph": "者",
+        "role": "left"
+      },
+      {
+        "id": "comp_fu",
+        "glyph": "阝",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "日",
+      "部",
+      "木",
+      "月"
+    ]
+  },
+  "酒": {
+    "char": "酒",
+    "strokeCount": 10,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_shui",
+        "glyph": "氵",
+        "role": "left"
+      },
+      {
+        "id": "comp_you",
+        "glyph": "酉",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "西",
+      "醒",
+      "木",
+      "日"
+    ]
+  },
+  "里": {
+    "char": "里",
+    "strokeCount": 7,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_tian",
+        "glyph": "田",
+        "role": "top"
+      },
+      {
+        "id": "comp_tu",
+        "glyph": "土",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "重",
+      "野",
+      "木",
+      "日"
+    ]
+  },
+  "钟": {
+    "char": "钟",
+    "strokeCount": 9,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_jin",
+        "glyph": "钅",
+        "role": "left"
+      },
+      {
+        "id": "comp_zhong",
+        "glyph": "中",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "口",
+      "钱",
+      "木",
+      "日"
+    ]
+  },
+  "钱": {
+    "char": "钱",
+    "strokeCount": 10,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_jin",
+        "glyph": "钅",
+        "role": "left"
+      },
+      {
+        "id": "comp_jian",
+        "glyph": "戋",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "戈",
+      "木",
+      "车",
+      "线"
+    ]
+  },
+  "铁": {
+    "char": "铁",
+    "strokeCount": 10,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_jin",
+        "glyph": "钅",
+        "role": "left"
+      },
+      {
+        "id": "comp_shi",
+        "glyph": "失",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "夫",
+      "错",
+      "木",
+      "日"
+    ]
+  },
+  "错": {
+    "char": "错",
+    "strokeCount": 13,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_jin",
+        "glyph": "钅",
+        "role": "left"
+      },
+      {
+        "id": "comp_xi",
+        "glyph": "昔",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "日",
+      "借",
+      "木",
+      "月"
+    ]
+  },
+  "长": {
+    "char": "长",
+    "strokeCount": 4,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_chang",
+        "glyph": "长",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "丈",
+      "氏",
+      "民",
+      "衣"
+    ]
+  },
+  "门": {
+    "char": "门",
+    "strokeCount": 3,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_men",
+        "glyph": "门",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "冂",
+      "匚",
+      "尸",
+      "广"
+    ]
+  },
+  "问": {
+    "char": "问",
+    "strokeCount": 6,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_men",
+        "glyph": "门",
+        "role": "outer"
+      },
+      {
+        "id": "comp_kou",
+        "glyph": "口",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "日",
+      "耳",
+      "木",
+      "马"
+    ]
+  },
+  "间": {
+    "char": "间",
+    "strokeCount": 7,
+    "topology": "ENCLOSURE",
+    "targetComponents": [
+      {
+        "id": "comp_men",
+        "glyph": "门",
+        "role": "outer"
+      },
+      {
+        "id": "comp_ri",
+        "glyph": "日",
+        "role": "inner"
+      }
+    ],
+    "distractorComponents": [
+      "问",
+      "闪",
+      "月",
+      "口"
+    ]
+  },
+  "阴": {
+    "char": "阴",
+    "strokeCount": 6,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_fu",
+        "glyph": "阝",
+        "role": "left"
+      },
+      {
+        "id": "comp_yue",
+        "glyph": "月",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "日",
+      "阳",
+      "木",
+      "人"
+    ]
+  },
+  "院": {
+    "char": "院",
+    "strokeCount": 9,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_fu",
+        "glyph": "阝",
+        "role": "left"
+      },
+      {
+        "id": "comp_wan",
+        "glyph": "完",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "宀",
+      "元",
+      "阳",
+      "木"
+    ]
+  },
+  "雨": {
+    "char": "雨",
+    "strokeCount": 8,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_yu_rain",
+        "glyph": "雨",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "两",
+      "西",
+      "而",
+      "丙"
+    ]
+  },
+  "雪": {
+    "char": "雪",
+    "strokeCount": 11,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_yu",
+        "glyph": "雨",
+        "role": "top"
+      },
+      {
+        "id": "comp_xue",
+        "glyph": "彐",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "雷",
+      "电",
+      "木",
+      "日"
+    ]
+  },
+  "零": {
+    "char": "零",
+    "strokeCount": 13,
+    "topology": "TOP_BOTTOM",
+    "targetComponents": [
+      {
+        "id": "comp_yu",
+        "glyph": "雨",
+        "role": "top"
+      },
+      {
+        "id": "comp_ling",
+        "glyph": "令",
+        "role": "bottom"
+      }
+    ],
+    "distractorComponents": [
+      "今",
+      "雪",
+      "木",
+      "日"
+    ]
+  },
+  "非": {
+    "char": "非",
+    "strokeCount": 8,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_fei_not",
+        "glyph": "非",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "韭",
+      "北",
+      "兆",
+      "业"
+    ]
+  },
+  "面": {
+    "char": "面",
+    "strokeCount": 9,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_mian",
+        "glyph": "面",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "西",
+      "回",
+      "百",
+      "自"
+    ]
+  },
+  "题": {
+    "char": "题",
+    "strokeCount": 15,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_shi",
+        "glyph": "是",
+        "role": "left"
+      },
+      {
+        "id": "comp_ye",
+        "glyph": "页",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "颜",
+      "领",
+      "木",
+      "日"
+    ]
+  },
+  "颜": {
+    "char": "颜",
+    "strokeCount": 15,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_yan",
+        "glyph": "彦",
+        "role": "left"
+      },
+      {
+        "id": "comp_ye",
+        "glyph": "页",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "题",
+      "须",
+      "木",
+      "日"
+    ]
+  },
+  "飞": {
+    "char": "飞",
+    "strokeCount": 3,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_fei",
+        "glyph": "飞",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "气",
+      "风",
+      "几",
+      "乙"
+    ]
+  },
+  "饭": {
+    "char": "饭",
+    "strokeCount": 7,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_shi",
+        "glyph": "饣",
+        "role": "left"
+      },
+      {
+        "id": "comp_fan",
+        "glyph": "反",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "饮",
+      "食",
+      "饱",
+      "又"
+    ]
+  },
+  "饺": {
+    "char": "饺",
+    "strokeCount": 9,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_shi",
+        "glyph": "饣",
+        "role": "left"
+      },
+      {
+        "id": "comp_jiao",
+        "glyph": "交",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "父",
+      "馆",
+      "木",
+      "日"
+    ]
+  },
+  "馆": {
+    "char": "馆",
+    "strokeCount": 11,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_shi",
+        "glyph": "饣",
+        "role": "left"
+      },
+      {
+        "id": "comp_guan",
+        "glyph": "官",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "宀",
+      "饭",
+      "木",
+      "日"
+    ]
+  },
+  "高": {
+    "char": "高",
+    "strokeCount": 10,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_gao",
+        "glyph": "高",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "亮",
+      "亭",
+      "京",
+      "享"
+    ]
+  },
+  "鱼": {
+    "char": "鱼",
+    "strokeCount": 8,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_yu",
+        "glyph": "鱼",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "鸟",
+      "龟",
+      "角",
+      "鲜"
+    ]
+  },
+  "鸟": {
+    "char": "鸟",
+    "strokeCount": 5,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_niao",
+        "glyph": "鸟",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "乌",
+      "马",
+      "鱼",
+      "隹"
+    ]
+  },
+  "鸡": {
+    "char": "鸡",
+    "strokeCount": 7,
+    "topology": "LEFT_RIGHT",
+    "targetComponents": [
+      {
+        "id": "comp_you",
+        "glyph": "又",
+        "role": "left"
+      },
+      {
+        "id": "comp_niao",
+        "glyph": "鸟",
+        "role": "right"
+      }
+    ],
+    "distractorComponents": [
+      "鸭",
+      "乌",
+      "木",
+      "日"
+    ]
+  },
+  "黑": {
+    "char": "黑",
+    "strokeCount": 12,
+    "topology": "ATOMIC",
+    "targetComponents": [
+      {
+        "id": "comp_hei",
+        "glyph": "黑",
+        "role": "base"
+      }
+    ],
+    "distractorComponents": [
+      "熏",
+      "点",
+      "照",
+      "焦"
+    ]
+  }
+}

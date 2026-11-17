@@ -1,0 +1,3828 @@
+{
+  "source": "duome.eu/vocabulary/en/zs/skills",
+  "total_units": 35,
+  "total_words": 715,
+  "unique_words": 665,
+  "units": [
+    {
+      "unit_index": 1,
+      "unit_name": "Food",
+      "description": "Name food and drinks",
+      "words": [
+        {
+          "character": "和",
+          "pinyin": "hé",
+          "english": "with, or, as, to, and, matches"
+        },
+        {
+          "character": "咖啡",
+          "pinyin": "kā fēi",
+          "english": "coffee"
+        },
+        {
+          "character": "水",
+          "pinyin": "shuǐ",
+          "english": "water"
+        },
+        {
+          "character": "汤",
+          "pinyin": "tāng",
+          "english": "soup"
+        },
+        {
+          "character": "热",
+          "pinyin": "rè",
+          "english": "hot"
+        },
+        {
+          "character": "米饭",
+          "pinyin": "mǐ fàn",
+          "english": "rice"
+        },
+        {
+          "character": "粥",
+          "pinyin": "zhōu",
+          "english": "porridge"
+        },
+        {
+          "character": "茶",
+          "pinyin": "chá",
+          "english": "tea"
+        },
+        {
+          "character": "豆腐",
+          "pinyin": "dòu fǔ",
+          "english": "tofu"
+        },
+        {
+          "character": "这是",
+          "pinyin": "zhè shì",
+          "english": "this is"
+        }
+      ]
+    },
+    {
+      "unit_index": 2,
+      "unit_name": "Nation.",
+      "description": "Talk about nationalities",
+      "words": [
+        {
+          "character": "中国",
+          "pinyin": "zhōng guó",
+          "english": "China"
+        },
+        {
+          "character": "人",
+          "pinyin": "rén",
+          "english": "people, guy, man's, man, human, someone, somebody, person, person's"
+        },
+        {
+          "character": "你呢",
+          "pinyin": "nǐ ne",
+          "english": "how about you"
+        },
+        {
+          "character": "嗨",
+          "pinyin": "hāi",
+          "english": "hi"
+        },
+        {
+          "character": "我",
+          "pinyin": "wǒ",
+          "english": "I"
+        },
+        {
+          "character": "日本",
+          "pinyin": "rì běn",
+          "english": "Japan"
+        },
+        {
+          "character": "是",
+          "pinyin": "shì",
+          "english": "is, am, it's, name's, wasn't, were, room's, that's, 's, yes, re, been, who's, did, does, equals, be, are, there's, was, there’s"
+        },
+        {
+          "character": "美国",
+          "pinyin": "měi guó",
+          "english": "America"
+        },
+        {
+          "character": "韩国",
+          "pinyin": "hán guó",
+          "english": "Korea, Korean, South Korea"
+        }
+      ]
+    },
+    {
+      "unit_index": 3,
+      "unit_name": "Profs.",
+      "description": "Discuss professions",
+      "words": [
+        {
+          "character": "中文",
+          "pinyin": "zhōng wén",
+          "english": "Chinese"
+        },
+        {
+          "character": "你",
+          "pinyin": "nǐ",
+          "english": "you"
+        },
+        {
+          "character": "医生",
+          "pinyin": "yī shēng",
+          "english": "doctor"
+        },
+        {
+          "character": "学生",
+          "pinyin": "xué shēng",
+          "english": "student"
+        },
+        {
+          "character": "对",
+          "pinyin": "duì",
+          "english": "correct"
+        },
+        {
+          "character": "对不对",
+          "pinyin": "duì bù duì",
+          "english": "right"
+        },
+        {
+          "character": "律师",
+          "pinyin": "lǜ shī",
+          "english": "lawyer"
+        },
+        {
+          "character": "老师",
+          "pinyin": "lǎo shī",
+          "english": "teacher"
+        },
+        {
+          "character": "英文",
+          "pinyin": "yīng wén",
+          "english": "English"
+        },
+        {
+          "character": "说",
+          "pinyin": "shuō",
+          "english": "speak"
+        }
+      ]
+    },
+    {
+      "unit_index": 4,
+      "unit_name": "Study",
+      "description": "Discuss your courses",
+      "words": [
+        {
+          "character": "上",
+          "pinyin": "shàng",
+          "english": "attend"
+        },
+        {
+          "character": "不",
+          "pinyin": "bù",
+          "english": "neither, hours—don't, do not, wasn't, n't, no, weren't, can't, wouldn't, doesn’t, won't, non, aren't, don't, don’t, didn't, isn't, is not, are not, does not, not, cannot, doesn't, didn’t"
+        },
+        {
+          "character": "他",
+          "pinyin": "tā",
+          "english": "he"
+        },
+        {
+          "character": "喜欢",
+          "pinyin": "xǐ huān",
+          "english": "like"
+        },
+        {
+          "character": "大学生",
+          "pinyin": "dà xué shēng",
+          "english": "college student"
+        },
+        {
+          "character": "她",
+          "pinyin": "tā",
+          "english": "she"
+        },
+        {
+          "character": "数学",
+          "pinyin": "shù xué",
+          "english": "math"
+        },
+        {
+          "character": "课",
+          "pinyin": "kè",
+          "english": "class"
+        },
+        {
+          "character": "音乐",
+          "pinyin": "yīn lè",
+          "english": "music"
+        }
+      ]
+    },
+    {
+      "unit_index": 5,
+      "unit_name": "Family",
+      "description": "Use possessive pronouns",
+      "words": [
+        {
+          "character": "中学生",
+          "pinyin": "zhōng xué shēng",
+          "english": "middle school student"
+        },
+        {
+          "character": "也",
+          "pinyin": "yě",
+          "english": "also"
+        },
+        {
+          "character": "儿子",
+          "pinyin": "ér zi",
+          "english": "son"
+        },
+        {
+          "character": "加拿大",
+          "pinyin": "jiā ná dà",
+          "english": "Canada, Canadian"
+        },
+        {
+          "character": "吗",
+          "pinyin": "ma",
+          "english": "is, am, wasn't, were, will, do, did, does, could, are, should, was, doesn't"
+        },
+        {
+          "character": "女儿",
+          "pinyin": "nǚ ér",
+          "english": "daughter"
+        },
+        {
+          "character": "妈妈",
+          "pinyin": "mā mā",
+          "english": "mother"
+        },
+        {
+          "character": "爸爸",
+          "pinyin": "bà bà",
+          "english": "dad"
+        },
+        {
+          "character": "的",
+          "pinyin": "de",
+          "english": "with, where, that, for, bear's, sister's, man's, ken's, 's, did, person's, at, duo's, on, who, about, which, to, whose, ben's, of, from, ’s, in, s', who's"
+        },
+        {
+          "character": "老公",
+          "pinyin": "lǎo gōng",
+          "english": "husband"
+        },
+        {
+          "character": "老婆",
+          "pinyin": "lǎo pó",
+          "english": "wife"
+        },
+        {
+          "character": "英国",
+          "pinyin": "yīng guó",
+          "english": "the UK, the United Kingdom, British, Britain"
+        },
+        {
+          "character": "这是",
+          "pinyin": "zhè shì",
+          "english": "this is"
+        }
+      ]
+    },
+    {
+      "unit_index": 6,
+      "unit_name": "Town",
+      "description": "Talk about places you visit",
+      "words": [
+        {
+          "character": "不常",
+          "pinyin": "bù cháng",
+          "english": "infrequently"
+        },
+        {
+          "character": "书",
+          "pinyin": "shū",
+          "english": "book"
+        },
+        {
+          "character": "书店",
+          "pinyin": "shū diàn",
+          "english": "bookstore"
+        },
+        {
+          "character": "买",
+          "pinyin": "mǎi",
+          "english": "to buy"
+        },
+        {
+          "character": "去",
+          "pinyin": "qù",
+          "english": "to go"
+        },
+        {
+          "character": "吃",
+          "pinyin": "chī",
+          "english": "to eat"
+        },
+        {
+          "character": "常常",
+          "pinyin": "cháng cháng",
+          "english": "frequently"
+        },
+        {
+          "character": "看",
+          "pinyin": "kàn",
+          "english": "show, watching, looked, look at, watched, see, look, watch, read, looks, reading, reads, to watch, looking, watches, seeing, glanced"
+        },
+        {
+          "character": "菜",
+          "pinyin": "cài",
+          "english": "cuisine"
+        },
+        {
+          "character": "超市",
+          "pinyin": "chāo shì",
+          "english": "supermarket"
+        },
+        {
+          "character": "零食",
+          "pinyin": "líng shí",
+          "english": "snack"
+        },
+        {
+          "character": "韩文",
+          "pinyin": "hán wén",
+          "english": "Korean"
+        },
+        {
+          "character": "饭馆",
+          "pinyin": "fàn guǎn",
+          "english": "restaurant"
+        }
+      ]
+    },
+    {
+      "unit_index": 7,
+      "unit_name": "Cafe",
+      "description": "Order drinks",
+      "words": [
+        {
+          "character": "一",
+          "pinyin": "yī",
+          "english": "a"
+        },
+        {
+          "character": "三",
+          "pinyin": "sān",
+          "english": "three"
+        },
+        {
+          "character": "不",
+          "pinyin": "bù",
+          "english": "no"
+        },
+        {
+          "character": "不客气",
+          "pinyin": "bù kè qì",
+          "english": "You're welcome"
+        },
+        {
+          "character": "两",
+          "pinyin": "liǎng",
+          "english": "two"
+        },
+        {
+          "character": "冰",
+          "pinyin": "bīng",
+          "english": "ice"
+        },
+        {
+          "character": "奶茶",
+          "pinyin": "nǎi chá",
+          "english": "milk tea"
+        },
+        {
+          "character": "杯",
+          "pinyin": "bēi",
+          "english": "cup of"
+        },
+        {
+          "character": "牛奶",
+          "pinyin": "niú nǎi",
+          "english": "milk"
+        },
+        {
+          "character": "糖",
+          "pinyin": "táng",
+          "english": "sugar"
+        },
+        {
+          "character": "绿茶",
+          "pinyin": "lǜ chá",
+          "english": "green tea"
+        },
+        {
+          "character": "要",
+          "pinyin": "yào",
+          "english": "want to"
+        },
+        {
+          "character": "谢谢",
+          "pinyin": "xiè xiè",
+          "english": "thanks"
+        },
+        {
+          "character": "这",
+          "pinyin": "zhè",
+          "english": "this, it's, the, these, here, it, that's"
+        }
+      ]
+    },
+    {
+      "unit_index": 8,
+      "unit_name": "Travel",
+      "description": "Locate travel essentials",
+      "words": [
+        {
+          "character": "不",
+          "pinyin": "bù",
+          "english": "not"
+        },
+        {
+          "character": "二",
+          "pinyin": "èr",
+          "english": "two"
+        },
+        {
+          "character": "哎呀",
+          "pinyin": "āi ya",
+          "english": "oh no"
+        },
+        {
+          "character": "哪里",
+          "pinyin": "nǎ lǐ",
+          "english": "where"
+        },
+        {
+          "character": "在",
+          "pinyin": "zài",
+          "english": "is, am, getting, onto, for, go, within, were, is located, are in, re, at, when, on, above, to, be, are, during, in, was, en"
+        },
+        {
+          "character": "手机",
+          "pinyin": "shǒu jī",
+          "english": "cellphone"
+        },
+        {
+          "character": "洗手间",
+          "pinyin": "xǐ shǒu jiān",
+          "english": "bathroom"
+        },
+        {
+          "character": "火车",
+          "pinyin": "huǒ chē",
+          "english": "train"
+        },
+        {
+          "character": "火车站",
+          "pinyin": "huǒ chē zhàn",
+          "english": "train station"
+        },
+        {
+          "character": "站台",
+          "pinyin": "zhàn tái",
+          "english": "platform"
+        },
+        {
+          "character": "第",
+          "pinyin": "dì",
+          "english": "the, first, f., rd, st, nd, th"
+        },
+        {
+          "character": "行李",
+          "pinyin": "xíng lǐ",
+          "english": "luggage"
+        },
+        {
+          "character": "车票",
+          "pinyin": "chē piào",
+          "english": "ticket"
+        },
+        {
+          "character": "这里",
+          "pinyin": "zhè lǐ",
+          "english": "here"
+        },
+        {
+          "character": "钱包",
+          "pinyin": "qián bāo",
+          "english": "wallet"
+        }
+      ]
+    },
+    {
+      "unit_index": 9,
+      "unit_name": "Semester",
+      "description": "Introduce yourself and your classes",
+      "words": [
+        {
+          "character": "个",
+          "pinyin": "gè",
+          "english": "serving, servings, an, a, one"
+        },
+        {
+          "character": "今天",
+          "pinyin": "jīn tiān",
+          "english": "today"
+        },
+        {
+          "character": "你好",
+          "pinyin": "nǐ hǎo",
+          "english": "hello"
+        },
+        {
+          "character": "历史",
+          "pinyin": "lì shǐ",
+          "english": "history"
+        },
+        {
+          "character": "同学",
+          "pinyin": "tóng xué",
+          "english": "classmate"
+        },
+        {
+          "character": "四",
+          "pinyin": "sì",
+          "english": "four"
+        },
+        {
+          "character": "我们",
+          "pinyin": "wǒ men",
+          "english": "we"
+        },
+        {
+          "character": "我叫",
+          "pinyin": "wǒ jiào",
+          "english": "my name is, i'm, name's"
+        },
+        {
+          "character": "新",
+          "pinyin": "xīn",
+          "english": "new"
+        },
+        {
+          "character": "有",
+          "pinyin": "yǒu",
+          "english": "have"
+        },
+        {
+          "character": "李天美",
+          "pinyin": "lǐ tiān měi",
+          "english": "Li Tianmei, tianmei"
+        },
+        {
+          "character": "王明",
+          "pinyin": "wáng míng",
+          "english": "Ming Wang, Wang Ming"
+        },
+        {
+          "character": "真的吗",
+          "pinyin": "zhēn de ma",
+          "english": "Really?"
+        },
+        {
+          "character": "节",
+          "pinyin": "jié",
+          "english": "festival"
+        },
+        {
+          "character": "都",
+          "pinyin": "dōu",
+          "english": "all, both, are"
+        }
+      ]
+    },
+    {
+      "unit_index": 10,
+      "unit_name": "Sports",
+      "description": "Discuss sports preferences",
+      "words": [
+        {
+          "character": "你们",
+          "pinyin": "nǐ men",
+          "english": "you all"
+        },
+        {
+          "character": "健身房",
+          "pinyin": "jiàn shēn fáng",
+          "english": "gym"
+        },
+        {
+          "character": "公园",
+          "pinyin": "gōng yuán",
+          "english": "park"
+        },
+        {
+          "character": "打",
+          "pinyin": "dǎ",
+          "english": "play"
+        },
+        {
+          "character": "排球",
+          "pinyin": "pái qiú",
+          "english": "volleyball"
+        },
+        {
+          "character": "比较",
+          "pinyin": "bǐ jiào",
+          "english": "relatively"
+        },
+        {
+          "character": "游泳",
+          "pinyin": "yóu yǒng",
+          "english": "swimming, swim, swam, swims, fountain"
+        },
+        {
+          "character": "篮球",
+          "pinyin": "lán qiú",
+          "english": "basketball"
+        },
+        {
+          "character": "网球",
+          "pinyin": "wǎng qiú",
+          "english": "tennis"
+        },
+        {
+          "character": "跑步",
+          "pinyin": "pǎo bù",
+          "english": "run, running, runs, jogged"
+        },
+        {
+          "character": "运动",
+          "pinyin": "yùn dòng",
+          "english": "exercise"
+        },
+        {
+          "character": "还是",
+          "pinyin": "hái shì",
+          "english": "or"
+        },
+        {
+          "character": "非常",
+          "pinyin": "fēi cháng",
+          "english": "extremely"
+        }
+      ]
+    },
+    {
+      "unit_index": 11,
+      "unit_name": "New Home",
+      "description": "Use adjectives for description",
+      "words": [
+        {
+          "character": "乱",
+          "pinyin": "luàn",
+          "english": "messy"
+        },
+        {
+          "character": "公寓",
+          "pinyin": "gōng yù",
+          "english": "apartment"
+        },
+        {
+          "character": "冰箱",
+          "pinyin": "bīng xiāng",
+          "english": "refrigerator"
+        },
+        {
+          "character": "卧室",
+          "pinyin": "wò shì",
+          "english": "bedroom"
+        },
+        {
+          "character": "厨房",
+          "pinyin": "chú fáng",
+          "english": "kitchen"
+        },
+        {
+          "character": "只",
+          "pinyin": "zhǐ",
+          "english": "only"
+        },
+        {
+          "character": "哇",
+          "pinyin": "wa",
+          "english": "wow"
+        },
+        {
+          "character": "大",
+          "pinyin": "dà",
+          "english": "big"
+        },
+        {
+          "character": "客厅",
+          "pinyin": "kè tīng",
+          "english": "living room"
+        },
+        {
+          "character": "小",
+          "pinyin": "xiǎo",
+          "english": "small"
+        },
+        {
+          "character": "床",
+          "pinyin": "chuáng",
+          "english": "bed"
+        },
+        {
+          "character": "很",
+          "pinyin": "hěn",
+          "english": "really, very, pretty, is, am, it's, it is, so, 's, be, are, a lot, was, well"
+        },
+        {
+          "character": "房子",
+          "pinyin": "fáng zi",
+          "english": "house"
+        },
+        {
+          "character": "房间",
+          "pinyin": "fáng jiān",
+          "english": "bedroom"
+        },
+        {
+          "character": "旧",
+          "pinyin": "jiù",
+          "english": "old"
+        },
+        {
+          "character": "桌子",
+          "pinyin": "zhuō zi",
+          "english": "table"
+        },
+        {
+          "character": "沙发",
+          "pinyin": "shā fā",
+          "english": "sofa"
+        },
+        {
+          "character": "漂亮",
+          "pinyin": "piào liàng",
+          "english": "beautiful"
+        },
+        {
+          "character": "电视",
+          "pinyin": "diàn shì",
+          "english": "TV"
+        },
+        {
+          "character": "舒服",
+          "pinyin": "shū fú",
+          "english": "comfortable"
+        }
+      ]
+    },
+    {
+      "unit_index": 12,
+      "unit_name": "Beijing",
+      "description": "Explore Beijing",
+      "words": [
+        {
+          "character": "人们",
+          "pinyin": "rén men",
+          "english": "people"
+        },
+        {
+          "character": "冬天",
+          "pinyin": "dōng tiān",
+          "english": "winter"
+        },
+        {
+          "character": "冷",
+          "pinyin": "lěng",
+          "english": "cold"
+        },
+        {
+          "character": "动物园",
+          "pinyin": "dòng wù yuán",
+          "english": "zoo"
+        },
+        {
+          "character": "北京",
+          "pinyin": "běi jīng",
+          "english": "peking, Beijing, beijing's"
+        },
+        {
+          "character": "夏天",
+          "pinyin": "xià tiān",
+          "english": "summer"
+        },
+        {
+          "character": "好吃",
+          "pinyin": "hǎo chī",
+          "english": "delicious"
+        },
+        {
+          "character": "好玩儿",
+          "pinyin": "hǎo wán ér",
+          "english": "fun"
+        },
+        {
+          "character": "故宫",
+          "pinyin": "gù gōng",
+          "english": "the Forbidden City"
+        },
+        {
+          "character": "春天",
+          "pinyin": "chūn tiān",
+          "english": "spring"
+        },
+        {
+          "character": "有名",
+          "pinyin": "yǒu míng",
+          "english": "famous"
+        },
+        {
+          "character": "火锅",
+          "pinyin": "huǒ guō",
+          "english": "hot pot"
+        },
+        {
+          "character": "烤鸭",
+          "pinyin": "kǎo yā",
+          "english": "roast duck"
+        },
+        {
+          "character": "热闹",
+          "pinyin": "rè nào",
+          "english": "lively"
+        },
+        {
+          "character": "特别",
+          "pinyin": "tè bié",
+          "english": "especially"
+        },
+        {
+          "character": "的时候",
+          "pinyin": "de shí hòu",
+          "english": "while, when, during, since"
+        },
+        {
+          "character": "秋天",
+          "pinyin": "qiū tiān",
+          "english": "autumn"
+        },
+        {
+          "character": "老家",
+          "pinyin": "lǎo jiā",
+          "english": "hometown"
+        },
+        {
+          "character": "贵",
+          "pinyin": "guì",
+          "english": "expensive"
+        },
+        {
+          "character": "辣",
+          "pinyin": "là",
+          "english": "spicy"
+        },
+        {
+          "character": "远",
+          "pinyin": "yuǎn",
+          "english": "far"
+        },
+        {
+          "character": "长城",
+          "pinyin": "zhǎng chéng",
+          "english": "Great Wall"
+        },
+        {
+          "character": "门票",
+          "pinyin": "mén piào",
+          "english": "admission ticket"
+        }
+      ]
+    },
+    {
+      "unit_index": 13,
+      "unit_name": "Date",
+      "description": "Use suggestion particles",
+      "words": [
+        {
+          "character": "一些",
+          "pinyin": "yī xiē",
+          "english": "some"
+        },
+        {
+          "character": "做",
+          "pinyin": "zuò",
+          "english": "make"
+        },
+        {
+          "character": "公交车",
+          "pinyin": "gōng jiāo chē",
+          "english": "bus"
+        },
+        {
+          "character": "博物馆",
+          "pinyin": "bó wù guǎn",
+          "english": "museum"
+        },
+        {
+          "character": "吧",
+          "pinyin": "ba",
+          "english": "let's"
+        },
+        {
+          "character": "周末",
+          "pinyin": "zhōu mò",
+          "english": "weekend"
+        },
+        {
+          "character": "喝",
+          "pinyin": "hē",
+          "english": "to drink"
+        },
+        {
+          "character": "地铁",
+          "pinyin": "de tiě",
+          "english": "subway"
+        },
+        {
+          "character": "坐",
+          "pinyin": "zuò",
+          "english": "take"
+        },
+        {
+          "character": "好的",
+          "pinyin": "hǎo de",
+          "english": "okay"
+        },
+        {
+          "character": "家",
+          "pinyin": "jiā",
+          "english": "home"
+        },
+        {
+          "character": "带",
+          "pinyin": "dài",
+          "english": "bring"
+        },
+        {
+          "character": "快",
+          "pinyin": "kuài",
+          "english": "fast"
+        },
+        {
+          "character": "晚饭",
+          "pinyin": "wǎn fàn",
+          "english": "dinner"
+        },
+        {
+          "character": "有空儿",
+          "pinyin": "yǒu kōng ér",
+          "english": "available"
+        },
+        {
+          "character": "果汁",
+          "pinyin": "guǒ zhī",
+          "english": "juice"
+        },
+        {
+          "character": "比较",
+          "pinyin": "bǐ jiào",
+          "english": "more, comparing, relatively, compared, rather, compare, compares"
+        },
+        {
+          "character": "水果",
+          "pinyin": "shuǐ guǒ",
+          "english": "fruit"
+        },
+        {
+          "character": "爆米花",
+          "pinyin": "bào mǐ huā",
+          "english": "popcorn"
+        },
+        {
+          "character": "爱情",
+          "pinyin": "ài qíng",
+          "english": "romance"
+        },
+        {
+          "character": "电影",
+          "pinyin": "diàn yǐng",
+          "english": "movie"
+        },
+        {
+          "character": "看",
+          "pinyin": "kàn",
+          "english": "watch"
+        },
+        {
+          "character": "蛋糕",
+          "pinyin": "dàn gāo",
+          "english": "cake"
+        },
+        {
+          "character": "饺子",
+          "pinyin": "jiǎo zi",
+          "english": "dumpling"
+        }
+      ]
+    },
+    {
+      "unit_index": 14,
+      "unit_name": "Dinner",
+      "description": "Use commands",
+      "words": [
+        {
+          "character": "做饭",
+          "pinyin": "zuò fàn",
+          "english": "cook"
+        },
+        {
+          "character": "先",
+          "pinyin": "xiān",
+          "english": "first"
+        },
+        {
+          "character": "冰淇淋",
+          "pinyin": "bīng qí lín",
+          "english": "ice cream"
+        },
+        {
+          "character": "几",
+          "pinyin": "jǐ",
+          "english": "several"
+        },
+        {
+          "character": "别",
+          "pinyin": "bié",
+          "english": "don't"
+        },
+        {
+          "character": "吃饭",
+          "pinyin": "chī fàn",
+          "english": "eats, eating, eat, ate"
+        },
+        {
+          "character": "土豆",
+          "pinyin": "tǔ dòu",
+          "english": "potato"
+        },
+        {
+          "character": "多",
+          "pinyin": "duō",
+          "english": "more"
+        },
+        {
+          "character": "小心",
+          "pinyin": "xiǎo xīn",
+          "english": "be careful"
+        },
+        {
+          "character": "手",
+          "pinyin": "shǒu",
+          "english": "hand"
+        },
+        {
+          "character": "擦",
+          "pinyin": "cā",
+          "english": "clean"
+        },
+        {
+          "character": "放",
+          "pinyin": "fàng",
+          "english": "add"
+        },
+        {
+          "character": "杯子",
+          "pinyin": "bēi zi",
+          "english": "cup"
+        },
+        {
+          "character": "洗",
+          "pinyin": "xǐ",
+          "english": "wash"
+        },
+        {
+          "character": "洗碗机",
+          "pinyin": "xǐ wǎn jī",
+          "english": "dishwasher"
+        },
+        {
+          "character": "爷爷",
+          "pinyin": "yé yé",
+          "english": "grandfather"
+        },
+        {
+          "character": "玩",
+          "pinyin": "wán",
+          "english": "play"
+        },
+        {
+          "character": "现在",
+          "pinyin": "xiàn zài",
+          "english": "now"
+        },
+        {
+          "character": "用",
+          "pinyin": "yòng",
+          "english": "use"
+        },
+        {
+          "character": "盐",
+          "pinyin": "yán",
+          "english": "salt"
+        },
+        {
+          "character": "盘子",
+          "pinyin": "pán zi",
+          "english": "plate"
+        },
+        {
+          "character": "碗",
+          "pinyin": "wǎn",
+          "english": "dish, bowl of, bowl, a bowl, dishes, bowls"
+        },
+        {
+          "character": "肉",
+          "pinyin": "ròu",
+          "english": "meat"
+        },
+        {
+          "character": "蔬菜",
+          "pinyin": "shū cài",
+          "english": "vegetable"
+        },
+        {
+          "character": "西红柿",
+          "pinyin": "xī hóng shì",
+          "english": "tomato"
+        }
+      ]
+    },
+    {
+      "unit_index": 15,
+      "unit_name": "Clubs",
+      "description": "Use modal verbs to express ability",
+      "words": [
+        {
+          "character": "一起",
+          "pinyin": "yī qǐ",
+          "english": "together"
+        },
+        {
+          "character": "人",
+          "pinyin": "rén",
+          "english": "person"
+        },
+        {
+          "character": "会",
+          "pinyin": "huì",
+          "english": "can"
+        },
+        {
+          "character": "俱乐部",
+          "pinyin": "jù lè bù",
+          "english": "club"
+        },
+        {
+          "character": "十",
+          "pinyin": "shí",
+          "english": "ten"
+        },
+        {
+          "character": "吉他",
+          "pinyin": "jí tā",
+          "english": "guitar"
+        },
+        {
+          "character": "唱歌",
+          "pinyin": "chàng gē",
+          "english": "sing, singing, sings"
+        },
+        {
+          "character": "喜剧",
+          "pinyin": "xǐ jù",
+          "english": "play, theater, plays, comedy, comedies"
+        },
+        {
+          "character": "弹",
+          "pinyin": "dàn",
+          "english": "play"
+        },
+        {
+          "character": "有趣",
+          "pinyin": "yǒu qù",
+          "english": "interesting"
+        },
+        {
+          "character": "棒球",
+          "pinyin": "bàng qiú",
+          "english": "baseball"
+        },
+        {
+          "character": "法语",
+          "pinyin": "fǎ yǔ",
+          "english": "French"
+        },
+        {
+          "character": "泰国",
+          "pinyin": "tài guó",
+          "english": "Thailand"
+        },
+        {
+          "character": "流行",
+          "pinyin": "liú xíng",
+          "english": "popular, pop"
+        },
+        {
+          "character": "烤",
+          "pinyin": "kǎo",
+          "english": "bake"
+        },
+        {
+          "character": "种",
+          "pinyin": "zhǒng",
+          "english": "type"
+        },
+        {
+          "character": "练习",
+          "pinyin": "liàn xí",
+          "english": "practice"
+        },
+        {
+          "character": "西班牙语",
+          "pinyin": "xī bān yá yǔ",
+          "english": "Spanish"
+        },
+        {
+          "character": "语言",
+          "pinyin": "yǔ yán",
+          "english": "language"
+        },
+        {
+          "character": "足球",
+          "pinyin": "zú qiú",
+          "english": "soccer"
+        },
+        {
+          "character": "踢",
+          "pinyin": "tī",
+          "english": "played, kicking, play, kicked, plays, kick, playing"
+        },
+        {
+          "character": "钢琴",
+          "pinyin": "gāng qín",
+          "english": "piano"
+        },
+        {
+          "character": "面包",
+          "pinyin": "miàn bāo",
+          "english": "bread"
+        },
+        {
+          "character": "面条",
+          "pinyin": "miàn tiáo",
+          "english": "noodle"
+        },
+        {
+          "character": "饼干",
+          "pinyin": "bǐng gàn",
+          "english": "cookie"
+        }
+      ]
+    },
+    {
+      "unit_index": 16,
+      "unit_name": "Rules",
+      "description": "Ask for permission",
+      "words": [
+        {
+          "character": "不行",
+          "pinyin": "bù xíng",
+          "english": "no"
+        },
+        {
+          "character": "休息",
+          "pinyin": "xiū xī",
+          "english": "rest"
+        },
+        {
+          "character": "借",
+          "pinyin": "jiè",
+          "english": "borrow"
+        },
+        {
+          "character": "健康",
+          "pinyin": "jiàn kāng",
+          "english": "healthy"
+        },
+        {
+          "character": "兔子",
+          "pinyin": "tù zi",
+          "english": "rabbit"
+        },
+        {
+          "character": "养",
+          "pinyin": "yǎng",
+          "english": "raise"
+        },
+        {
+          "character": "冰",
+          "pinyin": "bīng",
+          "english": "iced"
+        },
+        {
+          "character": "出去玩儿",
+          "pinyin": "chū qù wán ér",
+          "english": "go out for fun"
+        },
+        {
+          "character": "只",
+          "pinyin": "zhǐ",
+          "english": "an order of, only, just, all"
+        },
+        {
+          "character": "可乐",
+          "pinyin": "kě lè",
+          "english": "cola"
+        },
+        {
+          "character": "可以",
+          "pinyin": "kě yǐ",
+          "english": "can"
+        },
+        {
+          "character": "可爱",
+          "pinyin": "kě ài",
+          "english": "adorable"
+        },
+        {
+          "character": "哥哥",
+          "pinyin": "gē gē",
+          "english": "brother"
+        },
+        {
+          "character": "商场",
+          "pinyin": "shāng chǎng",
+          "english": "mall"
+        },
+        {
+          "character": "地",
+          "pinyin": "de",
+          "english": "floor"
+        },
+        {
+          "character": "姐姐",
+          "pinyin": "jiě jiě",
+          "english": "sister, sisters"
+        },
+        {
+          "character": "巧克力",
+          "pinyin": "qiǎo kè lì",
+          "english": "chocolate"
+        },
+        {
+          "character": "想",
+          "pinyin": "xiǎng",
+          "english": "want"
+        },
+        {
+          "character": "扫",
+          "pinyin": "sǎo",
+          "english": "sweep"
+        },
+        {
+          "character": "朋友",
+          "pinyin": "péng yǒu",
+          "english": "friend"
+        },
+        {
+          "character": "游戏",
+          "pinyin": "yóu xì",
+          "english": "game"
+        },
+        {
+          "character": "狗",
+          "pinyin": "gǒu",
+          "english": "dog"
+        },
+        {
+          "character": "玩具",
+          "pinyin": "wán jù",
+          "english": "toy"
+        },
+        {
+          "character": "电脑",
+          "pinyin": "diàn nǎo",
+          "english": "computer"
+        },
+        {
+          "character": "窗户",
+          "pinyin": "chuāng hù",
+          "english": "window"
+        },
+        {
+          "character": "累",
+          "pinyin": "lèi",
+          "english": "tired"
+        }
+      ]
+    },
+    {
+      "unit_index": 17,
+      "unit_name": "Moving",
+      "description": "Clean and organize your home",
+      "words": [
+        {
+          "character": "东西",
+          "pinyin": "dōng xī",
+          "english": "thing"
+        },
+        {
+          "character": "书架",
+          "pinyin": "shū jià",
+          "english": "bookshelf"
+        },
+        {
+          "character": "勺子",
+          "pinyin": "sháo zi",
+          "english": "spoon"
+        },
+        {
+          "character": "台灯",
+          "pinyin": "tái dēng",
+          "english": "lamp"
+        },
+        {
+          "character": "吵",
+          "pinyin": "chǎo",
+          "english": "noisy"
+        },
+        {
+          "character": "吸尘器",
+          "pinyin": "xī chén qì",
+          "english": "vacuum cleaner"
+        },
+        {
+          "character": "地方",
+          "pinyin": "de fāng",
+          "english": "place"
+        },
+        {
+          "character": "好看",
+          "pinyin": "hǎo kàn",
+          "english": "beautiful"
+        },
+        {
+          "character": "室友",
+          "pinyin": "shì yǒu",
+          "english": "roommate"
+        },
+        {
+          "character": "帽子",
+          "pinyin": "mào zi",
+          "english": "hat"
+        },
+        {
+          "character": "打扫",
+          "pinyin": "dǎ sǎo",
+          "english": "clean"
+        },
+        {
+          "character": "扔掉",
+          "pinyin": "rēng diào",
+          "english": "throw away"
+        },
+        {
+          "character": "找",
+          "pinyin": "zhǎo",
+          "english": "look for, looking for, find, look, looked, ask, get, search for"
+        },
+        {
+          "character": "拖把",
+          "pinyin": "tuō bǎ",
+          "english": "mop"
+        },
+        {
+          "character": "椅子",
+          "pinyin": "yǐ zi",
+          "english": "chair"
+        },
+        {
+          "character": "筷子",
+          "pinyin": "kuài zi",
+          "english": "chopsticks"
+        },
+        {
+          "character": "脏",
+          "pinyin": "zàng",
+          "english": "dirty"
+        },
+        {
+          "character": "衣服",
+          "pinyin": "yī fú",
+          "english": "clothes"
+        },
+        {
+          "character": "还",
+          "pinyin": "hái",
+          "english": "still"
+        },
+        {
+          "character": "这些",
+          "pinyin": "zhè xiē",
+          "english": "this, these, the"
+        },
+        {
+          "character": "那",
+          "pinyin": "nà",
+          "english": "the, that, those, it, there, that's"
+        },
+        {
+          "character": "那些",
+          "pinyin": "nà xiē",
+          "english": "those, the"
+        },
+        {
+          "character": "邻居",
+          "pinyin": "lín jū",
+          "english": "neighbor"
+        },
+        {
+          "character": "都",
+          "pinyin": "dōu",
+          "english": "all"
+        },
+        {
+          "character": "重",
+          "pinyin": "zhòng",
+          "english": "heavy"
+        }
+      ]
+    },
+    {
+      "unit_index": 18,
+      "unit_name": "Weekend",
+      "description": "Use the present progressive",
+      "words": [
+        {
+          "character": "上网",
+          "pinyin": "shàng wǎng",
+          "english": "access the internet"
+        },
+        {
+          "character": "人",
+          "pinyin": "rén",
+          "english": "people, guy, man's, man, human, someone, somebody, person, person's"
+        },
+        {
+          "character": "什么",
+          "pinyin": "shén me",
+          "english": "what"
+        },
+        {
+          "character": "他们",
+          "pinyin": "tā men",
+          "english": "they"
+        },
+        {
+          "character": "做",
+          "pinyin": "zuò",
+          "english": "do"
+        },
+        {
+          "character": "卖",
+          "pinyin": "mài",
+          "english": "sell"
+        },
+        {
+          "character": "听",
+          "pinyin": "tīng",
+          "english": "hear"
+        },
+        {
+          "character": "喂",
+          "pinyin": "wèi",
+          "english": "hello"
+        },
+        {
+          "character": "在",
+          "pinyin": "zài",
+          "english": "is, am, getting, onto, for, go, within, were, is located, are in, re, at, when, on, above, to, be, are, during, in, was, en"
+        },
+        {
+          "character": "女孩儿",
+          "pinyin": "nǚ hái ér",
+          "english": "girl"
+        },
+        {
+          "character": "妹妹",
+          "pinyin": "mèi mèi",
+          "english": "sisters, younger sister, sister"
+        },
+        {
+          "character": "小提琴",
+          "pinyin": "xiǎo tí qín",
+          "english": "violin"
+        },
+        {
+          "character": "帮助",
+          "pinyin": "bāng zhù",
+          "english": "help"
+        },
+        {
+          "character": "干净",
+          "pinyin": "gàn jìng",
+          "english": "clean"
+        },
+        {
+          "character": "忙",
+          "pinyin": "máng",
+          "english": "busy"
+        },
+        {
+          "character": "报纸",
+          "pinyin": "bào zhǐ",
+          "english": "newspaper"
+        },
+        {
+          "character": "拉",
+          "pinyin": "lā",
+          "english": "play"
+        },
+        {
+          "character": "摇滚",
+          "pinyin": "yáo gǔn",
+          "english": "rock"
+        },
+        {
+          "character": "早饭",
+          "pinyin": "zǎo fàn",
+          "english": "breakfast"
+        },
+        {
+          "character": "星期六",
+          "pinyin": "xīng qī liù",
+          "english": "Saturday"
+        },
+        {
+          "character": "是我",
+          "pinyin": "shì wǒ",
+          "english": "It's me"
+        },
+        {
+          "character": "没",
+          "pinyin": "méi",
+          "english": "didn't"
+        },
+        {
+          "character": "睡觉",
+          "pinyin": "shuì jué",
+          "english": "sleep, sleeping, sleeps, slept, go to bed"
+        },
+        {
+          "character": "需要",
+          "pinyin": "xū yào",
+          "english": "need"
+        },
+        {
+          "character": "飞盘",
+          "pinyin": "fēi pán",
+          "english": "frisbee"
+        }
+      ]
+    },
+    {
+      "unit_index": 19,
+      "unit_name": "Sick Day",
+      "description": "Seek medical help",
+      "words": [
+        {
+          "character": "下午",
+          "pinyin": "xià wǔ",
+          "english": "afternoon"
+        },
+        {
+          "character": "不舒服",
+          "pinyin": "bù shū fú",
+          "english": "not well"
+        },
+        {
+          "character": "了",
+          "pinyin": "le",
+          "english": "anymore, got, did, has, yet"
+        },
+        {
+          "character": "体温",
+          "pinyin": "tǐ wēn",
+          "english": "temperature"
+        },
+        {
+          "character": "假",
+          "pinyin": "jiǎ",
+          "english": "leave"
+        },
+        {
+          "character": "医院",
+          "pinyin": "yī yuàn",
+          "english": "hospital"
+        },
+        {
+          "character": "发烧",
+          "pinyin": "fā shāo",
+          "english": "fever"
+        },
+        {
+          "character": "吃",
+          "pinyin": "chī",
+          "english": "to eat"
+        },
+        {
+          "character": "头",
+          "pinyin": "tóu",
+          "english": "head"
+        },
+        {
+          "character": "少",
+          "pinyin": "shǎo",
+          "english": "less"
+        },
+        {
+          "character": "应该",
+          "pinyin": "yīng gāi",
+          "english": "should"
+        },
+        {
+          "character": "开心",
+          "pinyin": "kāi xīn",
+          "english": "happy"
+        },
+        {
+          "character": "怎么了",
+          "pinyin": "zěn me le",
+          "english": "what happened, what's the matter, what happened to, what's the matter with, what's wrong, what’s"
+        },
+        {
+          "character": "早上",
+          "pinyin": "zǎo shàng",
+          "english": "morning"
+        },
+        {
+          "character": "昨天",
+          "pinyin": "zuó tiān",
+          "english": "yesterday"
+        },
+        {
+          "character": "束",
+          "pinyin": "shù",
+          "english": "bouquet"
+        },
+        {
+          "character": "来",
+          "pinyin": "lái",
+          "english": "come"
+        },
+        {
+          "character": "煮",
+          "pinyin": "zhǔ",
+          "english": "boil"
+        },
+        {
+          "character": "疼",
+          "pinyin": "téng",
+          "english": "painful"
+        },
+        {
+          "character": "给",
+          "pinyin": "gěi",
+          "english": "to"
+        },
+        {
+          "character": "肚子",
+          "pinyin": "dù zi",
+          "english": "abdomen"
+        },
+        {
+          "character": "花",
+          "pinyin": "huā",
+          "english": "flower"
+        },
+        {
+          "character": "药",
+          "pinyin": "yào",
+          "english": "medicine"
+        },
+        {
+          "character": "药店",
+          "pinyin": "yào diàn",
+          "english": "pharmacy"
+        },
+        {
+          "character": "请",
+          "pinyin": "qǐng",
+          "english": "invite, please, invited, treat"
+        },
+        {
+          "character": "跟",
+          "pinyin": "gēn",
+          "english": "with, as, between, to, and, matches, against, about"
+        },
+        {
+          "character": "量",
+          "pinyin": "liàng",
+          "english": "take"
+        }
+      ]
+    },
+    {
+      "unit_index": 20,
+      "unit_name": "Birthday",
+      "description": "Plan a birthday party",
+      "words": [
+        {
+          "character": "下",
+          "pinyin": "xià",
+          "english": "next"
+        },
+        {
+          "character": "五",
+          "pinyin": "wǔ",
+          "english": "five"
+        },
+        {
+          "character": "准备",
+          "pinyin": "zhǔn bèi",
+          "english": "prepare"
+        },
+        {
+          "character": "告诉",
+          "pinyin": "gào sù",
+          "english": "tell"
+        },
+        {
+          "character": "围巾",
+          "pinyin": "wéi jīn",
+          "english": "scarf"
+        },
+        {
+          "character": "奶奶",
+          "pinyin": "nǎi nǎi",
+          "english": "grandmother"
+        },
+        {
+          "character": "开",
+          "pinyin": "kāi",
+          "english": "hold"
+        },
+        {
+          "character": "快乐",
+          "pinyin": "kuài lè",
+          "english": "happy"
+        },
+        {
+          "character": "惊喜",
+          "pinyin": "jīng xǐ",
+          "english": "surprise"
+        },
+        {
+          "character": "明天",
+          "pinyin": "míng tiān",
+          "english": "tomorrow"
+        },
+        {
+          "character": "星期天",
+          "pinyin": "xīng qī tiān",
+          "english": "Sunday"
+        },
+        {
+          "character": "条",
+          "pinyin": "tiáo",
+          "english": "fillets, pair of, slip, pair, band's"
+        },
+        {
+          "character": "气球",
+          "pinyin": "qì qiú",
+          "english": "balloon"
+        },
+        {
+          "character": "派对",
+          "pinyin": "pài duì",
+          "english": "party"
+        },
+        {
+          "character": "生日",
+          "pinyin": "shēng rì",
+          "english": "birthday"
+        },
+        {
+          "character": "礼物",
+          "pinyin": "lǐ wù",
+          "english": "gift"
+        },
+        {
+          "character": "种",
+          "pinyin": "zhǒng",
+          "english": "kind"
+        },
+        {
+          "character": "菜",
+          "pinyin": "cài",
+          "english": "dish"
+        },
+        {
+          "character": "薯片",
+          "pinyin": "shǔ piàn",
+          "english": "chips"
+        },
+        {
+          "character": "蜡烛",
+          "pinyin": "là zhú",
+          "english": "candle"
+        },
+        {
+          "character": "邀请",
+          "pinyin": "yāo qǐng",
+          "english": "invite"
+        },
+        {
+          "character": "项链",
+          "pinyin": "xiàng liàn",
+          "english": "necklace"
+        },
+        {
+          "character": "领带",
+          "pinyin": "lǐng dài",
+          "english": "tie"
+        },
+        {
+          "character": "饮料",
+          "pinyin": "yǐn liào",
+          "english": "drink"
+        },
+        {
+          "character": "鱼",
+          "pinyin": "yú",
+          "english": "fish"
+        }
+      ]
+    },
+    {
+      "unit_index": 21,
+      "unit_name": "Campus",
+      "description": "Ask for directions on campus",
+      "words": [
+        {
+          "character": "体育馆",
+          "pinyin": "tǐ yù guǎn",
+          "english": "gymnasium"
+        },
+        {
+          "character": "停车场",
+          "pinyin": "tíng chē chǎng",
+          "english": "parking lot"
+        },
+        {
+          "character": "六",
+          "pinyin": "liù",
+          "english": "six"
+        },
+        {
+          "character": "前面",
+          "pinyin": "qián miàn",
+          "english": "front"
+        },
+        {
+          "character": "参加",
+          "pinyin": "cān jiā",
+          "english": "participate"
+        },
+        {
+          "character": "参观",
+          "pinyin": "cān guān",
+          "english": "visit"
+        },
+        {
+          "character": "号",
+          "pinyin": "hào",
+          "english": "number, day of the month, date, sized"
+        },
+        {
+          "character": "后面",
+          "pinyin": "hòu miàn",
+          "english": "behind"
+        },
+        {
+          "character": "图书馆",
+          "pinyin": "tú shū guǎn",
+          "english": "library"
+        },
+        {
+          "character": "地铁站",
+          "pinyin": "de tiě zhàn",
+          "english": "subway station"
+        },
+        {
+          "character": "外面",
+          "pinyin": "wài miàn",
+          "english": "outside"
+        },
+        {
+          "character": "学校",
+          "pinyin": "xué xiào",
+          "english": "school"
+        },
+        {
+          "character": "安静",
+          "pinyin": "ān jìng",
+          "english": "quiet"
+        },
+        {
+          "character": "宿舍",
+          "pinyin": "sù shě",
+          "english": "dormitory"
+        },
+        {
+          "character": "操场",
+          "pinyin": "cāo chǎng",
+          "english": "playground"
+        },
+        {
+          "character": "教学楼",
+          "pinyin": "jiào xué lóu",
+          "english": "Teaching building"
+        },
+        {
+          "character": "旁边",
+          "pinyin": "páng biān",
+          "english": "beside"
+        },
+        {
+          "character": "晚上",
+          "pinyin": "wǎn shàng",
+          "english": "evening"
+        },
+        {
+          "character": "校园",
+          "pinyin": "xiào yuán",
+          "english": "campus"
+        },
+        {
+          "character": "活动",
+          "pinyin": "huó dòng",
+          "english": "event"
+        },
+        {
+          "character": "游泳池",
+          "pinyin": "yóu yǒng chí",
+          "english": "swimming pool"
+        },
+        {
+          "character": "真",
+          "pinyin": "zhēn",
+          "english": "really"
+        },
+        {
+          "character": "请问",
+          "pinyin": "qǐng wèn",
+          "english": "excuse me"
+        },
+        {
+          "character": "里面",
+          "pinyin": "lǐ miàn",
+          "english": "inside"
+        },
+        {
+          "character": "食堂",
+          "pinyin": "shí táng",
+          "english": "cafeteria"
+        },
+        {
+          "character": "高",
+          "pinyin": "gāo",
+          "english": "tall"
+        }
+      ]
+    },
+    {
+      "unit_index": 22,
+      "unit_name": "Home Visit",
+      "description": "Use comparatives",
+      "words": [
+        {
+          "character": "书房",
+          "pinyin": "shū fáng",
+          "english": "study"
+        },
+        {
+          "character": "亮",
+          "pinyin": "liàng",
+          "english": "bright"
+        },
+        {
+          "character": "大",
+          "pinyin": "dà",
+          "english": "old"
+        },
+        {
+          "character": "好听",
+          "pinyin": "hǎo tīng",
+          "english": "pleasant to listen to"
+        },
+        {
+          "character": "好喝",
+          "pinyin": "hǎo hē",
+          "english": "delicious"
+        },
+        {
+          "character": "家人",
+          "pinyin": "jiā rén",
+          "english": "family"
+        },
+        {
+          "character": "弟弟",
+          "pinyin": "dì dì",
+          "english": "younger brother"
+        },
+        {
+          "character": "新鲜",
+          "pinyin": "xīn xiān",
+          "english": "fresh"
+        },
+        {
+          "character": "歌",
+          "pinyin": "gē",
+          "english": "song"
+        },
+        {
+          "character": "歌手",
+          "pinyin": "gē shǒu",
+          "english": "singer"
+        },
+        {
+          "character": "比",
+          "pinyin": "bǐ",
+          "english": "more, than, compared"
+        },
+        {
+          "character": "没有",
+          "pinyin": "méi yǒu",
+          "english": "yet, haven't, do not, wasn't, no, weren't, off, did not, haven’t, don't have, hasn't, aren't, didn’t, don't, without, doesn't have, didn't, isn't, don't have any, hadn't, not, doesn't, doesn’t"
+        },
+        {
+          "character": "烤",
+          "pinyin": "kǎo",
+          "english": "grill"
+        },
+        {
+          "character": "照片",
+          "pinyin": "zhào piàn",
+          "english": "photo"
+        },
+        {
+          "character": "牛肉",
+          "pinyin": "niú ròu",
+          "english": "beef"
+        },
+        {
+          "character": "猫",
+          "pinyin": "māo",
+          "english": "cat"
+        },
+        {
+          "character": "玉米",
+          "pinyin": "yù mǐ",
+          "english": "corn"
+        },
+        {
+          "character": "看",
+          "pinyin": "kàn",
+          "english": "see"
+        },
+        {
+          "character": "聪明",
+          "pinyin": "cōng míng",
+          "english": "intelligent"
+        },
+        {
+          "character": "节目",
+          "pinyin": "jié mù",
+          "english": "program"
+        },
+        {
+          "character": "苹果",
+          "pinyin": "píng guǒ",
+          "english": "apple"
+        },
+        {
+          "character": "西瓜",
+          "pinyin": "xī guā",
+          "english": "watermelon"
+        },
+        {
+          "character": "请进",
+          "pinyin": "qǐng jìn",
+          "english": "please come in"
+        },
+        {
+          "character": "首",
+          "pinyin": "shǒu",
+          "english": "head"
+        },
+        {
+          "character": "鸡肉",
+          "pinyin": "jī ròu",
+          "english": "chicken"
+        }
+      ]
+    },
+    {
+      "unit_index": 23,
+      "unit_name": "Childhood",
+      "description": "Talk about your childhood",
+      "words": [
+        {
+          "character": "七",
+          "pinyin": "qī",
+          "english": "seven, 7"
+        },
+        {
+          "character": "上",
+          "pinyin": "shàng",
+          "english": "attend"
+        },
+        {
+          "character": "上海",
+          "pinyin": "shàng hǎi",
+          "english": "Shanghai, Shanghainese"
+        },
+        {
+          "character": "中学",
+          "pinyin": "zhōng xué",
+          "english": "middle school"
+        },
+        {
+          "character": "九",
+          "pinyin": "jiǔ",
+          "english": "nine, 9"
+        },
+        {
+          "character": "人",
+          "pinyin": "rén",
+          "english": "people, guy, man's, man, human, someone, somebody, person, person's"
+        },
+        {
+          "character": "八",
+          "pinyin": "bā",
+          "english": "eight, 8, eighth"
+        },
+        {
+          "character": "出国",
+          "pinyin": "chū guó",
+          "english": "go abroad, abroad"
+        },
+        {
+          "character": "出生",
+          "pinyin": "chū shēng",
+          "english": "birth, born"
+        },
+        {
+          "character": "前",
+          "pinyin": "qián",
+          "english": "before"
+        },
+        {
+          "character": "动画片",
+          "pinyin": "dòng huà piàn",
+          "english": "cartoon"
+        },
+        {
+          "character": "回",
+          "pinyin": "huí",
+          "english": "return"
+        },
+        {
+          "character": "在",
+          "pinyin": "zài",
+          "english": "is, am, getting, onto, for, go, within, were, is located, are in, re, at, when, on, above, to, be, are, during, in, was, en"
+        },
+        {
+          "character": "小学",
+          "pinyin": "xiǎo xué",
+          "english": "elementary school"
+        },
+        {
+          "character": "小时候",
+          "pinyin": "xiǎo shí hòu",
+          "english": "when he was a child, young, when I was a child, when we were children"
+        },
+        {
+          "character": "岁",
+          "pinyin": "suì",
+          "english": "years old"
+        },
+        {
+          "character": "工作",
+          "pinyin": "gōng zuò",
+          "english": "job"
+        },
+        {
+          "character": "年",
+          "pinyin": "nián",
+          "english": "year"
+        },
+        {
+          "character": "很多",
+          "pinyin": "hěn duō",
+          "english": "a lot of"
+        },
+        {
+          "character": "旅行",
+          "pinyin": "lǚ xíng",
+          "english": "travel"
+        },
+        {
+          "character": "桌游",
+          "pinyin": "zhuō yóu",
+          "english": "board game"
+        },
+        {
+          "character": "流行",
+          "pinyin": "liú xíng",
+          "english": "popular"
+        },
+        {
+          "character": "生活",
+          "pinyin": "shēng huó",
+          "english": "live"
+        },
+        {
+          "character": "长大",
+          "pinyin": "zhǎng dà",
+          "english": "grow up"
+        },
+        {
+          "character": "零",
+          "pinyin": "líng",
+          "english": "zero"
+        },
+        {
+          "character": "香港",
+          "pinyin": "xiāng gǎng",
+          "english": "Hong Kong, kong"
+        }
+      ]
+    },
+    {
+      "unit_index": 24,
+      "unit_name": "Plans",
+      "description": "Plan your activities",
+      "words": [
+        {
+          "character": "乒乓球",
+          "pinyin": "pīng pāng qiú",
+          "english": "ping pong"
+        },
+        {
+          "character": "出门",
+          "pinyin": "chū mén",
+          "english": "go out (expression)"
+        },
+        {
+          "character": "加入",
+          "pinyin": "jiā rù",
+          "english": "join"
+        },
+        {
+          "character": "加油",
+          "pinyin": "jiā yóu",
+          "english": "Keep it up"
+        },
+        {
+          "character": "去",
+          "pinyin": "qù",
+          "english": "go on, through, going to, for, go, get to, get, going, goes, to, gone, visit, go to, went, didn't"
+        },
+        {
+          "character": "后天",
+          "pinyin": "hòu tiān",
+          "english": "the day after tomorrow"
+        },
+        {
+          "character": "在家",
+          "pinyin": "zài jiā",
+          "english": "home"
+        },
+        {
+          "character": "复习",
+          "pinyin": "fù xí",
+          "english": "review"
+        },
+        {
+          "character": "外地",
+          "pinyin": "wài de",
+          "english": "out of town"
+        },
+        {
+          "character": "天气",
+          "pinyin": "tiān qì",
+          "english": "weather"
+        },
+        {
+          "character": "好",
+          "pinyin": "hǎo",
+          "english": "good"
+        },
+        {
+          "character": "好啊",
+          "pinyin": "hǎo a",
+          "english": "sure"
+        },
+        {
+          "character": "学",
+          "pinyin": "xué",
+          "english": "learn"
+        },
+        {
+          "character": "想",
+          "pinyin": "xiǎng",
+          "english": "miss"
+        },
+        {
+          "character": "打电话",
+          "pinyin": "dǎ diàn huà",
+          "english": "calling, make phone calls, dialing, making phone calls, telephone, calls, talking on the phone, telephoned, call, called, make a phone call, phoned"
+        },
+        {
+          "character": "明天",
+          "pinyin": "míng tiān",
+          "english": "tomorrow"
+        },
+        {
+          "character": "星期",
+          "pinyin": "xīng qī",
+          "english": "week, weeks"
+        },
+        {
+          "character": "有事儿",
+          "pinyin": "yǒu shì ér",
+          "english": "busy"
+        },
+        {
+          "character": "爬山",
+          "pinyin": "pá shān",
+          "english": "hiking, go hiking, mountaineering"
+        },
+        {
+          "character": "紧张",
+          "pinyin": "jǐn zhāng",
+          "english": "nervous"
+        },
+        {
+          "character": "老朋友",
+          "pinyin": "lǎo péng yǒu",
+          "english": "old friend"
+        },
+        {
+          "character": "考试",
+          "pinyin": "kǎo shì",
+          "english": "exam, tests, test, exams"
+        },
+        {
+          "character": "要",
+          "pinyin": "yào",
+          "english": "be going to"
+        },
+        {
+          "character": "见",
+          "pinyin": "jiàn",
+          "english": "saw, see, meet, f."
+        },
+        {
+          "character": "钓鱼",
+          "pinyin": "diào yú",
+          "english": "fish, fishing, go fishing, fishes"
+        }
+      ]
+    },
+    {
+      "unit_index": 25,
+      "unit_name": "Transport",
+      "description": "Use time expressions",
+      "words": [
+        {
+          "character": "上午",
+          "pinyin": "shàng wǔ",
+          "english": "morning"
+        },
+        {
+          "character": "二十",
+          "pinyin": "èr shí",
+          "english": "twenty"
+        },
+        {
+          "character": "五十",
+          "pinyin": "wǔ shí",
+          "english": "fifty"
+        },
+        {
+          "character": "公交站",
+          "pinyin": "gōng jiāo zhàn",
+          "english": "bus stop"
+        },
+        {
+          "character": "几点",
+          "pinyin": "jǐ diǎn",
+          "english": "what time"
+        },
+        {
+          "character": "出发",
+          "pinyin": "chū fā",
+          "english": "depart"
+        },
+        {
+          "character": "出租车",
+          "pinyin": "chū zū chē",
+          "english": "taxi"
+        },
+        {
+          "character": "分",
+          "pinyin": "fēn",
+          "english": "minutes, cents, point, cent, points, score"
+        },
+        {
+          "character": "别着急",
+          "pinyin": "bié zhe jí",
+          "english": "don't worry"
+        },
+        {
+          "character": "到",
+          "pinyin": "dào",
+          "english": "reach"
+        },
+        {
+          "character": "十一",
+          "pinyin": "shí yī",
+          "english": "eleven"
+        },
+        {
+          "character": "十二",
+          "pinyin": "shí èr",
+          "english": "twelve"
+        },
+        {
+          "character": "半",
+          "pinyin": "bàn",
+          "english": "half"
+        },
+        {
+          "character": "四十",
+          "pinyin": "sì shí",
+          "english": "forty"
+        },
+        {
+          "character": "对面",
+          "pinyin": "duì miàn",
+          "english": "across from"
+        },
+        {
+          "character": "带",
+          "pinyin": "dài",
+          "english": "bring"
+        },
+        {
+          "character": "护照",
+          "pinyin": "hù zhào",
+          "english": "passport"
+        },
+        {
+          "character": "机场",
+          "pinyin": "jī chǎng",
+          "english": "airport"
+        },
+        {
+          "character": "点",
+          "pinyin": "diǎn",
+          "english": "o'clock"
+        },
+        {
+          "character": "纽约",
+          "pinyin": "niǔ yuē",
+          "english": "New York, york's"
+        },
+        {
+          "character": "脸",
+          "pinyin": "liǎn",
+          "english": "face"
+        },
+        {
+          "character": "起飞",
+          "pinyin": "qǐ fēi",
+          "english": "take off"
+        },
+        {
+          "character": "那里",
+          "pinyin": "nà lǐ",
+          "english": "there"
+        },
+        {
+          "character": "酒店",
+          "pinyin": "jiǔ diàn",
+          "english": "hotel"
+        },
+        {
+          "character": "飞机",
+          "pinyin": "fēi jī",
+          "english": "plane"
+        }
+      ]
+    },
+    {
+      "unit_index": 26,
+      "unit_name": "Shopping",
+      "description": "Shop for clothes",
+      "words": [
+        {
+          "character": "便宜",
+          "pinyin": "biàn yí",
+          "english": "cheap"
+        },
+        {
+          "character": "别的",
+          "pinyin": "bié de",
+          "english": "different"
+        },
+        {
+          "character": "厚",
+          "pinyin": "hòu",
+          "english": "thick"
+        },
+        {
+          "character": "双",
+          "pinyin": "shuāng",
+          "english": "pair"
+        },
+        {
+          "character": "家",
+          "pinyin": "jiā",
+          "english": "home"
+        },
+        {
+          "character": "开",
+          "pinyin": "kāi",
+          "english": "drive"
+        },
+        {
+          "character": "手套",
+          "pinyin": "shǒu tào",
+          "english": "glove"
+        },
+        {
+          "character": "打折",
+          "pinyin": "dǎ zhé",
+          "english": "discount, discounted, on sale"
+        },
+        {
+          "character": "披萨",
+          "pinyin": "pī sà",
+          "english": "pizza"
+        },
+        {
+          "character": "有点儿",
+          "pinyin": "yǒu diǎn ér",
+          "english": "a little"
+        },
+        {
+          "character": "渴",
+          "pinyin": "kě",
+          "english": "thirsty"
+        },
+        {
+          "character": "牌子",
+          "pinyin": "pái zi",
+          "english": "brand"
+        },
+        {
+          "character": "白色",
+          "pinyin": "bái sè",
+          "english": "white"
+        },
+        {
+          "character": "皮带",
+          "pinyin": "pí dài",
+          "english": "belt"
+        },
+        {
+          "character": "硬",
+          "pinyin": "yìng",
+          "english": "hard"
+        },
+        {
+          "character": "紧",
+          "pinyin": "jǐn",
+          "english": "tight"
+        },
+        {
+          "character": "袜子",
+          "pinyin": "wà zi",
+          "english": "sock"
+        },
+        {
+          "character": "裤子",
+          "pinyin": "kù zi",
+          "english": "pants"
+        },
+        {
+          "character": "试衣间",
+          "pinyin": "shì yī jiān",
+          "english": "fitting room"
+        },
+        {
+          "character": "车",
+          "pinyin": "chē",
+          "english": "car"
+        },
+        {
+          "character": "连衣裙",
+          "pinyin": "lián yī qún",
+          "english": "dress"
+        },
+        {
+          "character": "逛街",
+          "pinyin": "guàng jiē",
+          "english": "shopping"
+        },
+        {
+          "character": "长",
+          "pinyin": "zhǎng",
+          "english": "long"
+        },
+        {
+          "character": "鞋",
+          "pinyin": "xié",
+          "english": "shoe"
+        },
+        {
+          "character": "饿",
+          "pinyin": "è",
+          "english": "hungry"
+        },
+        {
+          "character": "黑色",
+          "pinyin": "hēi sè",
+          "english": "black"
+        }
+      ]
+    },
+    {
+      "unit_index": 27,
+      "unit_name": "Concert",
+      "description": "Attend a concert",
+      "words": [
+        {
+          "character": "举行",
+          "pinyin": "jǔ xíng",
+          "english": "hold"
+        },
+        {
+          "character": "假期",
+          "pinyin": "jiǎ qī",
+          "english": "holiday"
+        },
+        {
+          "character": "停车",
+          "pinyin": "tíng chē",
+          "english": "park"
+        },
+        {
+          "character": "入口",
+          "pinyin": "rù kǒu",
+          "english": "entrance"
+        },
+        {
+          "character": "兴奋",
+          "pinyin": "xìng fèn",
+          "english": "excited"
+        },
+        {
+          "character": "哪些",
+          "pinyin": "nǎ xiē",
+          "english": "which"
+        },
+        {
+          "character": "售票处",
+          "pinyin": "shòu piào chù",
+          "english": "ticket office"
+        },
+        {
+          "character": "国外",
+          "pinyin": "guó wài",
+          "english": "abroad"
+        },
+        {
+          "character": "在",
+          "pinyin": "zài",
+          "english": "is, am, getting, onto, for, go, within, were, is located, are in, re, at, when, on, above, to, be, are, during, in, was, en"
+        },
+        {
+          "character": "城市",
+          "pinyin": "chéng shì",
+          "english": "city"
+        },
+        {
+          "character": "学",
+          "pinyin": "xué",
+          "english": "have been learning, learn, learning, study, has been learning, done"
+        },
+        {
+          "character": "座位",
+          "pinyin": "zuò wèi",
+          "english": "seat"
+        },
+        {
+          "character": "开始",
+          "pinyin": "kāi shǐ",
+          "english": "start"
+        },
+        {
+          "character": "拍",
+          "pinyin": "pāi",
+          "english": "take"
+        },
+        {
+          "character": "排队",
+          "pinyin": "pái duì",
+          "english": "waited in line, wait in line, queue, queuing"
+        },
+        {
+          "character": "滑雪",
+          "pinyin": "huá xuě",
+          "english": "skiing, skis, ski, skied"
+        },
+        {
+          "character": "演唱会",
+          "pinyin": "yǎn chàng huì",
+          "english": "concert"
+        },
+        {
+          "character": "票",
+          "pinyin": "piào",
+          "english": "ticket"
+        },
+        {
+          "character": "等",
+          "pinyin": "děng",
+          "english": "wait"
+        },
+        {
+          "character": "纪念品",
+          "pinyin": "jì niàn pǐn",
+          "english": "souvenir"
+        },
+        {
+          "character": "网上",
+          "pinyin": "wǎng shàng",
+          "english": "online"
+        },
+        {
+          "character": "见面",
+          "pinyin": "jiàn miàn",
+          "english": "meet up, meeting, met, meet, meets"
+        },
+        {
+          "character": "计划",
+          "pinyin": "jì huà",
+          "english": "plan"
+        },
+        {
+          "character": "运动",
+          "pinyin": "yùn dòng",
+          "english": "sport"
+        },
+        {
+          "character": "难",
+          "pinyin": "nán",
+          "english": "difficult"
+        }
+      ]
+    },
+    {
+      "unit_index": 28,
+      "unit_name": "Work",
+      "description": "Ask questions",
+      "words": [
+        {
+          "character": "今晚",
+          "pinyin": "jīn wǎn",
+          "english": "tonight"
+        },
+        {
+          "character": "件",
+          "pinyin": "jiàn",
+          "english": "piece of clothing, pieces of clothing, piece of"
+        },
+        {
+          "character": "会",
+          "pinyin": "huì",
+          "english": "meeting"
+        },
+        {
+          "character": "会议室",
+          "pinyin": "huì yì shì",
+          "english": "meeting room"
+        },
+        {
+          "character": "先生",
+          "pinyin": "xiān shēng",
+          "english": "Mr., Mister, sir, husband, teacher, mr"
+        },
+        {
+          "character": "公司",
+          "pinyin": "gōng sī",
+          "english": "company"
+        },
+        {
+          "character": "办公室",
+          "pinyin": "bàn gōng shì",
+          "english": "office"
+        },
+        {
+          "character": "同事",
+          "pinyin": "tóng shì",
+          "english": "colleague"
+        },
+        {
+          "character": "哪",
+          "pinyin": "nǎ",
+          "english": "which"
+        },
+        {
+          "character": "层",
+          "pinyin": "céng",
+          "english": "floor"
+        },
+        {
+          "character": "早上好",
+          "pinyin": "zǎo shàng hǎo",
+          "english": "good morning"
+        },
+        {
+          "character": "欢迎",
+          "pinyin": "huān yíng",
+          "english": "welcome"
+        },
+        {
+          "character": "点菜",
+          "pinyin": "diǎn cài",
+          "english": "order"
+        },
+        {
+          "character": "热情",
+          "pinyin": "rè qíng",
+          "english": "enthusiastic"
+        },
+        {
+          "character": "穿",
+          "pinyin": "chuān",
+          "english": "wear"
+        },
+        {
+          "character": "经理",
+          "pinyin": "jīng lǐ",
+          "english": "manager"
+        },
+        {
+          "character": "翻译",
+          "pinyin": "fān yì",
+          "english": "translator"
+        },
+        {
+          "character": "老板",
+          "pinyin": "lǎo bǎn",
+          "english": "boss"
+        },
+        {
+          "character": "衬衫",
+          "pinyin": "chèn shān",
+          "english": "shirt"
+        },
+        {
+          "character": "订",
+          "pinyin": "dìng",
+          "english": "book"
+        },
+        {
+          "character": "谁",
+          "pinyin": "shéi",
+          "english": "who"
+        },
+        {
+          "character": "赵小月",
+          "pinyin": "zhào xiǎo yuè",
+          "english": "Zhao Xiaoyue"
+        },
+        {
+          "character": "酒",
+          "pinyin": "jiǔ",
+          "english": "alcohol"
+        },
+        {
+          "character": "重要",
+          "pinyin": "zhòng yào",
+          "english": "important"
+        }
+      ]
+    },
+    {
+      "unit_index": 29,
+      "unit_name": "L&F",
+      "description": "Expressing possession",
+      "words": [
+        {
+          "character": "不知道",
+          "pinyin": "bù zhī dào",
+          "english": "not know"
+        },
+        {
+          "character": "丢",
+          "pinyin": "diū",
+          "english": "lose"
+        },
+        {
+          "character": "书包",
+          "pinyin": "shū bāo",
+          "english": "backpack"
+        },
+        {
+          "character": "刚刚",
+          "pinyin": "gāng gāng",
+          "english": "just"
+        },
+        {
+          "character": "发现",
+          "pinyin": "fā xiàn",
+          "english": "find"
+        },
+        {
+          "character": "叫",
+          "pinyin": "jiào",
+          "english": "call"
+        },
+        {
+          "character": "名字",
+          "pinyin": "míng zì",
+          "english": "name"
+        },
+        {
+          "character": "好像",
+          "pinyin": "hǎo xiàng",
+          "english": "seem"
+        },
+        {
+          "character": "小姐",
+          "pinyin": "xiǎo jiě",
+          "english": "Miss"
+        },
+        {
+          "character": "张华",
+          "pinyin": "zhāng huá",
+          "english": "Zhang Hua"
+        },
+        {
+          "character": "本",
+          "pinyin": "běn",
+          "english": "this, Ben, the, ben's"
+        },
+        {
+          "character": "水杯",
+          "pinyin": "shuǐ bēi",
+          "english": "water bottle"
+        },
+        {
+          "character": "红色",
+          "pinyin": "hóng sè",
+          "english": "red"
+        },
+        {
+          "character": "绿色",
+          "pinyin": "lǜ sè",
+          "english": "green"
+        },
+        {
+          "character": "老师",
+          "pinyin": "lǎo shī",
+          "english": "teacher"
+        },
+        {
+          "character": "蓝色",
+          "pinyin": "lán sè",
+          "english": "blue"
+        },
+        {
+          "character": "词典",
+          "pinyin": "cí diǎn",
+          "english": "dictionary"
+        },
+        {
+          "character": "身份证",
+          "pinyin": "shēn fèn zhèng",
+          "english": "ID card"
+        },
+        {
+          "character": "还",
+          "pinyin": "hái",
+          "english": "yet, returned, also, else, still, and, give back, again"
+        },
+        {
+          "character": "雨伞",
+          "pinyin": "yǔ sǎn",
+          "english": "umbrella"
+        }
+      ]
+    },
+    {
+      "unit_index": 30,
+      "unit_name": "Feelings",
+      "description": "Express feelings",
+      "words": [
+        {
+          "character": "做",
+          "pinyin": "zuò",
+          "english": "do"
+        },
+        {
+          "character": "写",
+          "pinyin": "xiě",
+          "english": "write"
+        },
+        {
+          "character": "危险",
+          "pinyin": "wēi xiǎn",
+          "english": "dangerous"
+        },
+        {
+          "character": "四川",
+          "pinyin": "sì chuān",
+          "english": "Sichuan"
+        },
+        {
+          "character": "天呐",
+          "pinyin": "tiān nà",
+          "english": "oh my"
+        },
+        {
+          "character": "家务",
+          "pinyin": "jiā wù",
+          "english": "housework"
+        },
+        {
+          "character": "容易",
+          "pinyin": "róng yì",
+          "english": "easy"
+        },
+        {
+          "character": "小说",
+          "pinyin": "xiǎo shuō",
+          "english": "novel"
+        },
+        {
+          "character": "平时",
+          "pinyin": "píng shí",
+          "english": "usually, usual"
+        },
+        {
+          "character": "快餐",
+          "pinyin": "kuài cān",
+          "english": "fast food"
+        },
+        {
+          "character": "怕",
+          "pinyin": "pà",
+          "english": "afraid"
+        },
+        {
+          "character": "无聊",
+          "pinyin": "wú liáo",
+          "english": "boring"
+        },
+        {
+          "character": "日语",
+          "pinyin": "rì yǔ",
+          "english": "Japanese"
+        },
+        {
+          "character": "最",
+          "pinyin": "zuì",
+          "english": "most"
+        },
+        {
+          "character": "汉字",
+          "pinyin": "hàn zì",
+          "english": "Chinese characters"
+        },
+        {
+          "character": "沙拉",
+          "pinyin": "shā lā",
+          "english": "salad"
+        },
+        {
+          "character": "红茶",
+          "pinyin": "hóng chá",
+          "english": "black tea"
+        },
+        {
+          "character": "聊天",
+          "pinyin": "liáo tiān",
+          "english": "chitchatting, chats, chatting, talking, chat, talk, have a chat, chat's"
+        },
+        {
+          "character": "蛇",
+          "pinyin": "shé",
+          "english": "snake"
+        },
+        {
+          "character": "蜘蛛",
+          "pinyin": "zhī zhū",
+          "english": "spider"
+        },
+        {
+          "character": "讨厌",
+          "pinyin": "tǎo yàn",
+          "english": "hate"
+        }
+      ]
+    },
+    {
+      "unit_index": 31,
+      "unit_name": "Weather",
+      "description": "Talk about the weather",
+      "words": [
+        {
+          "character": "一起",
+          "pinyin": "yī qǐ",
+          "english": "together"
+        },
+        {
+          "character": "今天",
+          "pinyin": "jīn tiān",
+          "english": "today"
+        },
+        {
+          "character": "今年",
+          "pinyin": "jīn nián",
+          "english": "this year"
+        },
+        {
+          "character": "关",
+          "pinyin": "guān",
+          "english": "close"
+        },
+        {
+          "character": "咖啡馆",
+          "pinyin": "kā fēi guǎn",
+          "english": "cafe"
+        },
+        {
+          "character": "大衣",
+          "pinyin": "dà yī",
+          "english": "coat"
+        },
+        {
+          "character": "太",
+          "pinyin": "tài",
+          "english": "too"
+        },
+        {
+          "character": "怎么样",
+          "pinyin": "zěn me yàng",
+          "english": "how is"
+        },
+        {
+          "character": "戴",
+          "pinyin": "dài",
+          "english": "wear"
+        },
+        {
+          "character": "挺",
+          "pinyin": "tǐng",
+          "english": "very"
+        },
+        {
+          "character": "晴天",
+          "pinyin": "qíng tiān",
+          "english": "sunny day"
+        },
+        {
+          "character": "暖和",
+          "pinyin": "nuǎn hé",
+          "english": "warm"
+        },
+        {
+          "character": "有雨",
+          "pinyin": "yǒu yǔ",
+          "english": "raining"
+        },
+        {
+          "character": "有风",
+          "pinyin": "yǒu fēng",
+          "english": "windy"
+        },
+        {
+          "character": "毛衣",
+          "pinyin": "máo yī",
+          "english": "sweater"
+        },
+        {
+          "character": "海边",
+          "pinyin": "hǎi biān",
+          "english": "beach"
+        },
+        {
+          "character": "记得",
+          "pinyin": "jì dé",
+          "english": "remember"
+        },
+        {
+          "character": "门",
+          "pinyin": "mén",
+          "english": "door"
+        },
+        {
+          "character": "雨衣",
+          "pinyin": "yǔ yī",
+          "english": "raincoat"
+        },
+        {
+          "character": "预报",
+          "pinyin": "yù bào",
+          "english": "forecast"
+        }
+      ]
+    },
+    {
+      "unit_index": 32,
+      "unit_name": "Friends",
+      "description": "Talk about friends",
+      "words": [
+        {
+          "character": "上学",
+          "pinyin": "shàng xué",
+          "english": "go to school"
+        },
+        {
+          "character": "不同",
+          "pinyin": "bù tóng",
+          "english": "different"
+        },
+        {
+          "character": "住在",
+          "pinyin": "zhù zài",
+          "english": "live"
+        },
+        {
+          "character": "农村",
+          "pinyin": "nóng cūn",
+          "english": "countryside"
+        },
+        {
+          "character": "十",
+          "pinyin": "shí",
+          "english": "10, ten, tens"
+        },
+        {
+          "character": "厉害",
+          "pinyin": "lì hài",
+          "english": "impressive"
+        },
+        {
+          "character": "口",
+          "pinyin": "kǒu",
+          "english": "exit, intersection, entrance"
+        },
+        {
+          "character": "多大",
+          "pinyin": "duō dà",
+          "english": "how big"
+        },
+        {
+          "character": "太棒了",
+          "pinyin": "tài bàng le",
+          "english": "great"
+        },
+        {
+          "character": "女朋友",
+          "pinyin": "nǚ péng yǒu",
+          "english": "girlfriend"
+        },
+        {
+          "character": "好朋友",
+          "pinyin": "hǎo péng yǒu",
+          "english": "good friend"
+        },
+        {
+          "character": "家",
+          "pinyin": "jiā",
+          "english": "family"
+        },
+        {
+          "character": "小",
+          "pinyin": "xiǎo",
+          "english": "young"
+        },
+        {
+          "character": "懒",
+          "pinyin": "lǎn",
+          "english": "lazy"
+        },
+        {
+          "character": "滑冰",
+          "pinyin": "huá bīng",
+          "english": "ice skating, ice-skate, skating, skated"
+        },
+        {
+          "character": "爱好",
+          "pinyin": "ài hǎo",
+          "english": "hobby"
+        },
+        {
+          "character": "电视剧",
+          "pinyin": "diàn shì jù",
+          "english": "TV series"
+        },
+        {
+          "character": "男朋友",
+          "pinyin": "nán péng yǒu",
+          "english": "boyfriend"
+        },
+        {
+          "character": "跳舞",
+          "pinyin": "tiào wǔ",
+          "english": "dancing, dance, danced, dances"
+        },
+        {
+          "character": "麻将",
+          "pinyin": "má jiāng",
+          "english": "mahjong"
+        }
+      ]
+    },
+    {
+      "unit_index": 33,
+      "unit_name": "Routine",
+      "description": "Describe your daily routine",
+      "words": [
+        {
+          "character": "一边",
+          "pinyin": "yī biān",
+          "english": "while"
+        },
+        {
+          "character": "上班",
+          "pinyin": "shàng bān",
+          "english": "work, go to work, works"
+        },
+        {
+          "character": "下班",
+          "pinyin": "xià bān",
+          "english": "got off work, get off work, finish work"
+        },
+        {
+          "character": "作家",
+          "pinyin": "zuò jiā",
+          "english": "writer"
+        },
+        {
+          "character": "刷牙",
+          "pinyin": "shuā yá",
+          "english": "brush teeth, teeth brushing"
+        },
+        {
+          "character": "四十五",
+          "pinyin": "sì shí wǔ",
+          "english": "forty-five"
+        },
+        {
+          "character": "忘",
+          "pinyin": "wàng",
+          "english": "forget"
+        },
+        {
+          "character": "新闻",
+          "pinyin": "xīn wén",
+          "english": "news"
+        },
+        {
+          "character": "方便",
+          "pinyin": "fāng biàn",
+          "english": "convenient"
+        },
+        {
+          "character": "日记",
+          "pinyin": "rì jì",
+          "english": "diary"
+        },
+        {
+          "character": "晚安",
+          "pinyin": "wǎn ān",
+          "english": "good night"
+        },
+        {
+          "character": "有时候",
+          "pinyin": "yǒu shí hòu",
+          "english": "sometimes"
+        },
+        {
+          "character": "每天",
+          "pinyin": "měi tiān",
+          "english": "every day"
+        },
+        {
+          "character": "洗澡",
+          "pinyin": "xǐ zǎo",
+          "english": "take shower, baths, bath, taking a shower, bathes, bathing, shower, showered, bathe"
+        },
+        {
+          "character": "漫画",
+          "pinyin": "màn huà",
+          "english": "comic"
+        },
+        {
+          "character": "睡觉",
+          "pinyin": "shuì jué",
+          "english": "go to bed"
+        },
+        {
+          "character": "自行车",
+          "pinyin": "zì xíng chē",
+          "english": "bicycle"
+        },
+        {
+          "character": "走路",
+          "pinyin": "zǒu lù",
+          "english": "walks, walk, walked, walking"
+        },
+        {
+          "character": "起床",
+          "pinyin": "qǐ chuáng",
+          "english": "get up"
+        },
+        {
+          "character": "钥匙",
+          "pinyin": "yào shi",
+          "english": "key"
+        },
+        {
+          "character": "骑",
+          "pinyin": "qí",
+          "english": "ride"
+        }
+      ]
+    },
+    {
+      "unit_index": 34,
+      "unit_name": "Busy Day",
+      "description": "Manage daily tasks",
+      "words": [
+        {
+          "character": "作业",
+          "pinyin": "zuò yè",
+          "english": "homework"
+        },
+        {
+          "character": "午饭",
+          "pinyin": "wǔ fàn",
+          "english": "lunch"
+        },
+        {
+          "character": "困",
+          "pinyin": "kùn",
+          "english": "sleepy"
+        },
+        {
+          "character": "外卖",
+          "pinyin": "wài mài",
+          "english": "takeout"
+        },
+        {
+          "character": "帮",
+          "pinyin": "bāng",
+          "english": "help"
+        },
+        {
+          "character": "快",
+          "pinyin": "kuài",
+          "english": "quickly"
+        },
+        {
+          "character": "怎么样",
+          "pinyin": "zěn me yàng",
+          "english": "how about that"
+        },
+        {
+          "character": "换",
+          "pinyin": "huàn",
+          "english": "exchange"
+        },
+        {
+          "character": "接",
+          "pinyin": "jiē",
+          "english": "pick up"
+        },
+        {
+          "character": "散步",
+          "pinyin": "sàn bù",
+          "english": "walks, walking, go for a walk, have a walk, walk, promenade"
+        },
+        {
+          "character": "早点儿",
+          "pinyin": "zǎo diǎn ér",
+          "english": "earlier"
+        },
+        {
+          "character": "时间",
+          "pinyin": "shí jiān",
+          "english": "time"
+        },
+        {
+          "character": "星期",
+          "pinyin": "xīng qī",
+          "english": "week, weeks"
+        },
+        {
+          "character": "汽水",
+          "pinyin": "qì shuǐ",
+          "english": "soda"
+        },
+        {
+          "character": "没问题",
+          "pinyin": "méi wèn tí",
+          "english": "No problem"
+        },
+        {
+          "character": "点",
+          "pinyin": "diǎn",
+          "english": "order"
+        },
+        {
+          "character": "然后",
+          "pinyin": "rán hòu",
+          "english": "then"
+        },
+        {
+          "character": "辣椒",
+          "pinyin": "là jiāo",
+          "english": "chili pepper"
+        },
+        {
+          "character": "马上",
+          "pinyin": "mǎ shàng",
+          "english": "soon"
+        },
+        {
+          "character": "鸡蛋",
+          "pinyin": "jī dàn",
+          "english": "egg"
+        }
+      ]
+    },
+    {
+      "unit_index": 35,
+      "unit_name": "Web Shop",
+      "description": "Shop online",
+      "words": [
+        {
+          "character": "一共",
+          "pinyin": "yī gòng",
+          "english": "altogether"
+        },
+        {
+          "character": "一十",
+          "pinyin": "yī shí",
+          "english": "ten"
+        },
+        {
+          "character": "不错",
+          "pinyin": "bù cuò",
+          "english": "good"
+        },
+        {
+          "character": "信用卡",
+          "pinyin": "xìn yòng kǎ",
+          "english": "credit card"
+        },
+        {
+          "character": "包",
+          "pinyin": "bāo",
+          "english": "bag"
+        },
+        {
+          "character": "十",
+          "pinyin": "shí",
+          "english": "10, ten, tens"
+        },
+        {
+          "character": "号",
+          "pinyin": "hào",
+          "english": "number"
+        },
+        {
+          "character": "块",
+          "pinyin": "kuài",
+          "english": "dollar"
+        },
+        {
+          "character": "多少钱",
+          "pinyin": "duō shǎo qián",
+          "english": "how much"
+        },
+        {
+          "character": "家具",
+          "pinyin": "jiā jù",
+          "english": "furniture"
+        },
+        {
+          "character": "怎么样",
+          "pinyin": "zěn me yàng",
+          "english": "how about"
+        },
+        {
+          "character": "慢",
+          "pinyin": "màn",
+          "english": "slow"
+        },
+        {
+          "character": "手表",
+          "pinyin": "shǒu biǎo",
+          "english": "watch"
+        },
+        {
+          "character": "折",
+          "pinyin": "zhé",
+          "english": "discount"
+        },
+        {
+          "character": "时尚",
+          "pinyin": "shí shàng",
+          "english": "fashionable"
+        },
+        {
+          "character": "服务",
+          "pinyin": "fú wù",
+          "english": "service"
+        },
+        {
+          "character": "满意",
+          "pinyin": "mǎn yì",
+          "english": "be happy with, satisfaction, satisfied, pleasure, satisfying"
+        },
+        {
+          "character": "百",
+          "pinyin": "bǎi",
+          "english": "hundred"
+        },
+        {
+          "character": "穿",
+          "pinyin": "chuān",
+          "english": "wear"
+        },
+        {
+          "character": "网",
+          "pinyin": "wǎng",
+          "english": "internet"
+        },
+        {
+          "character": "网站",
+          "pinyin": "wǎng zhàn",
+          "english": "website"
+        },
+        {
+          "character": "订单",
+          "pinyin": "dìng dān",
+          "english": "order"
+        },
+        {
+          "character": "账号",
+          "pinyin": "zhàng hào",
+          "english": "account"
+        },
+        {
+          "character": "运动鞋",
+          "pinyin": "yùn dòng xié",
+          "english": "sneaker"
+        },
+        {
+          "character": "退",
+          "pinyin": "tuì",
+          "english": "return"
+        }
+      ]
+    }
+  ]
+}
