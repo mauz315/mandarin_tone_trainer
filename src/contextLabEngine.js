@@ -584,7 +584,7 @@ export class ContextLabEngine {
       pinyinInput.disabled = false;
       pinyinInput.className = 'w-full bg-white text-black font-mono text-base sm:text-lg font-black px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl border-[2.5px] border-black shadow-hard-black focus:outline-none focus:ring-2 focus:ring-[#7EF1BE] transition-colors';
       setTimeout(() => {
-        try { pinyinInput.focus(); } catch (_) {}
+        try { pinyinInput.focus({ preventScroll: true }); } catch (_) {}
       }, 100);
     }
 
@@ -1102,7 +1102,32 @@ export class ContextLabEngine {
       });
     }
 
+    const forceScrollReset = () => {
+      window.scrollTo(0, 0);
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
+    };
+
     if (pinyinInput) {
+      pinyinInput.addEventListener('focus', () => {
+        const screen = document.getElementById('context-lab-screen');
+        if (screen) screen.classList.add('keyboard-active');
+
+        forceScrollReset();
+        requestAnimationFrame(forceScrollReset);
+        setTimeout(forceScrollReset, 40);
+        setTimeout(forceScrollReset, 150);
+        setTimeout(forceScrollReset, 350);
+      });
+
+      pinyinInput.addEventListener('blur', () => {
+        const screen = document.getElementById('context-lab-screen');
+        if (screen) screen.classList.remove('keyboard-active');
+
+        forceScrollReset();
+        setTimeout(forceScrollReset, 50);
+      });
+
       pinyinInput.addEventListener('input', (e) => {
         this.handlePinyinInput(e.target.value);
       });
@@ -1112,6 +1137,35 @@ export class ContextLabEngine {
           this.submitPinyinInput();
         }
       });
+    }
+
+    // Touchmove and Viewport Scroll Locks for universal mobile non-scrollable screen (Android & iOS)
+    const contextLabScreen = document.getElementById('context-lab-screen');
+    if (contextLabScreen && !contextLabScreen._touchLockAttached) {
+      contextLabScreen._touchLockAttached = true;
+      contextLabScreen.addEventListener('touchmove', (e) => {
+        // Disallow window elastic dragging while on this non-scrollable screen
+        e.preventDefault();
+      }, { passive: false });
+    }
+
+    if (typeof window !== 'undefined' && !window._contextLabMobileScrollLock) {
+      window._contextLabMobileScrollLock = true;
+      const handleMobileScrollLock = () => {
+        const screen = document.getElementById('context-lab-screen');
+        if (!screen || screen.classList.contains('hidden')) return;
+        if (window.scrollY !== 0 || window.scrollX !== 0 || document.documentElement.scrollTop !== 0 || document.body.scrollTop !== 0) {
+          window.scrollTo(0, 0);
+          document.documentElement.scrollTop = 0;
+          document.body.scrollTop = 0;
+        }
+      };
+
+      window.addEventListener('scroll', handleMobileScrollLock, { passive: false });
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('scroll', handleMobileScrollLock);
+        window.visualViewport.addEventListener('resize', handleMobileScrollLock);
+      }
     }
 
     if (submitBtn) {
